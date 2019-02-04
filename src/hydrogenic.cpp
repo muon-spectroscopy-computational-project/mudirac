@@ -13,7 +13,7 @@
 #include "hydrogenic.hpp"
 
 /**
- * @brief Eigenenergy of a given hydrogenic Schroedinger state
+ * @brief Energy of a given hydrogenic Schroedinger state
  * @note Returns the known eigenenergy for a hydrogenic atom computed with
  * the Schroedinger equation and for given charge, mass and quantum number n.
  * 
@@ -25,6 +25,9 @@
  * @return:     Energy
  */
 double hydrogenicSchroEnergy(double Z, double mu, int n) {
+    if (n < 0) {
+        throw "Invalid principal quantum number for hydrogenic energy.";
+    }
     return -mu*Z*Z/(2*n*n);
 }
 
@@ -77,4 +80,33 @@ vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z, double mu
     for (int i = 0; i < r.size(); ++i) {
         R[i] = hydrogenicSchroWavefunction(r[i], Z, mu, n, l);
     }
+}
+
+/**
+ * @brief Energy of a given hydrogenic Dirac state
+ * @note Returns the known eigenenergy for a hydrogenic atom computed with
+ * the Dirac equation and for given charge, mass and quantum numbers n and k.
+ * 
+ * E_n = mu*c^2*{1+[Z*alpha/(n-|k|+(k^2-Z^2*alpha^2))]^2}^{-1/2}
+ * 
+ * @param Z:    Nuclear charge (default 1)
+ * @param mu:   Reduced mass of the system, m*m_N/(m+m_N) (default 1)
+ * @param n:    Principal quantum number (default 1)
+ * @param k:    Number related to the total orbital momentum j=|l+s|, k = -(j+1/2)*sign(s) (default -1)
+ * @param bind: If true, only return the binding energy (substract mc^2)
+ * @return:     Energy
+ */
+double hydrogenicDiracEnergy(double Z, double mu, int n, int k, bool bind) {
+
+    if (n < 0 || abs(k) > n || k == 0) {
+        throw "Invalid quantum numbers for hydrogenic energy.";
+    }
+    
+    double gamma = k*k-pow(Z*Physical::alpha, 2);
+    if (gamma < 0) {
+        throw "Invalid orbital energy for given Z";
+    }
+    gamma = sqrt(gamma);
+
+    return mu*pow(Physical::c, 2)/sqrt(1+pow(Z*Physical::alpha/(n-abs(k)+gamma), 2))-(bind? mu*pow(Physical::c, 2) : 0);
 }
