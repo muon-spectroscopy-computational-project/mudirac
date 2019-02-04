@@ -10,9 +10,13 @@
  * @version 0.1 04/02/2019
  */
 
+#include <math.h>
 #include <vector>
+#include "utils.hpp"
 #include "constants.hpp"
 
 using namespace std;
 
 double hydrogenicSchroEnergy(double Z=1.0, double mu=1.0, int n=1);
+double hydrogenicSchroWavefunction(double r, double Z=1, double mu=1, int n=1, int l=0);
+vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z=1, double mu=1, int n=1, int l=0);
