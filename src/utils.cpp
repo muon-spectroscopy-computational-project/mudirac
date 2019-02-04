@@ -47,21 +47,21 @@ int factorial(int n) {
  * @brief  Compute the value of a generalised Laguerre polynomial at x
  * 
  * @param  x:       Argument of the polynomial 
- * @param  k:       Parameter k of the polynomial
+ * @param  n:       Parameter n of the polynomial
  * @param  alpha:   Parameter alpha of the polynomial
  * @retval          Value of the polynomial
  */
-double genLaguerrePoly(double x, int k, int alpha) {
+double genLaguerrePoly(double x, int n, int alpha) {
     // We do this recursively. Not the most efficient way, but since we only need small numbers, 
     // it should be sufficient.
 
     double L = 1.0;
 
-    if (k < 0) {
+    if (n < 0) {
         throw "Parameter k of generalised Laguerre polynomial must be >= 0.";
     } 
 
-    switch (k) {
+    switch (n) {
         case 0:
             return L;
             break;
@@ -69,7 +69,7 @@ double genLaguerrePoly(double x, int k, int alpha) {
             return (1.0 + alpha - x);
             break;
         default:
-            return ((2*k+1+alpha-x)*genLaguerrePoly(x, k-1, alpha)-(k+alpha)*genLaguerrePoly(x, k-2, alpha))/(k+1.0);
+            return ((2*n-1+alpha-x)*genLaguerrePoly(x, n-1, alpha)-(n-1+alpha)*genLaguerrePoly(x, n-2, alpha))/n;
             break;
     }
 }
@@ -78,16 +78,16 @@ double genLaguerrePoly(double x, int k, int alpha) {
  * @brief  Compute the value of a generalised Laguerre polynomial at multiple x
  * 
  * @param  x:       Arguments of the polynomial 
- * @param  k:       Parameter k of the polynomial
+ * @param  n:       Parameter n of the polynomial
  * @param  alpha:   Parameter alpha of the polynomial
  * @retval          Value of the polynomial
  */
-vector<double> genLaguerrePoly(vector<double> x, int k, int alpha) {
+vector<double> genLaguerrePoly(vector<double> x, int n, int alpha) {
     // Just iteratively go over all x
     vector<double> L(x.size());
 
     for (int i = 0; i < x.size(); ++i) {
-        L[i] = genLaguerrePoly(x[i], k, alpha);
+        L[i] = genLaguerrePoly(x[i], n, alpha);
     }
 
     return L;
