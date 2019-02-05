@@ -22,3 +22,4 @@ double hydrogenicSchroWavefunction(double r, double Z=1, double mu=1, int n=1, i
 vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z=1, double mu=1, int n=1, int l=0);
 
 double hydrogenicDiracEnergy(double Z=1.0, double mu=1.0, int n=1, int k=-1, bool bind=false);
+vector<double> hydrogenicDiracWavefunction(double r, double Z=1, double mu=1, int n=1, int k=-1);

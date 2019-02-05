@@ -21,6 +21,9 @@ namespace Physical {
     const double m_e = 1.0;                 // Electron mass
     const double m_mu = 1.0/4.83633170e-3;  // Muon mass
     const double m_p = 1.0/5.44617021352e-4;// Proton mass
+
+    // Units
+    const double eV = 1.0/27.211385;        // Electron volt
 }
 #endif
 #define PHYSICAL_DEF
