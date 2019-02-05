@@ -51,7 +51,7 @@ int factorial(int n) {
  * @param  alpha:   Parameter alpha of the polynomial
  * @retval          Value of the polynomial
  */
-double genLaguerrePoly(double x, int n, int alpha) {
+double genLaguerrePoly(double x, int n, double alpha) {
     // We do this recursively. Not the most efficient way, but since we only need small numbers, 
     // it should be sufficient.
 

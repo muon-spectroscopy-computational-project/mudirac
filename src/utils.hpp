@@ -18,5 +18,5 @@ double effectiveMass(double m1, double m2);
 
 int factorial(int n);
 
-double genLaguerrePoly(double x, int n, int alpha);
+double genLaguerrePoly(double x, int n, double alpha);
 vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
