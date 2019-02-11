@@ -82,11 +82,22 @@ vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z, double mu
 {
 
     vector<double> R(r.size());
+    double arg = Z * mu / n;
+    double prefac = sqrt(pow(2 * arg, 3) * factorial(n - l - 1) / (2.0 * n * factorial(n + l)));
 
+    if (n < 1 || l < 0 || l >= n)
+    {
+        throw "Invalid quantum numbers for hydrogenic wavefunction.";
+    }
+
+    // We duplicate the code to avoid recalculating the prefactor at every point
     for (int i = 0; i < r.size(); ++i)
     {
-        R[i] = hydrogenicSchroWavefunction(r[i], Z, mu, n, l);
+        R[i] = prefac * r[i] * exp(-arg * r[i]) * pow(2 * arg * r[i], l) *
+               genLaguerrePoly(2 * arg * r[i], n - l - 1, 2 * l + 1);
     }
+
+    return R;
 }
 
 /**
@@ -194,8 +205,53 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
 {
     vector<vector<double>> GF(r.size());
 
-    for (int i = 0; i < r.size(); ++i)
+    double E, Ek, mc2, C, A, rho, rhodep, lagP, lagM;
+    double gamma;
+
+    if (n < 0 || abs(k) > n || k == 0)
     {
-        GF[i] = hydrogenicDiracWavefunction(r[i], Z, mu, n, k);
+        throw "Invalid quantum numbers for hydrogenic Dirac wavefunction.";
     }
+
+    gamma = k * k - pow(Z * Physical::alpha, 2);
+    if (gamma < 0)
+    {
+        throw "Invalid orbital energy for given Z";
+    }
+    gamma = sqrt(gamma);
+
+    E = hydrogenicDiracEnergy(Z, mu, n, k);
+    mc2 = mu * pow(Physical::c, 2);
+    C = sqrt(pow(mc2, 2) - E * E) / Physical::c;
+
+    if (k == -n)
+    {
+        A = sqrt(C / (2 * n * (n + gamma) * gamma * tgamma(2 * gamma)));
+        for (int i = 0; i < r.size(); ++i)
+        {
+            rho = 2 * C * r[i];
+            rhodep = pow(rho, gamma) * exp(-0.5 * rho);
+            GF[i] = vector<double>(2);
+            GF[i][0] = A * (n + gamma) * rhodep;
+            GF[i][1] = A * Z * Physical::alpha * rhodep;
+        }
+    }
+    else
+    {
+        Ek = E * k / (gamma * mc2);
+        A = sqrt(C * factorial(n - abs(k) - 1) / (4 * k * (k - gamma) * (n - abs(k) + gamma) * tgamma(n - abs(k) + 2 * gamma + 1)) *
+                 (Ek + pow(Ek, 2)));
+        for (int i = 0; i < r.size(); ++i)
+        {
+            rho = 2 * C * r[i];
+            rhodep = pow(rho, gamma) * exp(-0.5 * rho);
+            lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
+            lagM = (gamma * mc2 - k * E) / (Physical::c * C) * genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
+            GF[i] = vector<double>(2);
+            GF[i][0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
+            GF[i][1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
+        }
+    }
+
+    return GF;
 }
