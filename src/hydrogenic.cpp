@@ -181,9 +181,9 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
         A = sqrt(C * factorial(n - abs(k) - 1) / (4 * k * (k - gamma) * (n - abs(k) + gamma) * tgamma(n - abs(k) + 2 * gamma + 1)) *
                  (Ek + pow(Ek, 2)));
         lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
-        lagM = genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
-        gf[0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * (gamma * mc2 - k * E) / (Physical::c * C) * lagM);
-        gf[1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * (gamma * mc2 - k * E) / (Physical::c * C) * lagP);
+        lagM = (gamma * mc2 - k * E) / (Physical::c * C) *genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
+        gf[0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) *  lagM);
+        gf[1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) *  lagP);
     }
 
     return gf;
