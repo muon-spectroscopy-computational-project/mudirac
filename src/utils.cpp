@@ -64,7 +64,7 @@ vector<vector<double>> genLogGrid(double x0, double x1, int n)
     for (int i = 0; i < n; ++i)
     {
         x[i] = i * dlog;
-        ex[i] = exp(x[i]);
+        ex[i] = x0*exp(x[i]);
     }
 
     return vector<vector<double>>({x, ex});
