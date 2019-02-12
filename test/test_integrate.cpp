@@ -26,7 +26,7 @@ int main()
     P[0] = 1;
     P[1] = cos(h);
 
-    shoot_QP(Q, P, AA, AB, BA, BB, h);
+    shootQP(Q, P, AA, AB, BA, BB, h);
 
     // Compute error
     double errQ = 0, errP = 0;
@@ -41,4 +41,17 @@ int main()
     errP = sqrt(errP)/N;
 
     cout << "Errors: Q = " << errQ << ", P = " << errP << "\n";
+
+    vector<vector<double>> lgrid;
+
+    lgrid = genLogGrid(1e-5, 1e2, 1000);
+
+    vector<double> r = lgrid[1], V(r.size());
+
+    for (int i = 0; i < r.size(); ++i) {
+        V[i] = -1.0/r[i];
+    }
+
+    cout << shootDiracLog(Q, P, V, -0.5+pow(Physical::c, 2)) << "\n";
+
 }
