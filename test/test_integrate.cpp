@@ -44,7 +44,7 @@ int main()
 
     vector<vector<double>> lgrid;
 
-    lgrid = genLogGrid(1e-5, 1e1, 1000);
+    lgrid = logGrid(1e-5, 1e1, 1000);
 
     vector<double> r = lgrid[1], V(r.size());
 

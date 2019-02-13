@@ -56,7 +56,7 @@ int factorial(int n)
  * @param  n: Number of points (default = 100).
  * @retval grid: Vectors containing the grids, [x, exp(x)].
  */
-vector<vector<double>> genLogGrid(double x0, double x1, int n)
+vector<vector<double>> logGrid(double x0, double x1, int n)
 {
     double dlog = log(x1 / x0) / (n - 1.0);
     vector<double> x(n), ex(n);
