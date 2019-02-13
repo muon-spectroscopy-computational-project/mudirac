@@ -31,5 +31,8 @@
 *.out
 *.app
 
-# Test data files
-test/*.dat
+# Test files
+test/*
+!test/*.cpp
+!test/catch
+!test/data
