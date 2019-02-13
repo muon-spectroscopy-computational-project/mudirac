@@ -2,7 +2,7 @@
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019)
  * 
- * integrate.hpp
+ * integrate.cpp
  * 
  * Routines for integrating differential equations with the shooting method
  * 
@@ -10,7 +10,6 @@
  * @version 0.1 04/02/2019
  */
 
-#include <iostream>
 #include "integrate.hpp"
 
 /**

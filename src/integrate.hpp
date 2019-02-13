@@ -4,7 +4,7 @@
  * 
  * integrate.hpp
  * 
- * Routines for integrating differential equations with the shooting method
+ * Routines for integrating differential equations with the shooting method - header file
  * 
  * @author Simone Sturniolo
  * @version 0.1 04/02/2019
