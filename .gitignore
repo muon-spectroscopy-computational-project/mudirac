@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# Test data files
+test/*.dat

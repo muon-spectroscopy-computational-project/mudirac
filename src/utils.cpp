@@ -19,8 +19,9 @@
  * @param  m2:  Second mass
  * @retval      Effective mass
  */
-double effectiveMass(double m1, double m2) {
-    return (m1*m2)/(m1+m2);
+double effectiveMass(double m1, double m2)
+{
+    return (m1 * m2) / (m1 + m2);
 }
 
 /**
@@ -29,18 +30,44 @@ double effectiveMass(double m1, double m2) {
  * @param  n:   Argument
  * @retval      n!
  */
-int factorial(int n) {
+int factorial(int n)
+{
     int fn = 1;
 
-    if (n < 0) {
+    if (n < 0)
+    {
         throw "Factorial of a negative number";
     }
 
-    for (int i = 1; i <= n; ++i) {
+    for (int i = 1; i <= n; ++i)
+    {
         fn *= i;
     }
 
     return fn;
+}
+
+/**
+ * @brief  Generate a logarithmic grid
+ * @note   Generate a logarithmically spaced grid between two given points.
+ * 
+ * @param  x0: Starting point.
+ * @param  x1: End point.
+ * @param  n: Number of points (default = 100).
+ * @retval grid: Vectors containing the grids, [x, exp(x)].
+ */
+vector<vector<double>> genLogGrid(double x0, double x1, int n)
+{
+    double dlog = log(x1 / x0) / (n - 1.0);
+    vector<double> x(n), ex(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        x[i] = i * dlog;
+        ex[i] = x0*exp(x[i]);
+    }
+
+    return vector<vector<double>>({x, ex});
 }
 
 /**
@@ -51,26 +78,29 @@ int factorial(int n) {
  * @param  alpha:   Parameter alpha of the polynomial
  * @retval          Value of the polynomial
  */
-double genLaguerrePoly(double x, int n, double alpha) {
-    // We do this recursively. Not the most efficient way, but since we only need small numbers, 
+double genLaguerrePoly(double x, int n, double alpha)
+{
+    // We do this recursively. Not the most efficient way, but since we only need small numbers,
     // it should be sufficient.
 
     double L = 1.0;
 
-    if (n < 0) {
+    if (n < 0)
+    {
         throw "Parameter k of generalised Laguerre polynomial must be >= 0.";
-    } 
+    }
 
-    switch (n) {
-        case 0:
-            return L;
-            break;
-        case 1:
-            return (1.0 + alpha - x);
-            break;
-        default:
-            return ((2*n-1+alpha-x)*genLaguerrePoly(x, n-1, alpha)-(n-1+alpha)*genLaguerrePoly(x, n-2, alpha))/n;
-            break;
+    switch (n)
+    {
+    case 0:
+        return L;
+        break;
+    case 1:
+        return (1.0 + alpha - x);
+        break;
+    default:
+        return ((2 * n - 1 + alpha - x) * genLaguerrePoly(x, n - 1, alpha) - (n - 1 + alpha) * genLaguerrePoly(x, n - 2, alpha)) / n;
+        break;
     }
 }
 
@@ -82,11 +112,13 @@ double genLaguerrePoly(double x, int n, double alpha) {
  * @param  alpha:   Parameter alpha of the polynomial
  * @retval          Value of the polynomial
  */
-vector<double> genLaguerrePoly(vector<double> x, int n, int alpha) {
+vector<double> genLaguerrePoly(vector<double> x, int n, int alpha)
+{
     // Just iteratively go over all x
     vector<double> L(x.size());
 
-    for (int i = 0; i < x.size(); ++i) {
+    for (int i = 0; i < x.size(); ++i)
+    {
         L[i] = genLaguerrePoly(x[i], n, alpha);
     }
 
