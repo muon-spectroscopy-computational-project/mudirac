@@ -12,5 +12,8 @@
 
 #include <math.h>
 #include <vector>
+#include "constants.hpp"
 
 using namespace std;
+
+void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k = -1, double m = 1, double Z = 1);

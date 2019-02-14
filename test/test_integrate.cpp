@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include "../src/integrate.hpp"
+#include "../src/boundary.hpp"
 
 using namespace std;
 
@@ -52,19 +53,11 @@ int main()
         V[i] = -1.0/r[i];
     }
 
-    double B = -0.5, K = sqrt(pow(B*Physical::alpha, 2)-2*B);
+    double B = -0.5;
+    int k = -1;
 
-    Q[0] = pow(r[0], -1);
-    Q[1] = pow(r[1], -1);
-    P[0] = pow(r[0], 1);
-    P[1] = pow(r[1], 1);
-
-    Q[N-2] = exp(-K*r[N-2]);
-    Q[N-1] = exp(-K*r[N-1]);
-    P[N-2] = -Q[N-2]*(B*Physical::alpha+2*Physical::c)/K;
-    P[N-1] = -Q[N-1]*(B*Physical::alpha+2*Physical::c)/K;
-
-    int turn_i = shootDiracLog(Q, P, r, V, pow(Physical::c, 2)+B, -1, 1, lgrid[0][1]-lgrid[0][0]);
+    boundaryDiracCoulomb(Q, P, r,  pow(Physical::c, 2)+B, k);
+    int turn_i = shootDiracLog(Q, P, r, V, pow(Physical::c, 2)+B, k, 1, lgrid[0][1]-lgrid[0][0]);
 
     for (int i = 0; i < r.size(); ++i) {
         if (i < turn_i) {
