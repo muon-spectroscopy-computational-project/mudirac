@@ -19,5 +19,5 @@ using namespace std;
 
 void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<double> AB, vector<double> BA, vector<double> BB,
              double h = 1, int stop_i = -1, char dir = 'f');
-int shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
-                  double E, int k = -1, double m = 1, double dx = 1);
+double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
+                     double E, int k = -1, double m = 1, double dx = 1);

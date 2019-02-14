@@ -11,6 +11,7 @@
  */
 
 #include "integrate.hpp"
+#include <iostream>
 
 /**
  * @brief  Integrate two coupled ODEs
@@ -85,14 +86,15 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
  * @param  k:  Quantum number (default = -1)
  * @param  m:  Mass of the particle (default = 1)
  * @param  dx: Integration step (default = 1)
- * @retval turn_i: Turning point index
+ * @retval dE: Suggested energy correction
  */
-int shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
-                  double E, int k, double m, double dx)
+double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
+                     double E, int k, double m, double dx)
 {
 
     int N = Q.size(), turn_i;
     double B; // Binding energy
+    double Qi, Pi, dPi, Qe, Pe, dPe, c1, c2, dE, dQi, dQe;
     vector<double> AA(N), AB(N), BA(N), BB(N); // Define the equation
 
     // Check size
@@ -109,7 +111,7 @@ int shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector
         if (V[turn_i] > B)
             break;
     }
-
+    
     // Now define the other arrays
     for (int i = 0; i < N; ++i)
     {
@@ -120,9 +122,39 @@ int shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector
     }
 
     // Integrate forward
-    shootQP(Q, P, AA, AB, BA, BB, dx, turn_i);
+    shootQP(Q, P, AA, AB, BA, BB, dx, turn_i + 1);
+    Qi = Q[turn_i];
+    Pi = P[turn_i];
     // Integrate backwards
     shootQP(Q, P, AA, AB, BA, BB, dx, turn_i, 'b');
 
-    return turn_i;
+    // Now compute the energy correction
+    Qe = Q[turn_i];
+    Pe = P[turn_i];
+
+    dPi = (0.5 * P[turn_i - 2] - 2 * P[turn_i - 1] + 1.5 * Pi) / (dx * r[turn_i]);
+    dPe = -(0.5 * P[turn_i + 2] - 2 * P[turn_i + 1] + 1.5 * Pe) / (dx * r[turn_i]);
+    dQi = (0.5 * Q[turn_i - 2] - 2 * Q[turn_i - 1] + 1.5 * Qi) / (dx * r[turn_i]);
+    dQe = -(0.5 * Q[turn_i + 2] - 2 * Q[turn_i + 1] + 1.5 * Qe) / (dx * r[turn_i]);
+
+    c1 = (Pe / Qe - Pi / Qi);
+    // cout << "Alternative: \n";
+    // cout << dPe/Qe+k/r[turn_i]*Pe/Qe - (dPi/Qi+k/r[turn_i]*Pi/Qi) << '\n';
+    // cout << dPi/Qi+k/r[turn_i]*Pi/Qi << '\n';
+    if (c1 != 0) {
+        c2 = BA[turn_i]/r[turn_i];
+        // cout <<  dPe / Pe - dPi / Pi << "\n";
+        // cout <<  c2*(Qe/Pe-Qi/Pi) << "\n";
+        // dE = (dPe / Pe - dPi / Pi - c2*(Qe/Pe-Qi/Pi)) * Physical::c / c1; // If equal to zero, we're already matching
+        dE = dPe/Pe-Physical::c*Qe/Pe;
+        cout << B << ' ' << dPe/Pe-Physical::c*Qe/Pe-(dPi/Pi-Physical::c*Qi/Pi) << '\n';
+    }
+    
+    // Also rescale everything
+    for (int i = 0; i < turn_i; ++i) {
+        Q[i] *= Qe/Qi;
+        P[i] *= Pe/Pi;
+    }
+
+    return dE;
 }

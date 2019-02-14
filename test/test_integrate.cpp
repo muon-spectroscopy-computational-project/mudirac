@@ -53,18 +53,19 @@ int main()
         V[i] = -1.0/r[i];
     }
 
-    double B = -0.5;
+    double B = -0.45;
     int k = -1;
+    double dE;
 
-    boundaryDiracCoulomb(Q, P, r,  pow(Physical::c, 2)+B, k);
-    int turn_i = shootDiracLog(Q, P, r, V, pow(Physical::c, 2)+B, k, 1, lgrid[0][1]-lgrid[0][0]);
-
-    for (int i = 0; i < r.size(); ++i) {
-        if (i < turn_i) {
-            Q[i] *= Q[turn_i]/Q[turn_i-1];
-            P[i] *= P[turn_i]/P[turn_i-1];
-        }
-        cout << r[i] << '\t' << Q[i] << '\t' << P[i] << '\n';
+    for (double Btest = -0.51; Btest < -0.49; Btest += 0.0001) {
+        boundaryDiracCoulomb(Q, P, r,  pow(Physical::c, 2)+Btest, k);
+        dE = shootDiracLog(Q, P, r, V, pow(Physical::c, 2)+Btest, k, 1, lgrid[0][1]-lgrid[0][0]);
     }
+
+    // cout << "dE = " << dE << "\n";
+
+    // for (int i = 0; i < r.size(); ++i) {
+    //     cout << r[i] << '\t' << Q[i] << '\t' << P[i] << '\n';
+    // }
 
 }
