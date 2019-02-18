@@ -14,13 +14,57 @@
 #include <iostream>
 
 /**
+ * @brief  Integrate a single ODE
+ * @note   Integrate one differential equation of the form:
+ * 
+ *      Q' = A*Q+B
+ * 
+ * with a second order shooting method, up to a given index, either forward or backwards.
+ * 
+ * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
+ * @param  A: Vector for A (see definition above). Same size as Q.
+ * @param  B: Vector for B.
+ * @param  h: Integration step (default = 1).
+ * @param  stop_i: Index to stop integration. Run the whole range if -1 (default = -1).
+ * @param  dir: Integration direction, either forward 'f' or backwards 'b' (default = 'f').
+ * @retval None
+ */
+void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
+{
+    int N = Q.size();
+    int step = (dir == 'f') ? 1 : -1;
+    int from_i = (step == 1) ? 2 : N - 3;
+    double QA, QB;
+
+    // First, check size
+    if (A.size() != N || B.size() != N)
+    {
+        throw "Invalid size for one or more arrays passed to shootQ";
+    }
+
+    if (stop_i == -1)
+    {
+        stop_i = (step == 1) ? N - 1 : 0;
+    }
+
+    for (int i = from_i; step * (i - stop_i) <= 0; i += step)
+    {
+        QA = 1.5 * step / h - A[i];
+        QB = (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step / h + B[i];
+        Q[i] = QB / QA;
+    }
+
+    return;
+}
+
+/**
  * @brief  Integrate two coupled ODEs
- * @note   Integrate a system of coupled equations of the form:
+ * @note   Integrate a system of coupled differential equations of the form:
  * 
  *      Q' = AA*Q+AB*P
  *      P' = BA*Q+BB*P
  * 
- * with a shooting method, up to a given index, either forward or backwards.
+ * with a second order shooting method, up to a given index, either forward or backwards.
  * 
  * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
  * @param  &P: Vector for P. Will return the integrated values, must contain already the first two as boundary conditions.
@@ -76,7 +120,8 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
  *      P' = -k/r*P+[mc+(E-V)/c]*Q
  * 
  * With k the quantum number: if j=|l+s|, then k = -(j+1/2)*sign(s), and E the expected energy (including the rest mass term).
- * The function will return the index of the 'turning point', where the forward and backwards integration meet.
+ * The function will return a struct containing the index of the 'turning point', where the forward and backwards integration meet,
+ * as well as the values of Q and P integrated forward (Qi, Pi) and backwards (Qe, Pe) at it.
  *   
  * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first and last two as boundary conditions.
  * @param  &P: Vector for P. Will return the integrated values, must contain already the first and last two as boundary conditions.
@@ -86,16 +131,17 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
  * @param  k:  Quantum number (default = -1)
  * @param  m:  Mass of the particle (default = 1)
  * @param  dx: Integration step (default = 1)
- * @retval dE: Suggested energy correction
+ * @retval turn_i: Turning point index
  */
-double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
-                     double E, int k, double m, double dx)
+TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
+                           double E, int k, double m, double dx)
 {
 
     int N = Q.size(), turn_i;
     double B; // Binding energy
-    double Qi, Pi, dPi, Qe, Pe, dPe, c1, c2, dE, dQi, dQe;
+    TurningPoint out;
     vector<double> AA(N), AB(N), BA(N), BB(N); // Define the equation
+    vector<double> dydE(N);
 
     // Check size
     if (P.size() != N || r.size() != N || V.size() != N)
@@ -111,7 +157,7 @@ double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vec
         if (V[turn_i] > B)
             break;
     }
-    
+
     // Now define the other arrays
     for (int i = 0; i < N; ++i)
     {
@@ -123,38 +169,14 @@ double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vec
 
     // Integrate forward
     shootQP(Q, P, AA, AB, BA, BB, dx, turn_i + 1);
-    Qi = Q[turn_i];
-    Pi = P[turn_i];
+    out.Qi = Q[turn_i];
+    out.Pi = P[turn_i];
     // Integrate backwards
     shootQP(Q, P, AA, AB, BA, BB, dx, turn_i, 'b');
+    out.Qe = Q[turn_i];
+    out.Pe = P[turn_i];
 
-    // Now compute the energy correction
-    Qe = Q[turn_i];
-    Pe = P[turn_i];
+    out.i = turn_i;
 
-    dPi = (0.5 * P[turn_i - 2] - 2 * P[turn_i - 1] + 1.5 * Pi) / (dx * r[turn_i]);
-    dPe = -(0.5 * P[turn_i + 2] - 2 * P[turn_i + 1] + 1.5 * Pe) / (dx * r[turn_i]);
-    dQi = (0.5 * Q[turn_i - 2] - 2 * Q[turn_i - 1] + 1.5 * Qi) / (dx * r[turn_i]);
-    dQe = -(0.5 * Q[turn_i + 2] - 2 * Q[turn_i + 1] + 1.5 * Qe) / (dx * r[turn_i]);
-
-    c1 = (Pe / Qe - Pi / Qi);
-    // cout << "Alternative: \n";
-    // cout << dPe/Qe+k/r[turn_i]*Pe/Qe - (dPi/Qi+k/r[turn_i]*Pi/Qi) << '\n';
-    // cout << dPi/Qi+k/r[turn_i]*Pi/Qi << '\n';
-    if (c1 != 0) {
-        c2 = BA[turn_i]/r[turn_i];
-        // cout <<  dPe / Pe - dPi / Pi << "\n";
-        // cout <<  c2*(Qe/Pe-Qi/Pi) << "\n";
-        // dE = (dPe / Pe - dPi / Pi - c2*(Qe/Pe-Qi/Pi)) * Physical::c / c1; // If equal to zero, we're already matching
-        dE = dPe/Pe-Physical::c*Qe/Pe;
-        cout << B << ' ' << dPe/Pe-Physical::c*Qe/Pe-(dPi/Pi-Physical::c*Qi/Pi) << '\n';
-    }
-    
-    // Also rescale everything
-    for (int i = 0; i < turn_i; ++i) {
-        Q[i] *= Qe/Qi;
-        P[i] *= Pe/Pi;
-    }
-
-    return dE;
+    return out;
 }

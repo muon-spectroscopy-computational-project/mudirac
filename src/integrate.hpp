@@ -17,7 +17,15 @@
 
 using namespace std;
 
+void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h = 1, int stop_i = -1, char dir = 'f');
 void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<double> AB, vector<double> BA, vector<double> BB,
              double h = 1, int stop_i = -1, char dir = 'f');
-double shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
-                     double E, int k = -1, double m = 1, double dx = 1);
+
+struct TurningPoint
+{
+    int i;
+    double Qi, Qe, Pi, Pe;
+};
+
+TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> r, vector<double> V,
+                           double E, int k = -1, double m = 1, double dx = 1);
