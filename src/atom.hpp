@@ -21,8 +21,9 @@ class Atom
     // Fundamental properties
     double Z, A;      // Nuclear charge and mass
     double m, mu;     // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
-    double R;         // Nuclear radius
+    double R;         // Nuclear radius    
     vector<double> V; // Radial potential
+    vector<double> bkgQ; // Background charge
     // Grid
     int N = 1000;                // Number of points
     double r0 = 1e-2, r1 = 5e1;  // Extremes
@@ -33,6 +34,15 @@ class Atom
   public:
     Atom(double Z_in = 1, double m_in = 1, double A_in = -1, double R_in = -1);
 
+    // Basic getters
+    double getZ() { return Z; };
+    double getA() { return A; };
+    double getm() { return m; };
+    double getmu() { return mu; };
+    double getR() { return R; };
+    double getN() { return N; };
+
+    // Grid and potential
     void setGrid(double r0_in = 1e-2, double r1_in = 5e1, int N_in = 1000);
     vector<double> getGrid(bool log = false);
     vector<double> getPotential();

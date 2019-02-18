@@ -32,7 +32,7 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
 
     if (A > 0)
     {
-        mu = effectiveMass(mu, A * Physical::amu);
+        mu = effectiveMass(m, A * Physical::amu);
     }
     else
     {
@@ -43,6 +43,27 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
     setGrid();
 }
 
+void Atom::recalcPotential()
+{
+    vector<double> r = grid[1];
+    double V0 = R <= 0 ? 0 : -1.5 * Z / R;
+    double R3 = pow(R, 3.0);
+
+    V = vector<double>(N, 0);
+
+    for (int i = 0; i < N; ++i)
+    {
+        if (r[i] <= R)
+        {
+            V[i] = Z * pow(r[i], 2) / (2 * R3) + V0;
+        }
+        else
+        {
+            V[i] = -Z / r[i];
+        }
+    }
+}
+
 void Atom::setGrid(double r0_in, double r1_in, int N_in)
 {
     r0 = r0_in;
@@ -50,6 +71,7 @@ void Atom::setGrid(double r0_in, double r1_in, int N_in)
     N = N_in;
 
     grid = logGrid(r0, r1, N);
+    recalcPotential();
 }
 
 vector<double> Atom::getGrid(bool log)
