@@ -1,0 +1,238 @@
+\documentclass[]{report}
+
+\usepackage{amsmath}
+
+% Title Page
+\title{\texttt{mudirac} - a Dirac equation solver for muonic atoms
+	\newline
+	\large Development guide}
+\author{Simone Sturniolo}
+
+
+\begin{document}
+\maketitle
+
+\chapter*{Introduction}
+
+This document contains information and references on the algorithms and methods employed for the development of \texttt{mudirac}. It is meant as a technical document, to keep track of technique used and allow for modification or bug fixing in the future.
+
+\chapter{Theory}
+
+\section{The Dirac equation}
+
+The basic solver makes use of the radial Dirac equation written in its coupled form, here written in atomic units:
+
+\begin{align}\label{dirac_sys}
+	Q'(r) &= \frac{k}{r}Q + \left(mc-\frac{E-V(r)}{c}\right)P \\
+	P'(r) &= -\frac{k}{r}P + \left(mc+\frac{E-V(r)}{c}\right)Q
+\end{align}
+
+as found for example in \cite{weinb2008, silbar2010} and others. In this form, the final wavefunction can be reconstructed by combining it with the appropriate spherical harmonics:
+
+\begin{align}
+\left<\mathbf{r}|\psi_{k\mu}\right> = \begin{pmatrix}
+\frac{P_k}{r}\left<\mathbf{\hat{r}}|k\mu\right> \\
+i\frac{Q_k}{cr}\left<\mathbf{\hat{r}}|-k\mu\right>
+\end{pmatrix}
+\end{align}
+
+where it must be kept in mind that the quantum number $k$ is $k=-(l+1)$ when $s = -1/2$ and $k=l$ when $s=1/2$, and the spin spherical harmonics are:
+
+\begin{equation}
+\left|k\mu\right> = \sum_{s=\pm 1/2} c(l\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
+\end{equation}
+
+with
+
+\begin{align}
+\left<\mathbf{\hat{r}}|l,\mu-s\right> = Y_{l,\mu-s}(\mathbf{\hat{r}}) \\
+\Phi\left(\frac{1}{2}\right) = \begin{pmatrix}
+1 \\
+0
+\end{pmatrix}
+\qquad
+\Phi\left(-\frac{1}{2}\right) = \begin{pmatrix}
+0 \\
+1
+\end{pmatrix} \\
+c(l\frac{1}{2};\mu-s, s) = \frac{(-1)^{l+\mu-1/2}}{(2j+1)^{1/2}}\begin{pmatrix}
+l \quad 1/2 \quad j \\
+m \quad s \quad \mu
+\end{pmatrix}
+\end{align}
+
+with $Y_{lm}$ being the spherical harmonics and the $c(l\frac{1}{2};\mu-s, s)$ being related to the Clebsch-Gordan coefficients \cite{weinb2008}.\newline
+Since this equation is one dimensional we don't need to worry about Q and P being complex-valued, as they will be always real. In general, P will be the `large' component, and in the limit of $c \rightarrow \infty$ we would have that $P^2(r) = r^2\Psi^2(r)$ where $\Psi$ is just the normal radial component of the Schr\"{o}dinger equation solution. A higher Q corresponds to a more `relativistic' behaviour.
+
+\chapter{Numerical methods}
+
+\section{Integration of the Dirac equation system}
+
+\subsection{Grid}
+
+The radial Dirac equation as written in \ref{dirac_sys} constitutes a system of two coupled first order differential equations. We use the shooting method to solve this problem. This approach requires one to choose the expected eigenvalue $E$ as a parameter, choose suitable guesses for the values at the boundary, then integrate numerically the equation from both sides of the domain up to a meeting point. The parameter is then adjusted based on how well the solutions match until stability is reached.\newline
+There are various practical issues involved in solving the equation this way. The first thing is the grid to use. Here we choose to use a logarithmic radial grid, defined as:
+
+\begin{equation}
+r = r_0e^x \qquad x = \log\left(\frac{r}{r_0}\right)
+\end{equation}
+
+In this format the equations become
+
+\begin{align}\label{dirac_sys_log}
+\frac{\partial Q}{dx} &= kQ + r(x)\left(mc-\frac{E-V(x)}{c}\right)P \\
+\frac{\partial P}{dx} &= -kP + r(x)\left(mc+\frac{E-V(x)}{c}\right)Q
+\end{align}
+
+The advantage is that an evenly spaced grid in $x$ is now much denser for small $r$, namely, for a Coulomb-like potential, close to the nucleus, where the wavefunction will vary more quickly.
+
+\subsection{Boundary conditions}
+Another issue is that of the boundary conditions. We take our cues for that from \cite{silbar2010}. For $r \rightarrow \infty$, one can see how $V \rightarrow 0$ and the equations reduce to
+
+\begin{align}\label{dirac_sys_inf}
+Q' &\approx \left(mc-\frac{E}{c}\right)P \\
+P' &\approx \left(mc+\frac{E}{c}\right)Q
+\end{align}
+
+leading to the conditions (defining $K = \sqrt{m^2c^2-E^2/c^2}$):
+
+\begin{align}
+P(r) &\approx e^{-Kr} \\
+Q(r) &\approx -\frac{K}{mc+E/c}P(r)
+\end{align}
+
+whereas for $r \rightarrow 0$ we find different results depending on whether we use a `true' Coulomb potential (point charge) or one where the charge is assumed to have a finite spherical size. For a point charge we find:
+
+\begin{align}\label{dirac_sys_zero_pc}
+	Q' &\approx \frac{1}{r}\left(kQ- \frac{Z}{c}P\right)  \\
+	P' &\approx \frac{1}{r}\left(-kP + \frac{Z}{c}Q\right)
+\end{align}
+
+leading to
+
+\begin{align}
+P(r) &\approx r^{l+1} \\
+Q(r) &\approx -\frac{Z}{c(l+2-k)}P(r)
+\end{align}
+
+while for a finite charge it's much simpler, as the equations decouple:
+
+\begin{align}\label{dirac_sys_zero_sph}
+Q' &\approx \frac{k}{r}Q  \\
+P' &\approx -\frac{k}{r}P
+\end{align}
+
+so 
+
+\begin{align}
+P(r) &\approx r^{-k} \\
+Q(r) &\approx r^k
+\end{align}
+
+\subsection{Integration scheme}
+
+In order to integrate numerically the equations we make use of the following second order scheme for the first derivative of a function defined on a uniform grid with step $h$:
+
+\begin{equation}
+y'_i = \frac{3y_i-4y_{i-1}+y_{i-2}}{2h} + \mathcal{O}(h^3)
+\end{equation}
+
+and its backwards converse:
+
+\begin{equation}
+y'_i = -\frac{3y_i-4y_{i+1}+y_{i+2}}{2h} + \mathcal{O}(h^3)
+\end{equation}
+
+With this definition, any coupled system of the form:
+
+\begin{align}
+Q'_i &= AA_i Q_i + AB_iP_i \\
+P'_i &= BA_i Q_i + BB_iP_i
+\end{align}
+
+can be solved by seeing how it's
+
+\begin{align}
+Q_i\left(\pm\frac{3}{2h}-AA_i\right) - AB_iP_i&= \pm\frac{1}{h}\left(2Q_{i\mp1}-\frac{1}{2}Q_{i\mp2}\right) \\
+P_i\left(\pm\frac{3}{2h}-BB_i\right) - BA_iQ_i&= \pm\frac{1}{h}\left(2P_{i\mp1}-\frac{1}{2}P_{i\mp2}\right)
+\end{align}
+
+the signs corresponding respectively to forward and backwards integration. Solving this linear system leads to the final formulas for $Q_i$ and $P_i$ at each step. If we define
+
+\begin{align}
+AC_i &= \pm\frac{1}{h}\left(2Q_{i\mp1}-\frac{1}{2}Q_{i\mp2}\right) \\
+BC_i &= \pm\frac{1}{h}\left(2P_{i\mp1}-\frac{1}{2}P_{i\mp2}\right) \\
+\end{align}
+
+then we have
+
+\begin{align}
+Q_i &= \frac{-BC_iAB_i-AC_i(\pm\frac{3}{2h}-BB_i)}{AB_iBA_i-(\pm\frac{3}{2h}-AA_i)(\pm\frac{3}{2h}-BB_i)} \\
+P_i &= \frac{-AC_iBA_i-BC_i(\pm\frac{3}{2h}-AA_i)}{AB_iBA_i-(\pm\frac{3}{2h}-AA_i)(\pm\frac{3}{2h}-BB_i)} \\
+\end{align}
+
+and this allows one to progressively integrate the equations given two initial points set with the boundary conditions.
+
+\subsection{Finding the eigenvalue}
+
+The equations are integrated forward from $r\approx0$ and backwards from $r\approx\infty$ up to a meeting point. This is chosen to be the `turning point', namely the first point on the grid (going outwards) for which
+
+\begin{equation}
+E-mc^2 = B < V(r)
+\end{equation}
+
+where we call $B$ the `binding energy' of the particle, corresponding to the traditional energy eigenvalue in the Schr\"{o}dinger equation. This is the effective energy the particle has at its disposal to escape the potential, besides its rest mass energy term $mc^2$.\newline
+Since the wavefunctions are not normalized yet, their values can all be scaled by a constant term. This means that comparing them directly is meaningless. Rather, in order to find whether the solutions `match', one can impose the condition:
+
+\begin{equation}
+\left. \frac{Q}{P}\right|_f = \left. \frac{Q}{P}\right|_b
+\end{equation}
+
+with f and b indicating forward or backwards integration. Since this is not usually the case, one will attempt a first value of $E$, then try to calculate 
+
+\begin{equation}
+\frac{\partial}{\partial E}\left(\left. \frac{Q}{P}\right|_f - \left. \frac{Q}{P}\right|_b\right) = 
+\frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_f - \frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_b
+\end{equation}
+
+to then use a steepest descent algorithm to find the correct value of $E$. This tends to be a very well behaved function, so optimisation is straightforward. One approach to doing this is numerical - one simply integrates the equation both at $E$ and $E+\delta E$, then computes the derivative from the difference of the values found. However it's more efficient to look directly at the behaviour of $y = Q/P$ as its own function. By dividing $Q'$ by $P$ and defining for convenience:
+
+\begin{equation}
+g_\pm = \left(mc\pm\frac{E-V}{c}\right)
+\end{equation}
+
+we have
+
+\begin{equation}
+\frac{Q'}{P} = \frac{k}{r}\frac{Q}{P}+g_-
+\end{equation}
+
+and since (making use of the other equation for $P'$)
+
+\begin{equation}
+y' = \frac{Q'}{P} - \frac{Q}{P^2}P' = = \frac{Q'}{P} + \frac{k}{r} y -g_+y^2
+\end{equation}
+
+we have
+
+\begin{equation}
+y' = 2\frac{k}{r}y-g_+y^2+g_-
+\end{equation}
+
+However what we are interested in is $\zeta = \partial y / \partial E$. We can derive and find:
+
+\begin{equation}
+\zeta' = 2\left(\frac{k}{r}-g_+y\right)\zeta-\frac{1}{c}(y^2+1)
+\end{equation}
+
+Since we already know the values of Q and P, and thus of y, integrating numerically this equation is trivial. We then have that
+
+\begin{equation}
+\frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_f - \frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_b = \zeta_f-\zeta_b
+\end{equation}
+
+
+\bibliographystyle{unsrt}
+\bibliography{DevelopmentGuide.bib}
+
+\end{document}          

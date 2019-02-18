@@ -36,3 +36,10 @@ test/*
 !test/*.cpp
 !test/catch
 !test/data
+
+# Doc files
+docs/*.aux
+docs/*.blg
+docs/*.bbl
+docs/*.log
+docs/*.synctex.gz
