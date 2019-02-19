@@ -30,6 +30,8 @@ class SchroState : State
 public:
   vector<double> R;
   int l;
+
+  SchroState(const SchroState &s);
 };
 
 class DiracState : State
@@ -38,6 +40,8 @@ public:
   vector<double> Q;
   vector<double> P;
   int k;
+
+  DiracState(const DiracState &s);
 };
 
 class Atom
@@ -74,3 +78,16 @@ public:
   vector<double> getGrid(bool log = false);
   vector<double> getPotential();
 };
+
+class DiracAtom
+{
+private:
+  // Eigenstates
+  map<tuple<int, int, bool>, DiracState> states;
+
+public:
+  void resetStates();
+  void calcState(int n, int l, bool s, bool force = false);
+  void calcAllStates(int max_n, bool force = false);
+  DiracState getState(int n, int l, bool s);
+}

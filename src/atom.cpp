@@ -12,6 +12,23 @@
 
 #include "atom.hpp"
 
+SchroState::SchroState(const SchroState &s)
+{
+    nodes = s.nodes;
+    E = s.E;
+    l = s.l;
+    R = vector<double>(s.R);
+}
+
+DiracState::DiracState(const DiracState &s)
+{
+    nodes = s.nodes;
+    E = s.E;
+    k = s.k;
+    Q = vector<double>(s.Q);
+    P = vector<double>(s.P);
+}
+
 /**
  * @brief  Initialise an Atom class instance
  * @note   Creates an Atom object defined by the given properties
