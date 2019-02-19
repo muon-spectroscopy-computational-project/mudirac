@@ -11,6 +11,13 @@
  */
 
 #include "atom.hpp"
+#include <iostream>
+
+State::State()
+{
+    E = 0;
+    nodes = 0;
+}
 
 SchroState::SchroState(const SchroState &s)
 {
@@ -18,6 +25,10 @@ SchroState::SchroState(const SchroState &s)
     E = s.E;
     l = s.l;
     R = vector<double>(s.R);
+}
+
+DiracState::DiracState()
+{
 }
 
 DiracState::DiracState(const DiracState &s)
@@ -82,6 +93,12 @@ void Atom::recalcPotential()
             V[i] += -Z / r[i];
         }
     }
+
+    // Now send it to zero at the end
+    for (int i = 0; i < N; ++i)
+    {
+        V[i] -= V[N - 1];
+    }
 }
 
 void Atom::setGrid(double r0_in, double r1_in, int N_in)
@@ -110,4 +127,35 @@ vector<double> Atom::getGrid(bool log)
 vector<double> Atom::getPotential()
 {
     return vector<double>(V);
+}
+
+DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(Z_in, m_in, A_in, R_in)
+{
+}
+
+void DiracAtom::calcState(int n, int l, bool s, bool force)
+{
+    int k = s ? l : -l - 1;
+    int maxit = 100;
+    double E, err;
+    DiracState *state = new DiracState();
+    TurningPoint tp;
+
+    // First, check if it's already calculated
+    if (!force && !(states[{n, l, s}] == NULL))
+    {
+        return;
+    }
+
+    // Then start with a guess for the energy
+    E = hydrogenicDiracEnergy(Z, mu, n, k);
+
+    for (int it = 0; it < maxit; ++it)
+    {
+        // Start by applying boundary conditions
+        boundaryDiracCoulomb(state->Q, state->P, grid[1], E, k, mu, Z);
+        tp = shootDiracLog(state->Q, state->P, grid[1], V, E, k, mu, dx);
+    }
+
+    cout << E << '\n';
 }

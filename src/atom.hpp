@@ -16,13 +16,18 @@
 #include <map>
 #include "utils.hpp"
 #include "constants.hpp"
+#include "hydrogenic.hpp"
 #include "integrate.hpp"
+#include "boundary.hpp"
 
 class State
 {
 public:
-  int nodes;
-  double E;
+  bool init = false;
+  int nodes = 0;
+  double E = 0;
+
+  State();
 };
 
 class SchroState : State
@@ -41,12 +46,13 @@ public:
   vector<double> P;
   int k;
 
+  DiracState();
   DiracState(const DiracState &s);
 };
 
 class Atom
 {
-private:
+protected:
   // Fundamental properties
   double Z, A;         // Nuclear charge and mass
   double m, mu;        // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
@@ -79,15 +85,17 @@ public:
   vector<double> getPotential();
 };
 
-class DiracAtom
+class DiracAtom : public Atom
 {
 private:
   // Eigenstates
-  map<tuple<int, int, bool>, DiracState> states;
+  map<tuple<int, int, bool>, DiracState *> states;
 
 public:
+  DiracAtom(double Z_in = 1, double m_in = 1, double A_in = -1, double R_in = -1);
+
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
   DiracState getState(int n, int l, bool s);
-}
+};

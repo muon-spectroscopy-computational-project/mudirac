@@ -12,11 +12,10 @@ int main()
 
     vector<double> r, V;
     tuple<int, int, int> ind;
-    map<tuple<int, int, int>, vector<double>> test;
+    map<tuple<int, int, int>, DiracState*> test;
+    DiracAtom da = DiracAtom(1,1,1,2);
 
-    test[{1,1,1}] = V;
-
-    cout << (test[{3,3,1}].empty()) << '\n'; 
+    da.calcState(1, 0, 0);
 
     r = a.getGrid();
     V = a.getPotential();
@@ -27,4 +26,9 @@ int main()
     // for (int i = 0; i < r.size(); ++i) {
     //     cout << r[i] << '\t' << V[i] << '\n';
     // }
+
+    DiracState* st = new DiracState();
+
+    cout << (test[{1,1,1}] == NULL) << "\n";
+    
 }
