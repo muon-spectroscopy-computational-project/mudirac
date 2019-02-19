@@ -112,6 +112,54 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
 }
 
 /**
+ * @brief  Integrate a single 2nd order ODE with Numerov's method
+ * @note   Integrate one differential equation of the form:
+ * 
+ *      Q'' = A*Q+B
+ * 
+ * with Numerov's method, up to a given index, either forward or backwards.
+ * 
+ * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
+ * @param  A: Vector for A (see definition above). Same size as Q.
+ * @param  B: Vector for B.
+ * @param  h: Integration step (default = 1).
+ * @param  stop_i: Index to stop integration. Run the whole range if -1 (default = -1).
+ * @param  dir: Integration direction, either forward 'f' or backwards 'b' (default = 'f').
+ * @retval None
+ */
+void shootNumerov(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
+{
+
+    int N = Q.size();
+    int step = (dir == 'f') ? 1 : -1;
+    int from_i = (step == 1) ? 2 : N - 3;
+    double h2_12 = h * h / 12;
+    double QA0, QA1, QA2, QB;
+
+    // First, check size
+    if (A.size() != N || B.size() != N)
+    {
+        throw "Invalid size for one or more arrays passed to shootNumerov";
+    }
+
+    if (stop_i == -1)
+    {
+        stop_i = (step == 1) ? N - 1 : 0;
+    }
+
+    for (int i = from_i; step * (i - stop_i) <= 0; i += step)
+    {
+        QA0 = (1 - h2_12 * A[i]);
+        QA1 = (1 + 5 * h2_12 * A[i - step]);
+        QA2 = (1 - h2_12 * A[i - 2 * step]);
+        QB = h2_12 * (B[i] + 10 * B[i - step] + B[i - 2 * step]);
+        Q[i] = (2 * Q[i - step] * QA1 - Q[i - 2 * step] * QA2 + QB) / QA0;
+    }
+
+    return;
+}
+
+/**
  * @brief  Integrate the radial Dirac equation on a logarithmic grid
  * @note   Perform integration of the radial Dirac equation on a logarithmic grid, forward and backwards, up to the turning point.
  * The coupled equations have the form:

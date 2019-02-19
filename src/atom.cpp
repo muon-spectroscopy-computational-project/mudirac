@@ -74,6 +74,12 @@ void Atom::setGrid(double r0_in, double r1_in, int N_in)
     recalcPotential();
 }
 
+void Atom::setBackgroundCharge(vector<double> bkgQ_in)
+{
+    bkgQ = vector<double>(bkgQ_in);
+    recalcPotential();
+}
+
 vector<double> Atom::getGrid(bool log)
 {
     return vector<double>(grid[!log]);

@@ -78,26 +78,48 @@ int main()
 
     cout << "Errors: Q = " << errQ << ", P = " << errP << "\n";
 
-    vector<vector<double>> lgrid;
+    // Numerov test
 
-    lgrid = logGrid(1e-5, 1e1, 1000);
+    AA = vector<double>(N, 0);
+    AB = vector<double>(N, 1);
 
-    vector<double> r = lgrid[1], V(r.size());
-
-    for (int i = 0; i < r.size(); ++i)
+    for (int i = 0; i < Q.size(); ++i)
     {
-        V[i] = -1.0 / r[i];
+        AB[i] = i*h;
     }
 
-    double B = -0.45;
-    int k = -1;
-    double dE;
+    Q[0] = 0;
+    Q[1] = 1.0/6.0*pow(h, 3);
 
-    for (double Btest = -0.51; Btest < -0.49; Btest += 0.0001)
+    shootNumerov(Q, AA, AB, h);
+
+    for (int i = 0; i < Q.size(); ++i)
     {
-        boundaryDiracCoulomb(Q, P, r, pow(Physical::c, 2) + Btest, k);
-        dE = shootDiracLog(Q, P, r, V, pow(Physical::c, 2) + Btest, k, 1, lgrid[0][1] - lgrid[0][0]);
+        cout << h * i << '\t' << Q[i] << '\n';
     }
+
+    // vector<vector<double>> lgrid;
+
+    // lgrid = logGrid(1e-5, 1e1, 1000);
+
+    // vector<double> r = lgrid[1], V(r.size());
+
+    // for (int i = 0; i < r.size(); ++i)
+    // {
+    //     V[i] = -1.0 / r[i];
+    // }
+
+    // double B = -0.45;
+    // int k = -1;
+    // double dE;
+
+    // for (double Btest = -0.51; Btest < -0.49; Btest += 0.0001)
+    // {
+    //     boundaryDiracCoulomb(Q, P, r, pow(Physical::c, 2) + Btest, k);
+    //     shootDiracLog(Q, P, r, V, pow(Physical::c, 2) + Btest, k, 1, lgrid[0][1] - lgrid[0][0]);
+    // }
+
+    //
 
     // cout << "dE = " << dE << "\n";
 
