@@ -46,7 +46,7 @@ public:
   vector<double> P;
   int k;
 
-  DiracState();
+  DiracState(int N = 0);
   DiracState(const DiracState &s);
 };
 

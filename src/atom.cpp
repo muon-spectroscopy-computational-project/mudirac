@@ -27,8 +27,10 @@ SchroState::SchroState(const SchroState &s)
     R = vector<double>(s.R);
 }
 
-DiracState::DiracState()
+DiracState::DiracState(int N)
 {
+    Q = vector<double>(N, 0);
+    P = vector<double>(N, 0);
 }
 
 DiracState::DiracState(const DiracState &s)
@@ -74,7 +76,7 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
 void Atom::recalcPotential()
 {
     vector<double> r = grid[1];
-    double V0 = R <= 0 ? 0 : -1.5 * Z / R;
+    double V0 = R <= r0 ? 0 : -1.5 * Z / R;
     double R3 = pow(R, 3.0);
 
     V = vector<double>(N, 0);
@@ -138,7 +140,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     int k = s ? l : -l - 1;
     int maxit = 100;
     double E, err;
-    DiracState *state = new DiracState();
+    DiracState *state = new DiracState(N);
     TurningPoint tp;
 
     // First, check if it's already calculated
@@ -153,9 +155,12 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     for (int it = 0; it < maxit; ++it)
     {
         // Start by applying boundary conditions
-        boundaryDiracCoulomb(state->Q, state->P, grid[1], E, k, mu, Z);
+        boundaryDiracCoulomb(state->Q, state->P, grid[1], E, k, mu, Z, R <= r0);
+        // Integrate here
         tp = shootDiracLog(state->Q, state->P, grid[1], V, E, k, mu, dx);
+        err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
+        // cout << err << '\n';
     }
 
-    cout << E << '\n';
+    // cout << E << '\n';
 }

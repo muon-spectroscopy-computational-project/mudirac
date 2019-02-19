@@ -12,7 +12,7 @@
 
 #include "boundary.hpp"
 
-void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z)
+void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, bool finite)
 {
     int l = k < 0 ? -(k + 1) : k; // Angular momentum number
     int N = Q.size();
@@ -24,11 +24,25 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
     }
 
     // r = 0 limit
-    // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
-    for (int i = 0; i < 2; ++i)
+    // Depends on whether we consider the nucleus of finite size or point-like
+    if (!finite)
     {
-        P[i] = pow(r[i], l + 1);
-        Q[i] = -Z * Physical::alpha / (l + 2 - k) * P[i];
+        // Point like
+        // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
+        for (int i = 0; i < 2; ++i)
+        {
+            P[i] = pow(r[i], l + 1);
+            Q[i] = -Z * Physical::alpha / (l + 2 - k) * P[i];
+        }
+    }
+    else
+    {
+        // Finite size: only the k/r term matters
+        for (int i = 0; i < 2; ++i)
+        {
+            P[i] = pow(r[i], -k);
+            Q[i] = 1.0 / P[i];
+        }
     }
 
     // r = inf limit

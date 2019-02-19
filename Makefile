@@ -11,8 +11,8 @@ test/test_hydrogenic: test/test_hydrogenic.cpp obj/hydrogenic.o obj/utils.o src/
 test/test_integrate: test/test_integrate.cpp obj/integrate.o obj/utils.o obj/boundary.o
 	g++ test/test_integrate.cpp obj/integrate.o obj/utils.o obj/boundary.o -o test/test_integrate
 
-test/test_atom: test/test_atom.cpp obj/atom.o obj/utils.o obj/integrate.o obj/hydrogenic.o src/constants.hpp
-	g++ test/test_atom.cpp obj/atom.o obj/utils.o obj/integrate.o obj/hydrogenic.o -o test/test_atom
+test/test_atom: test/test_atom.cpp obj/atom.o obj/utils.o obj/integrate.o obj/hydrogenic.o obj/boundary.o src/constants.hpp 
+	g++ test/test_atom.cpp obj/atom.o obj/utils.o obj/integrate.o obj/hydrogenic.o obj/boundary.o -o test/test_atom
 
 # OBJ files
 obj/hydrogenic.o: src/hydrogenic.cpp src/hydrogenic.hpp src/constants.hpp 
