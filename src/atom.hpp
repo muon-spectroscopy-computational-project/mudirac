@@ -14,6 +14,7 @@
 #include <vector>
 #include "utils.hpp"
 #include "constants.hpp"
+#include "integrate.hpp"
 
 class Atom
 {
@@ -28,6 +29,7 @@ private:
   int N = 1000;                // Number of points
   double r0 = 1e-2, r1 = 5e1;  // Extremes
   vector<vector<double>> grid; // Grid (x, r)
+  double dx;                   // Step
 
   void recalcPotential(); // Recalculate V
 

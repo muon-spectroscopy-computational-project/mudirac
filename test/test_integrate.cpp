@@ -85,22 +85,34 @@ int main()
 
     for (int i = 0; i < Q.size(); ++i)
     {
-        AB[i] = i*h;
+        AB[i] = i * h;
     }
 
     Q[0] = 0;
-    Q[1] = 1.0/6.0*pow(h, 3);
+    Q[1] = 1.0 / 6.0 * pow(h, 3);
 
     shootNumerov(Q, AA, AB, h);
 
-    for (int i = 0; i < Q.size(); ++i)
+    // for (int i = 0; i < Q.size(); ++i)
+    // {
+    //     cout << h * i << '\t' << Q[i] << '\n';
+    // }
+
+    // Potential test
+    vector<vector<double>> lgrid;
+    vector<double> rho(N, 1), V(N, 0);
+
+    lgrid = logGrid(1e-5, 1e1, N);
+
+    for (int i = 0; i < N; ++i)
     {
-        cout << h * i << '\t' << Q[i] << '\n';
+        rho[i] *= pow(lgrid[1][i], 2);
     }
-
-    // vector<vector<double>> lgrid;
-
-    // lgrid = logGrid(1e-5, 1e1, 1000);
+    shootPotentialLog(V, rho, lgrid[0][1]);
+    for (int i = 0; i < N; ++i)
+    {
+        cout << lgrid[1][i] << '\t' << V[i] << '\n';
+    }
 
     // vector<double> r = lgrid[1], V(r.size());
 

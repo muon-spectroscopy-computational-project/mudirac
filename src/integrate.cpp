@@ -120,9 +120,9 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
  * with Numerov's method, up to a given index, either forward or backwards.
  * 
  * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
- * @param  A: Vector for A (see definition above). Same size as Q.
- * @param  B: Vector for B.
- * @param  h: Integration step (default = 1).
+ * @param  A:  Vector for A (see definition above). Same size as Q.
+ * @param  B:  Vector for B.
+ * @param  h:  Integration step (default = 1).
  * @param  stop_i: Index to stop integration. Run the whole range if -1 (default = -1).
  * @param  dir: Integration direction, either forward 'f' or backwards 'b' (default = 'f').
  * @retval None
@@ -157,6 +157,41 @@ void shootNumerov(vector<double> &Q, vector<double> A, vector<double> B, double 
     }
 
     return;
+}
+
+/**
+ * @brief  Integrate a Coulomb potential from a radial background charge density on a logarithmic grid
+ * @note   Integrate a Coulomb potential from a radial background charge density on a logarithmic grid.
+ * The following ODE is integrated:
+ *  
+ *      V'' + V' = rho(x)
+ * with the derivatives being in x (r = r0*exp(x)) and the density being already integrated over the angular
+ * coordinates (so for example a constant density would have rho ~ r^2).
+ * @param  &V:   Vector for V. Will return the integrated potential. 
+ * @param  rho:  Vector for the charge density.
+ * @param  h:    Integration step (default = 1)
+ * @retval None
+ */
+void shootPotentialLog(vector<double> &V, vector<double> rho, double h)
+{
+    int N = V.size();
+    double h2 = h * h;
+    double A0, A1, A2, A3;
+
+    A0 = (2 / h2 + 11 / (6.0 * h));
+    A1 = (-5 / h2 - 3 / h);
+    A2 = (4 / h2 + 1.5 / h);
+    A3 = (-1 / h2 + -1 / (3 * h));
+
+    // Constant charge assumption
+    V[0] = rho[0] / 6;
+    V[1] = (rho[1] - V[0] * (A1 + A2 * exp(-2 * h) + A3 * exp(-4 * h))) / A0;
+    V[2] = (rho[1] - V[1] * A1 - V[0] * (A2 + A3 * exp(-2 * h))) / A0;
+
+    for (int i = 3; i < N; ++i)
+    {
+        V[i] = (rho[i] - V[i - 1] * A1 - V[i - 2] * A2 - V[i - 3] * A3) / A0;
+    }
 }
 
 /**
