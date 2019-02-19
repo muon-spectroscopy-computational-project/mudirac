@@ -100,7 +100,7 @@ int main()
 
     // Potential test
     vector<vector<double>> lgrid;
-    vector<double> rho(N, 1), V(N, 0);
+    vector<double> rho(N, 0), V(N, 0);
 
     lgrid = logGrid(1e-5, 1e1, N);
 

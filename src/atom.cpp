@@ -46,24 +46,23 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
 void Atom::recalcPotential()
 {
     vector<double> r = grid[1];
-    vector<double> Vbkg;
     double V0 = R <= 0 ? 0 : -1.5 * Z / R;
     double R3 = pow(R, 3.0);
 
     V = vector<double>(N, 0);
 
-    // Additional potential contribution from the background charge
-    shootNumerov(Vbkg, vector<double>(N, 0), bkgQ, dx);
+    // Start with the background charge contribution
+    shootPotentialLog(V, bkgQ, dx);
 
     for (int i = 0; i < N; ++i)
     {
         if (r[i] <= R)
         {
-            V[i] = Z * pow(r[i], 2) / (2 * R3) + V0;
+            V[i] += Z * pow(r[i], 2) / (2 * R3) + V0;
         }
         else
         {
-            V[i] = -Z / r[i];
+            V[i] += -Z / r[i];
         }
     }
 }
@@ -76,6 +75,7 @@ void Atom::setGrid(double r0_in, double r1_in, int N_in)
 
     grid = logGrid(r0, r1, N);
     dx = grid[0][1] - grid[0][0];
+    bkgQ = vector<double>(N, 0); // Reset background charge
     recalcPotential();
 }
 

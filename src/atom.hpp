@@ -12,9 +12,33 @@
 
 #include <math.h>
 #include <vector>
+#include <tuple>
+#include <map>
 #include "utils.hpp"
 #include "constants.hpp"
 #include "integrate.hpp"
+
+class State
+{
+public:
+  int nodes;
+  double E;
+};
+
+class SchroState : State
+{
+public:
+  vector<double> R;
+  int l;
+};
+
+class DiracState : State
+{
+public:
+  vector<double> Q;
+  vector<double> P;
+  int k;
+};
 
 class Atom
 {

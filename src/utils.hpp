@@ -15,11 +15,16 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_UTILS
+#define MUDIRAC_UTILS
+
 double effectiveMass(double m1, double m2);
 
 int factorial(int n);
 
-vector<vector<double>> logGrid(double x0, double x1, int n=100);
+vector<vector<double>> logGrid(double x0, double x1, int n = 100);
 
 double genLaguerrePoly(double x, int n, double alpha);
 vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
+
+#endif
