@@ -27,6 +27,13 @@ SchroState::SchroState(const SchroState &s)
     R = vector<double>(s.R);
 }
 
+/**
+ * @brief  Initialise a DiracState instance
+ * @note   Creates a DiracState with given grid size
+ * 
+ * @param  N: Desired grid size for Q and P
+ * @retval 
+ */
 DiracState::DiracState(int N)
 {
     Q = vector<double>(N, 0);
@@ -73,6 +80,12 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
     setGrid();
 }
 
+/**
+ * @brief  Recalculate the electrostatic potential
+ * @note   Recalculate the electrostatic potential for an atom. Done automatically 
+ * after changes in grid or background charge
+ * @retval None
+ */
 void Atom::recalcPotential()
 {
     vector<double> r = grid[1];
@@ -97,6 +110,15 @@ void Atom::recalcPotential()
     }
 }
 
+/**
+ * @brief  Set logarithmic integration grid
+ * @note   Set parameters of desired logarithmic integration grid for this Atom
+ * 
+ * @param  r0_in: Inferior boundary of the grid
+ * @param  r1_in: Superior boundar of the grid
+ * @param  N_in:  Number of points
+ * @retval None
+ */
 void Atom::setGrid(double r0_in, double r1_in, int N_in)
 {
     r0 = r0_in;
@@ -109,12 +131,28 @@ void Atom::setGrid(double r0_in, double r1_in, int N_in)
     recalcPotential();
 }
 
+/**
+ * @brief  Set the background charge
+ * @note   Set the background charge for this Atom. The charge must be already 
+ * expressed as amount of charge per spherical shell (so for example a constant 
+ * spatial charge q should be here 4pi*r^2*q)
+ * 
+ * @param  bkgQ_in: Vector of new background charge
+ * @retval None
+ */
 void Atom::setBackgroundCharge(vector<double> bkgQ_in)
 {
     bkgQ = vector<double>(bkgQ_in);
     recalcPotential();
 }
 
+/**
+ * @brief  Get the Atom object's grid
+ * @note   Get either r or log(r/r0) for this Atom's grid
+ * 
+ * @param  log: If true, return log(r/r0) instead of r (default = false)
+ * @retval 
+ */
 vector<double> Atom::getGrid(bool log)
 {
     return vector<double>(grid[!log]);
@@ -129,6 +167,16 @@ DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(
 {
 }
 
+/**
+ * @brief  Converge a state with given k and initial energy guess E0
+ * @note   Converge iteratively a Dirac orbital for this atom from a given k and
+ * energy starting guess. Will fail if convergence can't be achieved or if nodal theorems
+ * are violated. If successful, will return the state found
+ * 
+ * @param  E0: Initial energy guess
+ * @param  k:  Quantum number k
+ * @retval     Found DiracState
+ */
 DiracState DiracAtom::convergeState(double E0, int k)
 {
     double E, dE, err;
@@ -162,7 +210,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
         dE = err / (zetai[tp.i] - zetae[tp.i]);
         E = E - dE;
-        cout << (it+1) << '\t' << E-mu*pow(Physical::c, 2) << '\t' << dE << '\n';
+        cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
         if (isnan(E))
         {
             // Something bad happened
@@ -181,9 +229,22 @@ DiracState DiracAtom::convergeState(double E0, int k)
     return state;
 }
 
+/**
+ * @brief  Search for an orbital with given set of quantum numbers
+ * @note   Search for a Dirac orbital for this Atom with a given set of
+ * quantum numbers. Will start with a guess equal to the one for the hydrogenic solution
+ * and search from there. If any other states are found by accident during the search they
+ * are stored for future use.
+ * 
+ * @param  n: Principal quantum number
+ * @param  l: Orbital quantum number
+ * @param  s: Spin quantum number (true = 1/2 / false = -1/2)
+ * @param  force: If true, force recalculation of the orbital even if already present
+ * @retval None
+ */
 void DiracAtom::calcState(int n, int l, bool s, bool force)
 {
-    int k = s ? l : -l - 1;
+    int k = (s ? l : -l - 1);
     int maxit = 100;
     double E0;
     DiracState state;
@@ -200,5 +261,5 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 
     state = convergeState(E0, k);
 
-    cout << E0-mu*pow(Physical::c, 2) << " => " << state.E-mu*pow(Physical::c, 2) << '\n';
+    cout << E0 - mu * pow(Physical::c, 2) << " => " << state.E - mu * pow(Physical::c, 2) << '\n';
 }
