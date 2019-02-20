@@ -264,6 +264,23 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
     return out;
 }
 
+/**
+ * @brief  Integrate d/dE (Q/P) for a Dirac wavefunction based on a Coulomb potential
+ * @note   Integrate zeta = d/dE (Q/P) for a Dirac wavefunction based on a Coulomb potential. 
+ * Zeta is used to find the optimal energy correction at each step when converging a solution. 
+ * 
+ * @param  &zeta:   Vector for zeta. Will return the integrated values, must contain already the first and last two as boundary conditions.
+ * @param  y:       Vector containing values of Q/P.
+ * @param  r:       Radial (logarithmic) grid
+ * @param  V:       Potential
+ * @param  turn_i:  Index of the turning point. Will mark the stop of the integration.
+ * @param  E:       Energy (binding + mc^2)
+ * @param  k:       Quantum number (default = -1)
+ * @param  m:       Mass of the particle (default = 1)
+ * @param  dx:      Integration step (default = 1)
+ * @param  dir:     Integration direction, either forward 'f' or backwards 'b' (default = 'f').
+ * @retval None
+ */
 void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double> r, vector<double> V, int turn_i,
                           double E, int k, double m, double dx, char dir)
 {

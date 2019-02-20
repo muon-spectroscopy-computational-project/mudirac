@@ -19,8 +19,8 @@
  * numerical odyssey" - European Journal of Physics, 32(1):217–233, Dec 2010, and found in the Development Guide.
  * This method is used before passing Q and P to a routine such as shootDiracLog for integration.
  * 
- * @param  &Q: Q component of the Dirac wavefunction. Must have size greater than 4.
- * @param  &P: P component of the Dirac wavefunction. Must have size equal to Q.
+ * @param  &Q: Vector for Q. Must have size greater than 4.
+ * @param  &P: Vector for P. Must have size equal to Q.
  * @param  r:  Radial grid
  * @param  E:  Energy (binding + mc^2)
  * @param  k:  Quantum number (default = -1)
@@ -83,7 +83,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
  * Zeta is used to find the optimal energy correction at each step when converging a solution. This function is 
  * used before passing zeta to a routine such as shootDiracErrorDELog for integration.
  * 
- * @param  &zeta: The energy derivative of the ratio Q/P for a Dirac wavefunction. Must have size greater than 4.
+ * @param  &zeta: Vector for zeta. Must have size greater than 4.
  * @param  E:  Energy (binding + mc^2)
  * @param  k:  Quantum number (default = -1)
  * @param  m:  Mass of the particle (default = 1)
