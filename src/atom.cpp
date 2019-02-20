@@ -140,7 +140,8 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     int k = s ? l : -l - 1;
     int maxit = 100;
     double E, err;
-    DiracState *state = new DiracState(N);
+    vector<double> y(N), zetai(N), zetae(N);
+    DiracState state = DiracState(N);
     TurningPoint tp;
 
     // First, check if it's already calculated
@@ -155,12 +156,29 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     for (int it = 0; it < maxit; ++it)
     {
         // Start by applying boundary conditions
-        boundaryDiracCoulomb(state->Q, state->P, grid[1], E, k, mu, Z, R <= r0);
+        boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R <= r0);
         // Integrate here
-        tp = shootDiracLog(state->Q, state->P, grid[1], V, E, k, mu, dx);
+        tp = shootDiracLog(state.Q, state.P, grid[1], V, E, k, mu, dx);
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
         // cout << err << '\n';
-    }
+        // Compute the derivative of the error in dE
+        for (int i = 0; i < N; ++i)
+        {
+            y[i] = state.Q[i] / state.P[i];
+        }
+        // First the forward version
+        y[tp.i] = tp.Qi / tp.Pi;
+        shootDiracErrorDELog(zetai, y, grid[1], V, tp.i, E, k, mu, dx);
+        // Then the backwards one
+        y[tp.i] = tp.Qe / tp.Pe;
+        boundaryDiracErrorDECoulomb(zetae, E, k, mu);
+        shootDiracErrorDELog(zetae, y, grid[1], V, tp.i, E, k, mu, dx, 'b');
+        cout << err << '\t' << zetai[tp.i] - zetae[tp.i] << '\n';
 
-    // cout << E << '\n';
+        E = E - err / (zetai[tp.i] - zetae[tp.i]);
+        if (isnan(E)) {
+            // Something bad happened
+            throw "Convergence failed";
+        }
+    }
 }

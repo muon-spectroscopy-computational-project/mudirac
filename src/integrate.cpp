@@ -263,3 +263,32 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
 
     return out;
 }
+
+void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double> r, vector<double> V, int turn_i,
+                          double E, int k, double m, double dx, char dir)
+{
+    int N = zeta.size();
+    int step = (dir == 'f') ? 1 : -1;
+    int from_i = (step == 1) ? 2 : N - 3;
+    double mc = m * Physical::c;
+    double gp;
+
+    vector<double> A(N, 0);
+    vector<double> B(N, 0);
+
+    // Check size
+    if (y.size() != N || r.size() != N || V.size() != N)
+    {
+        throw "Invalid size for one or more arrays passed to shootDiracErrorDELog";
+    }
+
+    for (int i = from_i; step * (i - turn_i) <= 0; i += step)
+    {
+        gp = (mc + (E - V[i]) * Physical::alpha);
+        A[i] = 2 * (k - gp * r[i] * y[i]);
+        B[i] = -r[i] * (1 + y[i] * y[i]) * Physical::alpha;
+    }
+
+    // Now actually integrate
+    shootQ(zeta, A, B, dx, turn_i, dir);
+}

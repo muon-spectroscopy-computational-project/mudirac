@@ -59,3 +59,30 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         Q[N - i] = -K / (m * Physical::c + E * Physical::alpha) * P[N - i];
     }
 }
+
+void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k, double m)
+{
+    int l = k < 0 ? -(k + 1) : k; // Angular momentum number
+    int N = zeta.size();
+    double K, gp;
+
+    if (N < 4)
+    {
+        throw "Invalid array size passed to boundaryDiracErrorDECoulomb";
+    }
+
+    // In the r=0 limit, it's fine to have it be 0
+    zeta[0] = 0;
+    zeta[1] = 0;
+
+    // r = inf limit
+    K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
+    gp = (m * Physical::c + E * Physical::alpha);
+    if (K < 0)
+    {
+        throw "Can't compute boundary conditions for non-bound state";
+    }
+    K = sqrt(K);
+    zeta[N - 1] = E / (K * gp) * pow(Physical::alpha, 2) + K / pow(gp, 2) * Physical::alpha;
+    zeta[N - 2] = zeta[N - 1];
+}
