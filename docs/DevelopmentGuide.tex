@@ -64,7 +64,7 @@ m \quad s \quad \mu
 with $Y_{lm}$ being the spherical harmonics and the $c(l\frac{1}{2};\mu-s, s)$ being related to the Clebsch-Gordan coefficients \cite{weinb2008}.\newline
 Since this equation is one dimensional we don't need to worry about Q and P being complex-valued, as they will be always real. In general, P will be the `large' component, and in the limit of $c \rightarrow \infty$ we would have that $P^2(r) = r^2\Psi^2(r)$ where $\Psi$ is just the normal radial component of the Schr\"{o}dinger equation solution. A higher Q corresponds to a more `relativistic' behaviour.
 
-\chapter{Numerical methods}
+\chapter{Numerical implementation}
 
 \section{Integration of the Dirac equation system}
 
@@ -128,6 +128,57 @@ so
 P(r) &\approx r^{-k} \\
 Q(r) &\approx r^k
 \end{align}
+
+\subsection{Potential}
+
+The electrostatic potential for the equation is built out of two parts:
+
+\begin{equation}
+	V(r) = V_{N}+V_{bkg}
+\end{equation}
+
+Here $V_N$ is the Coulomb potential due to the nucleus, whereas $V_{bkg}$ is the contribution due to any other background charge (for example, the electronic cloud for muons). \newline
+For a point-like nuclear charge, $V_N$ is simply:
+
+\begin{equation}
+	V_N(r) = -\frac{Z}{r}
+\end{equation}
+
+It should be noted that since we're dealing with negative muons, all potential terms are implicit multiplied by one negative unit of charge, which is the cause of the minus sign. In case one considers a finite sized spherical nucleus of uniform charge and radius $R$, one finds:
+
+\begin{equation}
+V_N(r) = \begin{cases}
+-\frac{Z}{R}\left(\frac{3}{2}-\frac{1}{2}\frac{r^2}{R^2}\right), & \text{$r\leq R$}.\\
+-\frac{Z}{r}, & \text{$r > E$}.
+\end{cases}
+\end{equation}
+
+For the background charge, one builds the potential by integrating the equation:
+
+\begin{equation}
+\nabla^2 V = \rho
+\end{equation}
+
+which in radial coordinates becomes
+
+\begin{equation}
+	\frac{\partial}{\partial r}\left(r^2	\frac{\partial V}{\partial r}\right) = 4\pi r^2 \rho(r)
+\end{equation}
+
+where $4\pi r^2 \rho(r)$ represents the charge density of a spherical shell. Since we're using a logarithmic grid, when expressing the derivatives with respect to the $\log(r)$ we have
+
+\begin{equation}
+\frac{\partial^2 V}{\partial x^2} + \frac{\partial V}{\partial x}= 4\pi r^2 \rho(r)
+\end{equation}
+
+Due to the presence of a first order derivative this equation can not be integrated using Numerov's method. Instead, a finite order derivative scheme was used making use of the following approximations:
+
+\begin{align}
+\left.\frac{\partial V}{\partial x}\right|_i &\approx \frac{1}{h}\left(\frac{11}{6}V_i -3V_{i-1} +\frac{3}{2}V_{i-2}-\frac{1}{3}V_{i-3} \right) \\
+\left.\frac{\partial^2 V}{\partial x^2}\right|_i &\approx \frac{1}{h^2}\left(2V_i -5V_{i-1} +4V_{i-2}-V_{i-3} \right) \\
+\end{align}
+
+setting the first three points of V with an approximation of constant charge for $r < r_0$ and shooting outwards for all the following ones.
 
 \subsection{Integration scheme}
 
