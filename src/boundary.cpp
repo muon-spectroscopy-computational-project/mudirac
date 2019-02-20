@@ -12,6 +12,23 @@
 
 #include "boundary.hpp"
 
+/**
+ * @brief  Impose boundary conditions to a Dirac wavefunction based on a Coulomb potential
+ * @note   Impose boundary conditions to the Q and P components of a Dirac radial wavefunction based on a Coulomb potential.
+ * The conditions take the form detailed in Richard R Silbar and T Goldman. "Solving the radial dirac equations: a
+ * numerical odyssey" - European Journal of Physics, 32(1):217–233, Dec 2010, and found in the Development Guide.
+ * This method is used before passing Q and P to a routine such as shootDiracLog for integration.
+ * 
+ * @param  &Q: Q component of the Dirac wavefunction. Must have size greater than 4.
+ * @param  &P: P component of the Dirac wavefunction. Must have size equal to Q.
+ * @param  r:  Radial grid
+ * @param  E:  Energy (binding + mc^2)
+ * @param  k:  Quantum number (default = -1)
+ * @param  m:  Mass of the particle (default = 1)
+ * @param  Z:  Nuclear charge (default = 1)
+ * @param  finite: Whether the nucleus has a finite size or is point-like (default = false)
+ * @retval None
+ */
 void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, bool finite)
 {
     int l = k < 0 ? -(k + 1) : k; // Angular momentum number
@@ -60,6 +77,18 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
     }
 }
 
+/**
+ * @brief  Impose boundary conditions to d/dE (Q/P) for a Dirac wavefunction based on a Coulomb potential
+ * @note   Impose boundary conditions on zeta = d/dE (Q/P) for a Dirac wavefunction based on a Coulomb potential. 
+ * Zeta is used to find the optimal energy correction at each step when converging a solution. This function is 
+ * used before passing zeta to a routine such as shootDiracErrorDELog for integration.
+ * 
+ * @param  &zeta: The energy derivative of the ratio Q/P for a Dirac wavefunction. Must have size greater than 4.
+ * @param  E:  Energy (binding + mc^2)
+ * @param  k:  Quantum number (default = -1)
+ * @param  m:  Mass of the particle (default = 1)
+ * @retval None
+ */
 void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k, double m)
 {
     int l = k < 0 ? -(k + 1) : k; // Angular momentum number

@@ -15,7 +15,7 @@ int main()
     map<tuple<int, int, int>, DiracState *> test;
     DiracAtom da = DiracAtom(1, 1, 1);
     // cout << da.getmu() << '\n';
-    DiracAtom da2 = DiracAtom(1, 1, 1, 1e-2);
+    DiracAtom da2 = DiracAtom(1, 1, 1, 2e-2);
 
     try
     {
