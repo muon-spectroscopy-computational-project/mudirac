@@ -179,6 +179,7 @@ DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(
  */
 DiracState DiracAtom::convergeState(double E0, int k)
 {
+    int Qn, Pn;
     double E, dE, err;
     vector<double> y(N), zetai(N), zetae(N);
     DiracState state = DiracState(N);
@@ -221,6 +222,12 @@ DiracState DiracAtom::convergeState(double E0, int k)
             break;
         }
     }
+
+    // Count nodes
+    Pn = countNodes(state.P);
+    Qn = countNodes(state.Q);
+
+    cout << Pn << '\t' << Qn << '\n';
 
     state.E = E;
     state.init = true;
