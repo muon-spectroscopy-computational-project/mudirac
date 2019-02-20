@@ -124,3 +124,35 @@ vector<double> genLaguerrePoly(vector<double> x, int n, int alpha)
 
     return L;
 }
+
+/**
+ * @brief  Count the nodes in a given function
+ * @note   Count the nodes (times the value crosses zero) in a 
+ * function. Includes only an interval comprised between two extremes that are above a given tolerance.
+ * 
+ * @param  v:   Vector containing the function
+ * @param  tol: Tolerance 
+ * @retval      Number of nodes
+ */
+int countNodes(vector<double> v, double tol)
+{
+    int nc = 0;
+    int i0, i1;
+
+    for (i0 = 0; i0 < v.size(); ++i0)
+    {
+        if (abs(v[i0]) > tol)
+            break;
+    }
+    for (i1 = v.size() - 1; i1 > i0; --i1)
+    {
+        if (abs(v[i1]) > tol)
+            break;
+    }
+    for (int i = i0 + 1; i <= i1; ++i)
+    {
+        nc += ((v[i] * v[i - 1]) < 0);
+    }
+
+    return nc;
+}

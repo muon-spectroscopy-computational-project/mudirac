@@ -27,4 +27,6 @@ vector<vector<double>> logGrid(double x0, double x1, int n = 100);
 double genLaguerrePoly(double x, int n, double alpha);
 vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
 
+int countNodes(vector<double> v, double tol = 1e-8);
+
 #endif
