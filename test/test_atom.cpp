@@ -10,17 +10,19 @@ int main()
 {
     // Atom a = Atom(1, 1, 1, 2);
 
-    vector<double> r, V;
+    vector<double> r, V, V2;
     tuple<int, int, int> ind;
     map<tuple<int, int, int>, DiracState *> test;
     DiracAtom da = DiracAtom(1, 1, 1);
     // cout << da.getmu() << '\n';
-
-    da.setGrid(1e-2, 5e1, 1000);
+    DiracAtom da2 = DiracAtom(1, 1, 1, 1e-2);
 
     try
     {
         da.calcState(1, 0, false);
+        da.calcState(2, 0, false);
+        da2.calcState(1, 0, false);
+        da2.calcState(2, 0, false);
     }
     catch (const char *s)
     {
@@ -29,13 +31,14 @@ int main()
 
     r = da.getGrid();
     V = da.getPotential();
+    V2 = da2.getPotential();
 
     // cout << a.getZ() << '\n';
     // cout << a.getmu() << '\n';
 
     // for (int i = 0; i < r.size(); ++i)
     // {
-    //     cout << r[i] << '\t' << V[i] << '\n';
+    //     cout << r[i] << '\t' << V[i] << '\t' << V2[i] << '\n';
     // }
 
     // DiracState *st = new DiracState();

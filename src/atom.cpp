@@ -95,12 +95,6 @@ void Atom::recalcPotential()
             V[i] += -Z / r[i];
         }
     }
-
-    // // Now send it to zero at the end
-    // for (int i = 0; i < N; ++i)
-    // {
-    //     V[i] -= V[N - 1];
-    // }
 }
 
 void Atom::setGrid(double r0_in, double r1_in, int N_in)
@@ -147,9 +141,9 @@ DiracState DiracAtom::convergeState(double E0, int k)
     for (int it = 0; it < maxit; ++it)
     {
         // Start by applying boundary conditions
-        boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R <= r0);
-        cout << state.P[0] << '\t' << state.P[N - 1] << '\n';
-        cout << state.Q[0] << '\t' << state.Q[N - 1] << '\n';
+        boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R > r0);
+        // cout << state.P[0] << '\t' << state.P[N - 1] << '\n';
+        // cout << state.Q[0] << '\t' << state.Q[N - 1] << '\n';
         // Integrate here
         tp = shootDiracLog(state.Q, state.P, grid[1], V, E, k, mu, dx);
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
