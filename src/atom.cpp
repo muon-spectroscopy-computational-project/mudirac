@@ -96,11 +96,11 @@ void Atom::recalcPotential()
         }
     }
 
-    // Now send it to zero at the end
-    for (int i = 0; i < N; ++i)
-    {
-        V[i] -= V[N - 1];
-    }
+    // // Now send it to zero at the end
+    // for (int i = 0; i < N; ++i)
+    // {
+    //     V[i] -= V[N - 1];
+    // }
 }
 
 void Atom::setGrid(double r0_in, double r1_in, int N_in)
@@ -135,32 +135,24 @@ DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(
 {
 }
 
-void DiracAtom::calcState(int n, int l, bool s, bool force)
+DiracState DiracAtom::convergeState(double E0, int k)
 {
-    int k = s ? l : -l - 1;
-    int maxit = 100;
-    double E, err;
+    double E, dE, err;
     vector<double> y(N), zetai(N), zetae(N);
     DiracState state = DiracState(N);
     TurningPoint tp;
 
-    // First, check if it's already calculated
-    if (!force && !(states[{n, l, s}] == NULL))
-    {
-        return;
-    }
-
-    // Then start with a guess for the energy
-    E = hydrogenicDiracEnergy(Z, mu, n, k);
+    E = E0;
 
     for (int it = 0; it < maxit; ++it)
     {
         // Start by applying boundary conditions
         boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R <= r0);
+        cout << state.P[0] << '\t' << state.P[N - 1] << '\n';
+        cout << state.Q[0] << '\t' << state.Q[N - 1] << '\n';
         // Integrate here
         tp = shootDiracLog(state.Q, state.P, grid[1], V, E, k, mu, dx);
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
-        // cout << err << '\n';
         // Compute the derivative of the error in dE
         for (int i = 0; i < N; ++i)
         {
@@ -173,12 +165,46 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         y[tp.i] = tp.Qe / tp.Pe;
         boundaryDiracErrorDECoulomb(zetae, E, k, mu);
         shootDiracErrorDELog(zetae, y, grid[1], V, tp.i, E, k, mu, dx, 'b');
-        cout << err << '\t' << zetai[tp.i] - zetae[tp.i] << '\n';
 
-        E = E - err / (zetai[tp.i] - zetae[tp.i]);
-        if (isnan(E)) {
+        dE = err / (zetai[tp.i] - zetae[tp.i]);
+        E = E - dE;
+        cout << (it+1) << '\t' << E-mu*pow(Physical::c, 2) << '\t' << dE << '\n';
+        if (isnan(E))
+        {
             // Something bad happened
             throw "Convergence failed";
         }
+        else if (abs(dE) < Etol)
+        {
+            break;
+        }
     }
+
+    state.E = E;
+    state.init = true;
+    state.k = k;
+
+    return state;
+}
+
+void DiracAtom::calcState(int n, int l, bool s, bool force)
+{
+    int k = s ? l : -l - 1;
+    int maxit = 100;
+    double E0;
+    DiracState state;
+    TurningPoint tp;
+
+    // First, check if it's already calculated
+    if (!force && !(states[{n, l, s}] == NULL))
+    {
+        return;
+    }
+
+    // Then start with a guess for the energy
+    E0 = hydrogenicDiracEnergy(Z, mu, n, k);
+
+    state = convergeState(E0, k);
+
+    cout << E0-mu*pow(Physical::c, 2) << " => " << state.E-mu*pow(Physical::c, 2) << '\n';
 }

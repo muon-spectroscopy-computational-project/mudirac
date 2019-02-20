@@ -13,7 +13,10 @@ int main()
     vector<double> r, V;
     tuple<int, int, int> ind;
     map<tuple<int, int, int>, DiracState *> test;
-    DiracAtom da = DiracAtom(1, 1, 1, 1e-3);
+    DiracAtom da = DiracAtom(1, 1, 1);
+    // cout << da.getmu() << '\n';
+
+    da.setGrid(1e-2, 5e1, 1000);
 
     try
     {
@@ -24,13 +27,14 @@ int main()
         std::cerr << s << '\n';
     }
 
-    // r = da.getGrid();
-    // V = da.getPotential();
+    r = da.getGrid();
+    V = da.getPotential();
 
     // cout << a.getZ() << '\n';
     // cout << a.getmu() << '\n';
 
-    // for (int i = 0; i < r.size(); ++i) {
+    // for (int i = 0; i < r.size(); ++i)
+    // {
     //     cout << r[i] << '\t' << V[i] << '\n';
     // }
 

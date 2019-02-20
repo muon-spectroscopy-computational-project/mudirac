@@ -30,7 +30,7 @@ public:
   State();
 };
 
-class SchroState : State
+class SchroState : public State
 {
 public:
   vector<double> R;
@@ -39,7 +39,7 @@ public:
   SchroState(const SchroState &s);
 };
 
-class DiracState : State
+class DiracState : public State
 {
 public:
   vector<double> Q;
@@ -52,6 +52,11 @@ public:
 
 class Atom
 {
+public:
+  // Tolerances and other details
+  double Etol = 1e-10;
+  int maxit = 100;
+
 protected:
   // Fundamental properties
   double Z, A;         // Nuclear charge and mass
@@ -90,6 +95,9 @@ class DiracAtom : public Atom
 private:
   // Eigenstates
   map<tuple<int, int, bool>, DiracState *> states;
+
+  // Convergence
+  DiracState convergeState(double E0, int k = -1);
 
 public:
   DiracAtom(double Z_in = 1, double m_in = 1, double A_in = -1, double R_in = -1);
