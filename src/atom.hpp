@@ -94,7 +94,7 @@ class DiracAtom : public Atom
 {
 private:
   // Eigenstates
-  map<tuple<int, int, bool>, DiracState *> states;
+  map<tuple<int, int, bool>, DiracState> states;
 
   // Convergence
   DiracState convergeState(double E0, int k = -1);

@@ -180,7 +180,7 @@ DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(
 DiracState DiracAtom::convergeState(double E0, int k)
 {
     int Qn, Pn;
-    double E, dE, err;
+    double E, dE, err, norm;
     vector<double> y(N), zetai(N), zetae(N);
     DiracState state = DiracState(N);
     TurningPoint tp;
@@ -210,17 +210,35 @@ DiracState DiracAtom::convergeState(double E0, int k)
         shootDiracErrorDELog(zetae, y, grid[1], V, tp.i, E, k, mu, dx, 'b');
 
         dE = err / (zetai[tp.i] - zetae[tp.i]);
+        // cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
+        if (!isnan(dE) && abs(dE) < Etol)
+        {
+            break;
+        }
         E = E - dE;
-        cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
         if (isnan(E))
         {
             // Something bad happened
             throw "Convergence failed";
         }
-        else if (abs(dE) < Etol)
-        {
-            break;
-        }
+    }
+
+    // Make states continuous
+    for (int i = tp.i; i < N; ++i)
+    {
+        state.P[i] *= tp.Pi / tp.Pe;
+        state.Q[i] *= tp.Pi / tp.Pe;
+    }
+    // Now normalise
+    for (int i = 0; i < N; ++i)
+    {
+        y[i] = (pow(state.P[i], 2) + pow(state.Q[i] * Physical::alpha, 2)) * grid[1][i];
+    }
+    norm = sqrt(trapzInt(grid[0], y));
+    for (int i = 0; i < N; ++i)
+    {
+        state.P[i] /= norm;
+        state.Q[i] /= norm;
     }
 
     // Count nodes
@@ -229,6 +247,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     cout << Pn << '\t' << Qn << '\n';
 
+    state.nodes = Pn;
     state.E = E;
     state.init = true;
     state.k = k;
@@ -258,7 +277,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     TurningPoint tp;
 
     // First, check if it's already calculated
-    if (!force && !(states[{n, l, s}] == NULL))
+    if (!force && states[{n, l, s}].init)
     {
         return;
     }
@@ -268,5 +287,23 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 
     state = convergeState(E0, k);
 
-    cout << E0 - mu * pow(Physical::c, 2) << " => " << state.E - mu * pow(Physical::c, 2) << '\n';
+    states[{n, l, s}] = state;
+}
+
+/**
+ * @brief  Return an orbital with given set of quantum numbers
+ * @note   Search for a Dirac orbital for this Atom with a given set of
+ * quantum numbers. If the state has already been calculated and stored, return it.
+ * Otherwise, calculate it, then return it.  
+ * 
+ * @param  n: Principal quantum number
+ * @param  l: Orbital quantum number
+ * @param  s: Spin quantum number (true = 1/2 / false = -1/2)
+ * @retval Requested orbital
+ */
+DiracState DiracAtom::getState(int n, int l, bool s)
+{
+    calcState(n, l, s);
+
+    return DiracState(states[{n, l, s}]);
 }
