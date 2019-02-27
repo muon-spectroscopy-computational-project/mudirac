@@ -21,9 +21,9 @@ int main()
     try
     {
         da.calcState(1, 0, false);
-        da.calcState(2, 1, false);
+        da.calcState(2, 0, false);
         da2.calcState(1, 0, false);
-        da2.calcState(2, 1, false);
+        da2.calcState(2, 0, false);
     }
     catch (const char *s)
     {
@@ -34,15 +34,15 @@ int main()
     V = da.getPotential();
     V2 = da2.getPotential();
 
-    s2 = da.getState(2, 1, false);
-    s2f = da2.getState(2, 1, false);
+    s2 = da.getState(2, 0, false);
+    s2f = da2.getState(2, 0, false);
 
     // cout << a.getZ() << '\n';
     // cout << a.getmu() << '\n';
 
     for (int i = 0; i < r.size(); ++i)
     {
-        cout << r[i] << '\t' << s2.P[i] << '\t' << s2f.P[i] << '\n';
+        cout << r[i] << '\t' << s2.P[i] << '\t' << s2f.P[i] << '\t' << s2.Q[i] << '\t' << s2f.Q[i]<< '\n';
     }
 
     // DiracState *st = new DiracState();

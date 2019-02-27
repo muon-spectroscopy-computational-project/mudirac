@@ -45,6 +45,7 @@ public:
   vector<double> Q;
   vector<double> P;
   int k;
+  int nodesQ = 0;
 
   DiracState(int N = 0);
   DiracState(const DiracState &s);
@@ -54,7 +55,7 @@ class Atom
 {
 public:
   // Tolerances and other details
-  double Etol = 1e-10;
+  double Etol = 1e-10, Esearch = 1.2;
   int maxit = 100;
 
 protected:

@@ -245,9 +245,13 @@ DiracState DiracAtom::convergeState(double E0, int k)
     Pn = countNodes(state.P);
     Qn = countNodes(state.Q);
 
-    cout << Pn << '\t' << Qn << '\n';
+    if (Qn - Pn != (R > r0))
+    {
+        throw "Nodal theorems not respected - invalid state found";
+    }
 
     state.nodes = Pn;
+    state.nodesQ = Qn;
     state.E = E;
     state.init = true;
     state.k = k;
@@ -271,8 +275,9 @@ DiracState DiracAtom::convergeState(double E0, int k)
 void DiracAtom::calcState(int n, int l, bool s, bool force)
 {
     int k = (s ? l : -l - 1);
-    int maxit = 100;
+    int dnode;
     double E0;
+    bool found = false;
     DiracState state;
     TurningPoint tp;
 
@@ -285,7 +290,20 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     // Then start with a guess for the energy
     E0 = hydrogenicDiracEnergy(Z, mu, n, k);
 
-    state = convergeState(E0, k);
+    for (int it = 0; it < maxit; ++it)
+    {
+        state = convergeState(E0, k);
+        // Is the nodes condition respected?
+        dnode = state.nodes - (n - l - 1);
+        if (dnode == 0)
+        {
+            break;
+        }
+        else
+        {
+            E0 = dnode > 0 ? E0/Esearch : E0*Esearch;
+        }
+    }
 
     states[{n, l, s}] = state;
 }
