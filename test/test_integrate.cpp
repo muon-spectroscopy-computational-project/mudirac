@@ -15,6 +15,18 @@ int main()
     vector<double> Q(N), P(N);
     vector<double> AA(N), AB(N), BA(N), BB(N);
 
+    /* Basic integral test
+
+    */
+
+    for (int i = 0; i < N; ++i)
+    {
+        Q[i] = h * i + 1;
+        P[i] = 1.0 / Q[i];
+    }
+
+    cout << "Error: " << (log(11.0)-trapzInt(Q, P))/log(11.0) << '\n';
+
     /* Simple shootQ test 
 
     Q = exp(-x**2) + x
@@ -108,11 +120,11 @@ int main()
     {
         rho[i] *= pow(lgrid[1][i], 2);
     }
-    shootPotentialLog(V, rho, lgrid[0][1]);
-    for (int i = 0; i < N; ++i)
-    {
-        cout << lgrid[1][i] << '\t' << V[i] << '\n';
-    }
+    // shootPotentialLog(V, rho, lgrid[0][1]);
+    // for (int i = 0; i < N; ++i)
+    // {
+    //     cout << lgrid[1][i] << '\t' << V[i] << '\n';
+    // }
 
     // vector<double> r = lgrid[1], V(r.size());
 

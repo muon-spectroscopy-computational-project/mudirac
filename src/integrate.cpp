@@ -14,6 +14,34 @@
 #include <iostream>
 
 /**
+ * @brief  Integrate a function with the trapezoidal rule
+ * @note   Perform a trapezoidal rule integration of function y over range x:
+ * 
+ * I = sum_i (y[i]+y[i-1])/2*(x[i]-x[i-1])
+ * 
+ * @param  x: x axis values
+ * @param  y: function values
+ * @retval Integral
+ */
+double trapzInt(vector<double> x, vector<double> y)
+{
+    int N = y.size();
+    double ans = 0.0;
+
+    if (x.size() != N)
+    {
+        throw "Invalid size for arrays passed to trapzInt";
+    }
+
+    for (int i = 1; i < N; ++i)
+    {
+        ans += (y[i] + y[i - 1]) / 2.0 * (x[i] - x[i - 1]);
+    }
+
+    return ans;
+}
+
+/**
  * @brief  Integrate a single ODE
  * @note   Integrate one differential equation of the form:
  * 
