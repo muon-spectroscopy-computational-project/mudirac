@@ -43,3 +43,6 @@ docs/*.blg
 docs/*.bbl
 docs/*.log
 docs/*.synctex.gz
+
+# VS Code
+.vscode
