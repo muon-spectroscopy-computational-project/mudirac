@@ -44,5 +44,8 @@ docs/*.bbl
 docs/*.log
 docs/*.synctex.gz
 
+# Build directory
+build/*
+
 # VS Code
 .vscode
