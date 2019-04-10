@@ -1,12 +1,45 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include "../src/utils.hpp"
 #include "../src/integrate.hpp"
 #include "../src/boundary.hpp"
 
+#include "catch/catch.hpp"
+
 using namespace std;
 
-int main()
+// Integration tests
+vector<double> applyFunc(double (*f)(double), vector<double> x)
+{
+    vector<double> y(x.size());
+
+    for (int i = 0; i < x.size(); ++i)
+    {
+        y[i] = f(x[i]);
+    }
+
+    return y;
+}
+
+double trapzIntFunc(double (*f)(double), double x0 = 0, double x1 = 1, int n = 200)
+{
+    vector<double> x, y;
+
+    x = linGrid(x0, x1, n);
+    y = applyFunc(f, x);
+
+    return trapzInt(x, y);
+}
+
+TEST_CASE("Trapezoidal integration", "[trapzInt]")
+{
+    REQUIRE(trapzIntFunc(exp) == Approx(exp(1.0) - 1.0));
+    REQUIRE(trapzIntFunc(sin) == Approx(1.0 - cos(1.0)));
+    REQUIRE(trapzIntFunc(sqrt, 1.0, 4.0, 200) == Approx(14.0 / 3.0));
+}
+
+int old()
 {
     int N = 1000;
     double h = 10.0 / N;
@@ -25,7 +58,7 @@ int main()
         P[i] = 1.0 / Q[i];
     }
 
-    cout << "Error: " << (log(11.0)-trapzInt(Q, P))/log(11.0) << '\n';
+    cout << "Error: " << (log(11.0) - trapzInt(Q, P)) / log(11.0) << '\n';
 
     /* Simple shootQ test 
 
