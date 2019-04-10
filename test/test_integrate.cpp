@@ -7,6 +7,8 @@
 
 #include "catch/catch.hpp"
 
+#define ERRTOL 1e-5
+
 using namespace std;
 
 // Integration tests
@@ -22,7 +24,7 @@ vector<double> applyFunc(double (*f)(double), vector<double> x)
     return y;
 }
 
-double trapzIntFunc(double (*f)(double), double x0 = 0, double x1 = 1, int n = 200)
+double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int n = 200)
 {
     vector<double> x, y;
 
@@ -32,11 +34,81 @@ double trapzIntFunc(double (*f)(double), double x0 = 0, double x1 = 1, int n = 2
     return trapzInt(x, y);
 }
 
+double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double),
+                 double x0 = 0, double x1 = 1, int n = 200, char type = 'Q', char dir = 'f')
+{
+    double err = 0.0;
+    vector<double> x, A(n), B(n), Q(n);
+
+    x = linGrid(x0, x1, n);
+    A = applyFunc(fA, x);
+    B = applyFunc(fB, x);
+
+    // Boundary
+    if (dir == 'f')
+    {
+        Q[0] = fQ(x[0]);
+        Q[1] = fQ(x[1]);
+    }
+    else
+    {
+        Q[n - 2] = fQ(x[n - 2]);
+        Q[n - 1] = fQ(x[n - 1]);
+    }
+
+    switch (type)
+    {
+    case 'Q':
+        shootQ(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
+        break;
+    case 'N':
+        shootNumerov(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
+        break;
+    default:
+        break;
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        err += abs(Q[i] - fQ(x[i]));
+    }
+    err /= n;
+
+    return err;
+}
+
 TEST_CASE("Trapezoidal integration", "[trapzInt]")
 {
-    REQUIRE(trapzIntFunc(exp) == Approx(exp(1.0) - 1.0));
-    REQUIRE(trapzIntFunc(sin) == Approx(1.0 - cos(1.0)));
-    REQUIRE(trapzIntFunc(sqrt, 1.0, 4.0, 200) == Approx(14.0 / 3.0));
+    REQUIRE(trapzIntTest(exp) == Approx(exp(1.0) - 1.0));
+    REQUIRE(trapzIntTest(sin) == Approx(1.0 - cos(1.0)));
+    REQUIRE(trapzIntTest(sqrt, 1.0, 4.0) == Approx(14.0 / 3.0));
+    REQUIRE(trapzIntTest(cbrt, 1.0, 8.0) == Approx(45.0 / 4.0));
+}
+
+TEST_CASE("Shooting integration", "[shootQ]")
+{
+    /* 
+        Q = tan(x)
+        Q' = tan(x)^2 + 1
+    */
+    auto one = [](double x) { return 1.0; };
+    REQUIRE(shootTest(tan, tan, one, 0, 1, 1000) < ERRTOL);
+    /* 
+        Q = exp(-x**2) + x
+        Q' = -2x(Q-x) + 1 = (-2x)Q+(2x^2+1)
+    */
+    auto fQ = [](double x) { return exp(-x * x) + x; };
+    auto fA = [](double x) { return -2 * x; };
+    auto fB = [](double x) { return 2 * x * x + 1; };
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000) < ERRTOL);
+}
+
+TEST_CASE("Numerov integration", "[shootNumerov]")
+{
+    auto fQ = [](double x) { return sin(3 * x) + x * x; };
+    auto fA = [](double x) { return -9.0; };
+    auto fB = [](double x) { return 9.0 * x * x + 2; };
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'N') < ERRTOL);
 }
 
 int old()
