@@ -77,6 +77,50 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
     return err;
 }
 
+double shootQPTest(double (*fQ)(double), double (*fAA)(double), double (*fAB)(double),
+                   double (*fBA)(double), double (*fBB)(double),
+                   double x0 = 0, double x1 = 1, int n = 200, char dir = 'f')
+{
+    double err = 0.0;
+    vector<double> x, AA(n), AB(n), BA(n), BB(n), Q(n), P(n);
+
+    // x = linGrid(x0, x1, n);
+    // A = applyFunc(fA, x);
+    // B = applyFunc(fB, x);
+
+    // // Boundary
+    // if (dir == 'f')
+    // {
+    //     Q[0] = fQ(x[0]);
+    //     Q[1] = fQ(x[1]);
+    // }
+    // else
+    // {
+    //     Q[n - 2] = fQ(x[n - 2]);
+    //     Q[n - 1] = fQ(x[n - 1]);
+    // }
+
+    // switch (type)
+    // {
+    // case 'Q':
+    //     shootQ(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
+    //     break;
+    // case 'N':
+    //     shootNumerov(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
+    //     break;
+    // default:
+    //     break;
+    // }
+
+    // for (int i = 0; i < n; ++i)
+    // {
+    //     err += abs(Q[i] - fQ(x[i]));
+    // }
+    // err /= n;
+
+    return err;
+}
+
 TEST_CASE("Trapezoidal integration", "[trapzInt]")
 {
     REQUIRE(trapzIntTest(exp) == Approx(exp(1.0) - 1.0));
@@ -109,6 +153,10 @@ TEST_CASE("Numerov integration", "[shootNumerov]")
     auto fA = [](double x) { return -9.0; };
     auto fB = [](double x) { return 9.0 * x * x + 2; };
     REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'N') < ERRTOL);
+}
+
+TEST_CASE("Coupled integration", "[shootQP]")
+{
 }
 
 int old()
