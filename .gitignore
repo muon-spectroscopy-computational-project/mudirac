@@ -36,6 +36,7 @@ test/*
 !test/*.cpp
 !test/catch
 !test/data
+!test/CMakeLists.txt
 
 # Doc files
 docs/*.aux
