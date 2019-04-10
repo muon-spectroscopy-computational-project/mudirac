@@ -63,7 +63,7 @@ vector<double> linGrid(double x0, double x1, int n)
 
     for (int i = 0; i < n; ++i)
     {
-        x[i] = i * dx;
+        x[i] = i * dx + x0;
     }
 
     return x;
