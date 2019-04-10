@@ -48,6 +48,28 @@ int factorial(int n)
 }
 
 /**
+ * @brief  Generate a linear grid
+ * @note   Generate a linearly spaced grid between two given points.
+ * 
+ * @param  x0: Starting point.
+ * @param  x1: End point.
+ * @param  n: Number of points (default = 100).
+ * @retval x: Vector containing the grid.
+ */
+vector<double> linGrid(double x0, double x1, int n)
+{
+    double dx = (x1 - x0) / (n - 1.0);
+    vector<double> x(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        x[i] = i * dx;
+    }
+
+    return x;
+}
+
+/**
  * @brief  Generate a logarithmic grid
  * @note   Generate a logarithmically spaced grid between two given points.
  * 
