@@ -208,7 +208,7 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
     double E, Ek, mc2, C, A, rho, rhodep, lagP, lagM;
     double gamma;
 
-    if (n < 0 || abs(k) > n || k == 0)
+    if (n < 0 || abs(k) > n || k == 0 || k == n)
     {
         throw "Invalid quantum numbers for hydrogenic Dirac wavefunction.";
     }

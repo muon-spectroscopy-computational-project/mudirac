@@ -268,7 +268,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
  * 
  * @param  n: Principal quantum number
  * @param  l: Orbital quantum number
- * @param  s: Spin quantum number (true = 1/2 / false = -1/2)
+ * @param  s: Spin quantum number (true = 1/2, false = -1/2)
  * @param  force: If true, force recalculation of the orbital even if already present
  * @retval None
  */
