@@ -274,7 +274,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
  */
 void DiracAtom::calcState(int n, int l, bool s, bool force)
 {
-    int k = (s ? l : -l - 1);
+    int k = ((s && l > 0) ? l : -l - 1);
     int dnode;
     double E0;
     bool found = false;

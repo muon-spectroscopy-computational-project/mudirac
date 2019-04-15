@@ -230,7 +230,7 @@ void shootPotentialLog(vector<double> &V, vector<double> rho, double h)
  *      Q' = k/r*Q+[mc-(E-V)/c]*P
  *      P' = -k/r*P+[mc+(E-V)/c]*Q
  * 
- * With k the quantum number: if j=|l+s|, then k = -(j+1/2)*sign(s), and E the expected energy (including the rest mass term).
+ * With k the quantum number: if j=|l+s|, then k = -(j+1/2)*sign(j-l), and E the expected energy (including the rest mass term).
  * The function will return a struct containing the index of the 'turning point', where the forward and backwards integration meet,
  * as well as the values of Q and P integrated forward (Qi, Pi) and backwards (Qe, Pe) at it.
  *   

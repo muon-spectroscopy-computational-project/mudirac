@@ -117,7 +117,7 @@ vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z, double mu
 double hydrogenicDiracEnergy(double Z, double mu, int n, int k, bool bind)
 {
 
-    if (n < 0 || abs(k) > n || k == 0)
+    if (n < 0 || abs(k) > n || k == 0 || k == n)
     {
         throw "Invalid quantum numbers for hydrogenic Dirac energy.";
     }
@@ -151,7 +151,7 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
     double E, Ek, mc2, C, A, rho, rhodep, lagP, lagM;
     double gamma;
 
-    if (n < 0 || abs(k) > n || k == 0)
+    if (n < 0 || abs(k) > n || k == 0 || k == n)
     {
         throw "Invalid quantum numbers for hydrogenic Dirac wavefunction.";
     }
@@ -198,7 +198,7 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
  * @param  Z:   Nuclear charge (default 1)
  * @param  mu:  Reduced mass of the system, m*m_N/(m+m_N) (default 1)
  * @param  n:   Principal quantum number (default 1)
- * @param k:    Number related to the total orbital momentum j=|l+s|, k = -(j+1/2)*sign(s) (default -1)
+ * @param k:    Number related to the total orbital momentum j=|l+s|, k = -(j+1/2)*sign(j-l) (default -1)
  * @retval:     Vector of major and minor component of the Dirac bispinor
  */
 vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, double mu, int n, int k)
