@@ -252,7 +252,6 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
     double B; // Binding energy
     TurningPoint out;
     vector<double> AA(N), AB(N), BA(N), BB(N); // Define the equation
-    vector<double> dydE(N);
 
     // Check size
     if (P.size() != N || r.size() != N || V.size() != N)
@@ -267,6 +266,14 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
     {
         if (V[turn_i] > B)
             break;
+    }
+    if (turn_i >= V.size()-1) {
+        // Turning point not included in range
+        throw "Range for shootDiracLog does not include turning point (r_max < r_turn)";
+    }
+    else if (turn_i == 0) {
+        // Turning point not included in range
+        throw "Range for shootDiracLog does not include turning point (r_min > r_turn)";
     }
 
     // Now define the other arrays
