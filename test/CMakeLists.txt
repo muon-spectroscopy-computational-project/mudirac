@@ -6,3 +6,6 @@ target_link_libraries(test_utils test_main mudiraclib)
 
 add_executable(test_integrate test_integrate.cpp)
 target_link_libraries(test_integrate test_main mudiraclib)
+
+add_executable(test_hydrogenic test_hydrogenic.cpp)
+target_link_libraries(test_hydrogenic test_main mudiraclib)

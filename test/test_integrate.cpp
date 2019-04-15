@@ -4,6 +4,7 @@
 #include "../src/utils.hpp"
 #include "../src/integrate.hpp"
 #include "../src/boundary.hpp"
+#include "../src/hydrogenic.hpp"
 
 #include "catch/catch.hpp"
 
@@ -24,23 +25,23 @@ vector<double> applyFunc(double (*f)(double), vector<double> x)
     return y;
 }
 
-double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int n = 200)
+double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 200)
 {
     vector<double> x, y;
 
-    x = linGrid(x0, x1, n);
+    x = linGrid(x0, x1, N);
     y = applyFunc(f, x);
 
     return trapzInt(x, y);
 }
 
 double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double),
-                 double x0 = 0, double x1 = 1, int n = 200, char type = 'Q', char dir = 'f')
+                 double x0 = 0, double x1 = 1, int N = 200, char type = 'Q', char dir = 'f')
 {
     double err = 0.0;
-    vector<double> x, A(n), B(n), Q(n);
+    vector<double> x, A(N), B(N), Q(N);
 
-    x = linGrid(x0, x1, n);
+    x = linGrid(x0, x1, N);
     A = applyFunc(fA, x);
     B = applyFunc(fB, x);
 
@@ -52,8 +53,8 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
     }
     else
     {
-        Q[n - 2] = fQ(x[n - 2]);
-        Q[n - 1] = fQ(x[n - 1]);
+        Q[N - 2] = fQ(x[N - 2]);
+        Q[N - 1] = fQ(x[N - 1]);
     }
 
     switch (type)
@@ -68,11 +69,11 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
         break;
     }
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < N; ++i)
     {
         err += abs(Q[i] - fQ(x[i]));
     }
-    err /= n;
+    err /= N;
 
     return err;
 }
@@ -80,12 +81,12 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
 double shootQPTest(double (*fQ)(double), double (*fP)(double),
                    double (*fAA)(double), double (*fAB)(double),
                    double (*fBA)(double), double (*fBB)(double),
-                   double x0 = 0, double x1 = 1, int n = 200, char dir = 'f')
+                   double x0 = 0, double x1 = 1, int N = 200, char dir = 'f')
 {
     double err = 0.0;
-    vector<double> x, AA(n), AB(n), BA(n), BB(n), Q(n), P(n);
+    vector<double> x, AA(N), AB(N), BA(N), BB(N), Q(N), P(N);
 
-    x = linGrid(x0, x1, n);
+    x = linGrid(x0, x1, N);
     AA = applyFunc(fAA, x);
     AB = applyFunc(fAB, x);
     BA = applyFunc(fBA, x);
@@ -101,42 +102,74 @@ double shootQPTest(double (*fQ)(double), double (*fP)(double),
     }
     else
     {
-        Q[n - 2] = fQ(x[n - 2]);
-        Q[n - 1] = fQ(x[n - 1]);
-        P[n - 2] = fP(x[n - 2]);
-        P[n - 1] = fP(x[n - 1]);
+        Q[N - 2] = fQ(x[N - 2]);
+        Q[N - 1] = fQ(x[N - 1]);
+        P[N - 2] = fP(x[N - 2]);
+        P[N - 1] = fP(x[N - 1]);
     }
 
     shootQP(Q, P, AA, AB, BA, BB, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < N; ++i)
     {
         err += abs(Q[i] - fQ(x[i]));
         err += abs(P[i] - fP(x[i]));
     }
-    err /= 2 * n;
+    err /= 2 * N;
 
     return err;
 }
 
 double shootPotentialTest(double (*fV)(double), double (*frho)(double),
-                          double x0 = 0, double x1 = 1, int n = 200)
+                          double x0 = 0, double x1 = 1, int N = 200)
 {
     double err = 0.0;
-    vector<vector<double>> grid = logGrid(x0, x1, n);
-    vector<double> rho(n), V(n);
+    vector<vector<double>> grid = logGrid(x0, x1, N);
+    vector<double> rho(N), V(N);
 
     rho = applyFunc(frho, grid[1]);
 
     shootPotentialLog(V, rho, grid[0][1] - grid[0][0]);
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < N; ++i)
     {
         err += abs(V[i] - fV(grid[1][i]));
     }
-    err /= n;
+    err /= N;
 
     return err;
+}
+
+double diracTest(double Z, double mu, int n, int k,
+                 double x0 = 1e-3, double x1 = 1e1, int N = 200)
+{
+    double err = 0.0;
+    vector<double> Q(N), P(N), V(N);
+    vector<vector<double>> grid = logGrid(x0, x1, N);
+    double E = hydrogenicDiracEnergy(Z, mu, n, k);
+    vector<vector<double>> PQ = hydrogenicDiracWavefunction(grid[1], Z, mu, n, k);
+
+    for (int i = 0; i < N; ++i)
+    {
+        V[i] = -Z / grid[1][i];
+    }
+
+    boundaryDiracCoulomb(Q, P, grid[1], E, k, mu, Z);
+    TurningPoint tp = shootDiracLog(Q, P, grid[1], V, E, k, mu, grid[0][1] - grid[0][0]);
+
+    // Now on to rescale in order to make the two functions comparable
+    double norm_i = tp.Pi / PQ[0][tp.i];
+    double norm_e = tp.Pe / PQ[0][tp.i];
+
+    for (int i = 0; i < N; ++i)
+    {
+        P[i] /= i >= tp.i ? norm_e : norm_i;
+        Q[i] /= i >= tp.i ? norm_e : norm_i;
+
+        cout << grid[1][i] << ' ' << PQ[0][i] << ' ' << PQ[1][i] << ' ' << P[i] << ' ' << Q[i] << '\n';
+    }
+
+    return 1.0;
 }
 
 TEST_CASE("Trapezoidal integration", "[trapzInt]")
@@ -197,4 +230,10 @@ TEST_CASE("Potential integration", "[shootPotentialLog]")
     auto frho_f = [](double x) { return x < 1 ? 4 * M_PI * x * x : 0; };
     auto fV_f = [](double x) { return x < 1 ? 2.0 / 3.0 * M_PI * x * x : 2.0 / 3.0 * M_PI * (3 - 2 / x); };
     REQUIRE(shootPotentialTest(fV_f, frho_f, 1e-1, 1e1, 2000) < ERRTOL);
+}
+
+TEST_CASE("Dirac integration", "[shootDiracLog]")
+{
+    cout << "Running dirac test\n";
+    diracTest(1.0, 1.0, 1, -1);
 }

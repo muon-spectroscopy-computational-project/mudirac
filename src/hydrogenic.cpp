@@ -147,7 +147,7 @@ double hydrogenicDiracEnergy(double Z, double mu, int n, int k, bool bind)
 vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n, int k)
 {
 
-    vector<double> gf(2);
+    vector<double> pq(2);
     double E, Ek, mc2, C, A, rho, rhodep, lagP, lagM;
     double gamma;
 
@@ -172,8 +172,8 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
     if (k == -n)
     {
         A = sqrt(C / (2 * n * (n + gamma) * gamma * tgamma(2 * gamma)));
-        gf[0] = A * (n + gamma) * rhodep;
-        gf[1] = A * Z * Physical::alpha * rhodep;
+        pq[0] = A * (n + gamma) * rhodep;
+        pq[1] = A * Z * Physical::alpha * rhodep;
     }
     else
     {
@@ -181,12 +181,12 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
         A = sqrt(C * factorial(n - abs(k) - 1) / (4 * k * (k - gamma) * (n - abs(k) + gamma) * tgamma(n - abs(k) + 2 * gamma + 1)) *
                  (Ek + pow(Ek, 2)));
         lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
-        lagM = (gamma * mc2 - k * E) / (Physical::c * C) *genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
-        gf[0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) *  lagM);
-        gf[1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) *  lagP);
+        lagM = (gamma * mc2 - k * E) / (Physical::c * C) * genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
+        pq[0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
+        pq[1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
     }
 
-    return gf;
+    return pq;
 }
 
 /**
@@ -203,7 +203,9 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
  */
 vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, double mu, int n, int k)
 {
-    vector<vector<double>> GF(r.size());
+    vector<vector<double>> PQ(2);
+    PQ[0] = vector<double>(r.size());
+    PQ[1] = vector<double>(r.size());
 
     double E, Ek, mc2, C, A, rho, rhodep, lagP, lagM;
     double gamma;
@@ -231,9 +233,8 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
         {
             rho = 2 * C * r[i];
             rhodep = pow(rho, gamma) * exp(-0.5 * rho);
-            GF[i] = vector<double>(2);
-            GF[i][0] = A * (n + gamma) * rhodep;
-            GF[i][1] = A * Z * Physical::alpha * rhodep;
+            PQ[0][i] = A * (n + gamma) * rhodep;
+            PQ[1][i] = A * Z * Physical::alpha * rhodep;
         }
     }
     else
@@ -247,11 +248,10 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
             rhodep = pow(rho, gamma) * exp(-0.5 * rho);
             lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
             lagM = (gamma * mc2 - k * E) / (Physical::c * C) * genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
-            GF[i] = vector<double>(2);
-            GF[i][0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
-            GF[i][1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
+            PQ[0][i] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
+            PQ[1][i] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
         }
     }
 
-    return GF;
+    return PQ;
 }

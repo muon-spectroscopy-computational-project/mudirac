@@ -7,6 +7,8 @@
 #include "../src/hydrogenic.hpp"
 #include "../src/utils.hpp"
 
+#include "catch/catch.hpp"
+
 using namespace std;
 
 int main()
@@ -39,20 +41,12 @@ int main()
     }
 
     mu = effectiveMass(Physical::m_e, Physical::m_p * A);
-    R = hydrogenicSchroWavefunction(rvec, Z, mu, 5);
-    GF = hydrogenicDiracWavefunction(rvec, Z, mu, 5);
+    R = hydrogenicSchroWavefunction(rvec, Z, mu, 1);
+    GF = hydrogenicDiracWavefunction(rvec, Z, mu, 1);
 
-    vector<double> Q(rvec.size()), P(rvec.size());
+    // cout << countNodes(GF[1]) << '\t' << countNodes(GF[0]) << '\n';
 
-    for (int i = 0; i < GF.size(); ++i)
-    {
-        Q[i] = GF[i][0];
-        P[i] = GF[i][1];
+    for (int i = 0; i < GF.size(); ++i) {
+        cout << rvec[i] << " " << R[i] << " " << GF[0][i] << " " << GF[1][i] << "\n";
     }
-
-    cout << countNodes(Q) << '\t' << countNodes(P) << '\n';
-
-    // for (int i = 0; i < GF.size(); ++i) {
-    //     cout << rvec[i] << " " << R[i] << " " << GF[i][0] << " " << GF[i][1] << "\n";
-    // }
 }
