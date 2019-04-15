@@ -77,46 +77,64 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
     return err;
 }
 
-double shootQPTest(double (*fQ)(double), double (*fAA)(double), double (*fAB)(double),
+double shootQPTest(double (*fQ)(double), double (*fP)(double),
+                   double (*fAA)(double), double (*fAB)(double),
                    double (*fBA)(double), double (*fBB)(double),
                    double x0 = 0, double x1 = 1, int n = 200, char dir = 'f')
 {
     double err = 0.0;
     vector<double> x, AA(n), AB(n), BA(n), BB(n), Q(n), P(n);
 
-    // x = linGrid(x0, x1, n);
-    // A = applyFunc(fA, x);
-    // B = applyFunc(fB, x);
+    x = linGrid(x0, x1, n);
+    AA = applyFunc(fAA, x);
+    AB = applyFunc(fAB, x);
+    BA = applyFunc(fBA, x);
+    BB = applyFunc(fBB, x);
 
-    // // Boundary
-    // if (dir == 'f')
-    // {
-    //     Q[0] = fQ(x[0]);
-    //     Q[1] = fQ(x[1]);
-    // }
-    // else
-    // {
-    //     Q[n - 2] = fQ(x[n - 2]);
-    //     Q[n - 1] = fQ(x[n - 1]);
-    // }
+    // Boundary
+    if (dir == 'f')
+    {
+        Q[0] = fQ(x[0]);
+        Q[1] = fQ(x[1]);
+        P[0] = fP(x[0]);
+        P[1] = fP(x[1]);
+    }
+    else
+    {
+        Q[n - 2] = fQ(x[n - 2]);
+        Q[n - 1] = fQ(x[n - 1]);
+        P[n - 2] = fP(x[n - 2]);
+        P[n - 1] = fP(x[n - 1]);
+    }
 
-    // switch (type)
-    // {
-    // case 'Q':
-    //     shootQ(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
-    //     break;
-    // case 'N':
-    //     shootNumerov(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
-    //     break;
-    // default:
-    //     break;
-    // }
+    shootQP(Q, P, AA, AB, BA, BB, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
 
-    // for (int i = 0; i < n; ++i)
-    // {
-    //     err += abs(Q[i] - fQ(x[i]));
-    // }
-    // err /= n;
+    for (int i = 0; i < n; ++i)
+    {
+        err += abs(Q[i] - fQ(x[i]));
+        err += abs(P[i] - fP(x[i]));
+    }
+    err /= 2 * n;
+
+    return err;
+}
+
+double shootPotentialTest(double (*fV)(double), double (*frho)(double),
+                          double x0 = 0, double x1 = 1, int n = 200)
+{
+    double err = 0.0;
+    vector<vector<double>> grid = logGrid(x0, x1, n);
+    vector<double> rho(n), V(n);
+
+    rho = applyFunc(frho, grid[1]);
+
+    shootPotentialLog(V, rho, grid[0][1] - grid[0][0]);
+
+    for (int i = 0; i < n; ++i)
+    {
+        err += abs(V[i] - fV(grid[1][i]));
+    }
+    err /= n;
 
     return err;
 }
@@ -137,6 +155,7 @@ TEST_CASE("Shooting integration", "[shootQ]")
     */
     auto one = [](double x) { return 1.0; };
     REQUIRE(shootTest(tan, tan, one, 0, 1, 1000) < ERRTOL);
+    REQUIRE(shootTest(tan, tan, one, 0, 1, 1000, 'Q', 'b') < ERRTOL);
     /* 
         Q = exp(-x**2) + x
         Q' = -2x(Q-x) + 1 = (-2x)Q+(2x^2+1)
@@ -145,6 +164,7 @@ TEST_CASE("Shooting integration", "[shootQ]")
     auto fA = [](double x) { return -2 * x; };
     auto fB = [](double x) { return 2 * x * x + 1; };
     REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000) < ERRTOL);
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'Q', 'b') < ERRTOL);
 }
 
 TEST_CASE("Numerov integration", "[shootNumerov]")
@@ -153,154 +173,28 @@ TEST_CASE("Numerov integration", "[shootNumerov]")
     auto fA = [](double x) { return -9.0; };
     auto fB = [](double x) { return 9.0 * x * x + 2; };
     REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'N') < ERRTOL);
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'N', 'b') < ERRTOL);
 }
 
 TEST_CASE("Coupled integration", "[shootQP]")
 {
+    auto fQ = [](double x) { return sin(x); };
+    auto fP = [](double x) { return cos(x); };
+    auto one = [](double x) { return 1.0; };
+    auto negone = [](double x) { return -1.0; };
+    auto zero = [](double x) { return 0.0; };
+    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000) < ERRTOL);
+    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000, 'b') < ERRTOL);
 }
 
-int old()
+TEST_CASE("Potential integration", "[shootPotentialLog]")
 {
-    int N = 1000;
-    double h = 10.0 / N;
-    double errQ = 0, errP = 0;
-
-    vector<double> Q(N), P(N);
-    vector<double> AA(N), AB(N), BA(N), BB(N);
-
-    /* Basic integral test
-
-    */
-
-    for (int i = 0; i < N; ++i)
-    {
-        Q[i] = h * i + 1;
-        P[i] = 1.0 / Q[i];
-    }
-
-    cout << "Error: " << (log(11.0) - trapzInt(Q, P)) / log(11.0) << '\n';
-
-    /* Simple shootQ test 
-
-    Q = exp(-x**2) + x
-    Q' = -2x(Q-x) + 1 = -2xQ+2x^2+1
-
-    */
-
-    Q[0] = 1;
-    Q[1] = exp(-h * h) + h;
-
-    for (int i = 0; i < N; ++i)
-    {
-        AA[i] = -2 * h * i;
-        AB[i] = 2 * h * h * i * i + 1;
-    }
-
-    shootQ(Q, AA, AB, h);
-
-    // Compute error
-    errQ = 0;
-    for (int i = 0; i < N; ++i)
-    {
-        errQ += pow(Q[i] - exp(-h * h * i * i) - h * i, 2);
-    }
-    errQ = sqrt(errQ) / N;
-
-    cout << "Error: Q = " << errQ << "\n";
-
-    /*
-    A simple example:
-
-    Q' = P
-    P' = -Q
-
-    */
-
-    Q[0] = 0;
-    Q[1] = sin(h);
-    P[0] = 1;
-    P[1] = cos(h);
-
-    AA = vector<double>(N, 0);
-    AB = vector<double>(N, 1);
-    BA = vector<double>(N, -1);
-    BB = vector<double>(N, 0);
-
-    shootQP(Q, P, AA, AB, BA, BB, h);
-
-    // Compute error
-    errQ = 0;
-    errP = 0;
-    for (int i = 0; i < N; ++i)
-    {
-        errQ += pow(Q[i] - sin(h * i), 2);
-        errP += pow(P[i] - cos(h * i), 2);
-        // cout << h * i << "\t" << Q[i] << "\t" << P[i] << "\n";
-    }
-
-    errQ = sqrt(errQ) / N;
-    errP = sqrt(errP) / N;
-
-    cout << "Errors: Q = " << errQ << ", P = " << errP << "\n";
-
-    // Numerov test
-
-    AA = vector<double>(N, 0);
-    AB = vector<double>(N, 1);
-
-    for (int i = 0; i < Q.size(); ++i)
-    {
-        AB[i] = i * h;
-    }
-
-    Q[0] = 0;
-    Q[1] = 1.0 / 6.0 * pow(h, 3);
-
-    shootNumerov(Q, AA, AB, h);
-
-    // for (int i = 0; i < Q.size(); ++i)
-    // {
-    //     cout << h * i << '\t' << Q[i] << '\n';
-    // }
-
-    // Potential test
-    vector<vector<double>> lgrid;
-    vector<double> rho(N, 0), V(N, 0);
-
-    lgrid = logGrid(1e-5, 1e1, N);
-
-    for (int i = 0; i < N; ++i)
-    {
-        rho[i] *= pow(lgrid[1][i], 2);
-    }
-    // shootPotentialLog(V, rho, lgrid[0][1]);
-    // for (int i = 0; i < N; ++i)
-    // {
-    //     cout << lgrid[1][i] << '\t' << V[i] << '\n';
-    // }
-
-    // vector<double> r = lgrid[1], V(r.size());
-
-    // for (int i = 0; i < r.size(); ++i)
-    // {
-    //     V[i] = -1.0 / r[i];
-    // }
-
-    // double B = -0.45;
-    // int k = -1;
-    // double dE;
-
-    // for (double Btest = -0.51; Btest < -0.49; Btest += 0.0001)
-    // {
-    //     boundaryDiracCoulomb(Q, P, r, pow(Physical::c, 2) + Btest, k);
-    //     shootDiracLog(Q, P, r, V, pow(Physical::c, 2) + Btest, k, 1, lgrid[0][1] - lgrid[0][0]);
-    // }
-
-    //
-
-    // cout << "dE = " << dE << "\n";
-
-    // for (int i = 0; i < r.size(); ++i) {
-    //     cout << r[i] << '\t' << Q[i] << '\t' << P[i] << '\n';
-    // }
+    // Test with constant density
+    auto frho = [](double x) { return 4 * M_PI * x * x; };
+    auto fV = [](double x) { return 2.0 / 3.0 * M_PI * x * x; };
+    REQUIRE(shootPotentialTest(fV, frho, 1e-2, 1e-2 * M_E, 1000) < ERRTOL);
+    // Test with finite sphere
+    auto frho_f = [](double x) { return x < 1 ? 4 * M_PI * x * x : 0; };
+    auto fV_f = [](double x) { return x < 1 ? 2.0 / 3.0 * M_PI * x * x : 2.0 / 3.0 * M_PI * (3 - 2 / x); };
+    REQUIRE(shootPotentialTest(fV_f, frho_f, 1e-1, 1e1, 2000) < ERRTOL);
 }
