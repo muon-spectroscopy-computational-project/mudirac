@@ -163,13 +163,16 @@ double diracTest(double Z, double mu, int n, int k,
 
     for (int i = 0; i < N; ++i)
     {
+
         P[i] /= i >= tp.i ? norm_e : norm_i;
         Q[i] /= i >= tp.i ? norm_e : norm_i;
 
-        cout << grid[1][i] << ' ' << PQ[0][i] << ' ' << PQ[1][i] << ' ' << P[i] << ' ' << Q[i] << '\n';
+        err += abs(P[i] - PQ[0][i]);
+        err += abs(Q[i] - PQ[1][i]) * Physical::c; // The c factor brings this to the same order of magnitude as P
     }
+    err /= 2 * N;
 
-    return 1.0;
+    return err;
 }
 
 TEST_CASE("Trapezoidal integration", "[trapzInt]")
@@ -234,6 +237,10 @@ TEST_CASE("Potential integration", "[shootPotentialLog]")
 
 TEST_CASE("Dirac integration", "[shootDiracLog]")
 {
-    cout << "Running dirac test\n";
-    diracTest(1.0, 1.0, 1, -1, 1e-5, 1e2, 1000);
+    // These at the moment fail, the tolerance is too low
+    REQUIRE(diracTest(1, 1, 1, -1, 1e-4, 1e2, 1000) < ERRTOL);
+    REQUIRE(diracTest(1, 1, 2, -1, 2e-4, 2e2, 1000) < ERRTOL);
+    REQUIRE(diracTest(1, 1, 2,  1, 2e-4, 2e2, 1000) < ERRTOL);
+    REQUIRE(diracTest(1, 1, 3,  1, 2e-4, 2e2, 1000) < ERRTOL);
+    REQUIRE(diracTest(5, 1, 1, -1, 1e-4, 1e2, 1000) < ERRTOL);
 }
