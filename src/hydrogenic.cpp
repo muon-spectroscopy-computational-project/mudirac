@@ -169,11 +169,22 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
     rho = 2 * C * r;
     rhodep = pow(rho, gamma) * exp(-0.5 * rho);
 
+    /* Formulas are from Wikipedia. No reliable reference could be found - Wiki
+    references "The Quantum Theory of the Hydrogen Atom" by Felix Nendzig, 
+    which is not an official publication.
+    
+    The formulas in these documents seem correct, but here we add a minus sign
+    in front of the small component (the Q, or [1] here), because that's in accord
+    with the conventions used elsewhere, including in boundary conditions for
+    Coulomb potentials. This should not have a big effect on the final result as 
+    long as, in case of reconstruction of the full wavefunction, care is taken
+    in picking the spherical harmonic/Weyl spinor part.
+    */
     if (k == -n)
     {
         A = sqrt(C / (2 * n * (n + gamma) * gamma * tgamma(2 * gamma)));
         pq[0] = A * (n + gamma) * rhodep;
-        pq[1] = A * Z * Physical::alpha * rhodep;
+        pq[1] = -A * Z * Physical::alpha * rhodep;
     }
     else
     {
@@ -183,7 +194,7 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
         lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
         lagM = (gamma * mc2 - k * E) / (Physical::c * C) * genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
         pq[0] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
-        pq[1] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
+        pq[1] = -A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
     }
 
     return pq;
@@ -226,6 +237,17 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
     mc2 = mu * pow(Physical::c, 2);
     C = sqrt(pow(mc2, 2) - E * E) / Physical::c;
 
+    /* Formulas are from Wikipedia. No reliable reference could be found - Wiki
+    references "The Quantum Theory of the Hydrogen Atom" by Felix Nendzig, 
+    which is not an official publication.
+    
+    The formulas in these documents seem correct, but here we add a minus sign
+    in front of the small component (the Q, or [1] here), because that's in accord
+    with the conventions used elsewhere, including in boundary conditions for
+    Coulomb potentials. This should not have a big effect on the final result as 
+    long as, in case of reconstruction of the full wavefunction, care is taken
+    in picking the spherical harmonic/Weyl spinor part.
+    */
     if (k == -n)
     {
         A = sqrt(C / (2 * n * (n + gamma) * gamma * tgamma(2 * gamma)));
@@ -234,7 +256,7 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
             rho = 2 * C * r[i];
             rhodep = pow(rho, gamma) * exp(-0.5 * rho);
             PQ[0][i] = A * (n + gamma) * rhodep;
-            PQ[1][i] = A * Z * Physical::alpha * rhodep;
+            PQ[1][i] = -A * Z * Physical::alpha * rhodep;
         }
     }
     else
@@ -249,7 +271,7 @@ vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z, d
             lagP = rho * genLaguerrePoly(rho, n - abs(k) - 1, 2 * gamma + 1);
             lagM = (gamma * mc2 - k * E) / (Physical::c * C) * genLaguerrePoly(rho, n - abs(k), 2 * gamma - 1);
             PQ[0][i] = A * rhodep * (Z * Physical::alpha * lagP + (gamma - k) * lagM);
-            PQ[1][i] = A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
+            PQ[1][i] = -A * rhodep * (Z * Physical::alpha * lagM + (gamma - k) * lagP);
         }
     }
 

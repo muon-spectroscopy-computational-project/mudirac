@@ -27,7 +27,7 @@ The basic solver makes use of the radial Dirac equation written in its coupled f
 	P'(r) &= -\frac{k}{r}P + \left(mc+\frac{E-V(r)}{c}\right)Q
 \end{align}
 
-as found for example in \cite{weinb2008, silbar2010} and others. In this form, the final wavefunction can be reconstructed by combining it with the appropriate spherical harmonics:
+as found for example in \cite{weinb2008, silbar2010, gross1999} and others. In this form, the final wavefunction can be reconstructed by combining it with the appropriate spherical harmonics:
 
 \begin{align}
 \left<\mathbf{r}|\psi_{k\mu}\right> = \begin{pmatrix}
@@ -36,7 +36,7 @@ i\frac{Q_k}{r}\left<\mathbf{\hat{r}}|-k\mu\right>
 \end{pmatrix}
 \end{align}
 
-where it must be kept in mind that the quantum number $k$ is $k=-(l+1)$ when $s = -1/2$ and $k=l$ when $s=1/2$, and the spin spherical harmonics are:
+where it must be kept in mind that the quantum number $k$ depends on the total angular momentum of the electron, namely, whether its angular and spin momenta are aligned or not. It is $k=-(l+1)$ when $j = l-1/2$ and $k=l$ when $j=l+1/2$, and the spin spherical harmonics are:
 
 \begin{equation}
 \left|k\mu\right> = \sum_{s=\pm 1/2} c(l\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
@@ -56,12 +56,21 @@ with
 1
 \end{pmatrix} \\
 c(l\frac{1}{2};\mu-s, s) = \frac{(-1)^{l+\mu-1/2}}{(2j+1)^{1/2}}\begin{pmatrix}
-l \quad 1/2 \quad j \\
-m \quad s \quad \mu
+l & 1/2 & j \\
+m & s & \mu
 \end{pmatrix}
 \end{align}
 
-with $Y_{lm}$ being the spherical harmonics and the $c(l\frac{1}{2};\mu-s, s)$ being related to the Clebsch-Gordan coefficients \cite{weinb2008}.\newline
+with $Y_{lm}$ being the spherical harmonics, the $c(l\frac{1}{2};\mu-s, s)$ being related to the Clebsch-Gordan coefficients \cite{weinb2008}, and $m=\mu-s$. The coefficients can also be conveniently expressed as
+
+\begin{equation}
+c(l\frac{1}{2};\mu-s, s) = \begin{cases}
+-\mathrm{sign}(k)\sqrt{\frac{k+\frac{1}{2}-\mu}{2k+1}} \qquad s = \frac{1}{2} \\
+\sqrt{\frac{k+\frac{1}{2}+\mu}{2k+1}} \qquad s = -\frac{1}{2}
+\end{cases}
+\end{equation}
+
+as seen in \cite{gross1999}.\newline
 Since this equation is one dimensional we don't need to worry about Q and P being complex-valued, as they will be always real. In general, P will be the `large' component, and in the limit of $c \rightarrow \infty$ we would have that $P^2(r) = r^2\Psi^2(r)$ where $\Psi$ is just the normal radial component of the Schr\"{o}dinger equation solution. A higher Q corresponds to a more `relativistic' behaviour.
 
 \chapter{Numerical implementation}

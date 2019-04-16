@@ -235,5 +235,5 @@ TEST_CASE("Potential integration", "[shootPotentialLog]")
 TEST_CASE("Dirac integration", "[shootDiracLog]")
 {
     cout << "Running dirac test\n";
-    diracTest(1.0, 1.0, 1, -1);
+    diracTest(1.0, 1.0, 1, -1, 1e-5, 1e2, 1000);
 }
