@@ -125,7 +125,7 @@ int InputNode<T>::getSize()
  * @note   Returns a specific value of index i from the InputNode.
  * 
  * @param  i:   Index of the requested value
- * @retval 
+ * @retval      Value
  */
 template <typename T>
 T InputNode<T>::getValue(int i)
@@ -139,7 +139,7 @@ T InputNode<T>::getValue(int i)
  * @brief  Returns all values from the InputNode
  * @note   Returns all values from the InputNode as a vector.
  * 
- * @retval 
+ * @retval Vector of values
  */
 template <typename T>
 vector<T> InputNode<T>::getValues()
@@ -224,12 +224,17 @@ template class InputNode<string>;
 /**
  * @brief  Instantiates an InputFile
  * @note   Instantiates an InputFile.
- * @retval 
  */
 InputFile::InputFile()
 {
 }
 
+/**
+ * @brief  Return a list of keys for string type values
+ * @note   Return a list of keys for string type values.
+ * 
+ * @retval  Vector of string keys
+ */
 vector<string> InputFile::getStringKeys()
 {
     vector<string> keys(0);
@@ -243,6 +248,12 @@ vector<string> InputFile::getStringKeys()
     return keys;
 }
 
+/**
+ * @brief  Return a list of keys for double type values
+ * @note   Return a list of keys for double type values.
+ * 
+ * @retval  Vector of double keys
+ */
 vector<string> InputFile::getDoubleKeys()
 {
     vector<string> keys(0);
@@ -256,6 +267,12 @@ vector<string> InputFile::getDoubleKeys()
     return keys;
 }
 
+/**
+ * @brief  Return a list of keys for integer type values
+ * @note   Return a list of keys for integer type values.
+ * 
+ * @retval  Vector of integer keys
+ */
 vector<string> InputFile::getIntKeys()
 {
     vector<string> keys(0);
@@ -269,6 +286,14 @@ vector<string> InputFile::getIntKeys()
     return keys;
 }
 
+/**
+ * @brief  Get a single string value
+ * @note   Get a single string value from the given key
+ * 
+ * @param  k:   string value key
+ * @param  i:   string value index (for vector values)
+ * @retval      Value
+ */
 string InputFile::getStringValue(string k, int i)
 {
     if (string_values.find(k) == string_values.end())
@@ -278,6 +303,14 @@ string InputFile::getStringValue(string k, int i)
     return string_values[k].getValue(i);
 }
 
+/**
+ * @brief  Get a single double value
+ * @note   Get a single double value from the given key
+ * 
+ * @param  k:   double value key
+ * @param  i:   double value index (for vector values)
+ * @retval      Value
+ */
 double InputFile::getDoubleValue(string k, int i)
 {
     if (double_values.find(k) == double_values.end())
@@ -287,6 +320,14 @@ double InputFile::getDoubleValue(string k, int i)
     return double_values[k].getValue(i);
 }
 
+/**
+ * @brief  Get a single integer value
+ * @note   Get a single integer value from the given key
+ * 
+ * @param  k:   integer value key
+ * @param  i:   integer value index (for vector values)
+ * @retval      Value
+ */
 int InputFile::getIntValue(string k, int i)
 {
     if (int_values.find(k) == int_values.end())
@@ -296,6 +337,13 @@ int InputFile::getIntValue(string k, int i)
     return int_values[k].getValue(i);
 }
 
+/**
+ * @brief  Get a vector of string values
+ * @note   Get a vector of string values for the given key.
+ * 
+ * @param  k:   string value key
+ * @retval      Value
+ */
 vector<string> InputFile::getStringValues(string k)
 {
     if (string_values.find(k) == string_values.end())
@@ -305,6 +353,13 @@ vector<string> InputFile::getStringValues(string k)
     return string_values[k].getValues();
 }
 
+/**
+ * @brief  Get a vector of double values
+ * @note   Get a vector of double values for the given key.
+ * 
+ * @param  k:   double value key
+ * @retval      Value
+ */
 vector<double> InputFile::getDoubleValues(string k)
 {
     if (double_values.find(k) == double_values.end())
@@ -314,6 +369,13 @@ vector<double> InputFile::getDoubleValues(string k)
     return double_values[k].getValues();
 }
 
+/**
+ * @brief  Get a vector of integer values
+ * @note   Get a vector of integer values for the given key.
+ * 
+ * @param  k:   integer value key
+ * @retval      Value
+ */
 vector<int> InputFile::getIntValues(string k)
 {
     if (int_values.find(k) == int_values.end())
@@ -323,16 +385,40 @@ vector<int> InputFile::getIntValues(string k)
     return int_values[k].getValues();
 }
 
+/**
+ * @brief  Define a string valued node
+ * @note   Define an InputNode with a string value and the given name
+ * 
+ * @param  name: Name of the new InputNode
+ * @param  node: Starting value of the InputNode
+ * @retval None
+ */
 void InputFile::defineStringNode(string name, InputNode<string> node)
 {
     string_values[name] = node;
 }
 
+/**
+ * @brief  Define a double valued node
+ * @note   Define an InputNode with a double value and the given name
+ * 
+ * @param  name: Name of the new InputNode
+ * @param  node: Starting value of the InputNode
+ * @retval None
+ */
 void InputFile::defineDoubleNode(string name, InputNode<double> node)
 {
     double_values[name] = node;
 }
 
+/**
+ * @brief  Define a integer valued node
+ * @note   Define an InputNode with a integer value and the given name
+ * 
+ * @param  name: Name of the new InputNode
+ * @param  node: Starting value of the InputNode
+ * @retval None
+ */
 void InputFile::defineIntNode(string name, InputNode<int> node)
 {
     int_values[name] = node;
