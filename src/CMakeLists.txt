@@ -8,4 +8,5 @@ add_library(input STATIC input.cpp)
 # Define interface library
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE 
-                      atom boundary hydrogenic integrate utils input)
+                      atom boundary hydrogenic 
+                      integrate input utils)
