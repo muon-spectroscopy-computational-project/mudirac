@@ -79,3 +79,10 @@ TEST_CASE("Node counting", "[countnodes]")
     REQUIRE(countTest(5));
     REQUIRE(countTest(10));
 }
+
+TEST_CASE("Splitting strings", "[splitstring]")
+{
+    CHECK(splitString("a,b,c", ',') == vector<string>{"a", "b", "c"});
+    CHECK(splitString("a  b c") == vector<string>{"a", "", "b", "c"});
+    CHECK(splitString("a  b c", ' ', true) == vector<string>{"a", "b", "c"});
+}

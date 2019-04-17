@@ -12,6 +12,7 @@
 
 #include <math.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -29,5 +30,7 @@ double genLaguerrePoly(double x, int n, double alpha);
 vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
 
 int countNodes(vector<double> v, double tol = 1e-8);
+
+vector<string> splitString(string s, char sep = ' ', bool merge = false);
 
 #endif

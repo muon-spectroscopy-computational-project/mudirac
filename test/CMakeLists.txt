@@ -9,3 +9,6 @@ target_link_libraries(test_integrate test_main mudiraclib)
 
 add_executable(test_hydrogenic test_hydrogenic.cpp)
 target_link_libraries(test_hydrogenic test_main mudiraclib)
+
+add_executable(test_input test_input.cpp)
+target_link_libraries(test_input test_main mudiraclib)

@@ -178,3 +178,31 @@ int countNodes(vector<double> v, double tol)
 
     return nc;
 }
+
+/**
+ * @brief  Split a string with a given separator
+ * @note   Split a string s using each occurrence of a separator sep
+ * 
+ * @param  s:       String to split
+ * @param  sep:     Separator
+ * @param  merge:   If true, merge multiple consecutive occurrences of sep
+ * @retval          Vector of string fragments
+ */
+vector<string> splitString(string s, char sep, bool merge)
+{
+    int pos = -1;
+    vector<string> fragments;
+
+    while (s.size() > 0)
+    {
+        pos = s.find_first_of(sep);
+        fragments.push_back(s.substr(0, pos));
+        s = s.substr(pos + 1);
+        while (s[0] == sep && merge)
+            s = s.substr(1);
+        if (pos == string::npos)
+            break;
+    }
+
+    return fragments;
+}
