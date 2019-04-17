@@ -244,7 +244,7 @@ void InputFile::copySchema(InputFile schema)
     for (map<string, InputNode<string>>::iterator it = schema.string_values.begin();
          it != schema.string_values.end(); ++it)
     {
-        InputNode inode = it->second;
+        InputNode<string> inode = it->second;
         inode.clear();
         string_values[it->first] = inode;
     }
@@ -253,7 +253,7 @@ void InputFile::copySchema(InputFile schema)
     for (map<string, InputNode<double>>::iterator it = schema.double_values.begin();
          it != schema.double_values.end(); ++it)
     {
-        InputNode inode = it->second;
+        InputNode<double> inode = it->second;
         inode.clear();
         double_values[it->first] = inode;
     }
@@ -262,7 +262,7 @@ void InputFile::copySchema(InputFile schema)
     for (map<string, InputNode<int>>::iterator it = schema.int_values.begin();
          it != schema.int_values.end(); ++it)
     {
-        InputNode inode = it->second;
+        InputNode<int> inode = it->second;
         inode.clear();
         int_values[it->first] = inode;
     }

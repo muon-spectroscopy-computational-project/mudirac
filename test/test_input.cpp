@@ -60,5 +60,10 @@ TEST_CASE("Input file", "[InputFile]")
         CHECK(ifile.getIntKeys() == vector<string>{"number"});
         REQUIRE(ifile.getIntValue("number") == 10);
         REQUIRE_THROWS(ifile.getDoubleValue("height"));
+
+        // Try schema
+        InputFile ifile_deriv = InputFile();
+        ifile_deriv.copySchema(ifile);
+        REQUIRE(ifile_deriv.getIntValue("number") == 10);
     }
 }
