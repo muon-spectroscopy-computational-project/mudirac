@@ -230,6 +230,45 @@ InputFile::InputFile()
 }
 
 /**
+ * @brief  Copy data schema from an existing InputFile
+ * @note   Copy the names and default values of all InputNodes in a
+ * given InputFile, without copying the actual values
+ * 
+ * @param  schema: InputFile to use as a reference
+ * @retval None
+ */
+void InputFile::copySchema(InputFile schema)
+{
+    // Copy string values
+    string_values.clear();
+    for (map<string, InputNode<string>>::iterator it = schema.string_values.begin();
+         it != schema.string_values.end(); ++it)
+    {
+        InputNode inode = it->second;
+        inode.clear();
+        string_values[it->first] = inode;
+    }
+
+    double_values.clear();
+    for (map<string, InputNode<double>>::iterator it = schema.double_values.begin();
+         it != schema.double_values.end(); ++it)
+    {
+        InputNode inode = it->second;
+        inode.clear();
+        double_values[it->first] = inode;
+    }
+
+    int_values.clear();
+    for (map<string, InputNode<int>>::iterator it = schema.int_values.begin();
+         it != schema.int_values.end(); ++it)
+    {
+        InputNode inode = it->second;
+        inode.clear();
+        int_values[it->first] = inode;
+    }
+}
+
+/**
  * @brief  Return a list of keys for string type values
  * @note   Return a list of keys for string type values.
  * 
