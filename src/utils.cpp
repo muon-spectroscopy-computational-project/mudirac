@@ -188,7 +188,7 @@ int countNodes(vector<double> v, double tol)
  * @param  merge:   If true, merge multiple consecutive occurrences of sep
  * @retval          Vector of string fragments
  */
-vector<string> splitString(string s, char sep, bool merge)
+vector<string> splitString(string s, string sep, bool merge)
 {
     int pos = -1;
     vector<string> fragments;
@@ -196,10 +196,15 @@ vector<string> splitString(string s, char sep, bool merge)
     while (s.size() > 0)
     {
         pos = s.find_first_of(sep);
+        while (pos == 0 && merge)
+        {
+            s = s.substr(1);
+            pos = s.find_first_of(sep);
+        }
+        if (s.size() == 0)
+            break;
         fragments.push_back(s.substr(0, pos));
         s = s.substr(pos + 1);
-        while (s[0] == sep && merge)
-            s = s.substr(1);
         if (pos == string::npos)
             break;
     }

@@ -82,7 +82,13 @@ TEST_CASE("Node counting", "[countnodes]")
 
 TEST_CASE("Splitting strings", "[splitstring]")
 {
-    CHECK(splitString("a,b,c", ',') == vector<string>{"a", "b", "c"});
+    // Basic
+    CHECK(splitString("a,b,c", ",") == vector<string>{"a", "b", "c"});
+    // Merge
     CHECK(splitString("a  b c") == vector<string>{"a", "", "b", "c"});
-    CHECK(splitString("a  b c", ' ', true) == vector<string>{"a", "b", "c"});
+    CHECK(splitString("a  b c", " ", true) == vector<string>{"a", "b", "c"});
+    // Multiple separators
+    CHECK(splitString("a,b c", ", ") == vector<string>{"a", "b", "c"});
+    // Separators at the beginning
+    CHECK(splitString("  a,b c", ", ", true) == vector<string>{"a", "b", "c"});
 }
