@@ -34,6 +34,7 @@
 # Test files
 test/*
 !test/*.cpp
+!test/datapath.h.in
 !test/catch
 !test/data
 !test/CMakeLists.txt

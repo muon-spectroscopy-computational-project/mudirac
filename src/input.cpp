@@ -11,6 +11,7 @@
  */
 
 #include "input.hpp"
+#include <iostream>
 
 /**
  * @brief  Instantiates an InputNode
@@ -266,6 +267,36 @@ void InputFile::copySchema(InputFile schema)
         inode.clear();
         int_values[it->first] = inode;
     }
+}
+
+void InputFile::parseFile(string path)
+{
+    string line;
+    string key, value;
+    vector<string> tokens;
+    ifstream ifile(path);
+
+    while (getline(ifile, line)) {
+        // Remove comments
+        line = splitString(line, "#")[0];
+        line = stripString(line);
+        if (line.size() == 0)
+            continue;
+
+        tokens = splitString(line, ":");
+        key = stripString(tokens[0]);
+        value = stripString(tokens[1]);
+        if (string_values.find(key) != string_values.end()) {
+            string_values[key].parseValue(value);
+        }
+        else if (double_values.find(key) != double_values.end()) {
+            double_values[key].parseValue(value);
+        }
+        else if (int_values.find(key) != int_values.end()) {
+            int_values[key].parseValue(value);
+        }
+    }
+
 }
 
 /**

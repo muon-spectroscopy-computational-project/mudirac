@@ -1,5 +1,8 @@
 #include "../src/input.hpp"
+#include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include "datapath.h"
 
 #include "catch/catch.hpp"
 
@@ -65,5 +68,24 @@ TEST_CASE("Input file", "[InputFile]")
         InputFile ifile_deriv = InputFile();
         ifile_deriv.copySchema(ifile);
         REQUIRE(ifile_deriv.getIntValue("number") == 10);
+    }
+
+    {
+        InputFile ifile = InputFile();
+        ifile.defineIntNode("integer", InputNode<int>(0));
+        ifile.defineIntNode("integers", InputNode<int>(vector<int>{0}));
+        ifile.defineDoubleNode("double", InputNode<double>(0.0));
+        ifile.defineDoubleNode("doubles", InputNode<double>(vector<double>{0.0}));
+        ifile.defineStringNode("string", InputNode<string>(""));
+        ifile.defineStringNode("strings", InputNode<string>(vector<string>{""}));
+        ifile.parseFile(string(CURRENT_DATAPATH) + "/data/inputtest.in");
+
+        REQUIRE(ifile.getStringValue("string") == "mostly harmless");
+        REQUIRE(ifile.getIntValue("integer") == 42);
+        REQUIRE(ifile.getDoubleValue("double") == 3.14159);
+
+        CHECK(ifile.getStringValues("strings") == vector<string>{"life", "the", "universe", "and", "everything"});
+        CHECK(ifile.getIntValues("integers") == vector<int>{6, 7, 42});
+        CHECK(ifile.getDoubleValues("doubles") == vector<double>{1.414, 2.718, 3.142});
     }
 }
