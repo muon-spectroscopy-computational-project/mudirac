@@ -32,5 +32,5 @@ vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
 int countNodes(vector<double> v, double tol = 1e-8);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);
-
+string stripString(string s, string strip = " \t\n");
 #endif

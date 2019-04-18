@@ -11,6 +11,7 @@
  */
 
 #include "utils.hpp"
+#include <iostream>
 
 /**
  * @brief  Compute the effective mass of a two-body system
@@ -210,4 +211,28 @@ vector<string> splitString(string s, string sep, bool merge)
     }
 
     return fragments;
+}
+
+/**
+ * @brief   Strip a string of the given characters on both ends
+ * @note    Strip a string of any instances of the given characters
+ * on both ends. If no characters are passed, spaces are used.
+ * 
+ * @param   s:          String to strip
+ * @param   strip:      Characters to strip
+ * @retval              Stripped string
+ */
+string stripString(string s, string strip)
+{
+    int pos;
+    pos = s.find_first_not_of(strip);
+    if (pos == -1) {
+        // All to strip
+        return "";
+    }
+    s = s.substr(pos);
+    pos = s.find_last_not_of(strip);
+    s = s.substr(0, pos+1);
+
+    return s;
 }

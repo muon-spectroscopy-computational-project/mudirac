@@ -92,3 +92,10 @@ TEST_CASE("Splitting strings", "[splitstring]")
     // Separators at the beginning
     CHECK(splitString("  a,b c", ", ", true) == vector<string>{"a", "b", "c"});
 }
+
+TEST_CASE("Stripping strings", "[stripstring]")
+{
+    REQUIRE(stripString("   abc  ") == "abc");
+    REQUIRE(stripString("abc") == "abc");
+    REQUIRE(stripString("   \t").size() == 0);
+}
