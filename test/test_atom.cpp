@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
-#include "../src/atom.hpp"
+#include "../lib/atom.hpp"
 
 using namespace std;
 

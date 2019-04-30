@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <vector>
-#include "../src/hydrogenic.hpp"
-#include "../src/utils.hpp"
+#include "../lib/hydrogenic.hpp"
+#include "../lib/utils.hpp"
 
 #include "catch/catch.hpp"
 

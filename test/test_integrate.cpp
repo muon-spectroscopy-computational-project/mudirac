@@ -1,10 +1,10 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
-#include "../src/utils.hpp"
-#include "../src/integrate.hpp"
-#include "../src/boundary.hpp"
-#include "../src/hydrogenic.hpp"
+#include "../lib/utils.hpp"
+#include "../lib/integrate.hpp"
+#include "../lib/boundary.hpp"
+#include "../lib/hydrogenic.hpp"
 
 #include "catch/catch.hpp"
 

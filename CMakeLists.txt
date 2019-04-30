@@ -5,7 +5,7 @@ project(MuDirac)
 SET(CMAKE_CXX_STANDARD 11)
 
 # Define the core files as static libraries
-add_subdirectory(src lib)
+add_subdirectory(lib)
 
 # Now, test executables
 add_subdirectory(test)

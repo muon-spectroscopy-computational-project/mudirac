@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include "../src/utils.hpp"
+#include "../lib/utils.hpp"
 #include "data/genlag.h"
 
 #include "catch/catch.hpp"
