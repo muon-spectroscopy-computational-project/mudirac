@@ -211,6 +211,9 @@ DiracState DiracAtom::convergeState(double E0, int k)
         shootDiracErrorDELog(zetae, y, grid[1], V, tp.i, E, k, mu, dx, 'b');
 
         dE = err / (zetai[tp.i] - zetae[tp.i]);
+        // cout << tp.Qe << "\n";
+        // cout << tp.Pe << "\n";
+        // cout << zetai[tp.i] << " " << zetae[tp.i] << "\n";
         // cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
@@ -285,7 +288,6 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     // First, check if it's already calculated
     if (!force && states[make_tuple(n, l, s)].init)
     {
-        cout << "Already calculated\n";
         return;
     }
 
