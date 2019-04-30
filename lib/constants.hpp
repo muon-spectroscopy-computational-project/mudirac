@@ -24,6 +24,7 @@ const double m_mu = 1.0 / 4.83633170e-3;   // Muon mass
 const double m_p = 1.0 / 5.44617021352e-4; // Proton mass
 
 // Units
+const double m = 5.2917721067e-11; // Metre
 const double eV = 1.0 / 27.211385; // Electron volt
 const double amu = 1822.888486192; // Atomic mass unit
 } // namespace Physical

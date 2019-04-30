@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     double Z = stod(argv[1]);
     cout << "Solving for Z = " << Z << "\n";
     DiracState s1, p2;
-    DiracAtom da = DiracAtom(Z, Physical::m_mu, 2*Z*Physical::amu, 1.6);
+    DiracAtom da = DiracAtom(Z, Physical::m_mu);
     da.setGrid(1e-5, 1, 2000);
 
     try {
