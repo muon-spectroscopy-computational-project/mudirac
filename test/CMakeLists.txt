@@ -18,3 +18,5 @@ target_link_libraries(test_hydrogenic test_main mudiraclib)
 add_executable(test_input test_input.cpp)
 target_link_libraries(test_input test_main mudiraclib)
 
+add_executable(test_atom test_atom.cpp)
+target_link_libraries(test_atom test_main mudiraclib)

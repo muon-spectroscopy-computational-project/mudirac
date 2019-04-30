@@ -34,19 +34,28 @@ int main()
     V = da.getPotential();
     V2 = da2.getPotential();
 
-    s2 = da.getState(2, 0, false);
-    s2f = da2.getState(2, 0, false);
-
-    // cout << a.getZ() << '\n';
-    // cout << a.getmu() << '\n';
+    da.maxit = 1000;
+    da2.maxit = 1000;
+    try {
+        s2 = da.getState(1, 0, false);
+        s2f = da2.getState(1, 0, false);
+    }
+    catch (const char *s)
+    {
+        std::cerr << s << '\n';
+    }
+    // // cout << a.getZ() << '\n';
+    // // cout << a.getmu() << '\n';
 
     for (int i = 0; i < r.size(); ++i)
     {
         cout << r[i] << '\t' << s2.P[i] << '\t' << s2f.P[i] << '\t' << s2.Q[i] << '\t' << s2f.Q[i]<< '\n';
     }
 
-    // DiracState *st = new DiracState();
+    map<int, float> testmap;
 
-    // cout << (test[{1, 1, 1}] == NULL) << "\n";
-    // cout << "Finished\n";
+    cout << "Map test:\n";
+    cout << testmap[2] << "\n"; 
+
+
 }

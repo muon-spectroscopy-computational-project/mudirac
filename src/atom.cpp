@@ -42,6 +42,7 @@ DiracState::DiracState(int N)
 
 DiracState::DiracState(const DiracState &s)
 {
+    init = true;
     nodes = s.nodes;
     E = s.E;
     k = s.k;
@@ -284,6 +285,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     // First, check if it's already calculated
     if (!force && states[{n, l, s}].init)
     {
+        cout << "Already calculated\n";
         return;
     }
 
@@ -301,6 +303,8 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         }
         else
         {
+            // Still save the state for future use
+            states[{state.nodes+l+1, l, s}] = state;
             E0 = dnode > 0 ? E0/Esearch : E0*Esearch;
         }
     }
@@ -322,6 +326,11 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 DiracState DiracAtom::getState(int n, int l, bool s)
 {
     calcState(n, l, s);
+    DiracState st = states[{n, l, s}];
+   
+    if (!st.init) {
+        throw "Could not converge a state with given quantum numbers; try increasing maxit";
+    }
 
-    return DiracState(states[{n, l, s}]);
+    return DiracState(st);
 }
