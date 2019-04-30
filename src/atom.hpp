@@ -10,7 +10,7 @@
  * @version 0.1 04/02/2019
  */
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <tuple>
 #include <map>
@@ -19,6 +19,8 @@
 #include "hydrogenic.hpp"
 #include "integrate.hpp"
 #include "boundary.hpp"
+
+using namespace std;
 
 class State
 {

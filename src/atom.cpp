@@ -212,12 +212,12 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
         dE = err / (zetai[tp.i] - zetae[tp.i]);
         // cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
-        if (!isnan(dE) && abs(dE) < Etol)
+        if (!std::isnan(dE) && abs(dE) < Etol)
         {
             break;
         }
         E = E - dE;
-        if (isnan(E))
+        if (std::isnan(E))
         {
             // Something bad happened
             throw "Convergence failed";
@@ -283,7 +283,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     TurningPoint tp;
 
     // First, check if it's already calculated
-    if (!force && states[{n, l, s}].init)
+    if (!force && states[make_tuple(n, l, s)].init)
     {
         cout << "Already calculated\n";
         return;
@@ -304,12 +304,12 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         else
         {
             // Still save the state for future use
-            states[{state.nodes+l+1, l, s}] = state;
+            states[make_tuple(state.nodes+l+1, l, s)] = state;
             E0 = dnode > 0 ? E0/Esearch : E0*Esearch;
         }
     }
 
-    states[{n, l, s}] = state;
+    states[make_tuple(n, l, s)] = state;
 }
 
 /**
@@ -326,7 +326,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 DiracState DiracAtom::getState(int n, int l, bool s)
 {
     calcState(n, l, s);
-    DiracState st = states[{n, l, s}];
+    DiracState st = states[make_tuple(n, l, s)];
    
     if (!st.init) {
         throw "Could not converge a state with given quantum numbers; try increasing maxit";
