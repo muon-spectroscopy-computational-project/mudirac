@@ -10,3 +10,7 @@ add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE 
                       atom boundary hydrogenic 
                       integrate input utils)
+
+# Different folder for executables
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin")
+add_executable(testbin test.cpp)
