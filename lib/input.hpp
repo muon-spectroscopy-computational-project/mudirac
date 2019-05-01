@@ -35,7 +35,7 @@ private:
     vector<T> default_value;
     vector<T> value;
 
-    T parse(string s);
+    T parse(string s) const;
 
 public:
     InputNode();
@@ -44,12 +44,13 @@ public:
     InputNode(vector<T> default_value);
 
     void clear();
-    int getSize();
+    int getSize() const;
+
     void setValue(T v);
     void setValues(vector<T> v);
     void parseValue(string s);
-    T getValue(int i = 0);
-    vector<T> getValues();
+    T getValue(int i = 0) const;
+    vector<T> getValues() const;
 };
 
 /**

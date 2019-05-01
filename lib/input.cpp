@@ -74,25 +74,25 @@ InputNode<T>::InputNode(const InputNode<T> &t)
 
 // Parsers, type by type
 template <>
-int InputNode<int>::parse(string s)
+int InputNode<int>::parse(string s) const
 {
     return stoi(s);
 }
 
 template <>
-float InputNode<float>::parse(string s)
+float InputNode<float>::parse(string s) const
 {
     return stof(s);
 }
 
 template <>
-double InputNode<double>::parse(string s)
+double InputNode<double>::parse(string s) const
 {
     return stod(s);
 }
 
 template <>
-string InputNode<string>::parse(string s)
+string InputNode<string>::parse(string s) const
 {
     return s;
 }
@@ -116,7 +116,7 @@ void InputNode<T>::clear()
  * @retval 
  */
 template <typename T>
-int InputNode<T>::getSize()
+int InputNode<T>::getSize() const
 {
     return single ? 1 : value.size();
 }
@@ -129,7 +129,7 @@ int InputNode<T>::getSize()
  * @retval      Value
  */
 template <typename T>
-T InputNode<T>::getValue(int i)
+T InputNode<T>::getValue(int i) const
 {
     // Avoiding pointless mistakes
     i = single ? 0 : i;
@@ -143,7 +143,7 @@ T InputNode<T>::getValue(int i)
  * @retval Vector of values
  */
 template <typename T>
-vector<T> InputNode<T>::getValues()
+vector<T> InputNode<T>::getValues() const
 {
     return vector<T>(value);
 }
