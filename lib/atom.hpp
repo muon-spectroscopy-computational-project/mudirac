@@ -14,6 +14,7 @@
 #include <vector>
 #include <tuple>
 #include <map>
+#include <string>
 #include "utils.hpp"
 #include "constants.hpp"
 #include "hydrogenic.hpp"
@@ -22,6 +23,25 @@
 
 using namespace std;
 
+// Exception classes
+class AtomConvergenceException : exception
+{
+public:
+  static const int NAN_ENERGY = 0;
+  static const int NODES_WRONG = 1;
+  static const int MAXIT_REACHED = 2;
+
+  AtomConvergenceException(int t = NAN_ENERGY);
+  ~AtomConvergenceException(void) {}
+  int getType() const throw() { return type; };
+  const char *what() const throw() { return msg.c_str(); };
+
+private:
+  int type;
+  string msg;
+};
+
+// Main classes
 class State
 {
 public:

@@ -28,8 +28,8 @@ int main(int argc, char **argv)
     try {
         ds = da.getState(n, l, s);
     }
-    catch (const char* e) {
-        cerr << "ERROR: " << e << "\n";
+    catch (AtomConvergenceException& e) {
+        cerr << "ERROR: " << e.what() << "\n";
         return -1;
     }
 

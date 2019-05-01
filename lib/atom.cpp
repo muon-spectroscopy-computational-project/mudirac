@@ -13,6 +13,28 @@
 #include "atom.hpp"
 #include <iostream>
 
+AtomConvergenceException::AtomConvergenceException(int t)
+{
+
+    type = t;
+
+    switch (type)
+    {
+    case NAN_ENERGY:
+        msg = "Atomic energy could not converge";
+        break;
+    case NODES_WRONG:
+        msg = "Nodal theorems conditions not satisfied";
+        break;
+    case MAXIT_REACHED:
+        msg = "Maximum numbers of iterations reached";
+        break;
+    default:
+        msg = "Unknown atomic convergence error";
+        break;
+    }
+}
+
 State::State()
 {
     E = 0;
@@ -223,7 +245,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         if (std::isnan(E))
         {
             // Something bad happened
-            throw "Convergence failed";
+            throw AtomConvergenceException(AtomConvergenceException::NAN_ENERGY);
         }
     }
 
@@ -251,7 +273,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     if (Qn - Pn != (R > r0))
     {
-        throw "Nodal theorems not respected - invalid state found";
+        throw AtomConvergenceException(AtomConvergenceException::NODES_WRONG);
     }
 
     state.nodes = Pn;
@@ -306,8 +328,8 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         else
         {
             // Still save the state for future use
-            states[make_tuple(state.nodes+l+1, l, s)] = state;
-            E0 = dnode > 0 ? E0/Esearch : E0*Esearch;
+            states[make_tuple(state.nodes + l + 1, l, s)] = state;
+            E0 = dnode > 0 ? E0 / Esearch : E0 * Esearch;
         }
     }
 
@@ -329,9 +351,10 @@ DiracState DiracAtom::getState(int n, int l, bool s)
 {
     calcState(n, l, s);
     DiracState st = states[make_tuple(n, l, s)];
-   
-    if (!st.init) {
-        throw "Could not converge a state with given quantum numbers; try increasing maxit";
+
+    if (!st.init)
+    {
+        throw AtomConvergenceException(AtomConvergenceException::MAXIT_REACHED);
     }
 
     return DiracState(st);
