@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <cmath>
 #include <tuple>
+#include <limits>
 #include "../lib/atom.hpp"
 
 using namespace std;
@@ -9,6 +11,8 @@ using namespace std;
 int main()
 {
     // Atom a = Atom(1, 1, 1, 2);
+    cout << log(numeric_limits<double>::min()) << "\n";
+    return 0;
 
     vector<double> r, V, V2;
     tuple<int, int, int> ind;
