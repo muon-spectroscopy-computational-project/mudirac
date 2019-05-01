@@ -48,6 +48,8 @@ public:
   bool init = false;
   int nodes = 0;
   double E = 0;
+  vector<double> grid;
+  vector<double> loggrid;
 
   State();
 };
@@ -70,6 +72,7 @@ public:
   int nodesQ = 0;
 
   DiracState(int N = 0);
+  DiracState(double x0, double x1, int N);
   DiracState(const DiracState &s);
 };
 

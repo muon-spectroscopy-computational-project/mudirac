@@ -58,8 +58,28 @@ SchroState::SchroState(const SchroState &s)
  */
 DiracState::DiracState(int N)
 {
+    grid = vector<double>(N, 0);
+    loggrid = vector<double>(N, 0);
     Q = vector<double>(N, 0);
     P = vector<double>(N, 0);
+}
+
+/**
+ * @brief  Initialise a DiracState instance with a grid
+ * @note   Creates a DiracState with given grid size and initialises the
+ * spatial grid itself
+ * 
+ * @param  x0:  Grid starting point
+ * @param  x1:  Grid ending point
+ * @param  N:   Number of steps
+ * @retval 
+ */
+DiracState::DiracState(double x0, double x1, int N) : DiracState(N)
+{
+
+    vector<vector<double>> grids = logGrid(x0, x1, N);
+    loggrid = grids[0];
+    grid = grids[1];
 }
 
 DiracState::DiracState(const DiracState &s)
@@ -68,6 +88,8 @@ DiracState::DiracState(const DiracState &s)
     nodes = s.nodes;
     E = s.E;
     k = s.k;
+    grid = vector<double>(s.grid);
+    loggrid = vector<double>(s.loggrid);
     Q = vector<double>(s.Q);
     P = vector<double>(s.P);
 }
@@ -107,6 +129,7 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
  * @brief  Recalculate the electrostatic potential
  * @note   Recalculate the electrostatic potential for an atom. Done automatically 
  * after changes in grid or background charge
+ * 
  * @retval None
  */
 void Atom::recalcPotential()
@@ -224,7 +247,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         {
             y[i] = state.Q[i] / state.P[i];
         }
-        
+
         // First the forward version
         y[tp.i] = tp.Qi / tp.Pi;
         shootDiracErrorDELog(zetai, y, grid[1], V, tp.i, E, k, mu, dx);
