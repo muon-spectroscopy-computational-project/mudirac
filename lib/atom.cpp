@@ -224,6 +224,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         {
             y[i] = state.Q[i] / state.P[i];
         }
+        
         // First the forward version
         y[tp.i] = tp.Qi / tp.Pi;
         shootDiracErrorDELog(zetai, y, grid[1], V, tp.i, E, k, mu, dx);

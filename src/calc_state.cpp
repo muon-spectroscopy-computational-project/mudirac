@@ -32,6 +32,10 @@ int main(int argc, char **argv)
         cerr << "ERROR: " << e.what() << "\n";
         return -1;
     }
+    catch (const char* e) {
+        cerr << "ERROR: " << e << "\n";
+        return -1;
+    }
 
     cout << "E = " << ds.E/Physical::eV << " eV\n";
     for (int i = 0; i < r.size(); ++i) {
