@@ -67,6 +67,13 @@ TEST_CASE("Factorials", "[factorial]")
     REQUIRE_THROWS(factorial(-1));
 }
 
+TEST_CASE("Sinc", "[sinc]")
+{
+    REQUIRE(sinc(0) == 1);
+    REQUIRE(1-sinc(M_PI) == Approx(1.0));
+    REQUIRE(sinc(M_PI/2.0) == Approx(2.0/M_PI));
+}
+
 TEST_CASE("Generalised Laguerre polynomials", "[genlagpoly]")
 {
     REQUIRE_NOTHROW(compareLaguerre());
