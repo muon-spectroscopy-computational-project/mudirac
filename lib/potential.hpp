@@ -20,7 +20,7 @@ using namespace std;
 class Potential
 {
 public:
-    virtual double V(double r);
+    virtual double V(double r) {};
 };
 
 class CoulombPotential : Potential
