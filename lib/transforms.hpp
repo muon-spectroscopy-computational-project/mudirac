@@ -17,4 +17,3 @@ using namespace std;
 
 vector<double> dctIV(vector<double> f);
 vector<double> invDctIV(vector<double> f);
-

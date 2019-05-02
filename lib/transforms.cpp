@@ -19,7 +19,7 @@
  * 
  * X_k = sum_{n=0}^{N-1} x_n cos[pi/N*(n+1/2)*(k+1/2)]
  * 
- * @param f                 Function to transform
+ * @param f:                Function to transform
  * @return vector<double>   Transformed function
  */
 vector<double> dctIV(vector<double> f)
@@ -45,8 +45,8 @@ vector<double> dctIV(vector<double> f)
  * the function passed. This is basically the same as a DCT-IV with
  * a prefactor of 2/N.
  * 
- * @param f 
- * @return vector<double> 
+ * @param f:                Function to transform
+ * @return vector<double>   Transformed function
  */
 vector<double> invDctIV(vector<double> f)
 {

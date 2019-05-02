@@ -21,6 +21,9 @@ target_link_libraries(test_input test_main mudiraclib)
 add_executable(test_potential test_potential.cpp)
 target_link_libraries(test_potential test_main mudiraclib)
 
+add_executable(test_transforms test_transforms.cpp)
+target_link_libraries(test_transforms test_main mudiraclib)
+
 add_executable(test_atom test_atom.cpp)
 target_link_libraries(test_atom test_main mudiraclib)
 
