@@ -11,7 +11,6 @@
  */
 
 #include "utils.hpp"
-#include <iostream>
 
 /**
  * @brief  Compute the effective mass of a two-body system
@@ -43,6 +42,17 @@ int factorial(int n)
     }
 
     return fn;
+}
+
+/**
+ * @brief Sinc function, or sin(x)/x
+ * 
+ * 
+ * @param x         Argument
+ * @return double 
+ */
+double sinc(double x) {
+    return x <= 0? 1 : sin(x)/x;
 }
 
 /**
