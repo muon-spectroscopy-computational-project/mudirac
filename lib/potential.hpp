@@ -19,16 +19,16 @@ using namespace std;
 
 class Potential
 {
-public:
-    virtual double V(double r) {};
+  public:
+    virtual double V(double r){};
 };
 
 class CoulombPotential : Potential
 {
-public:
+  public:
     CoulombPotential(double Z, double R = -1);
     double V(double r) override;
 
-protected:
+  protected:
     double R, R3, VR, Z;
 };

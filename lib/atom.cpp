@@ -76,7 +76,6 @@ DiracState::DiracState(int N)
  */
 DiracState::DiracState(double x0, double x1, int N) : DiracState(N)
 {
-
     vector<vector<double>> grids = logGrid(x0, x1, N);
     loggrid = grids[0];
     grid = grids[1];
@@ -122,7 +121,7 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
     }
 
     // Compute the grid
-    setGrid();
+    setGridRelative();
 }
 
 /**
@@ -161,7 +160,7 @@ void Atom::recalcPotential()
  * @note   Set parameters of desired logarithmic integration grid for this Atom
  * 
  * @param  r0_in: Inferior boundary of the grid
- * @param  r1_in: Superior boundar of the grid
+ * @param  r1_in: Superior boundary of the grid
  * @param  N_in:  Number of points
  * @retval None
  */
@@ -175,6 +174,28 @@ void Atom::setGrid(double r0_in, double r1_in, int N_in)
     dx = grid[0][1] - grid[0][0];
     bkgQ = vector<double>(N, 0); // Reset background charge
     recalcPotential();
+}
+
+/**
+ * @brief Set logarithmic integration grid relative to a physical scale
+ * @note  Set parameters of desired logarithmic integration grid for this Atom,
+ * using a meaningful physical scale which corresponds to the expected radius of
+ * the Schroedinger 1s orbital. The parameters are turned to distances following:
+ * 
+ * r = f/(Z*mu)
+ * 
+ * with mu effective mass of the atom. This scales down the dimension to what is
+ * reasonable for the atom in question, allowing one to use homogeneous parameters
+ * for multiple atoms.
+ * 
+ * @param   f0:       Inferior boundary of the grid
+ * @param   f1:       Superior boundary of the grid
+ * @param   N:        Number of points
+ * @retval  None
+ */
+void Atom::setGridRelative(double f0, double f1, int N)
+{
+    setGrid(f0 / (Z * mu), f1 / (Z * mu), N);
 }
 
 /**

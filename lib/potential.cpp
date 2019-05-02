@@ -34,3 +34,4 @@ double CoulombPotential::V(double r)
         return -Z/r;
     }
 }
+

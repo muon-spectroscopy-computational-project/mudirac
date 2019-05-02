@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     // Parameters
-    if (argc != 5) {
+    if (argc < 4) {
         cout << "Wrong number of arguments\n";
         return -1;
     }
@@ -17,11 +17,14 @@ int main(int argc, char **argv)
     int n = stoi(argv[2]);
     int l = stoi(argv[3]);
     bool s = stoi(argv[4]) != 0;
+
+    double A = argc > 5? stod(argv[5]) : -1;
+    double R = argc > 6? stod(argv[6]) : -1;
     
-    DiracAtom da = DiracAtom(Z, Physical::m_mu);
+    DiracAtom da = DiracAtom(Z, Physical::m_mu, A*Physical::amu, R);
     DiracState ds;
 
-    da.setGrid(1e-5, 1);
+    da.setGridRelative(1e-4, 1e2, 3000);
 
     vector<double> r = da.getGrid();
 
@@ -37,7 +40,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    cout << "E = " << ds.E/Physical::eV << " eV\n";
+    cout << "E = " << (ds.E-da.getmu()*pow(Physical::c, 2))/Physical::eV << " eV\n";
     for (int i = 0; i < r.size(); ++i) {
         cout << r[i] << '\t' << ds.P[i] << '\t' << ds.Q[i] << '\n';
     }

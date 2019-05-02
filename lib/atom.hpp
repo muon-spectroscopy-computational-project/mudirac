@@ -111,6 +111,7 @@ public:
 
   // Grid and potential
   void setGrid(double r0_in = 1e-2, double r1_in = 5e1, int N_in = 1000);
+  void setGridRelative(double r0_in = 1e-2, double r1_in = 5e1, int N_in = 1000);
   void setBackgroundCharge(vector<double> bkgQ_in);
   vector<double> getGrid(bool log = false);
   vector<double> getPotential();
