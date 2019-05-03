@@ -13,6 +13,7 @@
 // All values from CODATA 2014 unless otherwise specified
 
 #ifndef PHYSICAL_DEF
+#define PHYSICAL_DEF
 namespace Physical
 {
 const double alpha = 7.2973525664e-3; // Fine structure constant
@@ -29,4 +30,3 @@ const double eV = 1.0 / 27.211385; // Electron volt
 const double amu = 1822.888486192; // Atomic mass unit
 } // namespace Physical
 #endif
-#define PHYSICAL_DEF

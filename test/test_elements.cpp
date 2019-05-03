@@ -18,6 +18,5 @@ TEST_CASE("Atomic data", "[atomData]")
     REQUIRE(getIsotopeSpin(1, 2) == Approx(1.0));
     REQUIRE_THROWS_AS(getElementZ("Kk"), invalid_argument);
     REQUIRE_THROWS_AS(getIsotopeMass(240), invalid_argument);
-
     CHECK(getAllIsotopes("H") == vector<int>{1, 2, 3, 4, 5, 6, 7});
 }
