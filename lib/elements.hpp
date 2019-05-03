@@ -25,6 +25,7 @@
 #include <cmath>
 #include <limits>
 #include <map>
+#include <algorithm>
 #include <stdexcept>
 #include <vector>
 

@@ -26,6 +26,7 @@
 #include <vector>
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 using namespace std;
 

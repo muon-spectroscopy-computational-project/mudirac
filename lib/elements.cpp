@@ -69,6 +69,34 @@ double getIsotopeSpin(int Z, int isotope)
     return getIsotopeSpin(symbol, isotope);
 }
 
+vector<int> getAllIsotopes(string symbol)
+{
+    map<int, isotope> isos;
+    try
+    {
+        isos = atomic_data.at(symbol).isotopes;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Element does not exist");
+    }
+
+    vector<int> isoA;
+    for (map<int, isotope>::iterator it = isos.begin(); it != isos.end(); ++it)
+    {
+        isoA.push_back(it->first);
+    }
+    sort(isoA.begin(), isoA.end());
+
+    return isoA;
+}
+
+vector<int> getAllIsotopes(int Z)
+{
+    string symbol = getElementSymbol(Z);
+    return getAllIsotopes(symbol);
+}
+
 int getElementZ(string symbol)
 {
     try
