@@ -75,7 +75,7 @@ elems = sorted(atomic_data.keys(), key=lambda x: len(x), reverse=True)
 
 el_re = re.compile('([0-9]+)({0})'.format('|'.join(elems)))
 spin_re = re.compile(r'([0-9]/)*([0-9])(\+|-)')
-nubase_lines = nubase_txt.split('\n')[1:] # First line is neutron
+nubase_lines = nubase_txt.split('\n')[1:]  # First line is neutron
 for l in nubase_lines:
     if len(l) == 0:
         break
@@ -85,10 +85,30 @@ for l in nubase_lines:
     if A != int(lspl[0]):
         raise RuntimeError('Invalid line in NUBASE data')
     if not (A in atomic_data[el]['isos']):
-        print('Isotope {0}{1} in NUBASE data has no ame2016 information; skipping.'.format(A, el))
+        print(
+            'Isotope {0}{1} in NUBASE data has no ame2016 information; skipping.'.format(A, el))
     try:
         spin = spin_re.findall(l)[0]
-        spin = (float(spin[1]) if spin[0] == '' else float(spin[0][:-1])/float(spin[1]))*(1 if spin[2] == '+' else -1)
+        spin = (float(spin[1]) if spin[0] == '' else float(
+            spin[0][:-1])/float(spin[1]))*(1 if spin[2] == '+' else -1)
         atomic_data[el]['isos'][A]['spin'] = spin
     except IndexError:
         continue
+
+# Compile that all as a C++ initialiser string
+cpp_string = 'map<string, element> atomic_data = {'
+for el, data in atomic_data.items():
+    cpp_string += '{{ "{0}", {{ {1}, {{'.format(el, data['Z'])
+    for A, iso in data['isos'].items():
+        cpp_string += '{{ {0}, {{ {m}, {spin} }} }},'.format(A, m=iso['m'],
+                                                             spin=(iso['spin'] if iso['spin']
+                                                                   is not None else 'NAN'))
+    cpp_string += '} } },'
+cpp_string += '};'
+
+with open('elements.in.hpp') as f:
+    ftxt = f.read()
+    ftxt = ftxt.replace('//{HERE GOES THE ACTUAL DATA}//', cpp_string)
+    fout = open('../lib/elements.hpp', 'w')
+    fout.write(ftxt)
+    fout.close()
