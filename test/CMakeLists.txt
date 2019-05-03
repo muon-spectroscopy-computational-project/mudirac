@@ -9,6 +9,9 @@ file(COPY data/inputtest.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 add_executable(test_utils test_utils.cpp)
 target_link_libraries(test_utils test_main mudiraclib)
 
+add_executable(test_elements test_elements.cpp)
+target_link_libraries(test_elements test_main mudiraclib)
+
 add_executable(test_integrate test_integrate.cpp)
 target_link_libraries(test_integrate test_main mudiraclib)
 

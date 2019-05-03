@@ -119,7 +119,7 @@ for el, data in atomic_data.items():
                                                                    is not None else 'NAN'))
     cpp_string += '} } },'
 
-    cpp_Z_string += '{{ {0}, {1} }},'.format(data['Z'], el)
+    cpp_Z_string += '{{ {0}, "{1}" }},'.format(data['Z'], el)
 cpp_string += '};\n'
 cpp_Z_string += '};'
 
