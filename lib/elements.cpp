@@ -24,3 +24,34 @@
  */
 
 #include "elements.hpp"
+
+/**
+double getIsotopeMass(string symbol, int isotope = -1)
+{
+    
+}
+
+double getIsotopeMass(int Z, int isotope = -1);
+double getIsotopeSpin(string symbol, int isotope = -1);
+double getIsotopeSpin(int Z, int isotope = -1);
+**/
+int getElementZ(string symbol)
+{
+    return atomic_data[symbol].Z;
+}
+
+string getElementSymbol(int Z)
+{
+    return atomic_Z_lookup[Z];
+}
+
+int getElementMainIsotope(string symbol) 
+{
+    return atomic_data[symbol].maxA;
+}
+
+int getElementMainIsotope(int Z) 
+{
+    string symbol = getElementSymbol(Z);
+    return getElementMainIsotope(symbol);
+}

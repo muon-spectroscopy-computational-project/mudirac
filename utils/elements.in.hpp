@@ -23,6 +23,7 @@
 
 #include <map>
 #include <cmath>
+#include <vector>
 #include <limits>
 #include <stdexcept>
 
@@ -45,9 +46,15 @@ double getIsotopeMass(string symbol, int isotope=-1);
 double getIsotopeMass(int Z, int isotope=-1);
 double getIsotopeSpin(string symbol, int isotope=-1);
 double getIsotopeSpin(int Z, int isotope=-1);
+vector<int> getAllIsotopes(string symbol);
+vector<int> getAllIsotopes(int Z);
+
 int getElementZ(string symbol);
 string getElementSymbol(int Z);
 int getElementMainIsotope(string symbol);
 int getElementMainIsotope(int Z);
 
+#ifndef ATOMIC_DATA
+#define ATOMIC_DATA
 //{HERE GOES THE ACTUAL DATA}//
+#endif
