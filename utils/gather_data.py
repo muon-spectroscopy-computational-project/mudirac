@@ -6,8 +6,11 @@ official sources (AME 2016 and NUBASE) and create header files to store
 this data for the main program.
 """
 
+import os
 import re
 import urllib.request
+
+dir = os.path.split(__file__)[0]
 
 
 def get_file(url):
@@ -21,10 +24,11 @@ nubase_url = 'https://www-nds.iaea.org/amdc/ame2016/nubase2016.txt'
 
 # Start with ame
 try:
-    ame_txt = open('ame2016.dat').read()
+    ame_path = os.path.join(dir, 'ame2016.dat')
+    ame_txt = open(ame_path).read()
 except IOError:
     ame_txt = get_file(ame_url)
-    with open('ame2016.dat', 'w') as f:
+    with open(ame_path, 'w') as f:
         f.write(ame_txt)
 ame_lines = ame_txt.split('\n')
 # Discard header
@@ -65,10 +69,11 @@ for l in ame_lines:
 
 # Now nubase
 try:
-    nubase_txt = open('nubase2016.dat').read()
+    nubase_path = os.path.join(dir, 'nubase2016.dat')
+    nubase_txt = open(nubase_path).read()
 except IOError:
     nubase_txt = get_file(nubase_url)
-    with open('nubase2016.dat', 'w') as f:
+    with open(nubase_path, 'w') as f:
         f.write(nubase_txt)
 
 elems = sorted(atomic_data.keys(), key=lambda x: len(x), reverse=True)
@@ -97,6 +102,7 @@ for l in nubase_lines:
 
 # Compile that all as a C++ initialiser string
 cpp_string = 'map<string, element> atomic_data = {'
+cpp_Z_string = 'map<int, string> atomic_Z_lookup = {'
 for el, data in atomic_data.items():
     cpp_string += '{{ "{0}", {{ {1}, {{'.format(el, data['Z'])
     for A, iso in data['isos'].items():
@@ -104,11 +110,15 @@ for el, data in atomic_data.items():
                                                              spin=(iso['spin'] if iso['spin']
                                                                    is not None else 'NAN'))
     cpp_string += '} } },'
-cpp_string += '};'
 
-with open('elements.in.hpp') as f:
+    cpp_Z_string += '{{ {0}, {1} }},'.format(data['Z'], el)
+cpp_string += '};\n'
+cpp_Z_string += '};'
+
+with open(os.path.join(dir, 'elements.in.hpp')) as f:
     ftxt = f.read()
-    ftxt = ftxt.replace('//{HERE GOES THE ACTUAL DATA}//', cpp_string)
-    fout = open('../lib/elements.hpp', 'w')
+    ftxt = ftxt.replace('//{HERE GOES THE ACTUAL DATA}//',
+                        cpp_string + cpp_Z_string)
+    fout = open(os.path.join(dir, '../lib/elements.hpp'), 'w')
     fout.write(ftxt)
     fout.close()
