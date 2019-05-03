@@ -31,15 +31,15 @@ using namespace std;
 
 struct isotope
 {
-    double mass;
-    double spin;
+    const double mass;
+    const double spin;
 };
 
 struct element
 {
-    int Z;
-    int maxA;
-    map<int, isotope> isotopes;
+    const int Z;
+    const int maxA;
+    const map<int, isotope> isotopes;
 };
 
 double getIsotopeMass(string symbol, int isotope=-1);

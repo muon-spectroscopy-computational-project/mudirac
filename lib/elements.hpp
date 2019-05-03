@@ -31,14 +31,14 @@
 using namespace std;
 
 struct isotope {
-  double mass;
-  double spin;
+  const double mass;
+  const double spin;
 };
 
 struct element {
-  int Z;
-  int maxA;
-  map<int, isotope> isotopes;
+  const int Z;
+  const int maxA;
+  const map<int, isotope> isotopes;
 };
 
 double getIsotopeMass(string symbol, int isotope = -1);
@@ -55,7 +55,7 @@ int getElementMainIsotope(int Z);
 
 #ifndef ATOMIC_DATA
 #define ATOMIC_DATA
-map<string, element> atomic_data = {
+const map<string, element> atomic_data = {
     {"H",
      {1,
       1,
@@ -2558,7 +2558,7 @@ map<string, element> atomic_data = {
           {295, {295.216332, NAN}},
       }}},
 };
-map<int, string> atomic_Z_lookup = {
+const map<int, string> atomic_Z_lookup = {
     {1, "H"},    {2, "He"},   {3, "Li"},   {4, "Be"},   {5, "B"},
     {6, "C"},    {7, "N"},    {8, "O"},    {9, "F"},    {10, "Ne"},
     {11, "Na"},  {12, "Mg"},  {13, "Al"},  {14, "Si"},  {15, "P"},

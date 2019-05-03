@@ -37,17 +37,17 @@ double getIsotopeSpin(int Z, int isotope = -1);
 **/
 int getElementZ(string symbol)
 {
-    return atomic_data[symbol].Z;
+    return atomic_data.at(symbol).Z;
 }
 
 string getElementSymbol(int Z)
 {
-    return atomic_Z_lookup[Z];
+    return atomic_Z_lookup.at(Z);
 }
 
 int getElementMainIsotope(string symbol) 
 {
-    return atomic_data[symbol].maxA;
+    return atomic_data.at(symbol).maxA;
 }
 
 int getElementMainIsotope(int Z) 

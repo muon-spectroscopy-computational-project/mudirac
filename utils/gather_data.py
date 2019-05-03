@@ -109,8 +109,8 @@ for l in nubase_lines:
         continue
 
 # Compile that all as a C++ initialiser string
-cpp_string = 'map<string, element> atomic_data = {'
-cpp_Z_string = 'map<int, string> atomic_Z_lookup = {'
+cpp_string = 'const map<string, element> atomic_data = {'
+cpp_Z_string = 'const map<int, string> atomic_Z_lookup = {'
 for el, data in atomic_data.items():
     cpp_string += '{{ "{0}", {{ {1}, {2}, {{'.format(el, data['Z'], iso_abund[data['Z']])
     for A, iso in data['isos'].items():
