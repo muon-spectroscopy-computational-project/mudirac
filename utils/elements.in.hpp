@@ -41,4 +41,13 @@ struct element
     map<int, isotope> isotopes;
 };
 
+double getIsotopeMass(string symbol, int isotope=-1);
+double getIsotopeMass(int Z, int isotope=-1);
+double getIsotopeSpin(string symbol, int isotope=-1);
+double getIsotopeSpin(int Z, int isotope=-1);
+int getElementZ(string symbol);
+string getElementSymbol(int Z);
+int getElementMainIsotope(string symbol);
+int getElementMainIsotope(int Z);
+
 //{HERE GOES THE ACTUAL DATA}//
