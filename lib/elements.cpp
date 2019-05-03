@@ -2,9 +2,11 @@
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019)
  * 
- * elements.hpp
+ * elements.cpp
  * 
  * Atomic mass and spin data extracted by AME2016 and NUBASE databases.
+ * Access functions.
+ * 
  * References:
  * 
  * AME2016 (masses):
@@ -22,6 +24,3 @@
  */
 
 #include "elements.hpp"
-
-
-

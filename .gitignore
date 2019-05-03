@@ -51,6 +51,7 @@ build/*
 
 # Downloaded data files
 utils/*.dat
+!utils/abundant.dat
 
 # VS Code
 .vscode
