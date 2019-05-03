@@ -49,5 +49,8 @@ docs/*.synctex.gz
 # Build directory
 build/*
 
+# Downloaded data files
+utils/*.dat
+
 # VS Code
 .vscode
