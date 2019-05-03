@@ -25,32 +25,87 @@
 
 #include "elements.hpp"
 
-/**
-double getIsotopeMass(string symbol, int isotope = -1)
+double getIsotopeMass(string symbol, int isotope)
 {
-    
+    if (isotope == -1)
+    {
+        isotope = getElementMainIsotope(symbol);
+    }
+    try
+    {
+        return atomic_data.at(symbol).isotopes.at(isotope).mass;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Isotope/element does not exist");
+    }
 }
 
-double getIsotopeMass(int Z, int isotope = -1);
-double getIsotopeSpin(string symbol, int isotope = -1);
-double getIsotopeSpin(int Z, int isotope = -1);
-**/
+double getIsotopeMass(int Z, int isotope)
+{
+    string symbol = getElementSymbol(Z);
+    return getIsotopeMass(symbol, isotope);
+}
+
+double getIsotopeSpin(string symbol, int isotope)
+{
+    if (isotope == -1)
+    {
+        isotope = getElementMainIsotope(symbol);
+    }
+    try
+    {
+        return atomic_data.at(symbol).isotopes.at(isotope).spin;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Isotope/element does not exist");
+    }
+}
+
+double getIsotopeSpin(int Z, int isotope)
+{
+    string symbol = getElementSymbol(Z);
+    return getIsotopeSpin(symbol, isotope);
+}
+
 int getElementZ(string symbol)
 {
-    return atomic_data.at(symbol).Z;
+    try
+    {
+        return atomic_data.at(symbol).Z;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Element does not exist");
+    }
 }
 
 string getElementSymbol(int Z)
 {
-    return atomic_Z_lookup.at(Z);
+    try
+    {
+        return atomic_Z_lookup.at(Z);
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Element does not exist");
+    }
 }
 
-int getElementMainIsotope(string symbol) 
+int getElementMainIsotope(string symbol)
 {
-    return atomic_data.at(symbol).maxA;
+    try
+    {
+        return atomic_data.at(symbol).maxA;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Element does not exist");
+    }
 }
 
-int getElementMainIsotope(int Z) 
+int getElementMainIsotope(int Z)
 {
     string symbol = getElementSymbol(Z);
     return getElementMainIsotope(symbol);
