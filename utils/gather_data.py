@@ -18,6 +18,14 @@ def get_file(url):
         data = resp.read()
     return data.decode('utf8')
 
+# Load isotopic abundance data
+iso_abund = {}
+with open(os.path.join(dir, 'abundant.dat')) as f:
+    for l in f.readlines():
+        if l[0] == '#':
+            continue
+        Z, A = map(int, l.split())
+        iso_abund[Z] = A
 
 ame_url = 'https://www-nds.iaea.org/amdc/ame2016/mass16.txt'
 nubase_url = 'https://www-nds.iaea.org/amdc/ame2016/nubase2016.txt'
@@ -104,7 +112,7 @@ for l in nubase_lines:
 cpp_string = 'map<string, element> atomic_data = {'
 cpp_Z_string = 'map<int, string> atomic_Z_lookup = {'
 for el, data in atomic_data.items():
-    cpp_string += '{{ "{0}", {{ {1}, {{'.format(el, data['Z'])
+    cpp_string += '{{ "{0}", {{ {1}, {2}, {{'.format(el, data['Z'], iso_abund[data['Z']])
     for A, iso in data['isos'].items():
         cpp_string += '{{ {0}, {{ {m}, {spin} }} }},'.format(A, m=iso['m'],
                                                              spin=(iso['spin'] if iso['spin']

@@ -24,6 +24,7 @@
 #include <map>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 using namespace std;
 
@@ -36,6 +37,7 @@ struct isotope
 struct element
 {
     int Z;
+    int maxA;
     map<int, isotope> isotopes;
 };
 
