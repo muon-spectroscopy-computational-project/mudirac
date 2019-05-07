@@ -54,6 +54,8 @@ int main()
     {
         std::cerr << s << '\n';
     }
+
+    cout << da.sphereNuclearModel(100) << '\n';
     // // cout << a.getZ() << '\n';
     // // cout << a.getmu() << '\n';
 

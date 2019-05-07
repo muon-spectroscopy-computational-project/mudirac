@@ -90,6 +90,9 @@ public:
   double Etol = 1e-10, Esearch = 1.2;
   int maxit = 100;
 
+  // Radius models
+  double static sphereNuclearModel(double A);
+
 protected:
   // Fundamental properties
   double Z, A;         // Nuclear charge and mass
@@ -104,9 +107,6 @@ protected:
   double dx;                   // Step
 
   void recalcPotential(); // Recalculate V
-
-  // Radius models
-  double static sphereNuclearModel(double A);
 
 public:
   Atom(double Z_in = 1, double m_in = 1, double A_in = -1, NuclearRadiusModel radius_model = POINT);
