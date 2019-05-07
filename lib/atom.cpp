@@ -13,7 +13,7 @@
 #include "atom.hpp"
 #include <iostream>
 
-AtomConvergenceException::AtomConvergenceException(int t)
+AtomConvergenceException::AtomConvergenceException(ACEType t)
 {
 
     type = t;
@@ -293,8 +293,6 @@ DiracState DiracAtom::convergeState(double E0, int k)
     {
         // Start by applying boundary conditions
         boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R > r0);
-        // cout << state.P[0] << '\t' << state.P[N - 1] << '\n';
-        // cout << state.Q[0] << '\t' << state.Q[N - 1] << '\n';
         // Integrate here
         tp = shootDiracLog(state.Q, state.P, grid[1], V, E, k, mu, dx);
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
@@ -325,7 +323,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         if (std::isnan(E))
         {
             // Something bad happened
-            throw AtomConvergenceException(AtomConvergenceException::NAN_ENERGY);
+            throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
         }
     }
 
@@ -353,7 +351,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     if (Qn - Pn != (R > r0))
     {
-        throw AtomConvergenceException(AtomConvergenceException::NODES_WRONG);
+        throw AtomConvergenceException(AtomConvergenceException::ACEType::NODES_WRONG);
     }
 
     state.nodes = Pn;
@@ -434,7 +432,7 @@ DiracState DiracAtom::getState(int n, int l, bool s)
 
     if (!st.init)
     {
-        throw AtomConvergenceException(AtomConvergenceException::MAXIT_REACHED);
+        throw AtomConvergenceException(AtomConvergenceException::ACEType::MAXIT_REACHED);
     }
 
     return DiracState(st);

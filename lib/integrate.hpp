@@ -12,10 +12,31 @@
 
 #include <math.h>
 #include <vector>
+#include <stdexcept>
 #include "utils.hpp"
 #include "constants.hpp"
 
 using namespace std;
+
+// Exception classes
+class TurningPointError : exception
+{
+public:
+    enum TPEType
+    {
+        RMIN_BIG,
+        RMAX_SMALL
+    };
+
+    TurningPointError(TPEType t = RMIN_BIG);
+    ~TurningPointError(void) {}
+    TPEType getType() const throw() { return type; };
+    const char *what() const throw() { return msg.c_str(); };
+
+private:
+    TPEType type;
+    string msg;
+};
 
 double trapzInt(vector<double> x, vector<double> y);
 void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h = 1, int stop_i = -1, char dir = 'f');

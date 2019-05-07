@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     double A, mu, Ka_schro, Ka_dirac_hydro, Ka_dirac_hydro_mu, Ka_dirac_num_mu, Ka_dirac_num_sphere;
     DiracState p2, s1;
     // Test all atomic numbers, from 2 to 90, for their kappa alpha line for various models
-    for (int Z = 2; Z < 60; ++Z)
+    for (int Z = 2; Z < 80; ++Z)
     {
         A = getIsotopeMass(Z);
         mu = effectiveMass(A * Physical::amu, Physical::m_mu);

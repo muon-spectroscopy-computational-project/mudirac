@@ -28,17 +28,20 @@ using namespace std;
 class AtomConvergenceException : exception
 {
 public:
-  static const int NAN_ENERGY = 0;
-  static const int NODES_WRONG = 1;
-  static const int MAXIT_REACHED = 2;
+  enum ACEType
+  {
+    NAN_ENERGY,
+    NODES_WRONG,
+    MAXIT_REACHED
+  };
 
-  AtomConvergenceException(int t = NAN_ENERGY);
+  AtomConvergenceException(ACEType t = NAN_ENERGY);
   ~AtomConvergenceException(void) {}
-  int getType() const throw() { return type; };
+  ACEType getType() const throw() { return type; };
   const char *what() const throw() { return msg.c_str(); };
 
 private:
-  int type;
+  ACEType type;
   string msg;
 };
 

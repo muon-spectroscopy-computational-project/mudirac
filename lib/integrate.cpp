@@ -13,6 +13,26 @@
 #include "integrate.hpp"
 #include <iostream>
 
+// Exceptions
+TurningPointError::TurningPointError(TPEType t)
+{
+
+    type = t;
+
+    switch (type)
+    {
+    case RMIN_BIG:
+        msg = "Range for integration does not include turning point (r_min > r_turn)";
+        break;
+    case RMAX_SMALL:
+        msg = "Range for integration does not include turning point (r_max < r_turn)";
+        break;
+    default:
+        msg = "Unknown turning point error";
+        break;
+    }
+}
+
 /**
  * @brief  Integrate a function with the trapezoidal rule
  * @note   Perform a trapezoidal rule integration of function y over range x:
@@ -30,7 +50,7 @@ double trapzInt(vector<double> x, vector<double> y)
 
     if (x.size() != N)
     {
-        throw "Invalid size for arrays passed to trapzInt";
+        throw invalid_argument("Invalid size for arrays passed to trapzInt");
     }
 
     for (int i = 1; i < N; ++i)
@@ -67,7 +87,7 @@ void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int
     // First, check size
     if (A.size() != N || B.size() != N)
     {
-        throw "Invalid size for one or more arrays passed to shootQ";
+        throw invalid_argument("Invalid size for one or more arrays passed to shootQ");
     }
 
     if (stop_i == -1)
@@ -116,7 +136,7 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
     // First, check size
     if (P.size() != N || AA.size() != N || AB.size() != N || BA.size() != N || BB.size() != N)
     {
-        throw "Invalid size for one or more arrays passed to shootQP";
+        throw invalid_argument("Invalid size for one or more arrays passed to shootQP");
     }
 
     if (stop_i == -1)
@@ -167,7 +187,7 @@ void shootNumerov(vector<double> &Q, vector<double> A, vector<double> B, double 
     // First, check size
     if (A.size() != N || B.size() != N)
     {
-        throw "Invalid size for one or more arrays passed to shootNumerov";
+        throw invalid_argument("Invalid size for one or more arrays passed to shootNumerov");
     }
 
     if (stop_i == -1)
@@ -256,7 +276,7 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
     // Check size
     if (P.size() != N || r.size() != N || V.size() != N)
     {
-        throw "Invalid size for one or more arrays passed to shootDiracLog";
+        throw invalid_argument("Invalid size for one or more arrays passed to shootDiracLog");
     }
 
     B = E - m * pow(Physical::c, 2);
@@ -267,13 +287,15 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
         if (V[turn_i] > B)
             break;
     }
-    if (turn_i >= V.size()-1) {
+    if (turn_i >= V.size() - 1)
+    {
         // Turning point not included in range
-        throw "Range for shootDiracLog does not include turning point (r_max < r_turn)";
+        throw TurningPointError(TurningPointError::TPEType::RMAX_SMALL);
     }
-    else if (turn_i == 0) {
+    else if (turn_i == 0)
+    {
         // Turning point not included in range
-        throw "Range for shootDiracLog does not include turning point (r_min > r_turn)";
+        throw TurningPointError(TurningPointError::TPEType::RMIN_BIG);
     }
 
     // Now define the other arrays
@@ -331,7 +353,7 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
     // Check size
     if (y.size() != N || r.size() != N || V.size() != N)
     {
-        throw "Invalid size for one or more arrays passed to shootDiracErrorDELog";
+        throw invalid_argument("Invalid size for one or more arrays passed to shootDiracErrorDELog");
     }
 
     for (int i = from_i; step * (i - turn_i) <= 0; i += step)
