@@ -103,13 +103,12 @@ DiracState::DiracState(const DiracState &s)
  * @param  R_in: Atomic radius (treated as point-like if <= 0)
  * @retval 
  */
-Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
+Atom::Atom(double Z_in, double m_in, double A_in, NuclearRadiusModel radius_model)
 {
     // Set the properties
     Z = Z_in;
     A = A_in;
     m = m_in;
-    R = R_in;
 
     if (A > 0)
     {
@@ -118,6 +117,27 @@ Atom::Atom(double Z_in, double m_in, double A_in, double R_in)
     else
     {
         mu = m;
+    }
+
+    // Define radius
+    if (A == -1)
+    {
+        R = -1;
+    }
+    else
+    {
+        switch (radius_model)
+        {
+        case POINT:
+            R = -1;
+            break;
+        case SPHERE:
+            R = sphereNuclearModel(A);
+            break;
+        default:
+            R = -1;
+            break;
+        }
     }
 
     // Compute the grid
@@ -230,7 +250,22 @@ vector<double> Atom::getPotential()
     return vector<double>(V);
 }
 
-DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, double R_in) : Atom(Z_in, m_in, A_in, R_in)
+// Nuclear radius models
+
+/**
+ * @brief  Spherical nuclear radius model
+ * @note   Describe the nucleus' finite size as if it was a sphere,
+ * assuming a model by which R = 1.2 A^(1/3) fm.
+ * 
+ * @param  A:   Atomic mass
+ * @retval      Nuclear radius
+ */
+double Atom::sphereNuclearModel(double A)
+{
+    return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
+}
+
+DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, NuclearRadiusModel radius_model) : Atom(Z_in, m_in, A_in, radius_model)
 {
 }
 

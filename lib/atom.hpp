@@ -20,6 +20,7 @@
 #include "hydrogenic.hpp"
 #include "integrate.hpp"
 #include "boundary.hpp"
+#include "elements.hpp"
 
 using namespace std;
 
@@ -39,6 +40,12 @@ public:
 private:
   int type;
   string msg;
+};
+
+enum NuclearRadiusModel
+{
+  POINT,
+  SPHERE
 };
 
 // Main classes
@@ -98,8 +105,11 @@ protected:
 
   void recalcPotential(); // Recalculate V
 
+  // Radius models
+  double static sphereNuclearModel(double A);
+
 public:
-  Atom(double Z_in = 1, double m_in = 1, double A_in = -1, double R_in = -1);
+  Atom(double Z_in = 1, double m_in = 1, double A_in = -1, NuclearRadiusModel radius_model = POINT);
 
   // Basic getters
   double getZ() { return Z; };
@@ -127,7 +137,7 @@ private:
   DiracState convergeState(double E0, int k = -1);
 
 public:
-  DiracAtom(double Z_in = 1, double m_in = 1, double A_in = -1, double R_in = -1);
+  DiracAtom(double Z_in = 1, double m_in = 1, double A_in = -1, NuclearRadiusModel radius_model = POINT);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
