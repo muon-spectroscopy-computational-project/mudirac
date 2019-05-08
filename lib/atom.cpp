@@ -228,6 +228,31 @@ DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_mod
 {
 }
 
+pair<int, int> DiracAtom::optimalGrid(double E, int k)
+{
+
+    double B;
+    double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
+    double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
+    double r_out, r_in, r_tp;
+
+    if (K < 0)
+    {
+        throw runtime_error("State is not bound, can't compute optimal grid");
+    }
+    if (gamma < 0)
+    {
+        // Unlikely while we're in the periodic table...
+        throw runtime_error("k is too small for this atom");
+    }
+
+    K = sqrt(K);
+    gamma = sqrt(gamma);
+    B = E - mu * pow(Physical::c, 2);
+
+    throw runtime_error("Not implemented yet");
+}
+
 /**
  * @brief  Converge a state with given k and initial energy guess E0
  * @note   Converge iteratively a Dirac orbital for this atom from a given k and

@@ -102,9 +102,9 @@ public:
 
 protected:
   // Fundamental properties
-  double Z, A;         // Nuclear charge and mass
-  double m, mu;        // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
-  double R;            // Nuclear radius
+  double Z, A;  // Nuclear charge and mass
+  double m, mu; // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
+  double R;     // Nuclear radius
   // Grid
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
@@ -127,6 +127,11 @@ public:
 class DiracAtom : public Atom
 {
 private:
+  // Grid finding
+  double gb_out = 5.0; // Relative outside bound of grid
+  double gb_in = 1e-2; // Relative inside bound of grid
+  int min_n = 1000;    // Minimum number of grid points
+
   // Eigenstates
   map<tuple<int, int, bool>, DiracState> states;
 
@@ -136,6 +141,8 @@ private:
 public:
   DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
+
+  pair<int, int> optimalGrid(double E, int k);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
