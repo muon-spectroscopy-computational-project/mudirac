@@ -58,6 +58,10 @@ SchroState::SchroState(const SchroState &s)
  */
 DiracState::DiracState(int N)
 {
+    if (N <= 0)
+    {
+        throw invalid_argument("N must be > 0 when initialising DiracState");
+    }
     grid = vector<double>(N, 0);
     loggrid = vector<double>(N, 0);
     Q = vector<double>(N, 0);
@@ -81,12 +85,33 @@ DiracState::DiracState(double x0, double x1, int N) : DiracState(N)
     grid = grids[1];
 }
 
+/**
+ * @brief  Initialise a DiracState instance with a grid
+ * @note   Creates a DiracState with given grid size and initialises the
+ * spatial grid itself
+ * 
+ * @param  x0:  Grid starting point
+ * @param  x1:  Grid ending point
+ * @param  N:   Number of steps
+ * @retval 
+ */
+DiracState::DiracState(double rc, double dx, int i0, int i1) : DiracState(i1 - i0 + 1)
+{
+    vector<vector<double>> grids = logGrid(rc, dx, i0, i1);
+    loggrid = grids[0];
+    grid = grids[1];
+
+    grid_indices.first = i0;
+    grid_indices.second = i1;
+}
+
 DiracState::DiracState(const DiracState &s)
 {
     init = true;
     nodes = s.nodes;
     E = s.E;
     k = s.k;
+    grid_indices = pair<int, int>(s.grid_indices);
     grid = vector<double>(s.grid);
     loggrid = vector<double>(s.loggrid);
     Q = vector<double>(s.Q);

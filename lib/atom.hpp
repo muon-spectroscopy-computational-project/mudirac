@@ -84,6 +84,7 @@ public:
 
   DiracState(int N = 0);
   DiracState(double x0, double x1, int N);
+  DiracState(double rc, double dx, int i0, int i1);
   DiracState(const DiracState &s);
 };
 
