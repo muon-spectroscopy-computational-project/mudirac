@@ -33,6 +33,7 @@
 
 # Test files
 test/*
+!test/macros.hpp
 !test/*.cpp
 !test/datapath.h.in
 !test/catch

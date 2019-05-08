@@ -4,6 +4,7 @@
 #include "../lib/transforms.hpp"
 
 #include "catch/catch.hpp"
+#include "macros.hpp"
 
 #define ERRTOL_HIGH 1e-5
 #define ERRTOL_LOW 1e-3
@@ -26,14 +27,13 @@ TEST_CASE("Discrete cosine transform", "[dctIV]")
 
     // More complex
 
-    for (int i = 0; i < N; ++i) {
-        f[i] = exp(-pow(4.0*i/N, 2.0));
+    for (int i = 0; i < N; ++i)
+    {
+        f[i] = exp(-pow(4.0 * i / N, 2.0));
     }
 
     cf = dctIV(f);
     cf = invDctIV(cf);
 
-    for (int i = 0; i < N; ++i) {
-        REQUIRE(cf[i] == Approx(f[i]));
-    }
+    CHECK_APPROX(f, cf, 1e-5);
 }

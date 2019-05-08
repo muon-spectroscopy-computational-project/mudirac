@@ -115,12 +115,16 @@ vector<vector<double>> logGrid(double x0, double x1, int n)
 vector<vector<double>> logGrid(double xc, double dx, int i0, int i1)
 {
     int n = i1 - i0 + 1;
+    if (n <= 0)
+    {
+        throw invalid_argument("i1 must be greater or equal than i0 in logGrid");
+    }
     vector<double> x(n), ex(n);
 
     for (int i = i0; i <= i1; ++i)
     {
         x[i - i0] = i * dx;
-        ex[i] = xc * exp(x[i - i0]);
+        ex[i - i0] = xc * exp(x[i - i0]);
     }
 
     return vector<vector<double>>({x, ex});

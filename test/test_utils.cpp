@@ -10,6 +10,7 @@
 #include "data/genlag.h"
 
 #include "catch/catch.hpp"
+#include "macros.hpp"
 
 bool compareLaguerre(double tol = 1e-5)
 {
@@ -67,11 +68,20 @@ TEST_CASE("Factorials", "[factorial]")
     REQUIRE_THROWS(factorial(-1));
 }
 
+TEST_CASE("Logarithmic grids", "[logGrid]")
+{
+    // Test center + step form
+    vector<vector<double>> lgrid_01 = logGrid(2.5 / 32.0, 2.5 * 32.0, 11);
+    vector<vector<double>> lgrid_cs = logGrid(2.5, log(2.0), -5, 5);
+
+    CHECK_APPROX(lgrid_01[1], lgrid_cs[1], 1e-5);
+}
+
 TEST_CASE("Sinc", "[sinc]")
 {
     REQUIRE(sinc(0) == 1);
-    REQUIRE(1-sinc(M_PI) == Approx(1.0));
-    REQUIRE(sinc(M_PI/2.0) == Approx(2.0/M_PI));
+    REQUIRE(1 - sinc(M_PI) == Approx(1.0));
+    REQUIRE(sinc(M_PI / 2.0) == Approx(2.0 / M_PI));
 }
 
 TEST_CASE("Generalised Laguerre polynomials", "[genlagpoly]")
