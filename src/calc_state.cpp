@@ -19,9 +19,8 @@ int main(int argc, char **argv)
     bool s = stoi(argv[4]) != 0;
 
     double A = argc > 5? stod(argv[5]) : -1;
-    double R = argc > 6? stod(argv[6]) : -1;
     
-    DiracAtom da = DiracAtom(Z, Physical::m_mu, A*Physical::amu, R);
+    DiracAtom da = DiracAtom(Z, Physical::m_mu, A*Physical::amu, NuclearRadiusModel::SPHERE);
     DiracState ds;
 
     da.setGridRelative(1e-4, 1e2, 3000);

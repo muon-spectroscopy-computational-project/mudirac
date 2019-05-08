@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     double A, mu, Ka_schro, Ka_dirac_hydro, Ka_dirac_hydro_mu, Ka_dirac_num_mu, Ka_dirac_num_sphere;
     DiracState p2, s1;
     // Test all atomic numbers, from 2 to 90, for their kappa alpha line for various models
-    for (int Z = 2; Z < 80; ++Z)
+    for (int Z = 2; Z < 60; ++Z)
     {
         A = getIsotopeMass(Z);
         mu = effectiveMass(A * Physical::amu, Physical::m_mu);
@@ -33,9 +33,9 @@ int main(int argc, char **argv)
             Ka_dirac_num_sphere = (p2.E-s1.E);
 
         }
-        catch (const char *e)
+        catch (TurningPointError tpe)
         {
-            cout << e << '\n';
+            cout << tpe.what() << '\n';
             throw("Failed");
         }
 
@@ -46,6 +46,6 @@ int main(int argc, char **argv)
         Ka_dirac_num_mu /= 1e3*Physical::eV;
         Ka_dirac_num_sphere /= 1e3*Physical::eV;
 
-        cout << Z << '\t' << Ka_schro << '\t' << Ka_dirac_hydro  << '\t' << Ka_dirac_hydro_mu  << '\t' << Ka_dirac_num_mu  << '\t' << Ka_dirac_num_sphere << '\n';
+        cout << Z << '\t' << A << '\t' << Ka_schro << '\t' << Ka_dirac_hydro  << '\t' << Ka_dirac_hydro_mu  << '\t' << Ka_dirac_num_mu  << '\t' << Ka_dirac_num_sphere << '\n';
     }
 }
