@@ -58,14 +58,11 @@ SchroState::SchroState(const SchroState &s)
  */
 DiracState::DiracState(int N)
 {
-    if (N <= 0)
-    {
-        throw invalid_argument("N must be > 0 when initialising DiracState");
-    }
     grid = vector<double>(N, 0);
     loggrid = vector<double>(N, 0);
     Q = vector<double>(N, 0);
     P = vector<double>(N, 0);
+    V = vector<double>(N, 0);
 }
 
 /**
@@ -126,14 +123,32 @@ DiracState::DiracState(const DiracState &s)
  * @param  m_in: Mass of the orbiting particle (e.g. electron)
  * @param  A_in: Atomic mass (amus, ignored if -1)
  * @param  R_in: Atomic radius (treated as point-like if <= 0)
+ * @param  fc:   Central point of the grid (corresponding to i = 0), as a fraction
+ *               of 1/(Z*mu), the 1s orbital radius for this atom (default = 1)
+ * @param  dx:   Logarithmic step of the grid (default = 0.005)
  * @retval 
  */
-Atom::Atom(double Z_in, double m_in, double A_in, NuclearRadiusModel radius_model)
+Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
+           double fc, double dx)
 {
     // Set the properties
-    Z = Z_in;
-    A = A_in;
-    m = m_in;
+    this->Z = Z;
+    this->A = A;
+    this->m = m;
+
+    // Sanity checks
+    if (Z <= 0)
+    {
+        throw invalid_argument("Z must be positive");
+    }
+    if (m <= 0)
+    {
+        throw invalid_argument("Mass can not be negative");
+    }
+    if (fc <= 0 || dx <= 0)
+    {
+        throw invalid_argument("Invalid grid parameters passed to Atom");
+    }
 
     if (A > 0)
     {
@@ -165,114 +180,33 @@ Atom::Atom(double Z_in, double m_in, double A_in, NuclearRadiusModel radius_mode
         }
     }
 
-    // Compute the grid
-    setGridRelative();
+    // Grid
+    rc = fc / (Z * mu);
+    this->dx = dx;
+
+    // Potential
+    V = CoulombPotential(Z, R);
 }
 
 /**
  * @brief  Recalculate the electrostatic potential
- * @note   Recalculate the electrostatic potential for an atom. Done automatically 
+ * @note   Recalculate the electrostatic potential for an atom. Done automatically
  * after changes in grid or background charge
- * 
- * @retval None
+ *
+ * @param r:        Grid to compute the potential on
+ * @retval          Computed potential
  */
-void Atom::recalcPotential()
+vector<double> Atom::recalcPotential(vector<double> r)
 {
-    vector<double> r = grid[1];
-    double V0 = R <= r0 ? 0 : -1.5 * Z / R;
-    double R3 = pow(R, 3.0);
-
-    V = vector<double>(N, 0);
-
-    // Start with the background charge contribution
-    shootPotentialLog(V, bkgQ, dx);
+    int N = r.size();
+    vector<double> Vout(N, 0);
 
     for (int i = 0; i < N; ++i)
     {
-        if (r[i] <= R)
-        {
-            V[i] += Z * pow(r[i], 2) / (2 * R3) + V0;
-        }
-        else
-        {
-            V[i] += -Z / r[i];
-        }
+        Vout[i] = V.V(r[i]);
     }
-}
 
-/**
- * @brief  Set logarithmic integration grid
- * @note   Set parameters of desired logarithmic integration grid for this Atom
- * 
- * @param  r0_in: Inferior boundary of the grid
- * @param  r1_in: Superior boundary of the grid
- * @param  N_in:  Number of points
- * @retval None
- */
-void Atom::setGrid(double r0_in, double r1_in, int N_in)
-{
-    r0 = r0_in;
-    r1 = r1_in;
-    N = N_in;
-
-    grid = logGrid(r0, r1, N);
-    dx = grid[0][1] - grid[0][0];
-    bkgQ = vector<double>(N, 0); // Reset background charge
-    recalcPotential();
-}
-
-/**
- * @brief Set logarithmic integration grid relative to a physical scale
- * @note  Set parameters of desired logarithmic integration grid for this Atom,
- * using a meaningful physical scale which corresponds to the expected radius of
- * the Schroedinger 1s orbital. The parameters are turned to distances following:
- * 
- * r = f/(Z*mu)
- * 
- * with mu effective mass of the atom. This scales down the dimension to what is
- * reasonable for the atom in question, allowing one to use homogeneous parameters
- * for multiple atoms.
- * 
- * @param   f0:       Inferior boundary of the grid
- * @param   f1:       Superior boundary of the grid
- * @param   N:        Number of points
- * @retval  None
- */
-void Atom::setGridRelative(double f0, double f1, int N)
-{
-    setGrid(f0 / (Z * mu), f1 / (Z * mu), N);
-}
-
-/**
- * @brief  Set the background charge
- * @note   Set the background charge for this Atom. The charge must be already 
- * expressed as amount of charge per spherical shell (so for example a constant 
- * spatial charge q should be here 4pi*r^2*q)
- * 
- * @param  bkgQ_in: Vector of new background charge
- * @retval None
- */
-void Atom::setBackgroundCharge(vector<double> bkgQ_in)
-{
-    bkgQ = vector<double>(bkgQ_in);
-    recalcPotential();
-}
-
-/**
- * @brief  Get the Atom object's grid
- * @note   Get either r or log(r/r0) for this Atom's grid
- * 
- * @param  log: If true, return log(r/r0) instead of r (default = false)
- * @retval 
- */
-vector<double> Atom::getGrid(bool log)
-{
-    return vector<double>(grid[!log]);
-}
-
-vector<double> Atom::getPotential()
-{
-    return vector<double>(V);
+    return Vout;
 }
 
 // Nuclear radius models
@@ -290,7 +224,7 @@ double Atom::sphereNuclearModel(double A)
     return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
 }
 
-DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, NuclearRadiusModel radius_model) : Atom(Z_in, m_in, A_in, radius_model)
+DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
 }
 
@@ -306,20 +240,27 @@ DiracAtom::DiracAtom(double Z_in, double m_in, double A_in, NuclearRadiusModel r
  */
 DiracState DiracAtom::convergeState(double E0, int k)
 {
-    int Qn, Pn;
+    int N, Qn, Pn;
     double E, dE, err, norm;
-    vector<double> y(N), zetai(N), zetae(N);
-    DiracState state = DiracState(N);
+    vector<double> y, zetai, zetae;
+    DiracState state;
     TurningPoint tp;
 
     E = E0;
 
     for (int it = 0; it < maxit; ++it)
     {
+        state = DiracState(rc, dx, -1000, 1000);
+        N = state.grid.size();
+        y = vector<double>(N, 0);
+        zetai = vector<double>(N, 0);
+        zetae = vector<double>(N, 0);
         // Start by applying boundary conditions
-        boundaryDiracCoulomb(state.Q, state.P, grid[1], E, k, mu, Z, R > r0);
+        boundaryDiracCoulomb(state.Q, state.P, state.grid, E, k, mu, Z, R > state.grid[0]);
+        // Potential
+        state.V = recalcPotential(state.grid);
         // Integrate here
-        tp = shootDiracLog(state.Q, state.P, grid[1], V, E, k, mu, dx);
+        tp = shootDiracLog(state.Q, state.P, state.grid, state.V, E, k, mu, dx);
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
         // Compute the derivative of the error in dE
         for (int i = 0; i < N; ++i)
@@ -329,17 +270,13 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
         // First the forward version
         y[tp.i] = tp.Qi / tp.Pi;
-        shootDiracErrorDELog(zetai, y, grid[1], V, tp.i, E, k, mu, dx);
+        shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, E, k, mu, dx);
         // Then the backwards one
         y[tp.i] = tp.Qe / tp.Pe;
         boundaryDiracErrorDECoulomb(zetae, E, k, mu);
-        shootDiracErrorDELog(zetae, y, grid[1], V, tp.i, E, k, mu, dx, 'b');
+        shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, E, k, mu, dx, 'b');
 
         dE = err / (zetai[tp.i] - zetae[tp.i]);
-        // cout << tp.Qe << "\n";
-        // cout << tp.Pe << "\n";
-        // cout << zetai[tp.i] << " " << zetae[tp.i] << "\n";
-        // cout << (it + 1) << '\t' << E - mu * pow(Physical::c, 2) << '\t' << dE << '\n';
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
             break;
@@ -361,9 +298,9 @@ DiracState DiracAtom::convergeState(double E0, int k)
     // Now normalise
     for (int i = 0; i < N; ++i)
     {
-        y[i] = (pow(state.P[i], 2) + pow(state.Q[i] * Physical::alpha, 2)) * grid[1][i];
+        y[i] = (pow(state.P[i], 2) + pow(state.Q[i] * Physical::alpha, 2)) * state.grid[i];
     }
-    norm = sqrt(trapzInt(grid[0], y));
+    norm = sqrt(trapzInt(state.loggrid, y));
     for (int i = 0; i < N; ++i)
     {
         state.P[i] /= norm;
@@ -374,7 +311,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
     Pn = countNodes(state.P);
     Qn = countNodes(state.Q);
 
-    if (Qn - Pn != (R > r0))
+    if (Qn - Pn != (R > state.grid[0]))
     {
         throw AtomConvergenceException(AtomConvergenceException::ACEType::NODES_WRONG);
     }
@@ -395,10 +332,10 @@ DiracState DiracAtom::convergeState(double E0, int k)
  * and search from there. If any other states are found by accident during the search they
  * are stored for future use.
  * 
- * @param  n: Principal quantum number
- * @param  l: Orbital quantum number
- * @param  s: Spin quantum number (true = 1/2, false = -1/2)
- * @param  force: If true, force recalculation of the orbital even if already present
+ * @param  n:       Principal quantum number
+ * @param  l:       Orbital quantum number
+ * @param  s:       Spin quantum number (true = 1/2, false = -1/2)
+ * @param  force:   If true, force recalculation of the orbital even if already present
  * @retval None
  */
 void DiracAtom::calcState(int n, int l, bool s, bool force)
@@ -437,6 +374,29 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     }
 
     states[make_tuple(n, l, s)] = state;
+}
+
+/**
+ * @brief  Calculate all states up to a given n
+ * @note   Calculate all states up to a given quantum number n,
+ * including all orbital and spin quantum numbers.
+ * 
+ * @param  max_n:   Maximum value of principal quantum number
+ * @param  force:   If true, force recalculation of the orbital even if already present
+ * @retval None
+ */
+void DiracAtom::calcAllStates(int max_n, bool force)
+{
+    for (int n = 1; n <= max_n; ++n)
+    {
+        for (int l = 0; l < n; ++l)
+        {
+            for (int s = 0; s < 2; ++s)
+            {
+                calcState(n, l, bool(s), force);
+            }
+        }
+    }
 }
 
 /**

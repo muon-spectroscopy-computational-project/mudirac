@@ -18,6 +18,9 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_INTEGRATE
+#define MUDIRAC_INTEGRATE
+
 // Exception classes
 class TurningPointError : exception
 {
@@ -55,3 +58,5 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
                            double E, int k = -1, double m = 1, double dx = 1);
 void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double> r, vector<double> V,
                           int turn_i, double E, int k = -1, double m = 1, double dx = 1, char dir = 'f');
+
+#endif

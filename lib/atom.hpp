@@ -21,6 +21,7 @@
 #include "integrate.hpp"
 #include "boundary.hpp"
 #include "elements.hpp"
+#include "potential.hpp"
 
 using namespace std;
 
@@ -61,6 +62,7 @@ public:
   pair<int, int> grid_indices;
   vector<double> grid;
   vector<double> loggrid;
+  vector<double> V;
 
   State();
 };
@@ -103,18 +105,16 @@ protected:
   double Z, A;         // Nuclear charge and mass
   double m, mu;        // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
   double R;            // Nuclear radius
-  vector<double> V;    // Radial potential
-  vector<double> bkgQ; // Background charge
   // Grid
-  int N = 1000;                // Number of points
-  double r0 = 1e-2, r1 = 5e1;  // Extremes
-  vector<vector<double>> grid; // Grid (x, r)
-  double dx;                   // Step
+  double rc = 1.0;   // Central radius
+  double dx = 0.005; // Step
+  CoulombPotential V;
 
-  void recalcPotential(); // Recalculate V
+  vector<double> recalcPotential(vector<double> r); // Recalculate V for a certain grid
 
 public:
-  Atom(double Z_in = 1, double m_in = 1, double A_in = -1, NuclearRadiusModel radius_model = POINT);
+  Atom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
+       double fc = 1.0, double dx = 0.005);
 
   // Basic getters
   double getZ() { return Z; };
@@ -122,14 +122,6 @@ public:
   double getm() { return m; };
   double getmu() { return mu; };
   double getR() { return R; };
-  double getN() { return N; };
-
-  // Grid and potential
-  void setGrid(double r0_in = 1e-2, double r1_in = 5e1, int N_in = 1000);
-  void setGridRelative(double r0_in = 1e-2, double r1_in = 5e1, int N_in = 1000);
-  void setBackgroundCharge(vector<double> bkgQ_in);
-  vector<double> getGrid(bool log = false);
-  vector<double> getPotential();
 };
 
 class DiracAtom : public Atom
@@ -142,7 +134,8 @@ private:
   DiracState convergeState(double E0, int k = -1);
 
 public:
-  DiracAtom(double Z_in = 1, double m_in = 1, double A_in = -1, NuclearRadiusModel radius_model = POINT);
+  DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
+            double fc = 1.0, double dx = 0.005);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);

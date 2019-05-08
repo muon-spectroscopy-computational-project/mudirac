@@ -12,17 +12,16 @@ int main()
 {
     // Atom a = Atom(1, 1, 1, 2);
     cout << log(numeric_limits<double>::min()) << "\n";
-    return 0;
 
     vector<double> r, V, V2;
     tuple<int, int, int> ind;
     map<tuple<int, int, int>, DiracState *> test;
-    DiracAtom da = DiracAtom(2, Physical::m_mu, -1);
+    DiracAtom da = DiracAtom(1, Physical::m_mu, -1);
     DiracAtom da2 = DiracAtom(2, Physical::m_mu, -1);
     DiracState s1, s1f, s2, s2f, p2, p2f;
 
-    da.setGrid(1e-6, 1);
-    da2.setGrid(1e-6, 1);
+    // da.setGrid(1e-6, 1);
+    // da2.setGrid(1e-6, 1);
 
     try
     {
@@ -31,14 +30,16 @@ int main()
         da2.calcState(1, 0, false);
         da2.calcState(2, 0, false);
     }
-    catch (const char *s)
+    catch (TurningPointError tpe)
     {
-        std::cerr << s << '\n';
+        std::cerr << tpe.what() << '\n';
     }
 
-    r = da.getGrid();
-    V = da.getPotential();
-    V2 = da2.getPotential();
+    return 0;
+
+    // r = da.getGrid();
+    // V = da.getPotential();
+    // V2 = da2.getPotential();
 
     da.maxit = 1000;
     da2.maxit = 1000;
