@@ -58,6 +58,7 @@ public:
   bool init = false;
   int nodes = 0;
   double E = 0;
+  pair<int, int> grid_indices;
   vector<double> grid;
   vector<double> loggrid;
 

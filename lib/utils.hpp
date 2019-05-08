@@ -26,6 +26,7 @@ double sinc(double x);
 
 vector<double> linGrid(double x0, double x1, int n = 100);
 vector<vector<double>> logGrid(double x0, double x1, int n = 100);
+vector<vector<double>> logGrid(double xc, double dx, int i0, int i1);
 
 double genLaguerrePoly(double x, int n, double alpha);
 vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);

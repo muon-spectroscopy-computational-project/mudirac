@@ -51,8 +51,9 @@ int factorial(int n)
  * @param x         Argument
  * @return double 
  */
-double sinc(double x) {
-    return x <= 0? 1 : sin(x)/x;
+double sinc(double x)
+{
+    return x <= 0 ? 1 : sin(x) / x;
 }
 
 /**
@@ -95,6 +96,31 @@ vector<vector<double>> logGrid(double x0, double x1, int n)
     {
         x[i] = i * dlog;
         ex[i] = x0 * exp(x[i]);
+    }
+
+    return vector<vector<double>>({x, ex});
+}
+
+/**
+ * @brief  Generate a logarithmic grid
+ * @note   Generate a logarithmically spaced grid from a central point
+ * and a step, ranging between the given indices.
+ *
+ * @param  xc:  Central point
+ * @param  dx:  Logarithmic step
+ * @param  i0:  Starting index
+ * @param  i1:  End index
+ * @retval grid: Vectors containing the grids, [x, exp(x)].
+ */
+vector<vector<double>> logGrid(double xc, double dx, int i0, int i1)
+{
+    int n = i1 - i0 + 1;
+    vector<double> x(n), ex(n);
+
+    for (int i = i0; i <= i1; ++i)
+    {
+        x[i - i0] = i * dx;
+        ex[i] = xc * exp(x[i - i0]);
     }
 
     return vector<vector<double>>({x, ex});
@@ -174,13 +200,15 @@ int countNodes(vector<double> v, double tol)
 
     for (i0 = 0; i0 < v.size(); ++i0)
     {
-        if (abs(v[i0]) > tol) {
+        if (abs(v[i0]) > tol)
+        {
             break;
         }
     }
     for (i1 = v.size() - 1; i1 > i0; --i1)
     {
-        if (abs(v[i1]) > tol) {
+        if (abs(v[i1]) > tol)
+        {
             break;
         }
     }
