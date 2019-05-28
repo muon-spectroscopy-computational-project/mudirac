@@ -58,7 +58,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         for (int i = 0; i < 2; ++i)
         {
             P[i] = pow(r[i], -k);
-            Q[i] = 1.0 / P[i];
+            Q[i] = pow(r[i], k);
         }
     }
 
@@ -75,7 +75,8 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         P[N - i] = exp(-K * r[N - i]);
         Q[N - i] = -K / (m * Physical::c + E * Physical::alpha) * P[N - i];
 
-        if (P[N-i] == 0) {
+        if (P[N - i] == 0)
+        {
             // We went below numerical precision!
             throw "Boundary conditions give zero at the outside edge - you may need a smaller grid";
         }

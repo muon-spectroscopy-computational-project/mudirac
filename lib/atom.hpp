@@ -142,7 +142,7 @@ public:
   DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
 
-  pair<int, int> optimalGrid(double E, int k);
+  pair<int, int> optimalGrid(double E, int k, double eps=1e-10);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);

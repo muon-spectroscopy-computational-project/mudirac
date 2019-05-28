@@ -228,12 +228,13 @@ DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_mod
 {
 }
 
-pair<int, int> DiracAtom::optimalGrid(double E, int k)
+pair<int, int> DiracAtom::optimalGrid(double E, int k, double eps)
 {
 
     double B;
     double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
     double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
+    double r_max;
     double r_out, r_in, r_tp;
 
     if (K < 0)
@@ -249,6 +250,14 @@ pair<int, int> DiracAtom::optimalGrid(double E, int k)
     K = sqrt(K);
     gamma = sqrt(gamma);
     B = E - mu * pow(Physical::c, 2);
+
+    r_max = gamma / K; // This is the ideal central position, where rho^gamma*exp(-rho/2) is maximum
+    // Lowest limit
+    r_in = pow(eps, 1.0/gamma)/exp(1)*gamma/K;
+    r_out = (gamma-log(eps))/K;
+    
+    cout << E << ' ' << r_in << ' ' << r_max << ' ' << -Z/B << ' ' << r_out << '\n';
+    // cout << r_max << '\t' << rc << '\n';
 
     throw runtime_error("Not implemented yet");
 }

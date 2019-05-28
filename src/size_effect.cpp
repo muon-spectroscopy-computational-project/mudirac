@@ -23,8 +23,8 @@ int main(int argc, char **argv)
     DiracAtom da = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::POINT);
     DiracAtom da_sphere = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE);
     
-    da.setGridRelative(1e-2, 1e2, 3000);
-    da_sphere.setGridRelative(1e-2, 1e2, 3000);
+    // da.setGridRelative(1e-2, 1e2, 3000);
+    // da_sphere.setGridRelative(1e-2, 1e2, 3000);
 
     for (int n = 1; n <= maxn; ++n) {
         try {
