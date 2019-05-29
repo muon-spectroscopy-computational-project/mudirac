@@ -3,7 +3,7 @@
 #include <math.h>
 #include "../lib/potential.hpp"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 
 #define ERRTOL_HIGH 1e-5
 #define ERRTOL_LOW 1e-3

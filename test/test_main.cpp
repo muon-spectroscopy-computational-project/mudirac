@@ -1,6 +1,6 @@
 // Main file for catch.hpp
 #define CATCH_CONFIG_MAIN
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 
 #define CHECK_APPROX(v1, v2)                               \
     {                                                      \

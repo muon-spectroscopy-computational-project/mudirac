@@ -3,7 +3,7 @@
 #include <cmath>
 #include "../lib/transforms.hpp"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 #include "macros.hpp"
 
 #define ERRTOL_HIGH 1e-5

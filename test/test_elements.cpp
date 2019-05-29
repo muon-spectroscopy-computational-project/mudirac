@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "../lib/elements.hpp"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 
 using namespace std;
 

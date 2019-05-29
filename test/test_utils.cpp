@@ -9,7 +9,7 @@
 #include "../lib/utils.hpp"
 #include "data/genlag.h"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 #include "macros.hpp"
 
 bool compareLaguerre(double tol = 1e-5)

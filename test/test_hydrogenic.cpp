@@ -7,7 +7,7 @@
 #include "../lib/hydrogenic.hpp"
 #include "../lib/utils.hpp"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 
 using namespace std;
 

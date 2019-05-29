@@ -4,7 +4,7 @@
 #include <fstream>
 #include "datapath.h"
 
-#include "catch/catch.hpp"
+#include "../vendor/catch/catch.hpp"
 
 using namespace std;
 
