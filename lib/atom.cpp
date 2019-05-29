@@ -228,38 +228,51 @@ DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_mod
 {
 }
 
-pair<int, int> DiracAtom::optimalGrid(double E, int k, double eps)
+pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failcode)
 {
-
     double B;
     double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
     double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
-    double r_max;
-    double r_out, r_in, r_tp;
+    double r_out, r_in;
+    int i_out, i_in;
+
+    failcode = GridLimitsFailcode::OK;
 
     if (K < 0)
     {
-        throw runtime_error("State is not bound, can't compute optimal grid");
+        failcode = GridLimitsFailcode::UNBOUND;
+        return {0, 0};
     }
     if (gamma < 0)
     {
         // Unlikely while we're in the periodic table...
-        throw runtime_error("k is too small for this atom");
+        failcode = GridLimitsFailcode::SMALL_GAMMA;
+        return {0, 0};
     }
 
     K = sqrt(K);
     gamma = sqrt(gamma);
     B = E - mu * pow(Physical::c, 2);
 
-    r_max = gamma / K; // This is the ideal central position, where rho^gamma*exp(-rho/2) is maximum
-    // Lowest limit
-    r_in = pow(eps, 1.0/gamma)/exp(1)*gamma/K;
-    r_out = (gamma-log(eps))/K;
-    
-    cout << E << ' ' << r_in << ' ' << r_max << ' ' << -Z/B << ' ' << r_out << '\n';
-    // cout << r_max << '\t' << rc << '\n';
+    // Upper limit
+    if (out_eps > 1 || out_eps < 0)
+    {
+        throw runtime_error("Invalid value for out_eps in DiracAtom; must be 0 < out_eps < 1");
+    }
+    r_out = Z / abs(B) - log(out_eps) / K;
 
-    throw runtime_error("Not implemented yet");
+    // Lower limit
+    if (in_eps > 1 || in_eps < 0)
+    {
+        throw runtime_error("Invalid value for in_eps in DiracAtom; must be 0 < in_eps < 1");
+    }
+    r_in = pow(in_eps, 1.0 / gamma) / M_E * gamma / K;
+
+    // Now get these as integer numbers of steps.
+    i_out = ceil(log(r_out / rc) / dx);
+    i_in = floor(log(r_in / rc) / dx);
+
+    return {i_in, i_out};
 }
 
 /**
@@ -276,15 +289,32 @@ DiracState DiracAtom::convergeState(double E0, int k)
 {
     int N, Qn, Pn;
     double E, dE, err, norm;
+    pair<int, int> glimits;
     vector<double> y, zetai, zetae;
     DiracState state;
     TurningPoint tp;
+    GridLimitsFailcode fcode;
 
     E = E0;
 
     for (int it = 0; it < maxit; ++it)
     {
-        state = DiracState(rc, dx, -1000, 1000);
+        glimits = gridLimits(E, k, fcode);
+        switch (fcode)
+        {
+        case GridLimitsFailcode::OK:
+            break;
+        case GridLimitsFailcode::UNBOUND:
+            cout << "Failed\n";
+            continue;
+            break;
+        case GridLimitsFailcode::SMALL_GAMMA:
+            break;
+        default:
+            throw runtime_error("Unknown error occurred in grid estimation in convergeState");
+            break;
+        }
+        state = DiracState(rc, dx, glimits.first, glimits.second);
         N = state.grid.size();
         y = vector<double>(N, 0);
         zetai = vector<double>(N, 0);

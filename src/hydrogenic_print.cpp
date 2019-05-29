@@ -22,9 +22,12 @@ int main(int argc, char **argv)
     bool mu = false;
     if (argc > 4)
         mu = (string(argv[4]) == "mu");
-    double r_span = 5;
+    double r_out = 5;
+    double r_in = 1e6;
     if (argc > 5)
-        r_span = stod(argv[5]);
+        r_out = stod(argv[5]);
+    if (argc > 6)
+        r_in = stod(argv[6]);
     double m = mu ? Physical::m_mu : Physical::m_e;
 
     double schE = hydrogenicSchroEnergy(Z, m, n);
@@ -32,12 +35,20 @@ int main(int argc, char **argv)
 
     double r_turn = -Z / dirE;
 
-    vector<double> r = linGrid(r_turn / r_span, r_turn * r_span);
-    vector<double> schPsi = hydrogenicSchroWavefunction(r, Z, m, n, l);
-    vector<vector<double>> dirPsi = hydrogenicDiracWavefunction(r, Z, m, n, k);
+    double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
+    gamma = sqrt(gamma);
+    double K = -dirE*Physical::alpha*(2*m*Physical::c+dirE*Physical::alpha);
+    K = sqrt(K);
 
-    for (int i = 0; i < r.size(); ++i)
+    double eps = 1e-3;
+    double r_low = pow(eps, 1.0 / gamma) / exp(1) * gamma / K;
+
+    vector<vector<double>> grid = logGrid(r_low, r_turn * r_out, 1000);
+    vector<double> schPsi = hydrogenicSchroWavefunction(grid[1], Z, m, n, l);
+    vector<vector<double>> dirPsi = hydrogenicDiracWavefunction(grid[1], Z, m, n, k);
+
+    for (int i = 0; i < grid[0].size(); ++i)
     {
-        cout << r[i] << '\t' << schPsi[i] << '\t' << dirPsi[0][i] << '\t' << dirPsi[0][i] << '\n';
+        cout << grid[0][i] << '\t' << grid[1][i] << '\t' << schPsi[i] << '\t' << dirPsi[0][i] << '\t' << dirPsi[1][i] << '\n';
     }
 }

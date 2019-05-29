@@ -127,11 +127,6 @@ public:
 class DiracAtom : public Atom
 {
 private:
-  // Grid finding
-  double gb_out = 5.0; // Relative outside bound of grid
-  double gb_in = 1e-2; // Relative inside bound of grid
-  int min_n = 1000;    // Minimum number of grid points
-
   // Eigenstates
   map<tuple<int, int, bool>, DiracState> states;
 
@@ -139,10 +134,21 @@ private:
   DiracState convergeState(double E0, int k = -1);
 
 public:
+  double out_eps = 1e-5;
+  double in_eps = 1e-5;
+  int min_n = 1000;
+
+  enum GridLimitsFailcode
+  {
+    OK,
+    UNBOUND,
+    SMALL_GAMMA,
+  };
+
   DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
 
-  pair<int, int> optimalGrid(double E, int k, double eps=1e-10);
+  pair<int, int> gridLimits(double E, int k, GridLimitsFailcode &failcode);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
