@@ -3,11 +3,22 @@
 #include "../lib/hydrogenic.hpp"
 #include "../lib/constants.hpp"
 #include "../lib/utils.hpp"
+#include "../vendor/easyloggingpp/easylogging++.h"
 
 using namespace std;
 
+INITIALIZE_EASYLOGGINGPP
+
 int main(int argc, char **argv)
 {
+    el::Configurations loggerConf;
+    loggerConf.setToDefault();
+    loggerConf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, "FALSE");
+    loggerConf.set(el::Level::Global, el::ConfigurationType::Filename, "hydrogenic_print.log");
+    el::Loggers::reconfigureLogger("default", loggerConf);
+
+    LOG(INFO) << "My first info log using default logger";
+
     // Parameters
     if (argc < 4)
     {
@@ -37,7 +48,7 @@ int main(int argc, char **argv)
 
     double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
     gamma = sqrt(gamma);
-    double K = -dirE*Physical::alpha*(2*m*Physical::c+dirE*Physical::alpha);
+    double K = -dirE * Physical::alpha * (2 * m * Physical::c + dirE * Physical::alpha);
     K = sqrt(K);
 
     double eps = 1e-3;
