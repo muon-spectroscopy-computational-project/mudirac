@@ -5,8 +5,10 @@
 
 using namespace std;
 
+
 int main(int argc, char **argv)
 {
+
     // Parameters
     cout << argc << '\n';
     if (argc < 3) {
