@@ -305,7 +305,8 @@ DiracState DiracAtom::convergeState(double E0, int k)
         case GridLimitsFailcode::OK:
             break;
         case GridLimitsFailcode::UNBOUND:
-            // LOG(INFO) << "Convergence failed - State with B = " << E-mu*pow(Physical::c, 2) << " is unbound";            
+            std::clog << "Convergence failed - State with B = " << E - mu * pow(Physical::c, 2) << " is unbound\n";
+            // LOG(INFO)
             continue;
             break;
         case GridLimitsFailcode::SMALL_GAMMA:

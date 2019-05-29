@@ -1,11 +1,16 @@
 #include <iostream>
 #include "../lib/atom.hpp"
 #include "../lib/constants.hpp"
+#include "../lib/log.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
+    Log logger("kappa_a.log");
+
+    std::clog << "Test\n";
+
     double A, mu, Ka_schro, Ka_dirac_hydro, Ka_dirac_hydro_mu, Ka_dirac_num_mu, Ka_dirac_num_sphere;
     DiracState p2, s1;
     // Test all atomic numbers, from 2 to 90, for their kappa alpha line for various models
@@ -25,13 +30,12 @@ int main(int argc, char **argv)
             p2 = daCoulomb.getState(2, 1, false);
             s1 = daCoulomb.getState(1, 0, false);
 
-            Ka_dirac_num_mu = (p2.E-s1.E);
+            Ka_dirac_num_mu = (p2.E - s1.E);
 
             p2 = daSphere.getState(2, 1, false);
             s1 = daSphere.getState(1, 0, false);
 
-            Ka_dirac_num_sphere = (p2.E-s1.E);
-
+            Ka_dirac_num_sphere = (p2.E - s1.E);
         }
         catch (TurningPointError tpe)
         {
@@ -40,12 +44,12 @@ int main(int argc, char **argv)
         }
 
         // Convert to keV
-        Ka_schro /= 1e3*Physical::eV;
-        Ka_dirac_hydro /= 1e3*Physical::eV;
-        Ka_dirac_hydro_mu /= 1e3*Physical::eV;
-        Ka_dirac_num_mu /= 1e3*Physical::eV;
-        Ka_dirac_num_sphere /= 1e3*Physical::eV;
+        Ka_schro /= 1e3 * Physical::eV;
+        Ka_dirac_hydro /= 1e3 * Physical::eV;
+        Ka_dirac_hydro_mu /= 1e3 * Physical::eV;
+        Ka_dirac_num_mu /= 1e3 * Physical::eV;
+        Ka_dirac_num_sphere /= 1e3 * Physical::eV;
 
-        cout << Z << '\t' << A << '\t' << Ka_schro << '\t' << Ka_dirac_hydro  << '\t' << Ka_dirac_hydro_mu  << '\t' << Ka_dirac_num_mu  << '\t' << Ka_dirac_num_sphere << '\n';
+        cout << Z << '\t' << A << '\t' << Ka_schro << '\t' << Ka_dirac_hydro << '\t' << Ka_dirac_hydro_mu << '\t' << Ka_dirac_num_mu << '\t' << Ka_dirac_num_sphere << '\n';
     }
 }
