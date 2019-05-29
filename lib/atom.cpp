@@ -306,7 +306,6 @@ DiracState DiracAtom::convergeState(double E0, int k)
             break;
         case GridLimitsFailcode::UNBOUND:
             std::clog << "Convergence failed - State with B = " << E - mu * pow(Physical::c, 2) << " is unbound\n";
-            // LOG(INFO)
             continue;
             break;
         case GridLimitsFailcode::SMALL_GAMMA:
@@ -353,6 +352,8 @@ DiracState DiracAtom::convergeState(double E0, int k)
             throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
         }
     }
+
+    std::clog.flush();
 
     // Make states continuous
     for (int i = tp.i; i < N; ++i)

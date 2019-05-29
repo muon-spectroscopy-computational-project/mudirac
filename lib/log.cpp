@@ -24,5 +24,4 @@ Log::~Log()
 {
     std::clog.rdbuf(clbuf);
     logfile.close();
-    std::cout << "Log destroyed!\n";
 }
