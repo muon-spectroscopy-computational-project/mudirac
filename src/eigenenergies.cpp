@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         finiteE << Z << '\t' << A << '\t';
         compareE << Z << '\t' << A << '\t';
 
-        for (int n = 1; n < 3; ++n)
+        for (int n = 1; n < 8; ++n)
         {
             try
             {
@@ -49,6 +49,10 @@ int main(int argc, char **argv)
             catch (TurningPointError tpe)
             {
                 cout << tpe.what() << '\n';
+                throw("Failed");
+            }
+            catch (exception e) {
+                cout << e.what() << '\n';
                 throw("Failed");
             }
         }

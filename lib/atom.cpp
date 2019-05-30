@@ -253,7 +253,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
 
     K = sqrt(K);
     gamma = sqrt(gamma);
-    B = E - mu * pow(Physical::c, 2);
+    B = E - restE;
 
     // Upper limit
     if (out_eps > 1 || out_eps < 0)
@@ -289,7 +289,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
 DiracState DiracAtom::convergeState(double E0, int k)
 {
     int N, Qn, Pn;
-    double E, dE, err, norm;
+    double B, E, dE, err, norm;
     pair<int, int> glimits;
     vector<double> y, zetai, zetae;
     DiracState state;
@@ -300,13 +300,15 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     for (int it = 0; it < maxit; ++it)
     {
+        B = E - restE;
         glimits = gridLimits(E, k, fcode);
         switch (fcode)
         {
         case GridLimitsFailcode::OK:
             break;
         case GridLimitsFailcode::UNBOUND:
-            std::clog << "Convergence failed - State with B = " << E - mu * pow(Physical::c, 2) << " is unbound\n";
+            std::clog << "Convergence failed - State with B = " << B << " is unbound\n";
+            E = restE - B;
             continue;
             break;
         case GridLimitsFailcode::SMALL_GAMMA:
@@ -325,7 +327,24 @@ DiracState DiracAtom::convergeState(double E0, int k)
         // Potential
         state.V = recalcPotential(state.grid);
         // Integrate here
-        tp = shootDiracLog(state.Q, state.P, state.grid, state.V, E, k, mu, dx);
+        try
+        {
+            tp = shootDiracLog(state.Q, state.P, state.grid, state.V, E, k, mu, dx);
+        }
+        catch (TurningPointError tpe)
+        {
+            std::clog << "TurningPointError: " << tpe.what() << '\n';
+            std::clog.flush();
+            if (tpe.getType() == tpe.RMIN_BIG)
+            {
+                E = E + 0.1;
+            }
+            else if (tpe.getType() == tpe.RMAX_SMALL)
+            {
+                E = E - 0.1;
+            }
+            continue;
+        }
         err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
         // Compute the derivative of the error in dE
         for (int i = 0; i < N; ++i)
@@ -422,6 +441,15 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 
     // Then start with a guess for the energy
     E0 = hydrogenicDiracEnergy(Z, mu, n, k);
+
+    if (R > 0)
+    {
+        // For finite atoms, the initial energy might be too low
+        if (E0 - restE < V.V(0))
+        {
+            E0 = V.V(0) + restE + 0.1;
+        }
+    }
 
     for (int it = 0; it < maxit; ++it)
     {
