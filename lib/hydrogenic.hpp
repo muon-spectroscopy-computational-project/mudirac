@@ -17,10 +17,10 @@
 
 using namespace std;
 
-double hydrogenicSchroEnergy(double Z=1.0, double mu=1.0, int n=1);
-double hydrogenicSchroWavefunction(double r, double Z=1, double mu=1, int n=1, int l=0);
-vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z=1, double mu=1, int n=1, int l=0);
+double hydrogenicSchroEnergy(double Z = 1.0, double mu = 1.0, int n = 1);
+double hydrogenicSchroWavefunction(double r, double Z = 1, double mu = 1, int n = 1, int l = 0);
+vector<double> hydrogenicSchroWavefunction(vector<double> r, double Z = 1, double mu = 1, int n = 1, int l = 0);
 
-double hydrogenicDiracEnergy(double Z=1.0, double mu=1.0, int n=1, int k=-1, bool bind=false);
-vector<double> hydrogenicDiracWavefunction(double r, double Z=1, double mu=1, int n=1, int k=-1);
-vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z=1, double mu=1, int n=1, int k=-1);
+double hydrogenicDiracEnergy(double Z = 1.0, double mu = 1.0, int n = 1, int k = -1, bool bind = false);
+vector<double> hydrogenicDiracWavefunction(double r, double Z = 1, double mu = 1, int n = 1, int k = -1);
+vector<vector<double>> hydrogenicDiracWavefunction(vector<double> r, double Z = 1, double mu = 1, int n = 1, int k = -1);

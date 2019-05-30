@@ -47,7 +47,6 @@ int factorial(int n)
 /**
  * @brief Sinc function, or sin(x)/x
  * 
- * 
  * @param x         Argument
  * @return double 
  */

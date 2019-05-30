@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <functional>
 
 using namespace std;
 
@@ -24,6 +25,11 @@ double effectiveMass(double m1, double m2);
 
 int factorial(int n);
 double sinc(double x);
+
+template <typename T>
+vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op);
+template <typename T>
+vector<T> vectorOperation(vector<T> v, T x, char op);
 
 vector<double> linGrid(double x0, double x1, int n = 100);
 vector<vector<double>> logGrid(double x0, double x1, int n = 100);
@@ -36,4 +42,107 @@ int countNodes(vector<double> v, double tol = 1e-8);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);
 string stripString(string s, string strip = " \t\n");
+
+// Templated function declarations
+/**
+ * @brief Perform an element-wise operation on two vectors
+ * 
+ * @tparam T        Type of the vectors' elements
+ * @param v1        First vector
+ * @param v2        Second vector
+ * @param op        Operator (can be +, -, *, / or ^)
+ * @return vector<T> 
+ */
+template <typename T>
+vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op)
+{
+    if (v1.size() != v2.size())
+    {
+        throw runtime_error("Vectors don't match in size");
+    }
+
+    vector<T> ans(v1.size());
+
+    T(*opfunc)
+    (T, T);
+
+    switch (op)
+    {
+    case '+':
+        opfunc = [](T a, T b) { return a + b; };
+        break;
+    case '-':
+        opfunc = [](T a, T b) { return a - b; };
+        break;
+    case '*':
+        opfunc = [](T a, T b) { return a * b; };
+        break;
+    case '/':
+        opfunc = [](T a, T b) { return a / b; };
+        break;
+    case '^':
+        opfunc = pow;
+        break;
+    default:
+        throw invalid_argument("Invalid operator code for vectorOperation");
+        break;
+    }
+
+    for (int i = 0; i < v1.size(); ++i)
+    {
+        ans[i] = opfunc(v1[i], v2[i]);
+    }
+
+    return ans;
+}
+
+/**
+ * @brief Perform an element-wise operation on a vector
+ * and a scalar
+ * 
+ * @tparam T        Type of the vectors' elements
+ * @param v         Vector
+ * @param x         Scalar
+ * @param op        Operator (can be +, -, *, / or ^)
+ * @return vector<T> 
+ */
+template <typename T>
+vector<T> vectorOperation(vector<T> v, T x, char op)
+{
+
+    vector<T> ans(v.size());
+
+    T(*opfunc)
+    (T, T);
+
+    switch (op)
+    {
+    case '+':
+        opfunc = [](T a, T b) { return a + b; };
+        break;
+    case '-':
+        opfunc = [](T a, T b) { return a - b; };
+        break;
+    case '*':
+        opfunc = [](T a, T b) { return a * b; };
+        break;
+    case '/':
+        opfunc = [](T a, T b) { return a / b; };
+        break;
+    case '^':
+        opfunc = pow;
+        break;
+    default:
+        throw invalid_argument("Invalid operator code for vectorOperation");
+        break;
+    }
+
+    for (int i = 0; i < v.size(); ++i)
+    {
+        ans[i] = opfunc(v[i], x);
+    }
+
+    return ans;
+}
+
 #endif

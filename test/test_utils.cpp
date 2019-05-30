@@ -68,6 +68,16 @@ TEST_CASE("Factorials", "[factorial]")
     REQUIRE_THROWS(factorial(-1));
 }
 
+TEST_CASE("Vector operations", "[vectorOperation]")
+{
+    vector<double> v1(3, 2), v2(3, 3);
+
+    CHECK(vectorOperation(v1, v2, '*') == vector<double>{6, 6, 6});
+    CHECK(vectorOperation(v1, v2, '+') == vector<double>{5, 5, 5});
+
+    CHECK(vectorOperation(v1, 3.0, '^') == vector<double>{8, 8, 8});
+}
+
 TEST_CASE("Logarithmic grids", "[logGrid]")
 {
     // Test center + step form
