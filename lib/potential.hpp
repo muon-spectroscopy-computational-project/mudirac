@@ -17,6 +17,9 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_POTENTIAL
+#define MUDIRAC_POTENTIAL
+
 class Potential
 {
 public:
@@ -32,3 +35,5 @@ public:
 protected:
   double R, R3, VR, Z;
 };
+
+#endif

@@ -226,6 +226,7 @@ double Atom::sphereNuclearModel(double A)
 
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
+    restE = mu * pow(Physical::c, 2);
 }
 
 pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failcode)

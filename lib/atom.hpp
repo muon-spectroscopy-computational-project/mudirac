@@ -127,6 +127,7 @@ public:
 class DiracAtom : public Atom
 {
 private:
+  double restE; // Rest energy
   // Eigenstates
   map<tuple<int, int, bool>, DiracState> states;
 
