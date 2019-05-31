@@ -72,6 +72,16 @@ double SchroState::norm()
 }
 
 /**
+ * @brief  Get principal quantum number n
+ * 
+ * @retval      n
+ */
+int SchroState::getn()
+{
+    return nodes + l + 1;
+}
+
+/**
  * @brief  Initialise a DiracState instance
  * @note   Creates a DiracState with given grid size
  * 
@@ -157,6 +167,40 @@ double DiracState::norm()
     }
 
     return sqrt(trapzInt(loggrid, rho));
+}
+
+/**
+ * @brief  Get principal quantum number n
+ * 
+ * @retval      n
+ */
+
+int DiracState::getn()
+{
+    int l = getl();
+    return nodes + 1 + l;
+}
+
+/**
+ * @brief  Get orbital quantum number l
+ * 
+ * @retval      l
+ */
+
+int DiracState::getl()
+{
+    return (k > 0 ? k : -k - 1);
+}
+
+/**
+ * @brief  Get spin quantum number s (true for +1/2)
+ * 
+ * @retval      s
+ */
+
+bool DiracState::gets()
+{
+    return (k > 0);
 }
 
 /**
@@ -320,6 +364,39 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
     return {i_in, i_out};
 }
 
+double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
+{
+    int N;
+    double err, dE;
+    vector<double> y, zetai, zetae;
+
+    N = state.grid.size();
+    y = vector<double>(N, 0);
+    zetai = vector<double>(N, 0);
+    zetae = vector<double>(N, 0);
+
+    // Start by applying boundary conditions
+    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
+    tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
+    err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
+    // Compute the derivative of the error in dE
+    for (int i = 0; i < N; ++i)
+    {
+        y[i] = state.Q[i] / state.P[i];
+    }
+    // First the forward version
+    y[tp.i] = tp.Qi / tp.Pi;
+    shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx);
+    // Then the backwards one
+    y[tp.i] = tp.Qe / tp.Pe;
+    boundaryDiracErrorDECoulomb(zetae, state.E, state.k, mu);
+    shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
+
+    dE = err / (zetai[tp.i] - zetae[tp.i]);
+
+    return dE;
+}
+
 /**
  * @brief  Converge a state with given k and initial energy guess E0
  * @note   Converge iteratively a Dirac orbital for this atom from a given k and
@@ -333,9 +410,8 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
 DiracState DiracAtom::convergeState(double E0, int k)
 {
     int N, Qn, Pn;
-    double B, E, dE, err, norm;
+    double B, E, dE, norm;
     pair<int, int> glimits;
-    vector<double> y, zetai, zetae;
     DiracState state;
     TurningPoint tp;
     GridLimitsFailcode fcode;
@@ -362,49 +438,13 @@ DiracState DiracAtom::convergeState(double E0, int k)
             break;
         }
         state = DiracState(rc, dx, glimits.first, glimits.second);
+        state.E = E;
+        state.k = k;
+
         N = state.grid.size();
-        y = vector<double>(N, 0);
-        zetai = vector<double>(N, 0);
-        zetae = vector<double>(N, 0);
-        // Start by applying boundary conditions
-        boundaryDiracCoulomb(state.Q, state.P, state.grid, E, k, mu, Z, R > state.grid[0]);
         // Potential
         state.V = recalcPotential(state.grid);
-        // Integrate here
-        try
-        {
-            tp = shootDiracLog(state.Q, state.P, state.grid, state.V, E, k, mu, dx);
-        }
-        catch (TurningPointError tpe)
-        {
-            std::clog << "TurningPointError: " << tpe.what() << '\n';
-            std::clog.flush();
-            if (tpe.getType() == tpe.RMIN_BIG)
-            {
-                E = E + 0.1;
-            }
-            else if (tpe.getType() == tpe.RMAX_SMALL)
-            {
-                E = E - 0.1;
-            }
-            continue;
-        }
-        err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
-        // Compute the derivative of the error in dE
-        for (int i = 0; i < N; ++i)
-        {
-            y[i] = state.Q[i] / state.P[i];
-        }
-
-        // First the forward version
-        y[tp.i] = tp.Qi / tp.Pi;
-        shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, E, k, mu, dx);
-        // Then the backwards one
-        y[tp.i] = tp.Qe / tp.Pe;
-        boundaryDiracErrorDECoulomb(zetae, E, k, mu);
-        shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, E, k, mu, dx, 'b');
-
-        dE = err / (zetai[tp.i] - zetae[tp.i]);
+        dE = stateIntegrate(state, tp);
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
             E = E - dE;
@@ -427,10 +467,6 @@ DiracState DiracAtom::convergeState(double E0, int k)
         state.Q[i] *= tp.Pi / tp.Pe;
     }
     // Now normalise
-    // for (int i = 0; i < N; ++i)
-    // {
-    //     y[i] = (pow(state.P[i], 2) + pow(state.Q[i], 2)) * state.grid[i];
-    // }
     norm = state.norm();
     for (int i = 0; i < N; ++i)
     {
@@ -449,9 +485,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     state.nodes = Pn;
     state.nodesQ = Qn;
-    state.E = E;
     state.init = true;
-    state.k = k;
 
     return state;
 }
@@ -500,15 +534,14 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     {
         state = convergeState(E0, k);
         // Is the nodes condition respected?
-        dnode = state.nodes - (n - l - 1);
-        if (dnode == 0)
+        if (state.getn() == n)
         {
             break;
         }
         else
         {
             // Still save the state for future use
-            states[make_tuple(state.nodes + l + 1, l, s)] = state;
+            states[make_tuple(state.getn(), l, s)] = state;
             E0 = dnode > 0 ? E0 / Esearch : E0 * Esearch;
         }
     }

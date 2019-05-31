@@ -77,6 +77,7 @@ public:
 
   SchroState(const SchroState &s);
 
+  int getn();
   double norm() override;
 };
 
@@ -93,6 +94,9 @@ public:
   DiracState(double rc, double dx, int i0, int i1);
   DiracState(const DiracState &s);
 
+  int getn();
+  int getl();
+  bool gets();
   double norm() override;
 };
 
@@ -161,6 +165,7 @@ public:
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
   // Convergence
+  double stateIntegrate(DiracState &state, TurningPoint &tp);
   DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);
 };
