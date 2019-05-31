@@ -104,7 +104,7 @@ class Atom
 {
 public:
   // Tolerances and other details
-  double Etol = 1e-10, Esearch = 1.2;
+  double Etol = 1e-10, Esearch = 1.2, Edamp = 0.5;
   int maxit = 100;
 
   // Radius models
@@ -120,8 +120,6 @@ protected:
   double dx = 0.005; // Step
   CoulombPotential V;
 
-  vector<double> recalcPotential(vector<double> r); // Recalculate V for a certain grid
-
 public:
   Atom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
        double fc = 1.0, double dx = 0.005);
@@ -133,6 +131,9 @@ public:
   double getmu() { return mu; };
   double getR() { return R; };
   double getV(double r) { return V.V(r); };
+  vector<double> getV(vector<double> r);
+  double getrc() { return rc; };
+  double getdx() { return dx; };
 };
 
 class DiracAtom : public Atom

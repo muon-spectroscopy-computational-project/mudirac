@@ -284,7 +284,7 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
  * @param r:        Grid to compute the potential on
  * @retval          Computed potential
  */
-vector<double> Atom::recalcPotential(vector<double> r)
+vector<double> Atom::getV(vector<double> r)
 {
     int N = r.size();
     vector<double> Vout(N, 0);
@@ -466,14 +466,14 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
         N = state.grid.size();
         // Potential
-        state.V = recalcPotential(state.grid);
+        state.V = getV(state.grid);
         dE = stateIntegrate(state, tp);
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
             E = E - dE;
             break;
         }
-        E = E - dE;
+        E = E - dE * Edamp;
         if (std::isnan(E))
         {
             // Something bad happened

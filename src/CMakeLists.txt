@@ -12,3 +12,6 @@ target_link_libraries(eigenenergies mudiraclib)
 
 add_executable(hydrogenic_print hydrogenic_print.cpp)
 target_link_libraries(hydrogenic_print mudiraclib)
+
+add_executable(map_E_basins map_E_basins.cpp)
+target_link_libraries(map_E_basins mudiraclib)
