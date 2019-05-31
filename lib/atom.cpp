@@ -317,6 +317,19 @@ DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_mod
     restE = mu * pow(Physical::c, 2);
 }
 
+/**
+ * @brief  Compute grid limits for given E and k
+ * @note   Compute ideal indices to use as grid limits for
+ * given E and k. This is done by making use of the fact
+ * that the function decays exponentially past the 
+ * turning point (for outer limit) and knowledge of its 
+ * power law behaviour near the centre (for the inner one).
+ * 
+ * @param  E:           Energy of the state we need the grid for
+ * @param  k:           Quantum number k of the state
+ * @param  &failcode:   Error code in case of failure
+ * @retval              Pair of limit indices for the grid {inner, outer}
+ */
 pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failcode)
 {
     double B;
@@ -364,6 +377,16 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
     return {i_in, i_out};
 }
 
+/**
+ * @brief  Integrate a DiracState of given E, k and V
+ * @note   Perform a single integration of a DiracState,
+ * given its E, k and V (which must be set in the DiracState
+ * object itself). Returns a suggested correction for the energy.
+ * 
+ * @param  &state:  DiracState to integrate
+ * @param  &tp:     TurningPoint object to store turning point infor
+ * @retval          Suggested energy correction
+ */
 double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
 {
     int N;
