@@ -363,6 +363,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         dE = err / (zetai[tp.i] - zetae[tp.i]);
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
+            E = E -dE;
             break;
         }
         E = E - dE;
@@ -384,7 +385,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
     // Now normalise
     for (int i = 0; i < N; ++i)
     {
-        y[i] = (pow(state.P[i], 2) + pow(state.Q[i] * Physical::alpha, 2)) * state.grid[i];
+        y[i] = (pow(state.P[i], 2) + pow(state.Q[i], 2)) * state.grid[i];
     }
     norm = sqrt(trapzInt(state.loggrid, y));
     for (int i = 0; i < N; ++i)

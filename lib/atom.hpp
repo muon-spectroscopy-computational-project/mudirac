@@ -122,6 +122,7 @@ public:
   double getm() { return m; };
   double getmu() { return mu; };
   double getR() { return R; };
+  double getV(double r) { return V.V(r); };
 };
 
 class DiracAtom : public Atom
@@ -130,9 +131,6 @@ private:
   double restE; // Rest energy
   // Eigenstates
   map<tuple<int, int, bool>, DiracState> states;
-
-  // Convergence
-  DiracState convergeState(double E0, int k = -1);
 
 public:
   double out_eps = 1e-5;
@@ -149,10 +147,14 @@ public:
   DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
 
+  double getRestE() { return restE; };
+
   pair<int, int> gridLimits(double E, int k, GridLimitsFailcode &failcode);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
+  // Convergence
+  DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);
 };
