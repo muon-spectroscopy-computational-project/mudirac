@@ -50,6 +50,28 @@ SchroState::SchroState(const SchroState &s)
 }
 
 /**
+ * @brief   Compute the norm of this eigenstate
+ * @note    Compute the norm of this eigenstate,
+ * defined as:
+ * 
+ *              ( int_0^infty R^2 dr )^(1/2)
+ * 
+ * @retval      Norm 
+ */
+double SchroState::norm()
+{
+    int N = R.size();
+    vector<double> rho(N);
+
+    for (int i = 0; i < N; ++i)
+    {
+        rho[i] = pow(R[i], 2) * grid[i];
+    }
+
+    return sqrt(trapzInt(loggrid, rho));
+}
+
+/**
  * @brief  Initialise a DiracState instance
  * @note   Creates a DiracState with given grid size
  * 
@@ -113,6 +135,28 @@ DiracState::DiracState(const DiracState &s)
     loggrid = vector<double>(s.loggrid);
     Q = vector<double>(s.Q);
     P = vector<double>(s.P);
+}
+
+/**
+ * @brief   Compute the norm of this eigenstate
+ * @note    Compute the norm of this eigenstate,
+ * defined as:
+ * 
+ *             ( int_0^infty (P^2+Q^2) dr )^(1/2)
+ * 
+ * @retval      Norm 
+ */
+double DiracState::norm()
+{
+    int N = P.size();
+    vector<double> rho(N);
+
+    for (int i = 0; i < N; ++i)
+    {
+        rho[i] = (pow(P[i], 2) + pow(Q[i], 2)) * grid[i];
+    }
+
+    return sqrt(trapzInt(loggrid, rho));
 }
 
 /**
@@ -363,7 +407,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         dE = err / (zetai[tp.i] - zetae[tp.i]);
         if (!std::isnan(dE) && abs(dE) < Etol)
         {
-            E = E -dE;
+            E = E - dE;
             break;
         }
         E = E - dE;
@@ -383,11 +427,11 @@ DiracState DiracAtom::convergeState(double E0, int k)
         state.Q[i] *= tp.Pi / tp.Pe;
     }
     // Now normalise
-    for (int i = 0; i < N; ++i)
-    {
-        y[i] = (pow(state.P[i], 2) + pow(state.Q[i], 2)) * state.grid[i];
-    }
-    norm = sqrt(trapzInt(state.loggrid, y));
+    // for (int i = 0; i < N; ++i)
+    // {
+    //     y[i] = (pow(state.P[i], 2) + pow(state.Q[i], 2)) * state.grid[i];
+    // }
+    norm = state.norm();
     for (int i = 0; i < N; ++i)
     {
         state.P[i] /= norm;

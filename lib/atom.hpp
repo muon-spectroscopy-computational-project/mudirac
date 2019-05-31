@@ -65,6 +65,8 @@ public:
   vector<double> V;
 
   State();
+
+  virtual double norm() = 0;
 };
 
 class SchroState : public State
@@ -74,6 +76,8 @@ public:
   int l;
 
   SchroState(const SchroState &s);
+
+  double norm() override;
 };
 
 class DiracState : public State
@@ -88,6 +92,8 @@ public:
   DiracState(double x0, double x1, int N);
   DiracState(double rc, double dx, int i0, int i1);
   DiracState(const DiracState &s);
+
+  double norm() override;
 };
 
 class Atom
