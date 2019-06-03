@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     ds.k = k;
 
     double E0 = hydrogenicDiracEnergy(Z, da.getmu(), 1, -1, true);
-    std::cout << E0 << '\t' << da.getV(0) << '\n';
+    // std::cout << E0 << '\t' << da.getV(0) << '\n';
 
     for (double fB = 5.0; fB > 1e-4; fB -= 5e-3)
     {
