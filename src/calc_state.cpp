@@ -3,11 +3,17 @@
 #include "../lib/atom.hpp"
 #include "../lib/hydrogenic.hpp"
 #include "../lib/constants.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
+    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "calc_state.log", "#message"),
+                       make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::special, "calc_state.err")});
+
+    LOG(INFO) << "Starting calc_state...\n";
+
     // Parameters
     if (argc < 4)
     {
@@ -22,6 +28,9 @@ int main(int argc, char **argv)
     double A = argc > 5 ? stod(argv[5]) : -1;
 
     int k = round((abs(l - s * 0.5) + 0.5) * (s ? 1 : -1));
+
+    LOG(INFO) << "Calculating states for atom with Z = " << Z << ", state n = " << n << " l = " << l << " s = " << (s ? "1/2" : "-1/2") << "\n";
+
     vector<vector<double>> PQ;
 
     DiracAtom da = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE);
