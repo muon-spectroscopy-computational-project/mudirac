@@ -22,6 +22,7 @@
 #include "boundary.hpp"
 #include "elements.hpp"
 #include "potential.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
 
@@ -105,6 +106,7 @@ class Atom
 public:
   // Tolerances and other details
   double Etol = 1e-10, Esearch = 1.2, Edamp = 0.5;
+  double max_dE_ratio = 1e-1;
   int maxit = 100;
 
   // Radius models

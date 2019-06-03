@@ -433,24 +433,27 @@ double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
 DiracState DiracAtom::convergeState(double E0, int k)
 {
     int N, Qn, Pn;
-    double B, E, dE, norm;
+    double B, E, dE, dEprev, norm;
     pair<int, int> glimits;
     DiracState state;
     TurningPoint tp;
     GridLimitsFailcode fcode;
 
     E = E0;
+    B = E - restE;
+    LOG(TRACE) << "Starting convergence...\n";
+    LOG(TRACE) << scientific;
+    LOG(TRACE) << 0 << '\t' << E - restE << '\n';
 
     for (int it = 0; it < maxit; ++it)
     {
-        B = E - restE;
         glimits = gridLimits(E, k, fcode);
         switch (fcode)
         {
         case GridLimitsFailcode::OK:
             break;
         case GridLimitsFailcode::UNBOUND:
-            // std::clog << "Convergence failed - State with B = " << B << " is unbound\n";
+            LOG(INFO) << "Convergence failed - State with B = " << B << " is unbound\n";
             E = restE - B;
             continue;
             break;
@@ -468,10 +471,16 @@ DiracState DiracAtom::convergeState(double E0, int k)
         // Potential
         state.V = getV(state.grid);
         dE = stateIntegrate(state, tp);
-        if (!std::isnan(dE) && abs(dE) < Etol)
+        if (!std::isnan(dE) && (abs(dE) < Etol))
         {
             E = E - dE;
+            LOG(TRACE) << "Convenrgence compelete after " << it + 1 << " iterations\n";
             break;
+        }
+        // Apply maximum step ratio
+        if (abs(dE / E) > max_dE_ratio)
+        {
+            dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
         }
         E = E - dE * Edamp;
         if (std::isnan(E))
@@ -479,6 +488,10 @@ DiracState DiracAtom::convergeState(double E0, int k)
             // Something bad happened
             throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
         }
+
+        B = E - restE;
+        dEprev = dE;
+        LOG(TRACE) << it + 1 << '\t' << E - restE << '\t' << dE << '\t' << Edamp << '\n';
     }
 
     // Make states continuous
@@ -541,6 +554,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
 
     // Then start with a guess for the energy
     E0 = hydrogenicDiracEnergy(Z, mu, n, k);
+    LOG(TRACE) << "Using starting energy: " << E0 << "\n";
 
     if (R > 0)
     {
@@ -548,6 +562,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         if (E0 - restE < V.V(0))
         {
             E0 = V.V(0) + restE + 0.1;
+            LOG(TRACE) << "Using starting energy for finite nucleus: " << E0 << "\n";
         }
     }
 

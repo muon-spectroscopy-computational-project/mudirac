@@ -33,7 +33,9 @@ int main(int argc, char **argv)
 
     vector<vector<double>> PQ;
 
-    DiracAtom da = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE);
+    DiracAtom da = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE, 1.0, 1e-3);
+    // da.Etol = 1e-9;
+    // da.Edamp = 0.25;
     DiracState ds;
 
     // da.setGridRelative(1e-4, 1e2, 3000);
