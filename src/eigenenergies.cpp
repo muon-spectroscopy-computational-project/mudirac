@@ -2,15 +2,11 @@
 #include <fstream>
 #include "../lib/atom.hpp"
 #include "../lib/constants.hpp"
-#include "../lib/log.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-    Log logger("eigenenergies.log");
-
-    std::clog << "Test\n";
 
     ofstream exactE("energy_table_exact.dat"), finiteE("energy_table_finite.dat"), compareE("energy_table_1s.dat");
 

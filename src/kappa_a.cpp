@@ -1,15 +1,11 @@
 #include <iostream>
 #include "../lib/atom.hpp"
 #include "../lib/constants.hpp"
-#include "../lib/log.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-    Log logger("kappa_a.log");
-
-    std::clog << "Kappa A calculation\n";
 
     double A, mu, Ka_schro, Ka_dirac_hydro, Ka_dirac_hydro_mu, Ka_dirac_num_mu, Ka_dirac_num_sphere;
     DiracState p2, s1;

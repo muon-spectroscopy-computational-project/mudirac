@@ -450,7 +450,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
         case GridLimitsFailcode::OK:
             break;
         case GridLimitsFailcode::UNBOUND:
-            std::clog << "Convergence failed - State with B = " << B << " is unbound\n";
+            // std::clog << "Convergence failed - State with B = " << B << " is unbound\n";
             E = restE - B;
             continue;
             break;
@@ -480,8 +480,6 @@ DiracState DiracAtom::convergeState(double E0, int k)
             throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
         }
     }
-
-    std::clog.flush();
 
     // Make states continuous
     for (int i = tp.i; i < N; ++i)
