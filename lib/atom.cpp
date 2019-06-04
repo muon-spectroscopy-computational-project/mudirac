@@ -12,28 +12,6 @@
 
 #include "atom.hpp"
 
-// AtomConvergenceException::AtomConvergenceException(ACEType t)
-// {
-
-//     type = t;
-
-//     switch (type)
-//     {
-//     case NAN_ENERGY:
-//         msg = "Atomic energy could not converge";
-//         break;
-//     case NODES_WRONG:
-//         msg = "Nodal theorems conditions not satisfied";
-//         break;
-//     case MAXIT_REACHED:
-//         msg = "Maximum numbers of iterations reached";
-//         break;
-//     default:
-//         msg = "Unknown atomic convergence error";
-//         break;
-//     }
-// }
-
 State::State()
 {
     E = 0;
@@ -169,11 +147,60 @@ double DiracState::norm()
 }
 
 /**
+ * @brief  Make the wavefunction continuous at the turning point
+ * @note   Make the wavefunction continuous with the information
+ * from a TurningPoint object from integration
+ * 
+ * @param  tp:              Turning point
+ * @retval None
+ */
+void DiracState::continuify(TurningPoint tp)
+{
+    int N = P.size();
+    double f = tp.Pi / tp.Pe;
+
+    for (int i = tp.i; i < N; ++i)
+    {
+        P[i] *= f;
+        Q[i] *= f;
+    }
+}
+
+/**
+ * @brief  Find and count the wavefunction's nodes
+ * @note   Find and count the wavefunction's nodes
+ * 
+ * @retval None
+ */
+void DiracState::findNodes()
+{
+    nodes = countNodes(P);
+    nodesQ = countNodes(Q);
+}
+
+/**
+ * @brief  Normalize the wavefunction
+ * @note   Normalize the wavefunction
+ * 
+ * @retval None
+ */
+void DiracState::normalize()
+{
+    int N = P.size();
+    double n = norm();
+
+    for (int i = 0; i < N; ++i)
+    {
+        P[i] /= n;
+        Q[i] /= n;
+    }
+}
+
+/**
  * @brief  Get principal quantum number n
  * 
  * @retval      n
  */
-
 int DiracState::getn()
 {
     int l = getl();
@@ -185,7 +212,6 @@ int DiracState::getn()
  * 
  * @retval      l
  */
-
 int DiracState::getl()
 {
     return (k > 0 ? k : -k - 1);
@@ -334,18 +360,17 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     double B;
     double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
     double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
-    double r_out, r_in;
+    double r_out, r_in, r_tp;
     int i_out, i_in;
 
     if (K < 0)
     {
-        throw "unbound";
+        throw AtomErrorCode::UNBOUND_STATE;
         return {0, 0};
     }
     if (gamma < 0)
     {
-        // Unlikely while we're in the periodic table...
-        throw "small_gamma";
+        throw AtomErrorCode::SMALL_GAMMA;
         return {0, 0};
     }
 
@@ -353,12 +378,18 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     gamma = sqrt(gamma);
     B = E - restE;
 
+    r_tp = Z / abs(B); // Coulombic turning point radius
+
+    LOG(TRACE) << "Computing optimal grid size for state with E = " << E << ", k = " << k << "\n";
+
     // Upper limit
     if (out_eps > 1 || out_eps < 0)
     {
         throw runtime_error("Invalid value for out_eps in DiracAtom; must be 0 < out_eps < 1");
     }
-    r_out = Z / abs(B) - log(out_eps) / K;
+    r_out = r_tp - log(out_eps) / K;
+
+    LOG(TRACE) << "Outer grid radius = " << r_out << "\n";
 
     // Lower limit
     if (in_eps > 1 || in_eps < 0)
@@ -366,6 +397,13 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
         throw runtime_error("Invalid value for in_eps in DiracAtom; must be 0 < in_eps < 1");
     }
     r_in = pow(in_eps, 1.0 / gamma) / M_E * gamma / K;
+
+    LOG(TRACE) << "Inner grid radius = " << r_in << "\n";
+
+    if (r_in > r_tp)
+    {
+        throw runtime_error("Inner grid radius is too small for given atom and state; please decrease in_eps");
+    }
 
     // Now get these as integer numbers of steps.
     i_out = ceil(log(r_out / rc) / dx);
@@ -483,6 +521,93 @@ double DiracAtom::searchBasinE(int k, int target, double Emin, double Emax)
     for (int it = 0; it < maxit; ++it)
     {
     }
+}
+
+/**
+ * @brief  Initialise a DiracState based on E and k
+ * @note   Initialise a DiracState based on energy E 
+ * and quantum number k
+ * 
+ * @param  E:           Energy
+ * @param  k:           Quantum number k
+ * @retval              Initialised state
+ */
+DiracState DiracAtom::initState(double E, int k)
+{
+    DiracState state;
+    pair<int, int> glimits;
+
+    glimits = gridLimits(E, k);
+    state = DiracState(rc, dx, glimits.first, glimits.second);
+    state.k = k;
+    state.E = E;
+
+    return state;
+}
+
+/**
+ * @brief  Integrate a DiracState of given E, k and V
+ * @note   Perform a single integration of a DiracState,
+ * given its E, k and V (which must be set in the DiracState
+ * object itself).
+ * 
+ * @param  &state:  DiracState to integrate
+ * @param  &tp:     TurningPoint object to store turning point info
+ * @retval          
+ */
+void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
+{
+    int N;
+
+    N = state.grid.size();
+    // Start by applying boundary conditions
+    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
+    tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
+
+    return;
+}
+
+/**
+ * @brief  Integrate a DiracState of given E, k and V
+ * @note   Perform a single integration of a DiracState,
+ * given its E, k and V (which must be set in the DiracState
+ * object itself). Computes also a suggested correction for the energy
+ * 
+ * @param  &state:  DiracState to integrate
+ * @param  &tp:     TurningPoint object to store turning point info
+ * @param  &dE:     Energy correction
+ * @retval          
+ */
+void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
+{
+    int N;
+    double err;
+    vector<double> y, zetai, zetae;
+
+    integrateState(state, tp);
+
+    N = state.grid.size();
+    y = vector<double>(N, 0);
+    zetai = vector<double>(N, 0);
+    zetae = vector<double>(N, 0);
+
+    err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
+    // Compute the derivative of the error in dE
+    for (int i = 0; i < N; ++i)
+    {
+        y[i] = state.Q[i] / state.P[i];
+    }
+    // First the forward version
+    y[tp.i] = tp.Qi / tp.Pi;
+    shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx);
+    // Then the backwards one
+    y[tp.i] = tp.Qe / tp.Pe;
+    boundaryDiracErrorDECoulomb(zetae, state.E, state.k, mu);
+    shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
+
+    dE = err / (zetai[tp.i] - zetae[tp.i]);
+
+    return;
 }
 
 /**

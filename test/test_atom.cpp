@@ -5,82 +5,45 @@
 #include <tuple>
 #include <limits>
 #include "../lib/atom.hpp"
+#include "../lib/hydrogenic.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
+
+#include "../vendor/catch/catch.hpp"
 
 using namespace std;
 
-int main()
+TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
 {
-    // Atom a = Atom(1, 1, 1, 2);
-    
-    double restE;
-    DiracAtom da = DiracAtom(1, Physical::m_e, 1, NuclearRadiusModel::SPHERE);
+    double Z = 1;
+    double m = 1;
+    double A = 1;
+    DiracAtom da = DiracAtom(Z, m, A);
 
-    restE = da.getmu() * pow(Physical::c, 2);
+    REQUIRE(da.getZ() == Z);
+    REQUIRE(da.getm() == m);
+    REQUIRE(da.getA() == A);
+    REQUIRE(da.getmu() == Approx(effectiveMass(m, A * Physical::amu)));
+    REQUIRE(da.getRestE() == da.getmu() * pow(Physical::c, 2));
+}
 
-    std::cout << restE << '\t' << da.getRestE() << '\t' << da.getV(0) << '\n';
+TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
+{
+    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::trace, AixLog::Type::normal);
 
+    double Z = 92;
+    double m = 1;
+    int n = 1;
+    int k = -1;
+    DiracAtom da = DiracAtom(Z, m);
+    double E0 = hydrogenicDiracEnergy(Z, m, n, k);
+    double B0 = E0 - da.getRestE();
 
-    DiracState ds;
-    
-    ds = da.convergeState(0);
+    DiracState ds = da.initState(E0, k);
 
-    std::cout << ds.nodes + 1 << '\t' << ds.E-restE << '\n';
+    REQUIRE(ds.grid[0] < -Z / B0);
+    REQUIRE(ds.grid[ds.grid.size() - 1] > -Z / B0);
 
-    ds = da.convergeState(-0.125+restE);
-
-    std::cout << ds.nodes + 1 << '\t' << ds.E-restE << '\n';
-
-    // vector<double> r, V, V2;
-    // tuple<int, int, int> ind;
-    // map<tuple<int, int, int>, DiracState *> test;
-    // DiracAtom da = DiracAtom(1, Physical::m_mu, -1);
-    // DiracAtom da2 = DiracAtom(2, Physical::m_mu, -1);
-    // DiracState s1, s1f, s2, s2f, p2, p2f;
-
-    // // da.setGrid(1e-6, 1);
-    // // da2.setGrid(1e-6, 1);
-
-    // try
-    // {
-    //     da.calcState(1, 0, false);
-    //     da.calcState(2, 0, false);
-    //     da2.calcState(1, 0, false);
-    //     da2.calcState(2, 0, false);
-    // }
-    // catch (TurningPointError tpe)
-    // {
-    //     std::cerr << tpe.what() << '\n';
-    // }
-
-    // return 0;
-
-    // // r = da.getGrid();
-    // // V = da.getPotential();
-    // // V2 = da2.getPotential();
-
-    // da.maxit = 1000;
-    // da2.maxit = 1000;
-    // try {
-    //     s1 = da.getState(1, 0, false);
-    //     s1f = da2.getState(1, 0, false);
-    //     s2 = da.getState(2, 0, false);
-    //     s2f = da2.getState(2, 0, false);
-    //     p2 = da.getState(2, 1, false);
-    //     p2f = da2.getState(2, 1, false);
-    // }
-    // catch (const char *s)
-    // {
-    //     std::cerr << s << '\n';
-    // }
-
-    // cout << da.sphereNuclearModel(100) << '\n';
-    // // // cout << a.getZ() << '\n';
-    // // // cout << a.getmu() << '\n';
-
-    // cout << (s2.E - s1.E)/Physical::eV<< "\n";
-    // cout << (p2.E - s1.E)/Physical::eV << "\n";
-    // for (int i = 0; i < r.size(); ++i)
-    // {
-    //     cout << r[i] << '\t' << s1.P[i] << '\t' << s2.P[i] << '\t' << p2.P[i] << '\n';
-    // }
+    // Must throw runtime_error for invalid out_eps
+    da.out_eps = 2;
+    REQUIRE_THROWS(da.gridLimits(E0, k));
 }

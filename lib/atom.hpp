@@ -26,26 +26,14 @@
 
 using namespace std;
 
-// // Exception classes
-// class AtomConvergenceException : exception
-// {
-// public:
-//   enum ACEType
-//   {
-//     NAN_ENERGY,
-//     NODES_WRONG,
-//     MAXIT_REACHED
-//   };
-
-//   AtomConvergenceException(ACEType t = NAN_ENERGY);
-//   ~AtomConvergenceException(void) {}
-//   ACEType getType() const throw() { return type; };
-//   const char *what() const throw() { return msg.c_str(); };
-
-// private:
-//   ACEType type;
-//   string msg;
-// };
+// Error codes
+enum AtomErrorCode
+{
+  UNBOUND_STATE = 1, // State is unbound, E - mc^2 > 0
+  RMAX_SMALL,        // Upper bound of grid is smaller than turning point
+  RMIN_LARGE,        // Lower bound of grid is bigger than turning point
+  SMALL_GAMMA,       // Gamma parameter too small (won't happen for known elements)
+};
 
 enum NuclearRadiusModel
 {
@@ -99,6 +87,10 @@ public:
   int getl();
   bool gets();
   double norm() override;
+
+  void continuify(TurningPoint tp);
+  void findNodes();
+  void normalize();
 };
 
 class Atom
@@ -155,15 +147,19 @@ public:
 
   double getRestE() { return restE; };
 
-  pair<int, int> gridLimits(double E, int k);
-
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
+
   // Convergence
   double searchBasinE(int k, int target, double Emin, double Emax);
   void stateCountNodes(DiracState &state, TurningPoint &tp);
   double stateIntegrate(DiracState &state, TurningPoint &tp);
+
+  pair<int, int> gridLimits(double E, int k);
+  DiracState initState(double E, int k = -1);
+  void integrateState(DiracState &state, TurningPoint &tp);
+  void integrateState(DiracState &state, TurningPoint &tp, double &dE);
   DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);
 };

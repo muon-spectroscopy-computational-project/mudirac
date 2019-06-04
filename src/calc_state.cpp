@@ -50,11 +50,6 @@ int main(int argc, char **argv)
         cout << k << '\n';
         PQ = hydrogenicDiracWavefunction(r, Z, da.getmu(), n, k);
     }
-    catch (AtomConvergenceException &e)
-    {
-        cerr << "ERROR: " << e.what() << "\n";
-        return -1;
-    }
     catch (const char *e)
     {
         cerr << "ERROR: " << e << "\n";
