@@ -26,26 +26,26 @@
 
 using namespace std;
 
-// Exception classes
-class AtomConvergenceException : exception
-{
-public:
-  enum ACEType
-  {
-    NAN_ENERGY,
-    NODES_WRONG,
-    MAXIT_REACHED
-  };
+// // Exception classes
+// class AtomConvergenceException : exception
+// {
+// public:
+//   enum ACEType
+//   {
+//     NAN_ENERGY,
+//     NODES_WRONG,
+//     MAXIT_REACHED
+//   };
 
-  AtomConvergenceException(ACEType t = NAN_ENERGY);
-  ~AtomConvergenceException(void) {}
-  ACEType getType() const throw() { return type; };
-  const char *what() const throw() { return msg.c_str(); };
+//   AtomConvergenceException(ACEType t = NAN_ENERGY);
+//   ~AtomConvergenceException(void) {}
+//   ACEType getType() const throw() { return type; };
+//   const char *what() const throw() { return msg.c_str(); };
 
-private:
-  ACEType type;
-  string msg;
-};
+// private:
+//   ACEType type;
+//   string msg;
+// };
 
 enum NuclearRadiusModel
 {
@@ -150,24 +150,19 @@ public:
   double in_eps = 1e-5;
   int min_n = 1000;
 
-  enum GridLimitsFailcode
-  {
-    OK,
-    UNBOUND,
-    SMALL_GAMMA,
-  };
-
   DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
 
   double getRestE() { return restE; };
 
-  pair<int, int> gridLimits(double E, int k, GridLimitsFailcode &failcode);
+  pair<int, int> gridLimits(double E, int k);
 
   void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
   // Convergence
+  double searchBasinE(int k, int target, double Emin, double Emax);
+  void stateCountNodes(DiracState &state, TurningPoint &tp);
   double stateIntegrate(DiracState &state, TurningPoint &tp);
   DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);

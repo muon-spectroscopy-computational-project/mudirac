@@ -11,29 +11,28 @@
  */
 
 #include "atom.hpp"
-#include <iostream>
 
-AtomConvergenceException::AtomConvergenceException(ACEType t)
-{
+// AtomConvergenceException::AtomConvergenceException(ACEType t)
+// {
 
-    type = t;
+//     type = t;
 
-    switch (type)
-    {
-    case NAN_ENERGY:
-        msg = "Atomic energy could not converge";
-        break;
-    case NODES_WRONG:
-        msg = "Nodal theorems conditions not satisfied";
-        break;
-    case MAXIT_REACHED:
-        msg = "Maximum numbers of iterations reached";
-        break;
-    default:
-        msg = "Unknown atomic convergence error";
-        break;
-    }
-}
+//     switch (type)
+//     {
+//     case NAN_ENERGY:
+//         msg = "Atomic energy could not converge";
+//         break;
+//     case NODES_WRONG:
+//         msg = "Nodal theorems conditions not satisfied";
+//         break;
+//     case MAXIT_REACHED:
+//         msg = "Maximum numbers of iterations reached";
+//         break;
+//     default:
+//         msg = "Unknown atomic convergence error";
+//         break;
+//     }
+// }
 
 State::State()
 {
@@ -330,7 +329,7 @@ DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_mod
  * @param  &failcode:   Error code in case of failure
  * @retval              Pair of limit indices for the grid {inner, outer}
  */
-pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failcode)
+pair<int, int> DiracAtom::gridLimits(double E, int k)
 {
     double B;
     double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
@@ -338,17 +337,15 @@ pair<int, int> DiracAtom::gridLimits(double E, int k, GridLimitsFailcode &failco
     double r_out, r_in;
     int i_out, i_in;
 
-    failcode = GridLimitsFailcode::OK;
-
     if (K < 0)
     {
-        failcode = GridLimitsFailcode::UNBOUND;
+        throw "unbound";
         return {0, 0};
     }
     if (gamma < 0)
     {
         // Unlikely while we're in the periodic table...
-        failcode = GridLimitsFailcode::SMALL_GAMMA;
+        throw "small_gamma";
         return {0, 0};
     }
 
@@ -421,6 +418,74 @@ double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
 }
 
 /**
+ * @brief  Integrate the given state and count its nodes
+ * @note   Integrate the given state and count its nodes. Used
+ * for quick searches over number of nodes.
+ * 
+ * @param  &state:  DiracState to integrate
+ * @param  &tp:     TurningPoint object to store turning point infor
+ * @retval None
+ */
+void DiracAtom::stateCountNodes(DiracState &state, TurningPoint &tp)
+{
+    int N;
+
+    N = state.grid.size();
+    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
+    tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
+
+    // Make states continuous
+    for (int i = tp.i; i < N; ++i)
+    {
+        state.P[i] *= tp.Pi / tp.Pe;
+        state.Q[i] *= tp.Pi / tp.Pe;
+    }
+
+    // Count nodes
+    state.nodes = countNodes(state.P);
+    state.nodesQ = countNodes(state.Q);
+}
+
+/**
+ * @brief  Search for a starting value of E with a target number of nodes
+ * @note   Perform a bisection search for a starting value of E with a target number of nodes.
+ * bounded within a given interval. Will raise an error if such a value can not be found.
+ * 
+ * @param  k:           Quantum number k
+ * @param  target:      Target number of nodes for the P part of the wavefunction
+ * @param  Emin:        Lower bound of the energy interval
+ * @param  Emax:        Upper bound of the energy interval
+ * @retval 
+ */
+double DiracAtom::searchBasinE(int k, int target, double Emin, double Emax)
+{
+    int nodes1, nodes2;
+    double E1, E2;
+    DiracState state;
+    TurningPoint tp;
+
+    state.k = k;
+    E1 = Emin + (Emax - Emin) / 3.0;
+    E2 = Emax - (Emax - Emin) / 3.0;
+
+    cout << E1 << '\n';
+
+    state.E = E1;
+    stateCountNodes(state, tp);
+    nodes1 = state.nodes;
+
+    state.E = E2;
+    stateCountNodes(state, tp);
+    nodes2 = state.nodes;
+
+    cout << nodes1 << '\t' << nodes2 << '\n';
+
+    for (int it = 0; it < maxit; ++it)
+    {
+    }
+}
+
+/**
  * @brief  Converge a state with given k and initial energy guess E0
  * @note   Converge iteratively a Dirac orbital for this atom from a given k and
  * energy starting guess. Will fail if convergence can't be achieved or if nodal theorems
@@ -437,7 +502,6 @@ DiracState DiracAtom::convergeState(double E0, int k)
     pair<int, int> glimits;
     DiracState state;
     TurningPoint tp;
-    GridLimitsFailcode fcode;
 
     E = E0;
     B = E - restE;
@@ -447,22 +511,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     for (int it = 0; it < maxit; ++it)
     {
-        glimits = gridLimits(E, k, fcode);
-        switch (fcode)
-        {
-        case GridLimitsFailcode::OK:
-            break;
-        case GridLimitsFailcode::UNBOUND:
-            LOG(INFO) << "Convergence failed - State with B = " << B << " is unbound\n";
-            E = restE - B;
-            continue;
-            break;
-        case GridLimitsFailcode::SMALL_GAMMA:
-            break;
-        default:
-            throw runtime_error("Unknown error occurred in grid estimation in convergeState");
-            break;
-        }
+        glimits = gridLimits(E, k);
         state = DiracState(rc, dx, glimits.first, glimits.second);
         state.E = E;
         state.k = k;
@@ -486,7 +535,8 @@ DiracState DiracAtom::convergeState(double E0, int k)
         if (std::isnan(E))
         {
             // Something bad happened
-            throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
+            // throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
+            throw "NAN ENERGY";
         }
 
         B = E - restE;
@@ -514,7 +564,8 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     if (Qn - Pn != (R > state.grid[0]))
     {
-        throw AtomConvergenceException(AtomConvergenceException::ACEType::NODES_WRONG);
+        // throw AtomConvergenceException(AtomConvergenceException::ACEType::NODES_WRONG);
+        throw "NODES WRONG";
     }
 
     state.nodes = Pn;
@@ -626,7 +677,8 @@ DiracState DiracAtom::getState(int n, int l, bool s)
 
     if (!st.init)
     {
-        throw AtomConvergenceException(AtomConvergenceException::ACEType::MAXIT_REACHED);
+        throw "MAXIT REACHED";
+        // throw AtomConvergenceException(AtomConvergenceException::ACEType::MAXIT_REACHED);
     }
 
     return DiracState(st);
