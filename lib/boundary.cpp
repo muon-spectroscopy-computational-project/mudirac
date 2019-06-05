@@ -78,6 +78,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         if (P[N - i] == 0)
         {
             // We went below numerical precision!
+            LOG(ERROR) << "Boundary conditions give zero at r = " << r[N-i] << "; a smaller grid is necessary";
             throw "Boundary conditions give zero at the outside edge - you may need a smaller grid";
         }
     }

@@ -5,6 +5,7 @@
 #include <tuple>
 #include <limits>
 #include "../lib/atom.hpp"
+#include "../lib/utils.hpp"
 #include "../lib/hydrogenic.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
 
@@ -51,9 +52,24 @@ TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
 
 TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
 {
-    DiracAtom da = DiracAtom(1, 1);
+    double Z = 1;
+    double m = 1;
+    DiracAtom da = DiracAtom(Z, m);
+    DiracState ds;
+    TurningPoint tp;
 
-    pair<double, double> elim = da.energyLimits();
-    REQUIRE(elim.first == Approx(-da.getRestE()));
-    REQUIRE(elim.second == Approx(da.getRestE()));
+    pair<double, double> limE = da.energyLimits();
+    REQUIRE(limE.first == Approx(-da.getRestE()));
+    REQUIRE(limE.second == Approx(da.getRestE()));
+
+    // Test finding the nodes interval
+    int nodes;
+    double minE = da.getRestE() - m * Z * Z;
+    double maxE = limE.second;
+    qnumPrincipal2Nodes(2, 0, nodes);
+
+    ds.k = -1;
+    da.convergeNodes(ds, tp, nodes, minE, maxE);
+    REQUIRE(ds.E > hydrogenicDiracEnergy(Z, m, 1));
+    REQUIRE(ds.E < hydrogenicDiracEnergy(Z, m, 3));
 }

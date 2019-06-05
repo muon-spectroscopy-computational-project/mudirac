@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include "utils.hpp"
 #include "constants.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
 

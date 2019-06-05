@@ -401,6 +401,93 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     return {minE, maxE};
 }
 
+void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE)
+{
+    int k;
+    int nl, nr;
+    double El, Er, oldEl = maxE + 1, oldEr = maxE + 1;
+    pair<int, int> glim;
+
+    k = state.k;
+    El = minE + (maxE - minE) / 3.0;
+    Er = maxE - (maxE - minE) / 3.0;
+
+    LOG(TRACE) << "Running convergeNodes to search energy with solution with " << targ_nodes << " nodes\n";
+
+    for (int it = 0; it < maxit; ++it)
+    {
+        LOG(TRACE) << "Iteration " << (it + 1) << ", El = " << El - restE << "+mc2, Er = " << Er - restE << "+mc2\n";
+        if (El != oldEl)
+        {
+            glim = gridLimits(El, k);
+            state = DiracState(rc, dx, glim.first, glim.second);
+            state.E = El;
+            state.V = getV(state.grid);
+            integrateState(state, tp);
+            state.continuify(tp);
+            state.findNodes();
+            nl = state.nodes;
+            if (nl == targ_nodes)
+            {
+                LOG(TRACE) << "State with " << targ_nodes << " nodes found at E = " << El - restE << "+mc2\n";
+                return;
+            }
+        }
+
+        if (Er != oldEr)
+        {
+            glim = gridLimits(Er, k);
+            state = DiracState(rc, dx, glim.first, glim.second);
+            state.E = Er;
+            state.V = getV(state.grid);
+            integrateState(state, tp);
+            state.continuify(tp);
+            state.findNodes();
+            nr = state.nodes;
+            if (nr == targ_nodes)
+            {
+                LOG(TRACE) << "State with " << targ_nodes << " nodes found at E = " << Er - restE << "+mc2\n";
+                return;
+            }
+        }
+
+        LOG(TRACE) << "Nodes count: nl = " << nl << ", nr = " << nr << "\n";
+
+        // Otherwise, what are their signs?
+        int dl = (nl - targ_nodes);
+        int dr = (nr - targ_nodes);
+
+        if (dl > 0 && dr > 0)
+        {
+            // Both are too high
+            oldEr = Er;
+            Er = El;
+            El = (minE + El) / 2.0;
+            maxE = Er;
+        }
+        else if (dl < 0 && dr < 0)
+        {
+            // Both are too low
+            oldEl = El;
+            El = Er;
+            Er = (maxE + Er) / 2.0;
+            minE = El;
+        }
+        else if (dl < 0 && dr > 0)
+        {
+            // It's in between!
+            oldEl = El;
+            minE = El;
+            El = (El + Er) / 2.0;
+        }
+        else
+        {
+            // Doesn't make sense
+            throw runtime_error("convergeNodes failed - higher number of nodes for lower energy");
+        }
+    }
+}
+
 /**
  * @brief  Compute grid limits for given E and k
  * @note   Compute ideal indices to use as grid limits for
@@ -440,6 +527,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     r_tp = Z / abs(B); // Coulombic turning point radius
 
     LOG(TRACE) << "Computing optimal grid size for state with E = " << E << ", k = " << k << "\n";
+    LOG(TRACE) << "K = " << K << ", gamma = " << gamma << "\n";
 
     // Upper limit
     if (out_eps > 1 || out_eps < 0)
@@ -461,6 +549,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     if (r_in > r_tp)
     {
+        LOG(ERROR) << "Inner grid radius " << r_in << " is smaller than turning point radius " << r_tp << "; please decrease in_eps\n";
         throw runtime_error("Inner grid radius is too small for given atom and state; please decrease in_eps");
     }
 
@@ -619,9 +708,16 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
     int N;
 
     N = state.grid.size();
+    if (N == 0)
+    {
+        throw runtime_error("Can not integrate state with zero-sized grid");
+    }
+    LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
     // Start by applying boundary conditions
     boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
+    LOG(TRACE) << "Boundary conditions applied\n";
     tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
+    LOG(TRACE) << "Integration complete, turning point at " << tp.i << "\n";
 
     return;
 }

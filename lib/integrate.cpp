@@ -11,7 +11,6 @@
  */
 
 #include "integrate.hpp"
-#include <iostream>
 
 // Exceptions
 TurningPointError::TurningPointError(TPEType t)
@@ -289,11 +288,13 @@ TurningPoint shootDiracLog(vector<double> &Q, vector<double> &P, vector<double> 
     }
     if (turn_i >= V.size() - 1)
     {
+        LOG(ERROR) << "Turning point not included in range: r_max too small\n";
         // Turning point not included in range
         throw TurningPointError(TurningPointError::TPEType::RMAX_SMALL);
     }
     else if (turn_i == 0)
     {
+        LOG(ERROR) << "Turning point not included in range: r_min too big\n";
         // Turning point not included in range
         throw TurningPointError(TurningPointError::TPEType::RMIN_BIG);
     }

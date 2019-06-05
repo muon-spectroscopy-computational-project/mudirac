@@ -156,11 +156,12 @@ public:
   void stateCountNodes(DiracState &state, TurningPoint &tp);
   double stateIntegrate(DiracState &state, TurningPoint &tp);
 
-  pair<double, double> energyLimits(int nodes=0, int k=-1);
+  pair<double, double> energyLimits(int nodes = 0, int k = -1);
   pair<int, int> gridLimits(double E, int k);
   DiracState initState(double E, int k = -1);
   void integrateState(DiracState &state, TurningPoint &tp);
   void integrateState(DiracState &state, TurningPoint &tp, double &dE);
+  void convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE);
   DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);
 };
