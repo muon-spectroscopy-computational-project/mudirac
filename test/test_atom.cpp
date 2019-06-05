@@ -9,6 +9,7 @@
 #include "../vendor/aixlog/aixlog.hpp"
 
 #include "../vendor/catch/catch.hpp"
+#include "macros.hpp"
 
 using namespace std;
 
@@ -46,4 +47,13 @@ TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
     // Must throw runtime_error for invalid out_eps
     da.out_eps = 2;
     REQUIRE_THROWS(da.gridLimits(E0, k));
+}
+
+TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
+{
+    DiracAtom da = DiracAtom(1, 1);
+
+    pair<double, double> elim = da.energyLimits();
+    REQUIRE(elim.first == Approx(-da.getRestE()));
+    REQUIRE(elim.second == Approx(da.getRestE()));
 }

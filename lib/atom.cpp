@@ -55,7 +55,9 @@ double SchroState::norm()
  */
 int SchroState::getn()
 {
-    return nodes + l + 1;
+    int n;
+    qnumNodes2Principal(nodes, l, n);
+    return n;
 }
 
 /**
@@ -204,7 +206,9 @@ void DiracState::normalize()
 int DiracState::getn()
 {
     int l = getl();
-    return nodes + 1 + l;
+    int n;
+    qnumNodes2Principal(nodes, l, n);
+    return n;
 }
 
 /**
@@ -214,7 +218,10 @@ int DiracState::getn()
  */
 int DiracState::getl()
 {
-    return (k > 0 ? k : -k - 1);
+    int l;
+    bool s;
+    qnumDirac2Schro(k, l, s);
+    return l;
 }
 
 /**
@@ -225,7 +232,10 @@ int DiracState::getl()
 
 bool DiracState::gets()
 {
-    return (k > 0);
+    int l;
+    bool s;
+    qnumDirac2Schro(k, l, s);
+    return s;
 }
 
 /**
@@ -340,6 +350,55 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
+}
+
+/**
+ * @brief  Bounds for the energy of a state with given k and nodes
+ * @note   Lower and upper bound for the energy of a state with given
+ * k and nodes, taking into account states that have been already
+ * found with the same k
+ * 
+ * @param  nodes:   Target number of nodes in P
+ * @param  k:       Quantum number k
+ * @retval          Lower and upper bounds for the energy
+ */
+pair<double, double> DiracAtom::energyLimits(int nodes, int k)
+{
+    int n, l;
+    bool s;
+    double minE, maxE;
+    map<tuple<int, int, bool>, DiracState>::iterator it;
+
+    qnumDirac2Schro(k, l, s);
+    qnumNodes2Principal(nodes, l, n);
+
+    // Not below the lowest potential energy, and not an antiparticle
+    minE = max(V.V(0) + restE, -restE);
+    // Required for the state to be bound
+    maxE = restE;
+
+    for (it = states.begin(); it != states.end(); it++)
+    {
+        int itn, itl;
+        bool its;
+        itn = get<0>(it->first);
+        itl = get<1>(it->first);
+        its = get<2>(it->first);
+
+        if (itl == l && its == s)
+        {
+            if (itn <= n)
+            {
+                minE = max(minE, it->second.E);
+            }
+            else
+            {
+                maxE = min(maxE, it->second.E);
+            }
+        }
+    }
+
+    return {minE, maxE};
 }
 
 /**
