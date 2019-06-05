@@ -224,6 +224,39 @@ int countNodes(vector<double> v, double tol)
 }
 
 /**
+ * @brief  Convert quantum numbers l and s to k
+ * @note   Convert quantum numbers l and s as used in
+ * the radial Schroedinger equation to their equivalent k
+ * in the Dirac one
+ * 
+ * @param  l:       Orbital quantum number
+ * @param  s:       Spin quantum number
+ * @param  &k:      Dirac quantum number
+ * @retval None
+ */
+void qnumSchro2Dirac(int l, bool s, int &k)
+{
+    k = ((s && l > 0) ? l : -l - 1);
+}
+
+/**
+ * @brief  Convert quantum number k to l and s
+ * @note   Convert quantum number k as used in
+ * the radial Dirac equation to its equivalent l
+ * and s in the Schroedinger one
+ * 
+ * @param  k:      Dirac quantum number
+ * @param  &l:       Orbital quantum number
+ * @param  &s:       Spin quantum number
+ * @retval None
+ */
+void qnumDirac2Schro(int k, int &l, bool &s)
+{
+    s = (k > 0);
+    l = s ? k : -(k + 1);
+}
+
+/**
  * @brief  Split a string with a given separator
  * @note   Split a string s using each occurrence of a separator sep
  *

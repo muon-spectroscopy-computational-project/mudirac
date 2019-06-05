@@ -40,6 +40,9 @@ vector<double> genLaguerrePoly(vector<double> x, int n, int alpha);
 
 int countNodes(vector<double> v, double tol = 1e-8);
 
+void qnumSchro2Dirac(int l, bool s, int &k);
+void qnumDirac2Schro(int k, int &l, bool &s);
+
 vector<string> splitString(string s, string sep = " ", bool merge = false);
 string stripString(string s, string strip = " \t\n");
 
