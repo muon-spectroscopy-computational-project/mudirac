@@ -42,6 +42,8 @@ int countNodes(vector<double> v, double tol = 1e-8);
 
 void qnumSchro2Dirac(int l, bool s, int &k);
 void qnumDirac2Schro(int k, int &l, bool &s);
+void qnumNodes2Principal(int nodes, int l, int &n);
+void qnumPrincipal2Nodes(int n, int l, int &nodes);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);
 string stripString(string s, string strip = " \t\n");

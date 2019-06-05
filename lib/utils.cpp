@@ -257,6 +257,36 @@ void qnumDirac2Schro(int k, int &l, bool &s)
 }
 
 /**
+ * @brief  Convert from nodes and l to n
+ * @note   Convert from number of nodes in the wavefunction and 
+ * orbital quantum number l to principal quantum number
+ * 
+ * @param  nodes:   Number of nodes
+ * @param  l:       Orbital quantum number
+ * @param  &n:      Principal quantum number
+ * @retval None
+ */
+void qnumNodes2Principal(int nodes, int l, int &n)
+{
+    n = nodes + l + 1;
+}
+
+/**
+ * @brief  Convert from n and l to nodes
+ * @note   Convert from principal quantum number
+ * and orbital quantum number l to number of nodes in the wavefunction
+ * 
+ * @param  n:      Principal quantum number
+ * @param  l:       Orbital quantum number
+ * @param  &nodes:   Number of nodes
+ * @retval None
+ */
+void qnumPrincipal2Nodes(int n, int l, int &nodes)
+{
+    nodes = n - l - 1;
+}
+
+/**
  * @brief  Split a string with a given separator
  * @note   Split a string s using each occurrence of a separator sep
  *
