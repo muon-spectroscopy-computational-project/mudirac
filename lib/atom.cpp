@@ -421,6 +421,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
         {
             glim = gridLimits(El, k);
             state = DiracState(rc, dx, glim.first, glim.second);
+            state.k = k;
             state.E = El;
             state.V = getV(state.grid);
             integrateState(state, tp);
@@ -438,6 +439,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
         {
             glim = gridLimits(Er, k);
             state = DiracState(rc, dx, glim.first, glim.second);
+            state.k = k;
             state.E = Er;
             state.V = getV(state.grid);
             integrateState(state, tp);
@@ -527,7 +529,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     r_tp = Z / abs(B); // Coulombic turning point radius
 
     LOG(TRACE) << "Computing optimal grid size for state with E = " << E << ", k = " << k << "\n";
-    LOG(TRACE) << "K = " << K << ", gamma = " << gamma << "\n";
+    LOG(TRACE) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
 
     // Upper limit
     if (out_eps > 1 || out_eps < 0)

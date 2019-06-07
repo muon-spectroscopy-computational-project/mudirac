@@ -40,6 +40,15 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         throw "Invalid array size passed to boundaryDiracCoulomb";
     }
 
+    K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
+    if (K < 0)
+    {
+        throw "Can't compute boundary conditions for non-bound state";
+    }
+    K = sqrt(K);
+
+    LOG(TRACE) << "Computing Coulomb boundary conditions for Dirac wavefunction, k = " << k << ", K = " << K << "\n";
+
     // r = 0 limit
     // Depends on whether we consider the nucleus of finite size or point-like
     if (!finite)
@@ -62,14 +71,10 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         }
     }
 
+    LOG(TRACE) << "Boundary conditions at r => 0, P = [" << P[0] << "," << P[1] << "], Q = [" << Q[0] << "," << Q[1] << "]\n";
+
     // r = inf limit
     // Same as above
-    K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
-    if (K < 0)
-    {
-        throw "Can't compute boundary conditions for non-bound state";
-    }
-    K = sqrt(K);
     for (int i = 1; i < 3; ++i)
     {
         P[N - i] = exp(-K * r[N - i]);
@@ -82,6 +87,10 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
             throw "Boundary conditions give zero at the outside edge - you may need a smaller grid";
         }
     }
+
+    LOG(TRACE) << "Boundary conditions at r => inf, P = [" << P[N-2] << "," << P[N-1] << "], Q = [" << Q[N-2] << "," << Q[N-1] << "]\n";
+
+
 }
 
 /**
