@@ -64,7 +64,7 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
 
     // Test finding the nodes interval
     int nodes;
-    double minE = da.getRestE() - m * Z * Z;
+    double minE = limE.first;
     double maxE = limE.second;
     qnumPrincipal2Nodes(2, 0, nodes);
 
