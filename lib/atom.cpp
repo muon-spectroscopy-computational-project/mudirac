@@ -401,6 +401,19 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     return {minE, maxE};
 }
 
+/**
+  * @brief  Converge a state to fall within an attraction basin with the required number of nodes
+  * @note   Perform a preliminary, rough bisection search to find an energy that produces a
+  * wavefunction with the desired number of nodes for the given state. This is then used as a 
+  * starting point for full convergence.
+  * 
+  * @param  &state:     DiracState to integrate
+  * @param  &tp:        TurningPoint object to store turning point info
+  * @param  targ_nodes: Target number of nodes
+  * @param  &minE:      Minimum energy (boundary will be updated through search)
+  * @param  &maxE:      Maximum energy (boundary will be updated through search)
+  * @retval None
+  */
 void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE)
 {
     int k;
@@ -487,6 +500,55 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
             // Doesn't make sense
             throw runtime_error("convergeNodes failed - higher number of nodes for lower energy");
         }
+    }
+
+    throw runtime_error("convergeNodes failed to find a suitable state - maximum iterations hit");
+}
+
+void DiracAtom::convergeE(DiracState &state, TurningPoint &tp)
+{
+    int k;
+    double E, dE;
+    pair<int, int> glim;
+
+    k = state.k;
+    E = state.E;
+
+    LOG(TRACE) << "Running convergeE to search energy from starting value of " << E << "\n";
+
+    for (int it = 0; it < maxit; ++it)
+    {
+        LOG(TRACE) << "Iteration " << (it + 1) << ", E = " << E << "\n";
+
+        glim = gridLimits(E, k);
+        state = DiracState(rc, dx, glim.first, glim.second);
+        state.k = k;
+        state.E = E;
+        state.V = getV(state.grid);
+        integrateState(state, tp, dE);
+
+        LOG(TRACE) << "Integration complete, computed error dE = " << dE << "\n";
+
+        if (std::isnan(dE))
+        {
+            throw runtime_error("Invalid dE value returned by integrateState");
+        }
+
+        if (abs(dE) < Etol)
+        {
+            E = E - dE;
+            LOG(TRACE) << "Convergence complete after " << (it + 1) << " iterations\n";
+            state.E = E;
+            state.continuify(tp);
+            state.findNodes();
+            return;
+        }
+        // Apply maximum step ratio
+        if (abs(dE / E) > max_dE_ratio)
+        {
+            dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
+        }
+        E = E - dE * Edamp;
     }
 }
 

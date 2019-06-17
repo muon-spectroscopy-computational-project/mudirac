@@ -29,6 +29,3 @@ target_link_libraries(test_transforms test_main mudiraclib)
 
 add_executable(test_atom test_atom.cpp)
 target_link_libraries(test_atom test_main mudiraclib)
-
-add_executable(test_optimal test_optimal.cpp)
-target_link_libraries(test_optimal test_main mudiraclib)
