@@ -54,6 +54,9 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
 {
     double Z = 1;
     double m = 1;
+    double Es1 = hydrogenicDiracEnergy(Z, m, 1),
+           Es2 = hydrogenicDiracEnergy(Z, m, 2),
+           Es3 = hydrogenicDiracEnergy(Z, m, 3);
     DiracAtom da = DiracAtom(Z, m);
     DiracState ds;
     TurningPoint tp;
@@ -70,6 +73,14 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
 
     ds.k = -1;
     da.convergeNodes(ds, tp, nodes, minE, maxE);
-    REQUIRE(ds.E > hydrogenicDiracEnergy(Z, m, 1));
-    REQUIRE(ds.E < hydrogenicDiracEnergy(Z, m, 3));
+    REQUIRE(ds.E > Es1);
+    REQUIRE(ds.E < Es3);
+
+    // Test finding the correct energy
+    da.convergeE(ds, tp);
+    REQUIRE(ds.E == Approx(Es2));
+
+    // And test full convergence
+    ds = da.convergeState(2, -1);
+    REQUIRE(ds.E == Approx(Es2));
 }

@@ -432,11 +432,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
         LOG(TRACE) << "Iteration " << (it + 1) << ", El = " << El - restE << "+mc2, Er = " << Er - restE << "+mc2\n";
         if (El != oldEl)
         {
-            glim = gridLimits(El, k);
-            state = DiracState(rc, dx, glim.first, glim.second);
-            state.k = k;
-            state.E = El;
-            state.V = getV(state.grid);
+            state = initState(El, k);
             integrateState(state, tp);
             state.continuify(tp);
             state.findNodes();
@@ -450,11 +446,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
 
         if (Er != oldEr)
         {
-            glim = gridLimits(Er, k);
-            state = DiracState(rc, dx, glim.first, glim.second);
-            state.k = k;
-            state.E = Er;
-            state.V = getV(state.grid);
+            state = initState(Er, k);
             integrateState(state, tp);
             state.continuify(tp);
             state.findNodes();
@@ -518,13 +510,9 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp)
 
     for (int it = 0; it < maxit; ++it)
     {
-        LOG(TRACE) << "Iteration " << (it + 1) << ", E = " << E << "\n";
+        LOG(TRACE) << "Iteration " << (it + 1) << ", E = " << E - restE << " + mc2\n";
 
-        glim = gridLimits(E, k);
-        state = DiracState(rc, dx, glim.first, glim.second);
-        state.k = k;
-        state.E = E;
-        state.V = getV(state.grid);
+        state = initState(E, k);
         integrateState(state, tp, dE);
 
         LOG(TRACE) << "Integration complete, computed error dE = " << dE << "\n";
@@ -668,74 +656,6 @@ double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
 }
 
 /**
- * @brief  Integrate the given state and count its nodes
- * @note   Integrate the given state and count its nodes. Used
- * for quick searches over number of nodes.
- * 
- * @param  &state:  DiracState to integrate
- * @param  &tp:     TurningPoint object to store turning point infor
- * @retval None
- */
-void DiracAtom::stateCountNodes(DiracState &state, TurningPoint &tp)
-{
-    int N;
-
-    N = state.grid.size();
-    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
-    tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
-
-    // Make states continuous
-    for (int i = tp.i; i < N; ++i)
-    {
-        state.P[i] *= tp.Pi / tp.Pe;
-        state.Q[i] *= tp.Pi / tp.Pe;
-    }
-
-    // Count nodes
-    state.nodes = countNodes(state.P);
-    state.nodesQ = countNodes(state.Q);
-}
-
-/**
- * @brief  Search for a starting value of E with a target number of nodes
- * @note   Perform a bisection search for a starting value of E with a target number of nodes.
- * bounded within a given interval. Will raise an error if such a value can not be found.
- * 
- * @param  k:           Quantum number k
- * @param  target:      Target number of nodes for the P part of the wavefunction
- * @param  Emin:        Lower bound of the energy interval
- * @param  Emax:        Upper bound of the energy interval
- * @retval 
- */
-double DiracAtom::searchBasinE(int k, int target, double Emin, double Emax)
-{
-    int nodes1, nodes2;
-    double E1, E2;
-    DiracState state;
-    TurningPoint tp;
-
-    state.k = k;
-    E1 = Emin + (Emax - Emin) / 3.0;
-    E2 = Emax - (Emax - Emin) / 3.0;
-
-    cout << E1 << '\n';
-
-    state.E = E1;
-    stateCountNodes(state, tp);
-    nodes1 = state.nodes;
-
-    state.E = E2;
-    stateCountNodes(state, tp);
-    nodes2 = state.nodes;
-
-    cout << nodes1 << '\t' << nodes2 << '\n';
-
-    for (int it = 0; it < maxit; ++it)
-    {
-    }
-}
-
-/**
  * @brief  Initialise a DiracState based on E and k
  * @note   Initialise a DiracState based on energy E 
  * and quantum number k
@@ -753,6 +673,7 @@ DiracState DiracAtom::initState(double E, int k)
     state = DiracState(rc, dx, glimits.first, glimits.second);
     state.k = k;
     state.E = E;
+    state.V = getV(state.grid);
 
     return state;
 }
@@ -827,6 +748,48 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     dE = err / (zetai[tp.i] - zetae[tp.i]);
 
     return;
+}
+
+DiracState DiracAtom::convergeState(int n, int k)
+{
+    int l;
+    bool s;
+    int targ_nodes;
+    double minE, maxE;
+    pair<double, double> Elim;
+    DiracState state;
+    TurningPoint tp;
+
+    // Compute the required number of nodes
+    qnumDirac2Schro(k, l, s);
+    qnumPrincipal2Nodes(n, l, targ_nodes);
+
+    // Find energy limits
+    Elim = energyLimits(targ_nodes, k);
+    minE = Elim.first;
+    maxE = Elim.second;
+
+    LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
+    LOG(TRACE) << "Energy limits: " << minE << " < E < " << maxE << "\n";
+
+    // Find appropriate basin
+    state.k = k;
+    convergeNodes(state, tp, targ_nodes, minE, maxE);
+    // Now converge energy
+    convergeE(state, tp);
+
+    // Check node condition
+    if (state.nodes != targ_nodes)
+    {
+        LOG(TRACE) << "State contains " << state.nodes << " nodes instead of " << targ_nodes << "\n";
+        throw runtime_error("Invalid converged state - wrong number of nodes");
+    }
+    state.normalize();
+
+    LOG(TRACE) << "Convergence achieved at E = " << state.E - restE << " + mc2\n";
+
+    // And return
+    return state;
 }
 
 /**

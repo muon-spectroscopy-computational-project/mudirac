@@ -152,8 +152,6 @@ public:
   void calcAllStates(int max_n, bool force = false);
 
   // Convergence
-  double searchBasinE(int k, int target, double Emin, double Emax);
-  void stateCountNodes(DiracState &state, TurningPoint &tp);
   double stateIntegrate(DiracState &state, TurningPoint &tp);
 
   pair<double, double> energyLimits(int nodes = 0, int k = -1);
@@ -163,6 +161,7 @@ public:
   void integrateState(DiracState &state, TurningPoint &tp, double &dE);
   void convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE);
   void convergeE(DiracState &state, TurningPoint &tp);
+  DiracState convergeState(int n = 1, int k = -1);
   DiracState convergeState(double E0, int k = -1);
   DiracState getState(int n, int l, bool s);
 };
