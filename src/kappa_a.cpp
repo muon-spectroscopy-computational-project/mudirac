@@ -1,23 +1,25 @@
 #include <iostream>
 #include "../lib/atom.hpp"
 #include "../lib/constants.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-
     double A, mu, Ka_schro, Ka_dirac_hydro, Ka_dirac_hydro_mu, Ka_dirac_num_mu, Ka_dirac_num_sphere;
     DiracState p2, s1;
+
+    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "kappa_a.log", "#message"),
+                       make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::special, "kappa_a.err")});
+
     // Test all atomic numbers, from 2 to 90, for their kappa alpha line for various models
-    for (int Z = 69; Z < 90; ++Z)
+    for (int Z = 1; Z < 90; ++Z)
     {
         A = getIsotopeMass(Z);
         mu = effectiveMass(A * Physical::amu, Physical::m_mu);
         DiracAtom daCoulomb = DiracAtom(Z, Physical::m_mu, A);
         DiracAtom daSphere = DiracAtom(Z, Physical::m_mu, A, SPHERE);
-
-        std::clog << Z << '\n';
 
         try
         {
@@ -43,7 +45,6 @@ int main(int argc, char **argv)
 
             std::clog << "Finite nucleus energies computed\n";
             std::clog.flush();
-
         }
         catch (TurningPointError tpe)
         {

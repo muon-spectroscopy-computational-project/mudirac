@@ -750,8 +750,9 @@ DiracState DiracAtom::convergeState(int n, int k)
     {
         state.k = k;
         // Find appropriate basin
-        convergeNodes(state, tp, targ_nodes, minE, maxE);
+        convergeNodes(state, tp, targ_nodes, minE, maxE);        
         // Now converge energy
+        state.E = max(hydrogenicDiracEnergy(Z, mu, n, k), minE); // Speeds things up a lot...
         convergeE(state, tp, minE, maxE);
 
         // Check node condition
@@ -766,6 +767,11 @@ DiracState DiracAtom::convergeState(int n, int k)
             {
                 minE = max(minE, state.E);
             }
+            // Store it for the future
+            state.normalize();
+            state.converged = true;
+            states[make_tuple(n, l, s)] = state;
+            state = DiracState();
         }
         else
         {
