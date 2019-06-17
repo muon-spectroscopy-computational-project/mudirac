@@ -613,49 +613,6 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 }
 
 /**
- * @brief  Integrate a DiracState of given E, k and V
- * @note   Perform a single integration of a DiracState,
- * given its E, k and V (which must be set in the DiracState
- * object itself). Returns a suggested correction for the energy.
- * 
- * @param  &state:  DiracState to integrate
- * @param  &tp:     TurningPoint object to store turning point infor
- * @retval          Suggested energy correction
- */
-double DiracAtom::stateIntegrate(DiracState &state, TurningPoint &tp)
-{
-    int N;
-    double err, dE;
-    vector<double> y, zetai, zetae;
-
-    N = state.grid.size();
-    y = vector<double>(N, 0);
-    zetai = vector<double>(N, 0);
-    zetae = vector<double>(N, 0);
-
-    // Start by applying boundary conditions
-    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]);
-    tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
-    err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
-    // Compute the derivative of the error in dE
-    for (int i = 0; i < N; ++i)
-    {
-        y[i] = state.Q[i] / state.P[i];
-    }
-    // First the forward version
-    y[tp.i] = tp.Qi / tp.Pi;
-    shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx);
-    // Then the backwards one
-    y[tp.i] = tp.Qe / tp.Pe;
-    boundaryDiracErrorDECoulomb(zetae, state.E, state.k, mu);
-    shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
-
-    dE = err / (zetai[tp.i] - zetae[tp.i]);
-
-    return dE;
-}
-
-/**
  * @brief  Initialise a DiracState based on E and k
  * @note   Initialise a DiracState based on energy E 
  * and quantum number k
@@ -794,96 +751,6 @@ DiracState DiracAtom::convergeState(int n, int k)
 }
 
 /**
- * @brief  Converge a state with given k and initial energy guess E0
- * @note   Converge iteratively a Dirac orbital for this atom from a given k and
- * energy starting guess. Will fail if convergence can't be achieved or if nodal theorems
- * are violated. If successful, will return the state found
- * 
- * @param  E0: Initial energy guess
- * @param  k:  Quantum number k
- * @retval     Found DiracState
- */
-DiracState DiracAtom::convergeState(double E0, int k)
-{
-    int N, Qn, Pn;
-    double B, E, dE, dEprev, norm;
-    pair<int, int> glimits;
-    DiracState state;
-    TurningPoint tp;
-
-    E = E0;
-    B = E - restE;
-    LOG(TRACE) << "Starting convergence...\n";
-    LOG(TRACE) << scientific;
-    LOG(TRACE) << 0 << '\t' << E - restE << '\n';
-
-    for (int it = 0; it < maxit; ++it)
-    {
-        glimits = gridLimits(E, k);
-        state = DiracState(rc, dx, glimits.first, glimits.second);
-        state.E = E;
-        state.k = k;
-
-        N = state.grid.size();
-        // Potential
-        state.V = getV(state.grid);
-        dE = stateIntegrate(state, tp);
-        if (!std::isnan(dE) && (abs(dE) < Etol))
-        {
-            E = E - dE;
-            LOG(TRACE) << "Convenrgence compelete after " << it + 1 << " iterations\n";
-            break;
-        }
-        // Apply maximum step ratio
-        if (abs(dE / E) > max_dE_ratio)
-        {
-            dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
-        }
-        E = E - dE * Edamp;
-        if (std::isnan(E))
-        {
-            // Something bad happened
-            // throw AtomConvergenceException(AtomConvergenceException::ACEType::NAN_ENERGY);
-            throw "NAN ENERGY";
-        }
-
-        B = E - restE;
-        dEprev = dE;
-        LOG(TRACE) << it + 1 << '\t' << E - restE << '\t' << dE << '\t' << Edamp << '\n';
-    }
-
-    // Make states continuous
-    for (int i = tp.i; i < N; ++i)
-    {
-        state.P[i] *= tp.Pi / tp.Pe;
-        state.Q[i] *= tp.Pi / tp.Pe;
-    }
-    // Now normalise
-    norm = state.norm();
-    for (int i = 0; i < N; ++i)
-    {
-        state.P[i] /= norm;
-        state.Q[i] /= norm;
-    }
-
-    // Count nodes
-    Pn = countNodes(state.P);
-    Qn = countNodes(state.Q);
-
-    if (Qn - Pn != (R > state.grid[0]))
-    {
-        // throw AtomConvergenceException(AtomConvergenceException::ACEType::NODES_WRONG);
-        throw "NODES WRONG";
-    }
-
-    state.nodes = Pn;
-    state.nodesQ = Qn;
-    state.converged = true;
-
-    return state;
-}
-
-/**
  * @brief  Search for an orbital with given set of quantum numbers
  * @note   Search for a Dirac orbital for this Atom with a given set of
  * quantum numbers. Will start with a guess equal to the one for the hydrogenic solution
@@ -898,7 +765,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
  */
 void DiracAtom::calcState(int n, int l, bool s, bool force)
 {
-    int k = ((s && l > 0) ? l : -l - 1);
+    int k;
     int dnode;
     double E0;
     bool found = false;
@@ -911,34 +778,14 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
         return;
     }
 
-    // Then start with a guess for the energy
-    E0 = hydrogenicDiracEnergy(Z, mu, n, k);
-    LOG(TRACE) << "Using starting energy: " << E0 << "\n";
-
-    if (R > 0)
+    qnumSchro2Dirac(l, s, k);
+    try
     {
-        // For finite atoms, the initial energy might be too low
-        if (E0 - restE < V.V(0))
-        {
-            E0 = V.V(0) + restE + 0.1;
-            LOG(TRACE) << "Using starting energy for finite nucleus: " << E0 << "\n";
-        }
+        state = convergeState(n, k);
     }
-
-    for (int it = 0; it < maxit; ++it)
+    catch (runtime_error re)
     {
-        state = convergeState(E0, k);
-        // Is the nodes condition respected?
-        if (state.getn() == n)
-        {
-            break;
-        }
-        else
-        {
-            // Still save the state for future use
-            states[make_tuple(state.getn(), l, s)] = state;
-            E0 = dnode > 0 ? E0 / Esearch : E0 * Esearch;
-        }
+        LOG(ERROR) << "Convergence failed with error: " << re.what() << "\n";
     }
 
     states[make_tuple(n, l, s)] = state;
@@ -985,8 +832,7 @@ DiracState DiracAtom::getState(int n, int l, bool s)
 
     if (!st.converged)
     {
-        throw "MAXIT REACHED";
-        // throw AtomConvergenceException(AtomConvergenceException::ACEType::MAXIT_REACHED);
+        throw runtime_error("State is not converged");
     }
 
     return DiracState(st);
