@@ -381,6 +381,10 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     {
         int itn, itl;
         bool its;
+
+        // if (!it->second.converged)
+        //     continue;
+
         itn = get<0>(it->first);
         itl = get<1>(it->first);
         its = get<2>(it->first);
@@ -497,7 +501,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
     throw runtime_error("convergeNodes failed to find a suitable state - maximum iterations hit");
 }
 
-void DiracAtom::convergeE(DiracState &state, TurningPoint &tp)
+void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, double &maxE)
 {
     int k;
     double E, dE;
@@ -507,6 +511,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp)
     E = state.E;
 
     LOG(TRACE) << "Running convergeE to search energy from starting value of " << E << "\n";
+    LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
     for (int it = 0; it < maxit; ++it)
     {
@@ -537,7 +542,19 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp)
             dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
         }
         E = E - dE * Edamp;
+        if (E > maxE)
+        {
+            // Something has gone wrong. Try to go back to a more reasonable search
+            E = (maxE + E + dE * Edamp) / 2.0;
+        }
+        else if (E < minE)
+        {
+            // As above
+            E = (minE + E + dE * Edamp) / 2.0;
+        }
     }
+
+    throw runtime_error("Convergence failed in given numer of iterations");
 }
 
 /**
@@ -729,25 +746,40 @@ DiracState DiracAtom::convergeState(int n, int k)
     LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
     LOG(TRACE) << "Energy limits: " << minE << " < E < " << maxE << "\n";
 
-    // Find appropriate basin
-    state.k = k;
-    convergeNodes(state, tp, targ_nodes, minE, maxE);
-    // Now converge energy
-    convergeE(state, tp);
-
-    // Check node condition
-    if (state.nodes != targ_nodes)
+    for (int it; it < maxit; ++it)
     {
-        LOG(TRACE) << "State contains " << state.nodes << " nodes instead of " << targ_nodes << "\n";
-        throw runtime_error("Invalid converged state - wrong number of nodes");
+        state.k = k;
+        // Find appropriate basin
+        convergeNodes(state, tp, targ_nodes, minE, maxE);
+        // Now converge energy
+        convergeE(state, tp, minE, maxE);
+
+        // Check node condition
+        if (state.nodes != targ_nodes)
+        {
+            LOG(TRACE) << "Converged state contains " << state.nodes << " nodes instead of " << targ_nodes << "\n";
+            if (state.nodes > targ_nodes)
+            {
+                maxE = min(maxE, state.E);
+            }
+            else
+            {
+                minE = max(minE, state.E);
+            }
+        }
+        else
+        {
+            state.normalize();
+            state.converged = true;
+
+            LOG(TRACE) << "Convergence achieved at E = " << state.E - restE << " + mc2\n";
+
+            // And return
+            return state;
+        }
     }
-    state.normalize();
-    state.converged = true;
 
-    LOG(TRACE) << "Convergence achieved at E = " << state.E - restE << " + mc2\n";
-
-    // And return
-    return state;
+    throw runtime_error("Failed to converge with convergeState");
 }
 
 /**

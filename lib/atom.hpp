@@ -33,6 +33,8 @@ enum AtomErrorCode
   RMAX_SMALL,        // Upper bound of grid is smaller than turning point
   RMIN_LARGE,        // Lower bound of grid is bigger than turning point
   SMALL_GAMMA,       // Gamma parameter too small (won't happen for known elements)
+  NODES_HIGH,         // State has converged but does not contain the right amount of nodes (too many)
+  NODES_LOW,         // State has converged but does not contain the right amount of nodes (too few)
 };
 
 enum NuclearRadiusModel
@@ -158,7 +160,7 @@ public:
   void integrateState(DiracState &state, TurningPoint &tp);
   void integrateState(DiracState &state, TurningPoint &tp, double &dE);
   void convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE);
-  void convergeE(DiracState &state, TurningPoint &tp);
+  void convergeE(DiracState &state, TurningPoint &tp, double &minE, double &maxE);
   DiracState convergeState(int n = 1, int k = -1);
   DiracState getState(int n, int l, bool s);
 };

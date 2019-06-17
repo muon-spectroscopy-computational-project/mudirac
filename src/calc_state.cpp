@@ -34,6 +34,7 @@ int main(int argc, char **argv)
     vector<vector<double>> PQ;
 
     DiracAtom da = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE, 1.0, 1e-3);
+    da.Etol = 1e-7;
     DiracState ds;
 
     vector<double> r;

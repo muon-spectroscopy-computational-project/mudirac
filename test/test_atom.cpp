@@ -77,7 +77,7 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
     REQUIRE(ds.E < Es3);
 
     // Test finding the correct energy
-    da.convergeE(ds, tp);
+    da.convergeE(ds, tp, minE, maxE);
     REQUIRE(ds.E == Approx(Es2));
 
     // And test full convergence
