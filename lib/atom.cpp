@@ -115,7 +115,7 @@ DiracState::DiracState(double rc, double dx, int i0, int i1) : DiracState(i1 - i
 
 DiracState::DiracState(const DiracState &s)
 {
-    init = true;
+    converged = s.converged;
     nodes = s.nodes;
     E = s.E;
     k = s.k;
@@ -785,6 +785,7 @@ DiracState DiracAtom::convergeState(int n, int k)
         throw runtime_error("Invalid converged state - wrong number of nodes");
     }
     state.normalize();
+    state.converged = true;
 
     LOG(TRACE) << "Convergence achieved at E = " << state.E - restE << " + mc2\n";
 
@@ -877,7 +878,7 @@ DiracState DiracAtom::convergeState(double E0, int k)
 
     state.nodes = Pn;
     state.nodesQ = Qn;
-    state.init = true;
+    state.converged = true;
 
     return state;
 }
@@ -905,7 +906,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     TurningPoint tp;
 
     // First, check if it's already calculated
-    if (!force && states[make_tuple(n, l, s)].init)
+    if (!force && states[make_tuple(n, l, s)].converged)
     {
         return;
     }
@@ -982,7 +983,7 @@ DiracState DiracAtom::getState(int n, int l, bool s)
     calcState(n, l, s);
     DiracState st = states[make_tuple(n, l, s)];
 
-    if (!st.init)
+    if (!st.converged)
     {
         throw "MAXIT REACHED";
         // throw AtomConvergenceException(AtomConvergenceException::ACEType::MAXIT_REACHED);

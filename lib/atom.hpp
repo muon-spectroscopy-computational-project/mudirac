@@ -45,7 +45,7 @@ enum NuclearRadiusModel
 class State
 {
 public:
-  bool init = false;
+  bool converged = false;       // Used to flag states that are "good" to use
   int nodes = 0;
   double E = 0;
   pair<int, int> grid_indices;
