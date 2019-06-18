@@ -4,6 +4,7 @@ add_library(test_main STATIC test_main.cpp)
 set(CURRENT_DATAPATH ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(datapath.h.in ${CMAKE_CURRENT_SOURCE_DIR}/datapath.h @ONLY)
 file(COPY data/inputtest.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
+file(COPY data/kappa_alpha_exp.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 
 # Tests
 add_executable(test_utils test_utils.cpp)
@@ -29,3 +30,6 @@ target_link_libraries(test_transforms test_main mudiraclib)
 
 add_executable(test_atom test_atom.cpp)
 target_link_libraries(test_atom test_main mudiraclib)
+
+add_executable(test_kappaa test_kappaa.cpp)
+target_link_libraries(test_kappaa mudiraclib)
