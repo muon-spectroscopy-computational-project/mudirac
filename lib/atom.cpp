@@ -746,7 +746,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
     LOG(TRACE) << "Energy limits: " << minE << " < E < " << maxE << "\n";
 
-    for (int it; it < maxit; ++it)
+    for (int it = 0; it < maxit; ++it)
     {
         state.k = k;
         // Find appropriate basin
