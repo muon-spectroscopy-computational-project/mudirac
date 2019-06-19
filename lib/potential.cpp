@@ -12,7 +12,7 @@
 
 #include "potential.hpp"
 
-CoulombPotential::CoulombPotential(double Z, double R)
+CoulombSpherePotential::CoulombSpherePotential(double Z, double R)
 {
     this->Z = Z;
     this->R = R;
@@ -20,7 +20,7 @@ CoulombPotential::CoulombPotential(double Z, double R)
     this->VR = R > 0 ? -1.5 * Z / R : 0;
 }
 
-double CoulombPotential::V(double r)
+double CoulombSpherePotential::V(double r)
 {
     if (r < 0)
     {
@@ -30,8 +30,31 @@ double CoulombPotential::V(double r)
     {
         return Z * pow(r, 2) / (2 * R3) + VR;
     }
-    else {
-        return -Z/r;
+    else
+    {
+        return -Z / r;
     }
 }
 
+CoulombUehlingSpherePotential::CoulombUehlingSpherePotential(double Z, double R, int usteps) : CoulombSpherePotential(Z, R)
+{
+    this->usteps = usteps;
+}
+
+double CoulombUehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
+{
+    double ans = exp(-2 * r * Physical::c / u);
+    ans *= (exp(2 * R * Physical::c / u) * (R * u * Physical::alpha / 2 - pow(u * Physical::alpha, 2) / 4) +
+            exp(-2 * R * Physical::c / u) * (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4));
+
+    return ans;
+}
+
+double CoulombUehlingSpherePotential::ukernel_r_smaller(double u, double r, double R)
+{
+    double ans = (exp(-2 * r * Physical::c / u) - exp(2 * r * Physical::c / u));
+    ans *= (exp(-2 * R * Physical::c / u) * (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4) -
+            pow(u * Physical::alpha, 2) / 4);
+
+    return ans;
+}

@@ -20,20 +20,60 @@ using namespace std;
 #ifndef MUDIRAC_POTENTIAL
 #define MUDIRAC_POTENTIAL
 
+/**
+  * @brief  Generic Potential class other potentials inherit from 
+  * @note   A generic Potential class for other specific potentials
+  * to inherit from.
+  * 
+  * @retval None
+ */
 class Potential
 {
 public:
+  /**
+    * @brief  Evaluate potential at r
+    * @note   Evaluate potential at r
+    * 
+    * @param  r:  Distance from the center at which to evaluate potential
+    * @retval     Potential
+   */
   virtual double V(double r){};
 };
 
-class CoulombPotential : Potential
+/**
+  * @brief  Coulomb potential with uniform spherical charge distribution
+  * @note   Coulomb potential assuming a uniform spherical charge of radius R
+  * 
+  * @retval None
+  */
+class CoulombSpherePotential : Potential
 {
 public:
-  CoulombPotential(double Z = 1.0, double R = -1);
+  CoulombSpherePotential(double Z = 1.0, double R = -1);
   double V(double r) override;
 
 protected:
   double R, R3, VR, Z;
+};
+
+/**
+  * @brief  Coulomb potential with uniform spherical charge and Uehling term
+  * @note   Coulomb potential assuming a uniform spherical charge of radius R,
+  * including the first Uehling potential term (polarisation of the vacuum, 
+  * including only electron-positron pairs)
+  *  
+  * @retval None
+ */
+class CoulombUehlingSpherePotential : CoulombSpherePotential
+{
+public:
+  CoulombUehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
+
+  static double ukernel_r_greater(double u, double r, double R);
+  static double ukernel_r_smaller(double u, double r, double R);
+
+protected:
+  int usteps;
 };
 
 #endif

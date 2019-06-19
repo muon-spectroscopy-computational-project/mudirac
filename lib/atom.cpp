@@ -308,7 +308,7 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
     this->dx = dx;
 
     // Potential
-    V = CoulombPotential(Z, R);
+    V = CoulombSpherePotential(Z, R);
 }
 
 /**

@@ -114,7 +114,7 @@ protected:
   // Grid
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
-  CoulombPotential V;
+  CoulombSpherePotential V;
 
 public:
   Atom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
