@@ -14,6 +14,7 @@
 #include <vector>
 #include <stdexcept>
 #include "integrate.hpp"
+#include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
 
@@ -64,16 +65,20 @@ protected:
   *  
   * @retval None
  */
-class CoulombUehlingSpherePotential : CoulombSpherePotential
+class UehlingSpherePotential : Potential
 {
 public:
-  CoulombUehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
+  UehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
+  double V(double r) override;
 
   static double ukernel_r_greater(double u, double r, double R);
   static double ukernel_r_smaller(double u, double r, double R);
+  static double ukernel_point(double u, double r);
 
 protected:
+  double Z, R, rho, K;
   int usteps;
+  vector<double> uarg;
 };
 
 #endif

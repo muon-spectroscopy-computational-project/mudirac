@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     double restE = Physical::m_mu * pow(Physical::c, 2.0);
     double R, corrE;
     vector<vector<double>> PQ, n_grid;
-    CoulombPotential Vpoint, Vsphere;
+    CoulombSpherePotential Vpoint, Vsphere;
     vector<double> rho, dV;
     DiracState s, s_sphere;
 
@@ -33,8 +33,8 @@ int main(int argc, char **argv)
     DiracAtom da_sphere = DiracAtom(Z, Physical::m_mu, A, NuclearRadiusModel::SPHERE);
 
     R = da_sphere.getR();
-    Vpoint = CoulombPotential(Z);
-    Vsphere = CoulombPotential(Z, R);
+    Vpoint = CoulombSpherePotential(Z);
+    Vsphere = CoulombSpherePotential(Z, R);
 
     for (int n = 1; n <= maxn; ++n)
     {

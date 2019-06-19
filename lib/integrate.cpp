@@ -61,6 +61,29 @@ double trapzInt(vector<double> x, vector<double> y)
 }
 
 /**
+ * @brief  Integrate a function with the trapezoidal rule
+ * @note   Perform a trapezoidal rule integration of function y with step dx:
+ * 
+ * I = sum_i (y[i]+y[i-1])/2*dx
+ * 
+ * @param  dx:  x step
+ * @param  y:   function values
+ * @retval Integral
+ */
+double trapzInt(double dx, vector<double> y)
+{
+    int N = y.size();
+    double ans = 0.0;
+
+    for (int i = 1; i < N; ++i)
+    {
+        ans += (y[i] + y[i - 1]) / 2.0 * dx;
+    }
+
+    return ans;
+}
+
+/**
  * @brief  Integrate a single ODE
  * @note   Integrate one differential equation of the form:
  * 

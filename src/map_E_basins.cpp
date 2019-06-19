@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     double E0 = hydrogenicDiracEnergy(Z, da.getmu(), 1, -1, true);
     // std::cout << E0 << '\t' << da.getV(0) << '\n';
 
-    da.searchBasinE(-1, 2, E0 * 2, 0);
+    // da.searchBasinE(-1, 2, E0 * 2, 0);
     return 0;
 
     for (double fB = 5.0; fB > 1e-4; fB -= 5e-3)
@@ -49,7 +49,8 @@ int main(int argc, char **argv)
             ds.k = k;
             ds.E = E;
             ds.V = da.getV(ds.grid);
-            double dE = da.stateIntegrate(ds, tp);
+            double dE;
+            // dE = da.stateIntegrate(ds, tp);
 
             std::cout << B << '\t' << dE << '\n';
         }

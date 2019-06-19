@@ -26,14 +26,24 @@ vector<double> applyFunc(double (*f)(double), vector<double> x)
     return y;
 }
 
-double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 200)
+double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 200, bool step = false)
 {
     vector<double> x, y;
 
+    double ans;
     x = linGrid(x0, x1, N);
     y = applyFunc(f, x);
 
-    return trapzInt(x, y);
+    if (step)
+    {
+        ans = trapzInt(x[1] - x[0], y);
+    }
+    else
+    {
+        ans = trapzInt(x, y);
+    }
+
+    return ans;
 }
 
 double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double),
@@ -189,6 +199,7 @@ TEST_CASE("Trapezoidal integration", "[trapzInt]")
     REQUIRE(trapzIntTest(sin) == Approx(1.0 - cos(1.0)));
     REQUIRE(trapzIntTest(sqrt, 1.0, 4.0) == Approx(14.0 / 3.0));
     REQUIRE(trapzIntTest(cbrt, 1.0, 8.0) == Approx(45.0 / 4.0));
+    REQUIRE(trapzIntTest(cbrt, 1.0, 8.0, 200, true) == Approx(45.0 / 4.0));
 }
 
 TEST_CASE("Shooting integration", "[shootQ]")
@@ -245,7 +256,7 @@ TEST_CASE("Potential integration", "[shootPotentialLog]")
 
 TEST_CASE("Dirac integration", "[shootDiracLog]")
 {
-    // At the moment only the 'low' tolerance is achievable. 
+    // At the moment only the 'low' tolerance is achievable.
     // This needs improvement
     REQUIRE(diracTest(1, 1, 1, -1, 1e-4, 1e2, 1000) < ERRTOL_LOW);
     REQUIRE(diracTest(1, 1, 2, -1, 2e-4, 2e2, 1000) < ERRTOL_LOW);
