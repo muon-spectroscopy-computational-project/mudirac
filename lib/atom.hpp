@@ -33,7 +33,7 @@ enum AtomErrorCode
   RMAX_SMALL,        // Upper bound of grid is smaller than turning point
   RMIN_LARGE,        // Lower bound of grid is bigger than turning point
   SMALL_GAMMA,       // Gamma parameter too small (won't happen for known elements)
-  NODES_HIGH,         // State has converged but does not contain the right amount of nodes (too many)
+  NODES_HIGH,        // State has converged but does not contain the right amount of nodes (too many)
   NODES_LOW,         // State has converged but does not contain the right amount of nodes (too few)
 };
 
@@ -47,7 +47,7 @@ enum NuclearRadiusModel
 class State
 {
 public:
-  bool converged = false;       // Used to flag states that are "good" to use
+  bool converged = false; // Used to flag states that are "good" to use
   int nodes = 0;
   double E = 0;
   pair<int, int> grid_indices;
@@ -114,7 +114,11 @@ protected:
   // Grid
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
+  // Potential
   CoulombSpherePotential V;
+  // Additional potential terms
+  bool use_uehling = false;
+  UehlingSpherePotential V_uehling;
 
 public:
   Atom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
@@ -130,6 +134,10 @@ public:
   vector<double> getV(vector<double> r);
   double getrc() { return rc; };
   double getdx() { return dx; };
+
+  // Additional potential terms get/setters
+  bool getUehling() { return use_uehling; };
+  void setUehling(bool s, int usteps = 1000);
 };
 
 class DiracAtom : public Atom

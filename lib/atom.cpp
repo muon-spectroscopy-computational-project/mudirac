@@ -311,6 +311,15 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
     V = CoulombSpherePotential(Z, R);
 }
 
+void Atom::setUehling(bool s, int usteps)
+{
+    use_uehling = s;
+    if (s)
+    {
+        V_uehling = UehlingSpherePotential(Z, R, usteps);
+    }
+}
+
 /**
  * @brief  Recalculate the electrostatic potential
  * @note   Recalculate the electrostatic potential for an atom. Done automatically
@@ -327,6 +336,10 @@ vector<double> Atom::getV(vector<double> r)
     for (int i = 0; i < N; ++i)
     {
         Vout[i] = V.V(r[i]);
+        if (use_uehling)
+        {
+            Vout[i] += V_uehling.V(r[i]);
+        }
     }
 
     return Vout;
@@ -750,7 +763,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     {
         state.k = k;
         // Find appropriate basin
-        convergeNodes(state, tp, targ_nodes, minE, maxE);        
+        convergeNodes(state, tp, targ_nodes, minE, maxE);
         // Now converge energy
         state.E = max(hydrogenicDiracEnergy(Z, mu, n, k), minE); // Speeds things up a lot...
         convergeE(state, tp, minE, maxE);
