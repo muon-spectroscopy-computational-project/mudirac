@@ -138,6 +138,9 @@ public:
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000);
+
+  // Clear computed states
+  virtual void reset(){};
 };
 
 class DiracAtom : public Atom
@@ -156,8 +159,9 @@ public:
             double fc = 1.0, double dx = 0.005);
 
   double getRestE() { return restE; };
+  
+  void reset() override;
 
-  void resetStates();
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
 

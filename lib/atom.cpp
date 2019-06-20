@@ -318,6 +318,7 @@ void Atom::setUehling(bool s, int usteps)
     {
         V_uehling = UehlingSpherePotential(Z, R, usteps);
     }
+    reset();
 }
 
 /**
@@ -363,6 +364,11 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
+}
+
+void DiracAtom::reset()
+{
+    states.clear();
 }
 
 /**
