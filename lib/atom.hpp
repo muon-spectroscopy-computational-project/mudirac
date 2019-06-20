@@ -159,7 +159,7 @@ public:
             double fc = 1.0, double dx = 0.005);
 
   double getRestE() { return restE; };
-  
+
   void reset() override;
 
   void calcState(int n, int l, bool s, bool force = false);

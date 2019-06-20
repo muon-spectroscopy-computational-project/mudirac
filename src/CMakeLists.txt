@@ -18,3 +18,6 @@ target_link_libraries(hydrogenic_print mudiraclib)
 
 add_executable(map_E_basins map_E_basins.cpp)
 target_link_libraries(map_E_basins mudiraclib)
+
+add_executable(calc_Etrans calc_Etrans.cpp)
+target_link_libraries(calc_Etrans mudiraclib)
