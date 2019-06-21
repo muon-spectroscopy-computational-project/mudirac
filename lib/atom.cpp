@@ -559,17 +559,20 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
         if (abs(dE / E) > max_dE_ratio)
         {
             dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
+            LOG(TRACE) << "Step exceeds maximum allowed dE/E ratio, resized to " << dE << "\n";
         }
         E = E - dE * Edamp;
         if (E > maxE)
         {
             // Something has gone wrong. Try to go back to a more reasonable search
             E = (maxE + E + dE * Edamp) / 2.0;
+            LOG(TRACE) << "New energy exceeds maxE, resized to " << E << "\n";
         }
         else if (E < minE)
         {
             // As above
             E = (minE + E + dE * Edamp) / 2.0;
+            LOG(TRACE) << "New energy below minE, resized to " << E << "\n";
         }
     }
 
