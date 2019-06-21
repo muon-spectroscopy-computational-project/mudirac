@@ -524,12 +524,13 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
 {
     int k;
     double E, dE;
+    double Edamp_eff = abs(Edamp);
     pair<int, int> glim;
 
     k = state.k;
     E = state.E;
 
-    LOG(TRACE) << "Running convergeE to search energy from starting value of " << E << "\n";
+    LOG(TRACE) << "Running convergeE to search energy from starting value of " << E - restE << " + mc2\n";
     LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
     for (int it = 0; it < maxit; ++it)
@@ -561,18 +562,20 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
             dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
             LOG(TRACE) << "Step exceeds maximum allowed dE/E ratio, resized to " << dE << "\n";
         }
-        E = E - dE * Edamp;
+        E = E - dE * Edamp_eff;
         if (E > maxE)
         {
             // Something has gone wrong. Try to go back to a more reasonable search
             E = (maxE + E + dE * Edamp) / 2.0;
-            LOG(TRACE) << "New energy exceeds maxE, resized to " << E << "\n";
+            LOG(TRACE) << "New energy exceeds maxE, resized to " << E - restE << " + mc2, reduced damping\n";
+            Edamp_eff /= 2;
         }
         else if (E < minE)
         {
             // As above
             E = (minE + E + dE * Edamp) / 2.0;
-            LOG(TRACE) << "New energy below minE, resized to " << E << "\n";
+            LOG(TRACE) << "New energy below minE, resized to " << E - restE << " + mc2, reduced damping\n";
+            Edamp_eff /= 2;
         }
     }
 
@@ -774,7 +777,12 @@ DiracState DiracAtom::convergeState(int n, int k)
         // Find appropriate basin
         convergeNodes(state, tp, targ_nodes, minE, maxE);
         // Now converge energy
-        state.E = max(hydrogenicDiracEnergy(Z, mu, n, k), minE); // Speeds things up a lot...
+        double hydroE = hydrogenicDiracEnergy(Z, mu, n, k);
+        if (hydroE > minE && hydroE < maxE)
+        {
+            LOG(TRACE) << "Using hydrogenic Dirac energy " << hydroE - restE << " + mc2 as starting guess\n";
+            state.E = hydroE; // Speeds up things a lot when we got a broad interval
+        }
         convergeE(state, tp, minE, maxE);
 
         // Check node condition
