@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "calc_state.log", "#message"),
+    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "calc_state.log"),
                        make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::special, "calc_state.err")});
 
     LOG(INFO) << "Starting calc_state...\n";

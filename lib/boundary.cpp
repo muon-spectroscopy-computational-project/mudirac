@@ -31,9 +31,12 @@
  */
 void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, bool finite)
 {
-    int l = k < 0 ? -(k + 1) : k; // Angular momentum number
+    int l; // Angular momentum number
+    bool s;
     int N = Q.size();
     double K;
+
+    qnumDirac2Schro(k, l, s);
 
     if (P.size() != N || r.size() != N || N < 4)
     {
@@ -66,6 +69,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         // Finite size: only the k/r term matters
         for (int i = 0; i < 2; ++i)
         {
+            throw "Error: FOR SOME REASON THESE ONLY WORK WHEN THE k SIGN IS FLIPPED";
             P[i] = pow(r[i], -k);
             Q[i] = pow(r[i], k);
         }
@@ -107,9 +111,12 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
  */
 void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k, double m)
 {
-    int l = k < 0 ? -(k + 1) : k; // Angular momentum number
+    int l; // Angular momentum number
+    bool s;
     int N = zeta.size();
     double K, gp;
+
+    qnumDirac2Schro(k, l, s);
 
     if (N < 4)
     {

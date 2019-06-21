@@ -13,6 +13,7 @@
 #include <math.h>
 #include <vector>
 #include "constants.hpp"
+#include "utils.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;

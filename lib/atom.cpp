@@ -364,6 +364,7 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
+    LOG(TRACE) << "Dirac Atom created with rest energy = " << restE << "\n";
 }
 
 void DiracAtom::reset()
@@ -401,8 +402,8 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
         int itn, itl;
         bool its;
 
-        // if (!it->second.converged)
-        //     continue;
+        if (!it->second.converged)
+            continue;
 
         itn = get<0>(it->first);
         itl = get<1>(it->first);
@@ -620,7 +621,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     r_tp = Z / abs(B); // Coulombic turning point radius
 
-    LOG(TRACE) << "Computing optimal grid size for state with E = " << E << ", k = " << k << "\n";
+    LOG(TRACE) << "Computing optimal grid size for state with E = " << E -restE << " + mc2, k = " << k << "\n";
     LOG(TRACE) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
 
     // Upper limit
@@ -769,7 +770,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     maxE = Elim.second;
 
     LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
-    LOG(TRACE) << "Energy limits: " << minE << " < E < " << maxE << "\n";
+    LOG(TRACE) << "Energy limits: " << minE-restE << " + mc2 < E < " << maxE-restE << " + mc2\n";
 
     for (int it = 0; it < maxit; ++it)
     {
