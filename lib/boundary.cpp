@@ -15,8 +15,9 @@
 /**
  * @brief  Impose boundary conditions to a Dirac wavefunction based on a Coulomb potential
  * @note   Impose boundary conditions to the Q and P components of a Dirac radial wavefunction based on a Coulomb potential.
- * The conditions take the form detailed in Richard R Silbar and T Goldman. "Solving the radial dirac equations: a
- * numerical odyssey" - European Journal of Physics, 32(1):217–233, Dec 2010, and found in the Development Guide.
+ * The conditions take the form detailed in Richard R Silbar and T Goldman, "Solving the radial dirac equations: a
+ * numerical odyssey" - European Journal of Physics, 32(1):217–233, Dec 2010, and I. P. Grant, "B-spline methods for
+ * radial Dirac equations" - J. Phys. B: At. Mol. Opt. Phys., 42:055002, Jan 2009, and found in the Development Guide.
  * This method is used before passing Q and P to a routine such as shootDiracLog for integration.
  * 
  * @param  &Q: Vector for Q. Must have size greater than 4.
@@ -26,10 +27,10 @@
  * @param  k:  Quantum number (default = -1)
  * @param  m:  Mass of the particle (default = 1)
  * @param  Z:  Nuclear charge (default = 1)
- * @param  finite: Whether the nucleus has a finite size or is point-like (default = false)
+ * @param  R:  Nuclear radius; considered point-like if <= 0 (default = -1)
  * @retval None
  */
-void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, bool finite)
+void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, double R)
 {
     int l; // Angular momentum number
     bool s;
@@ -54,7 +55,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
 
     // r = 0 limit
     // Depends on whether we consider the nucleus of finite size or point-like
-    if (!finite)
+    if (R <= 0)
     {
         // Point like
         // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
@@ -66,12 +67,19 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
     }
     else
     {
-        // Finite size: only the k/r term matters
+        // Finite size
         for (int i = 0; i < 2; ++i)
         {
-            throw "Error: FOR SOME REASON THESE ONLY WORK WHEN THE k SIGN IS FLIPPED";
-            P[i] = pow(r[i], -k);
-            Q[i] = pow(r[i], k);
+            if (k < 0)
+            {
+                P[i] = pow(r[i], -k);
+                Q[i] = pow(r[i], -k + 1) * 1.5 * Z * Physical::alpha / (R * (-2 * k + 1));
+            }
+            else
+            {
+                P[i] = pow(r[i], k + 2);
+                Q[i] = -pow(r[i], k + 1) * Physical::c * (2 * k + 1) * R / (1.5 * Z);
+            }
         }
     }
 
@@ -87,14 +95,12 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         if (P[N - i] == 0)
         {
             // We went below numerical precision!
-            LOG(ERROR) << "Boundary conditions give zero at r = " << r[N-i] << "; a smaller grid is necessary";
+            LOG(ERROR) << "Boundary conditions give zero at r = " << r[N - i] << "; a smaller grid is necessary";
             throw "Boundary conditions give zero at the outside edge - you may need a smaller grid";
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => inf, P = [" << P[N-2] << "," << P[N-1] << "], Q = [" << Q[N-2] << "," << Q[N-1] << "]\n";
-
-
+    LOG(TRACE) << "Boundary conditions at r => inf, P = [" << P[N - 2] << "," << P[N - 1] << "], Q = [" << Q[N - 2] << "," << Q[N - 1] << "]\n";
 }
 
 /**

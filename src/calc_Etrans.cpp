@@ -38,18 +38,21 @@ int main(int argc, char **argv)
     DiracAtom da_s = DiracAtom(Z, Physical::m_mu, A, SPHERE);
     DiracAtom da_su = DiracAtom(Z, Physical::m_mu, A, SPHERE);
     // da_su.setUehling(true, 100);
-
+    
     ds1 = da_p.getState(n1, l1, s1);
     ds2 = da_p.getState(n2, l2, s2);
 
-    cout << ds2.E << " " << ds1.E << "\n";
     double E_p = (ds2.E - ds1.E) / Physical::eV;
 
-    ds1 = da_s.getState(n1, l1, s1);
-    ds2 = da_s.getState(n2, l2, s2);
-
-    cout << ds2.E << " " << ds1.E << "\n";
-
+    try {
+        ds1 = da_s.getState(n1, l1, s1);
+        ds2 = da_s.getState(n2, l2, s2);
+    }
+    catch(char const *e) {
+        cout << e << '\n';
+        return -1;
+    }
+    
     double E_s = (ds2.E - ds1.E) / Physical::eV;
 
     ds1 = da_su.getState(n1, l1, s1);
