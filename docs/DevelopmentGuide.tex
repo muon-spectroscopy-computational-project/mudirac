@@ -145,7 +145,8 @@ which is the expression used for the Uehling potential in the implementation. Th
 
 \subsection{Grid}
 
-The radial Dirac equation as written in \ref{dirac_sys} constitutes a system of two coupled first order differential equations. We use the shooting method to solve this problem. This approach requires one to choose the expected eigenvalue $E$ as a parameter, choose suitable guesses for the values at the boundary, then integrate numerically the equation from both sides of the domain up to a meeting point. The parameter is then adjusted based on how well the solutions match until stability is reached.\newline
+The radial Dirac equation as written in \ref{dirac_sys} constitutes a system of two coupled first order differential equations. We use the shooting method to solve this problem. This approach requires one to choose the expected eigenvalue $E$ as a parameter, choose suitable guesses for the values at the 
+, then integrate numerically the equation from both sides of the domain up to a meeting point. The parameter is then adjusted based on how well the solutions match until stability is reached.\newline
 There are various practical issues involved in solving the equation this way. The first thing is the grid to use. Here we choose to use a logarithmic radial grid, defined as:
 
 \begin{equation}
@@ -162,7 +163,7 @@ In this format the equations become
 The advantage is that an evenly spaced grid in $x$ is now much denser for small $r$, namely, for a Coulomb-like potential, close to the nucleus, where the wavefunction will vary more quickly.
 
 \subsection{Boundary conditions}
-Another issue is that of the boundary conditions. We take our cues for that from \cite{silbar2010}. For $r \rightarrow \infty$, one can see how $V \rightarrow 0$ and the equations reduce to
+Another issue is that of the boundary conditions. For $r \rightarrow \infty$, one can see how $V \rightarrow 0$ and the equations reduce to \cite{silbar2010}
 
 \begin{align}\label{dirac_sys_inf}
 Q' &\approx \left(mc-\frac{E}{c}\right)P \\
@@ -176,7 +177,7 @@ P(r) &\approx e^{-Kr} \\
 Q(r) &\approx -\frac{K}{mc+E/c}P(r)
 \end{align}
 
-whereas for $r \rightarrow 0$ we find different results depending on whether we use a `true' Coulomb potential (point charge) or one where the charge is assumed to have a finite spherical size. For a point charge we find:
+whereas for $r \rightarrow 0$ we find different results depending on whether we use a `true' Coulomb potential (point charge) or one where the charge is assumed to have a finite spherical size. For a point charge we find \cite{silbar2010}:
 
 \begin{align}\label{dirac_sys_zero_pc}
 	Q' &\approx \frac{1}{r}\left(kQ- \frac{Z}{c}P\right)  \\
@@ -190,19 +191,23 @@ P(r) &\approx r^{l+1} \\
 Q(r) &\approx -\frac{Z}{c(l+2-k)}P(r)
 \end{align}
 
-while for a finite charge it's much simpler, as the equations decouple:
+while for a finite charge by expanding in a power series we find \cite{grant2009}
 
-\begin{align}\label{dirac_sys_zero_sph}
-Q' &\approx \frac{k}{r}Q  \\
-P' &\approx -\frac{k}{r}P
-\end{align}
-
-so 
+so for $k < 0$
 
 \begin{align}
 P(r) &\approx r^{-k} \\
-Q(r) &\approx r^k
+Q(r) &\approx \frac{3Z}{2cR(-2k+1)}r^{-k+1}
 \end{align}
+
+whereas for $k > 0$
+
+\begin{align}
+P(r) &\approx r^{k+2} \\
+Q(r) &\approx \frac{2cR(2k+1)}{3Z}r^{k+1}
+\end{align}
+
+making use of the fact that $V(0) = -3Z/2R$ for a uniformly charged spherical nucleus.
 
 \subsection{Potential}\label{num_pot}
 
