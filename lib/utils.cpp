@@ -236,14 +236,14 @@ int countNodes(vector<double> v, double tol)
  */
 void qnumSchro2Dirac(int l, bool s, int &k)
 {
-    k = ((s && l > 0) ? l : -l - 1);
+    k = ((!s && l > 0) ? l : -l - 1);
 }
 
 /**
  * @brief  Convert quantum number k to l and s
  * @note   Convert quantum number k as used in
  * the radial Dirac equation to its equivalent l
- * and s in the Schroedinger one
+ * and s in the Schroedinger one.
  * 
  * @param  k:      Dirac quantum number
  * @param  &l:       Orbital quantum number
@@ -252,8 +252,8 @@ void qnumSchro2Dirac(int l, bool s, int &k)
  */
 void qnumDirac2Schro(int k, int &l, bool &s)
 {
-    s = (k > 0);
-    l = s ? k : -(k + 1);
+    s = (k < 0);
+    l = s ? -(k + 1) : k;
 }
 
 /**
