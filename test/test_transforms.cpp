@@ -35,5 +35,5 @@ TEST_CASE("Discrete cosine transform", "[dctIV]")
     cf = dctIV(f);
     cf = invDctIV(cf);
 
-    CHECK_APPROX(f, cf, 1e-5);
+    CHECK_APPROX(f, cf, ERRTOL_HIGH);
 }
