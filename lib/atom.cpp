@@ -311,6 +311,16 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
     V = CoulombSpherePotential(Z, R);
 }
 
+ /**
+  * @brief  Set parameters for the Uehling potential term
+  * @note   Set up the Uehling potential term, activating/deactivating
+  * it and setting the number of steps used for its integration. 
+  * Calling this function resets all computed states.
+  * 
+  * @param  s:          Whether the Uehling potential should be on/off
+  * @param  usteps:     Number of integration steps used for it (default = 1000)
+  * @retval None
+ */
 void Atom::setUehling(bool s, int usteps)
 {
     use_uehling = s;
@@ -318,6 +328,28 @@ void Atom::setUehling(bool s, int usteps)
     {
         V_uehling = UehlingSpherePotential(Z, R, usteps);
     }
+    reset();
+}
+
+ /**
+  * @brief  Set grid parameters
+  * @note   Set parameters defining the logarithmic grid, rc and dx.
+  * The grid will be made of points at
+  * 
+  * r = rc*exp(i*dx)
+  * 
+  * where i can be any integer number. Calling this function resets
+  * all computed states.
+  * 
+  * @param  rc:         Central radius of the grid
+  * @param  dx:         Logarithmic step of the grid
+  * @retval None
+ */
+void Atom::setgrid(double rc, double dx)
+{
+    this->rc = rc;
+    this->dx = dx;
+
     reset();
 }
 
@@ -621,7 +653,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     r_tp = Z / abs(B); // Coulombic turning point radius
 
-    LOG(TRACE) << "Computing optimal grid size for state with E = " << E -restE << " + mc2, k = " << k << "\n";
+    LOG(TRACE) << "Computing optimal grid size for state with E = " << E - restE << " + mc2, k = " << k << "\n";
     LOG(TRACE) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
 
     // Upper limit
@@ -699,7 +731,7 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
     }
     LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
     // Start by applying boundary conditions
-    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0]? R : -1);
+    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0] ? R : -1);
     LOG(TRACE) << "Boundary conditions applied\n";
     tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
     LOG(TRACE) << "Integration complete, turning point at " << tp.i << "\n";
@@ -770,7 +802,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     maxE = Elim.second;
 
     LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
-    LOG(TRACE) << "Energy limits: " << minE-restE << " + mc2 < E < " << maxE-restE << " + mc2\n";
+    LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
     for (int it = 0; it < maxit; ++it)
     {

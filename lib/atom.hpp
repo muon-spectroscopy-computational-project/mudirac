@@ -135,6 +135,8 @@ public:
   double getrc() { return rc; };
   double getdx() { return dx; };
 
+  void setgrid(double rc, double dx);
+
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000);
