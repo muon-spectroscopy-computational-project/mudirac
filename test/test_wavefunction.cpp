@@ -32,3 +32,15 @@ TEST_CASE("Bra-ket on logarithmic grid", "[braKetLog]")
     REQUIRE(braKetLog(s2d, s2d, grid[1], dx) == Approx(1));
     REQUIRE(braKetLog(s1d, s2d, grid[1], dx) + 1 == Approx(1));
 }
+
+TEST_CASE("Expectation values on logarithmic grid", "[braOpKetLog]")
+{
+    // Define a grid
+    double dx = 0.01;
+    vector<vector<double>> grid = logGrid(1, dx, -500, 500);
+
+    vector<double> s1 = hydrogenicSchroWavefunction(grid[1], 1, 1, 1, 0);
+    vector<double> s2 = hydrogenicSchroWavefunction(grid[1], 1, 1, 2, 0);
+
+    REQUIRE(braOpKetLog(s1, grid[1], s1, grid[1], dx) == Approx(1.5));
+}
