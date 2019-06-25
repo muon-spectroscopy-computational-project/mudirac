@@ -115,10 +115,72 @@ double UehlingSpherePotential::V(double r)
         {
             uarg[i] = ukernel_r_greater(u, r, r) + ukernel_r_smaller(u, r, R) - ukernel_r_smaller(u, r, r);
         }
-        
+
         uarg[i] *= sqrt(1 - u * u) * (1 + 0.5 * u * u);
     }
     double ans = trapzInt(du, uarg);
 
     return K / r * ans;
+}
+
+BkgGridPotential::BkgGridPotential(vector<double> rho, double rc, double dx, int i0, int i1)
+{
+    this->rc = rc;
+    this->dx = dx;
+    this->i0 = i0;
+    this->i1 = i1;
+
+    rho0 = rho[0];
+    grid = logGrid(rc, dx, i0, i1);
+
+    Vpot = vector<double>(i1 - i0 + 1);
+    shootPotentialLog(Vpot, rho, dx);
+    // The charge is an integral plus an assumed constant charge density for r < r0
+    Q = trapzInt(dx, vectorOperation(rho, grid[1], '*')) + rho[0] * grid[1][0] / 3.0;
+    V0 = -Q / grid[1][i1 - i0] - Vpot[i1 - i0];
+}
+
+double BkgGridPotential::V(double r)
+{
+    // Find the index
+    double xi = log(r / rc) / dx;
+
+    if (xi < i0)
+    {
+        return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
+    }
+    else if (xi > i0)
+    {
+        return -Q / r;
+    }
+    else
+    {
+        // Interpolate
+        int il = floor(xi);
+        int ir = ceil(xi);
+
+        double drl = grid[1][il] * (exp(xi - il) - 1);
+        double f = drl / (grid[1][ir] - grid[1][il]);
+        return lerp(Vpot[il], Vpot[ir], f);
+    }
+}
+
+double BkgGridPotential::Vgrid(int i)
+{
+    if (i >= i0 && i <= i1)
+    {
+        return Vpot[i - i0] + V0;
+    }
+    else
+    {
+        double r = rc * exp(i * dx);
+        if (i < i0)
+        {
+            return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
+        }
+        else
+        {
+            return -Q / r;
+        }
+    }
 }

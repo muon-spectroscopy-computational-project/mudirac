@@ -47,3 +47,27 @@ TEST_CASE("Uehling correction to Coulomb potential", "[CoulombSpherePotential]")
     REQUIRE(cpot.V(0.01) == Approx(-0.1795).epsilon(1e-3));
     REQUIRE(cpot.V(5e-5) == Approx(-10225.5698).epsilon(1e-3));
 }
+
+TEST_CASE("Background charge on grid potential", "[BkgGridPotential]")
+{
+    double rc = 1, dx = 0.000001;
+    int i0 = -100000, i1 = 10000;
+    vector<vector<double>> grid = logGrid(rc, dx, i0, i1);
+    vector<double> rho(grid[0].size());
+
+    for (int i = 0; i < rho.size(); ++i)
+    {
+        rho[i] = 3 * pow(grid[1][i], 2) * (grid[1][i] <= 1);
+    }
+
+    BkgGridPotential bpot = BkgGridPotential(rho, rc, dx, i0, i1);
+
+    REQUIRE(bpot.getQ() == Approx(1).epsilon(1e-3));
+
+    // For constant density it should match the regular coulomb potential
+    CoulombSpherePotential cpot = CoulombSpherePotential(1, 1);
+
+    REQUIRE(bpot.Vgrid(i0) == Approx(cpot.V(grid[1][0])));
+    REQUIRE(bpot.Vgrid(0) == Approx(cpot.V(grid[1][-i0])));
+    REQUIRE(bpot.Vgrid(i1) == Approx(cpot.V(grid[1][i1 - i0])));
+}

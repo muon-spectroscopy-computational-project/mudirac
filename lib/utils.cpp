@@ -48,11 +48,26 @@ int factorial(int n)
  * @brief Sinc function, or sin(x)/x
  * 
  * @param x         Argument
- * @return double 
+ * @retval          sin(x)/x 
  */
 double sinc(double x)
 {
     return x <= 0 ? 1 : sin(x) / x;
+}
+
+/**
+  * @brief  Linear interpolation
+  * @note   Lineral interpolation between two values with a
+  * parameter t
+  * 
+  * @param  a:      First value
+  * @param  b:      Second value
+  * @param  t:      Interpolation parameter (t=0 -> a, t=1 -> b)
+  * @retval         Interpolated value
+ */
+double lerp(double a, double b, double t)
+{
+    return a + (b - a) * t;
 }
 
 /**

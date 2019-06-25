@@ -58,10 +58,9 @@ protected:
 };
 
 /**
-  * @brief  Coulomb potential with uniform spherical charge and Uehling term
-  * @note   Coulomb potential assuming a uniform spherical charge of radius R,
-  * including the first Uehling potential term (polarisation of the vacuum, 
-  * including only electron-positron pairs)
+  * @brief  Uehling correction term to Coulomb potential
+  * @note   Uehling correction term to Coulomb potential (polarisation of the vacuum, 
+  * including only electron-positron pairs) assuming a uniform spherical charge of radius R 
   *  
   * @retval None
  */
@@ -79,6 +78,29 @@ protected:
   double Z, R, rho, K;
   int usteps;
   vector<double> uarg;
+};
+
+/**
+  * @brief  Coulomb potential from a charge distribution on a logarithmic grid
+  * @note   Coulomb potential from a charge distribution on a fixed logarithmic grid,
+  * interpolated for values that are not part of it.
+  * 
+  * @retval None
+ */
+class BkgGridPotential : Potential
+{
+public:
+  BkgGridPotential(vector<double> rho, double rc, double dx, int i0, int i1);
+  double V(double r) override;
+  double Vgrid(int i);
+
+  double getQ() { return Q; };
+
+protected:
+  int i0, i1;
+  double rc, dx, Q, rho0, V0;
+  vector<double> Vpot;
+  vector<vector<double>> grid;
 };
 
 #endif

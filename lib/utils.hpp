@@ -25,6 +25,7 @@ double effectiveMass(double m1, double m2);
 
 int factorial(int n);
 double sinc(double x);
+double lerp(double a, double b, double t);
 
 template <typename T>
 vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op);
