@@ -7,10 +7,11 @@ add_library(integrate STATIC integrate.cpp)
 add_library(utils STATIC utils.cpp)
 add_library(elements STATIC elements.cpp)
 add_library(input STATIC input.cpp)
+add_library(wavefunction STATIC wavefunction.cpp)
 
 # Define interface library
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE 
                       atom boundary hydrogenic 
-                      potential transforms integrate 
-                      elements input utils)
+                      potential transforms wavefunction 
+                      integrate elements input utils)
