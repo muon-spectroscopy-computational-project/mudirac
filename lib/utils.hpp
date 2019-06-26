@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <functional>
 
+#include "../vendor/aixlog/aixlog.hpp"
+
 using namespace std;
 
 #ifndef MUDIRAC_UTILS

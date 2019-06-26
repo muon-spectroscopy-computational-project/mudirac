@@ -215,24 +215,42 @@ int countNodes(vector<double> v, double tol)
 {
     int nc = 0;
     int i0, i1;
+    double max = 0;
+
+    for (int i = 0; i < v.size(); ++i)
+    {
+        double y = abs(v[i]);
+        if (y > max)
+        {
+            max = y;
+        }
+    }
 
     for (i0 = 0; i0 < v.size(); ++i0)
     {
-        if (abs(v[i0]) > tol)
+        if (abs(v[i0]) / max > tol)
         {
             break;
         }
     }
     for (i1 = v.size() - 1; i1 > i0; --i1)
     {
-        if (abs(v[i1]) > tol)
+        if (abs(v[i1]) / max > tol)
         {
             break;
         }
     }
+
+    LOG(TRACE) << "Counting nodes between indices " << i0 << " and " << i1 << "\n";
+
     for (int i = i0 + 1; i <= i1; ++i)
     {
-        nc += ((v[i] * v[i - 1]) < 0);
+        bool node = ((v[i] * v[i - 1]) < 0);
+        nc += node;
+        if (node)
+        {
+            LOG(TRACE) << "Node found at index " << i << "\n";
+        }
     }
 
     return nc;

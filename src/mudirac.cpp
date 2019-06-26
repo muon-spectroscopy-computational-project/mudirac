@@ -38,11 +38,79 @@ int main(int argc, char *argv[])
 
     DiracAtom da = config.makeAtom();
 
-    vector<string> lines = config.getStringValues("xrd_lines");
+    // Now unravel the required spectral lines
+    vector<string> xr_lines = config.getStringValues("xr_lines");
+    vector<pair<DiracState, DiracState>> trans_states;
 
-    for (int i = 0; i < lines.size(); ++i)
+    for (int i = 0; i < xr_lines.size(); ++i)
     {
-        vector<string> states = splitString(lines[i], "-");
-        cout << states[0] << '-' << states[1] << '\n';
+        int n1, l1, n2, l2;
+        bool s1, s2;
+        DiracState ds1, ds2;
+        vector<string> states = splitString(xr_lines[i], "-");
+
+        if (states.size() != 2)
+        {
+            throw invalid_argument("Invalid spectral line in input file");
+        }
+
+        parseIupacState(states[0], n1, l1, s1);
+        parseIupacState(states[1], n2, l2, s2);
+
+        LOG(INFO) << "Computing transition " << states[0] << " - " << states[1] << "\n";
+
+        ds1 = da.getState(n1, l1, s1);
+        ds2 = da.getState(n2, l2, s2);
+
+        LOG(INFO) << "Transition energy = " << (ds2.E - ds1.E) / (Physical::eV * 1000) << " kEv\n";
+
+        trans_states.push_back(make_pair(ds1, ds2));
+    }
+
+    int output_verbosity = config.getIntValue("output");
+
+    // Now create output files
+    if (output_verbosity >= 1)
+    {
+        // Save a file for all lines
+        ofstream out(seed + ".xr.out");
+        DiracState ds1, ds2;
+
+        out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+
+        for (int i = 0; i < xr_lines.size(); ++i)
+        {
+            ds1 = trans_states[i].first;
+            ds2 = trans_states[i].second;
+            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << '\n';
+        }
+
+        out.close();
+    }
+
+    if (output_verbosity >= 3)
+    {
+        // Save each individual state
+        for (int i = 0; i < xr_lines.size(); ++i)
+        {
+            for (int j = 0; j < 2; ++j)
+            {
+                ofstream out(seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out");
+                DiracState ds = (j == 0 ? trans_states[i].first : trans_states[i].second);
+
+                LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j+1) << "\n";
+
+                out << "# " << ds.E / Physical::eV << '\n';
+                out << "# " << ds.getn() << '\t' << ds.getl() << '\t' << ds.gets() << '\n';
+                out << "# " << ds.nodes << '\t' << ds.nodesQ << '\n';
+
+                for (int k = 0; k < ds.grid.size(); ++k)
+                {
+                    out << ds.grid[k] << '\t' << ds.V[k] / Physical::eV << '\t' << ds.P[k] << '\t' << ds.Q[k] << '\n';
+                }
+
+                out.close();
+            }
+        }
     }
 }

@@ -124,6 +124,7 @@ DiracState::DiracState(const DiracState &s)
     loggrid = vector<double>(s.loggrid);
     Q = vector<double>(s.Q);
     P = vector<double>(s.P);
+    V = vector<double>(s.V);
 }
 
 /**
@@ -402,7 +403,7 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
-    LOG(DEBUG) << "Rest energy = " << restE/Physical::eV << " eV\n";
+    LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
 }
 
 void DiracAtom::reset()
@@ -497,6 +498,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
             state = initState(El, k);
             integrateState(state, tp);
             state.continuify(tp);
+            state.normalize();
             state.findNodes();
             nl = state.nodes;
             if (nl == targ_nodes)
@@ -511,6 +513,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
             state = initState(Er, k);
             integrateState(state, tp);
             state.continuify(tp);
+            state.normalize();
             state.findNodes();
             nr = state.nodes;
             if (nr == targ_nodes)
@@ -592,6 +595,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
             LOG(TRACE) << "Convergence complete after " << (it + 1) << " iterations\n";
             state.E = E;
             state.continuify(tp);
+            state.normalize();
             state.findNodes();
             return;
         }
@@ -811,13 +815,15 @@ DiracState DiracAtom::convergeState(int n, int k)
 
     for (int it = 0; it < maxit_state; ++it)
     {
+        LOG(TRACE) << "Iteration " << (it + 1) << ", minE = " << minE - restE << "+mc2, maxE = " << maxE - restE << "+mc2\n";
         state.k = k;
         // Find appropriate basin
         convergeNodes(state, tp, targ_nodes, minE, maxE);
         // Now converge energy
         double hydroE = hydrogenicDiracEnergy(Z, mu, n, k);
-        if (hydroE > minE && hydroE < maxE)
+        if (it == 0 && hydroE > minE && hydroE < maxE)
         {
+            // We only try this the first time; if it fails, it ain't working any better later...
             LOG(TRACE) << "Using hydrogenic Dirac energy " << hydroE - restE << " + mc2 as starting guess\n";
             state.E = hydroE; // Speeds up things a lot when we got a broad interval
         }
@@ -827,6 +833,7 @@ DiracState DiracAtom::convergeState(int n, int k)
         if (state.nodes != targ_nodes)
         {
             LOG(TRACE) << "Converged state contains " << state.nodes << " nodes instead of " << targ_nodes << "\n";
+            LOG(TRACE) << "Converged state has E = " << state.E - restE << "+mc2\n";
             if (state.nodes > targ_nodes)
             {
                 maxE = min(maxE, state.E);

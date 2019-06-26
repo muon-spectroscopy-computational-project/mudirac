@@ -34,7 +34,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineIntNode("verbosity", InputNode<int>(1));        // Verbosity level (1 to 3)
     this->defineIntNode("output", InputNode<int>(1));           // Output level (1 to 3)
     // Vector string keywords
-    this->defineStringNode("xrd_lines", InputNode<string>(vector<string>{"K1-L2"}));
+    this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}));
 }
 
 DiracAtom MuDiracInputFile::makeAtom()
