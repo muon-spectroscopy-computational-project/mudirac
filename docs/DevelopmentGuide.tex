@@ -87,7 +87,7 @@ R = 1.2 A^{1/3} \mathrm{fm} = 2.267\cdot10^{-5}A^3
 
 , where the second version is in atomic units.
 
-\subsection{Vacuum polarizability}
+\subsection{Vacuum polarizability}\label{vacpot}
 
 The next term to include is the effect of the polarizability of the vacuum. The regular Coulomb law is based on the principle of vacuum having zero polarizability, but that is not an accurate description once one takes into account quantum field theory. Vacuum can be polarized by the appearance of charged particle pairs, which constitute Feynman diagrams with added loops in the photon propagator \cite{borie1982}. The biggest term is the diagram in which one electron-positron pair is created, of order $\alpha$. Diagrams with more loops will be of order $\alpha^2$ or even smaller, and diagrams involving pairs of more massive charged particles such as muons and antimuons also contribute much smaller contributions due to the higher energy required to form such particles, which makes them vanish exponentially. Accounting for this term gives rise to a correction to the Coulomb potential known as the Uehling potential \cite{johnson2001}:
 
@@ -211,14 +211,11 @@ making use of the fact that $V(0) = -3Z/2R$ for a uniformly charged spherical nu
 
 \subsection{Potential}\label{num_pot}
 
-The electrostatic potential for the equation is built out of two parts:
+The electrostatic potential for the equation can be built out of multiple parts, representing the various contributions. Which ones are used depend on the desired level of accuracy.
 
-\begin{equation}
-	V(r) = V_{N}+V_{bkg}
-\end{equation}
+\subsubsection{Coulomb potential}
 
-Here $V_N$ is the Coulomb potential due to the nucleus, whereas $V_{bkg}$ is the contribution due to any other background charge (for example, the electronic cloud for muons). \newline
-For a point-like nuclear charge, $V_N$ is simply:
+The fundamental potential to apply is always the basic Coulomb potential. For a point-like nuclear charge, this is simply:
 
 \begin{equation}
 	V_N(r) = -\frac{Z}{r}
@@ -233,7 +230,8 @@ V_N(r) = \begin{cases}
 \end{cases}
 \end{equation}
 
-For the background charge, one builds the potential by integrating the equation:
+\subsubsection{Background charge potential}
+In presence of a radial background charge distribution, one builds the potential by integrating the equation:
 
 \begin{equation}
 \nabla^2 V = \rho
@@ -258,7 +256,28 @@ Due to the presence of a first order derivative this equation can not be integra
 \left.\frac{\partial^2 V}{\partial x^2}\right|_i &\approx \frac{1}{h^2}\left(2V_i -5V_{i-1} +4V_{i-2}-V_{i-3} \right) \\
 \end{align}
 
-setting the first three points of V with an approximation of constant charge for $r < r_0$ and shooting outwards for all the following ones.
+setting the first three points of V with an approximation of constant charge for $r < r_0$ and shooting outwards for all the following ones.\newline 
+When the charge is defined on a limited radial grid, one also has the problem of what to use outside of its bounds. The convention adopted in the software is to always make it so that $V(\infty) = 0$ and to assume the charge to be constant inside the innermost radius and zero outside the outermost one. So if the grid gives us a charge distribution $\rho(r)$ defined between $R_{in}$ and $R_{out}$, and the resulting integrated potential is $V_{grid}(r)$, we will then define the total potential as
+
+\begin{equation}
+V_{bkg}(r) = \begin{cases}
+-\frac{Q}{r}\qquad & r > R_{out} \\
+V_{grid}(r) -V_{grid}(R_{out}) - \frac{Q}{R_{out}} \qquad & R_{out} \geq r > R_{in} \\
+\frac{2}{3}\pi r^2\rho(R_{in})\left(\frac{r}{R_{in}}\right)^2-V_{grid}(R_{out}) - \frac{Q}{R_{out}} \qquad & r \leq R_{in}
+\end{cases}
+\end{equation} 
+
+where 
+
+\begin{equation}
+Q = \int_{R_{in}}^{R_{out}} 4\pi r^2\rho(r) dr + \frac{4}{3}\pi R_{in}^3\rho(R_{in})
+\end{equation}
+
+is the total charge of the background (including a term counting the assumed constant charge within the innermost radius of the grid).
+
+\subsubsection{Uehling potential}
+
+Both the nucleus and the charge distribution give rise to a further term due to vacuum polarizability. The full form for this has been presented in \ref{vacpot}.
 
 \subsection{Integration scheme}
 
