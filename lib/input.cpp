@@ -22,38 +22,8 @@ template <typename T>
 InputNode<T>::InputNode()
 {
     this->single = false;
+    this->case_sensitive = true;
     this->default_value = vector<T>(0);
-    this->clear();
-}
-
-/**
- * @brief  Instantiates an InputNode
- * @note   Instantiates an InputNode using a single default value
- * 
- * @param  default_value
- * @retval 
- */
-template <typename T>
-InputNode<T>::InputNode(T default_value)
-{
-    this->single = true;
-    this->default_value = vector<T>(1, default_value);
-    this->clear();
-}
-
-/**
- * @brief  Instantiates an InputNode
- * @note   Instantiates an InputNode using multiple default values.
- * The resulting InputNode will parse comma/space separated vectors.
- * 
- * @param  default_value
- * @retval 
- */
-template <typename T>
-InputNode<T>::InputNode(vector<T> default_value)
-{
-    this->single = false;
-    this->default_value = vector<T>(default_value);
     this->clear();
 }
 
@@ -68,8 +38,42 @@ template <typename T>
 InputNode<T>::InputNode(const InputNode<T> &t)
 {
     single = t.single;
+    case_sensitive = t.case_sensitive;
     default_value = t.default_value;
     value = t.value;
+}
+
+/**
+ * @brief  Instantiates an InputNode
+ * @note   Instantiates an InputNode using a single default value
+ * 
+ * @param  default_value
+ * @retval 
+ */
+template <typename T>
+InputNode<T>::InputNode(T default_value, bool case_sensitive)
+{
+    this->single = true;
+    this->case_sensitive = case_sensitive;
+    this->default_value = vector<T>(1, default_value);
+    this->clear();
+}
+
+/**
+ * @brief  Instantiates an InputNode
+ * @note   Instantiates an InputNode using multiple default values.
+ * The resulting InputNode will parse comma/space separated vectors.
+ * 
+ * @param  default_value
+ * @retval 
+ */
+template <typename T>
+InputNode<T>::InputNode(vector<T> default_value, bool case_sensitive)
+{
+    this->single = false;
+    this->case_sensitive = case_sensitive;
+    this->default_value = vector<T>(default_value);
+    this->clear();
 }
 
 // Parsers, type by type
@@ -94,6 +98,13 @@ double InputNode<double>::parse(string s) const
 template <>
 string InputNode<string>::parse(string s) const
 {
+    if (!case_sensitive)
+    {
+        for (int i = 0; i < s.size(); ++i)
+        {
+            s[i] = toupper(s[i]);
+        }
+    }
     return s;
 }
 

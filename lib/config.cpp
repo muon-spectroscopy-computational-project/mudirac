@@ -17,8 +17,8 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     // Definition of all input keywords that can be used
 
     // String keywords
-    this->defineStringNode("element", InputNode<string>("H"));           // Element to compute the spectrum for
-    this->defineStringNode("nuclear_model", InputNode<string>("POINT")); // Model used for nucleus
+    this->defineStringNode("element", InputNode<string>("H"));                  // Element to compute the spectrum for
+    this->defineStringNode("nuclear_model", InputNode<string>("POINT", false)); // Model used for nucleus
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));             // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));    // Tolerance for electronic convergence
@@ -34,7 +34,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineIntNode("verbosity", InputNode<int>(1));        // Verbosity level (1 to 3)
     this->defineIntNode("output", InputNode<int>(1));           // Output level (1 to 3)
     // Vector string keywords
-    this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}));
+    this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}, false));
 }
 
 DiracAtom MuDiracInputFile::makeAtom()
@@ -58,7 +58,7 @@ DiracAtom MuDiracInputFile::makeAtom()
     da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
     da.maxit_E = this->getIntValue("max_E_iter");
     da.maxit_nodes = this->getIntValue("max_nodes_iter");
-    da.maxit_state = this->getIntValue("max_state_iter");    
+    da.maxit_state = this->getIntValue("max_state_iter");
 
     return da;
 }

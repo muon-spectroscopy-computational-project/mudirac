@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         out.close();
     }
 
-    if (output_verbosity >= 3)
+    if (output_verbosity >= 2)
     {
         // Save each individual state
         for (int i = 0; i < xr_lines.size(); ++i)

@@ -32,6 +32,7 @@ class InputNode
 {
 private:
     bool single;
+    bool case_sensitive;
     vector<T> default_value;
     vector<T> value;
 
@@ -39,9 +40,9 @@ private:
 
 public:
     InputNode();
-    InputNode(T default_value);
     InputNode(const InputNode<T> &t);
-    InputNode(vector<T> default_value);
+    InputNode(T default_value, bool case_sensitive = true);
+    InputNode(vector<T> default_value, bool case_sensitive = true);
 
     void clear();
     int getSize() const;
