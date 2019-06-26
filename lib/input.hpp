@@ -88,18 +88,3 @@ public:
     void defineDoubleNode(string name, InputNode<double> node = InputNode<double>(0));
     void defineIntNode(string name, InputNode<int> node = InputNode<int>(0));
 };
-
-/**
-  * @class MuDiracInputFile
-  * 
-  * @brief  A specialised InputFile class for the config input file in mudirac
-  * @note   A specialised InputFile class for the config input file in mudirac.
-  * Initialises all the relevant keywords.
-  * 
-  * @retval None
-  */
-class MuDiracInputFile : public InputFile
-{
-public:
-    MuDiracInputFile(void);
-};

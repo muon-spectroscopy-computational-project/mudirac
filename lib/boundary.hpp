@@ -18,6 +18,11 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_BOUNDARY
+#define MUDIRAC_BOUNDARY
+
 void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k = -1, double m = 1, double Z = 1,
                           double R = -1);
 void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k = -1, double m = 1);
+
+#endif

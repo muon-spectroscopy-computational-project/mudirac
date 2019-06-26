@@ -26,6 +26,8 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_ATOM
+#define MUDIRAC_ATOM
 // Error codes
 enum AtomErrorCode
 {
@@ -180,3 +182,5 @@ public:
   DiracState convergeState(int n = 1, int k = -1);
   DiracState getState(int n, int l, bool s);
 };
+
+#endif
