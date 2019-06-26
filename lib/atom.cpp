@@ -311,7 +311,7 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
     V = CoulombSpherePotential(Z, R);
 }
 
- /**
+/**
   * @brief  Set parameters for the Uehling potential term
   * @note   Set up the Uehling potential term, activating/deactivating
   * it and setting the number of steps used for its integration. 
@@ -331,7 +331,7 @@ void Atom::setUehling(bool s, int usteps)
     reset();
 }
 
- /**
+/**
   * @brief  Set grid parameters
   * @note   Set parameters defining the logarithmic grid, rc and dx.
   * The grid will be made of points at
@@ -483,7 +483,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
 
     LOG(TRACE) << "Running convergeNodes to search energy with solution with " << targ_nodes << " nodes\n";
 
-    for (int it = 0; it < maxit; ++it)
+    for (int it = 0; it < maxit_nodes; ++it)
     {
         LOG(TRACE) << "Iteration " << (it + 1) << ", El = " << El - restE << "+mc2, Er = " << Er - restE << "+mc2\n";
         if (El != oldEl)
@@ -566,7 +566,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
     LOG(TRACE) << "Running convergeE to search energy from starting value of " << E - restE << " + mc2\n";
     LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
-    for (int it = 0; it < maxit; ++it)
+    for (int it = 0; it < maxit_E; ++it)
     {
         LOG(TRACE) << "Iteration " << (it + 1) << ", E = " << E - restE << " + mc2\n";
 
@@ -804,7 +804,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
     LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
-    for (int it = 0; it < maxit; ++it)
+    for (int it = 0; it < maxit_state; ++it)
     {
         state.k = k;
         // Find appropriate basin

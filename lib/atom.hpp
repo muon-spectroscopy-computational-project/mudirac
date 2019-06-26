@@ -101,7 +101,9 @@ public:
   // Tolerances and other details
   double Etol = 1e-7, Esearch = 1.2, Edamp = 0.5;
   double max_dE_ratio = 1e-1;
-  int maxit = 100;
+  int maxit_E = 100;
+  int maxit_nodes = 100;
+  int maxit_state = 100;
 
   // Radius models
   double static sphereNuclearModel(double A);
