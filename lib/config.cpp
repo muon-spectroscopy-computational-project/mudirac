@@ -17,8 +17,9 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     // Definition of all input keywords that can be used
 
     // String keywords
-    this->defineStringNode("element", InputNode<string>("H"));                  // Element to compute the spectrum for
-    this->defineStringNode("nuclear_model", InputNode<string>("POINT", false)); // Model used for nucleus
+    this->defineStringNode("element", InputNode<string>("H"));                     // Element to compute the spectrum for
+    this->defineStringNode("nuclear_model", InputNode<string>("POINT", false));    // Model used for nucleus
+    this->defineStringNode("uehling_correction", InputNode<string>("OFF", false)); // Whether to use the Uehling potential correction
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));             // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));    // Tolerance for electronic convergence
@@ -31,10 +32,11 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineIntNode("max_E_iter", InputNode<int>(100));     // Max iterations in energy search
     this->defineIntNode("max_nodes_iter", InputNode<int>(100)); // Max iterations in nodes search
     this->defineIntNode("max_state_iter", InputNode<int>(100)); // Max iterations in state search
+    this->defineIntNode("uehling_steps", InputNode<int>(100));  // Uehling correction integration steps
     this->defineIntNode("verbosity", InputNode<int>(1));        // Verbosity level (1 to 3)
     this->defineIntNode("output", InputNode<int>(1));           // Output level (1 to 3)
     // Vector string keywords
-    this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}, false));
+    this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}, false)); // List of spectral lines to compute
 }
 
 DiracAtom MuDiracInputFile::makeAtom()
@@ -59,6 +61,11 @@ DiracAtom MuDiracInputFile::makeAtom()
     da.maxit_E = this->getIntValue("max_E_iter");
     da.maxit_nodes = this->getIntValue("max_nodes_iter");
     da.maxit_state = this->getIntValue("max_state_iter");
+
+    if (this->getStringValue("uehling_correction") == "ON")
+    {
+        da.setUehling(true, this->getIntValue("uehling_steps"));
+    }
 
     return da;
 }

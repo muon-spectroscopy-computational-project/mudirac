@@ -48,6 +48,7 @@ InputNode<T>::InputNode(const InputNode<T> &t)
  * @note   Instantiates an InputNode using a single default value
  * 
  * @param  default_value
+ * @param  case_sensitive   If false, all strings are converted to uppercase (has no effect on number types)
  * @retval 
  */
 template <typename T>
@@ -65,6 +66,7 @@ InputNode<T>::InputNode(T default_value, bool case_sensitive)
  * The resulting InputNode will parse comma/space separated vectors.
  * 
  * @param  default_value
+ * @param  case_sensitive   If false, all strings are converted to uppercase (has no effect on number types)
  * @retval 
  */
 template <typename T>
