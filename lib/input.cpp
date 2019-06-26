@@ -276,7 +276,8 @@ void InputFile::parseFile(string path)
     vector<string> tokens;
     ifstream ifile(path);
 
-    while (getline(ifile, line)) {
+    while (getline(ifile, line))
+    {
         // Remove comments
         line = splitString(line, "#")[0];
         line = stripString(line);
@@ -286,17 +287,19 @@ void InputFile::parseFile(string path)
         tokens = splitString(line, ":");
         key = stripString(tokens[0]);
         value = stripString(tokens[1]);
-        if (string_values.find(key) != string_values.end()) {
+        if (string_values.find(key) != string_values.end())
+        {
             string_values[key].parseValue(value);
         }
-        else if (double_values.find(key) != double_values.end()) {
+        else if (double_values.find(key) != double_values.end())
+        {
             double_values[key].parseValue(value);
         }
-        else if (int_values.find(key) != int_values.end()) {
+        else if (int_values.find(key) != int_values.end())
+        {
             int_values[key].parseValue(value);
         }
     }
-
 }
 
 /**
@@ -492,4 +495,27 @@ void InputFile::defineDoubleNode(string name, InputNode<double> node)
 void InputFile::defineIntNode(string name, InputNode<int> node)
 {
     int_values[name] = node;
+}
+
+MuDiracInputFile::MuDiracInputFile() : InputFile()
+{
+    // Definition of all input keywords that can be used
+
+    // String keywords
+    this->defineStringNode("element", InputNode<string>("H"));           // Element to compute the spectrum for
+    this->defineStringNode("nuclear_model", InputNode<string>("POINT")); // Model used for nucleus
+    // Double keywords
+    this->defineDoubleNode("mass", InputNode<double>(1));             // Mass of orbiting particle (in muon masses)
+    this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));    // Tolerance for electronic convergence
+    this->defineDoubleNode("energy_damp", InputNode<double>(0.5));    // "Damping" used in steepest descent energy search
+    this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));   // Maximum |dE|/E ratio in energy search
+    this->defineDoubleNode("loggrid_step", InputNode<double>(0.005)); // Logarithmic grid step
+    this->defineDoubleNode("loggrid_center", InputNode<double>(1.0)); // Logarithmic grid center (in units of 1/(Z*m))
+    // Integer keywords
+    this->defineIntNode("isotope", InputNode<int>(-1));         // Isotope to use for element
+    this->defineIntNode("max_E_iter", InputNode<int>(100));     // Max iterations in energy search
+    this->defineIntNode("max_nodes_iter", InputNode<int>(100)); // Max iterations in nodes search
+    this->defineIntNode("max_state_iter", InputNode<int>(100)); // Max iterations in state search
+    this->defineIntNode("verbosity", InputNode<int>(1));        // Verbosity level (1 to 3)
+    this->defineIntNode("output", InputNode<int>(1));           // Output level (1 to 3)
 }

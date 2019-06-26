@@ -21,3 +21,7 @@ target_link_libraries(map_E_basins mudiraclib)
 
 add_executable(calc_Etrans calc_Etrans.cpp)
 target_link_libraries(calc_Etrans mudiraclib)
+
+configure_file(mudirac.in.hpp ${CMAKE_CURRENT_SOURCE_DIR}/mudirac.hpp)
+add_executable(mudirac mudirac.cpp)
+target_link_libraries(mudirac mudiraclib)

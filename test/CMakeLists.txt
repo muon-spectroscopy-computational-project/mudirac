@@ -2,7 +2,7 @@ add_library(test_main STATIC test_main.cpp)
 
 # Copying data files
 set(CURRENT_DATAPATH ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(datapath.h.in ${CMAKE_CURRENT_SOURCE_DIR}/datapath.h @ONLY)
+configure_file(datapath.in.h ${CMAKE_CURRENT_SOURCE_DIR}/datapath.h)
 file(COPY data/inputtest.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 file(COPY data/kappa_alpha_exp.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 

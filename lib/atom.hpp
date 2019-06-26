@@ -99,7 +99,7 @@ class Atom
 {
 public:
   // Tolerances and other details
-  double Etol = 1e-7, Esearch = 1.2, Edamp = 0.5;
+  double Etol = 1e-7, Edamp = 0.5;
   double max_dE_ratio = 1e-1;
   int maxit_E = 100;
   int maxit_nodes = 100;

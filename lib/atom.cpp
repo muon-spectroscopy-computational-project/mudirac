@@ -396,7 +396,7 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
-    LOG(TRACE) << "Dirac Atom created with rest energy = " << restE << "\n";
+    LOG(DEBUG) << "Dirac Atom created with rest energy = " << restE << "\n";
 }
 
 void DiracAtom::reset()
@@ -481,7 +481,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
     El = minE + (maxE - minE) / 3.0;
     Er = maxE - (maxE - minE) / 3.0;
 
-    LOG(TRACE) << "Running convergeNodes to search energy with solution with " << targ_nodes << " nodes\n";
+    LOG(DEBUG) << "Running convergeNodes to search energy with solution with " << targ_nodes << " nodes\n";
 
     for (int it = 0; it < maxit_nodes; ++it)
     {
@@ -563,8 +563,8 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
     k = state.k;
     E = state.E;
 
-    LOG(TRACE) << "Running convergeE to search energy from starting value of " << E - restE << " + mc2\n";
-    LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
+    LOG(DEBUG) << "Running convergeE to search energy from starting value of " << E - restE << " + mc2\n";
+    LOG(DEBUG) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
     for (int it = 0; it < maxit_E; ++it)
     {
@@ -653,8 +653,8 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     r_tp = Z / abs(B); // Coulombic turning point radius
 
-    LOG(TRACE) << "Computing optimal grid size for state with E = " << E - restE << " + mc2, k = " << k << "\n";
-    LOG(TRACE) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
+    LOG(DEBUG) << "Computing optimal grid size for state with E = " << E - restE << " + mc2, k = " << k << "\n";
+    LOG(DEBUG) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
 
     // Upper limit
     if (out_eps > 1 || out_eps < 0)
@@ -663,7 +663,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     }
     r_out = r_tp - log(out_eps) / K;
 
-    LOG(TRACE) << "Outer grid radius = " << r_out << "\n";
+    LOG(DEBUG) << "Outer grid radius = " << r_out << "\n";
 
     // Lower limit
     if (in_eps > 1 || in_eps < 0)
@@ -672,7 +672,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     }
     r_in = pow(in_eps, 1.0 / gamma) / M_E * gamma / K;
 
-    LOG(TRACE) << "Inner grid radius = " << r_in << "\n";
+    LOG(DEBUG) << "Inner grid radius = " << r_in << "\n";
 
     if (r_in > r_tp)
     {
@@ -729,12 +729,11 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
     {
         throw runtime_error("Can not integrate state with zero-sized grid");
     }
-    LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
+    LOG(DEBUG) << "Integrating state with grid of size " << N << "\n";
     // Start by applying boundary conditions
     boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0] ? R : -1);
-    LOG(TRACE) << "Boundary conditions applied\n";
     tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
-    LOG(TRACE) << "Integration complete, turning point at " << tp.i << "\n";
+    LOG(DEBUG) << "Integration complete, turning point found at " << tp.i << "\n";
 
     return;
 }
@@ -801,8 +800,8 @@ DiracState DiracAtom::convergeState(int n, int k)
     minE = Elim.first;
     maxE = Elim.second;
 
-    LOG(TRACE) << "Converging state with n = " << n << ", k = " << k << "\n";
-    LOG(TRACE) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
+    LOG(DEBUG) << "Converging state with n = " << n << ", k = " << k << "\n";
+    LOG(DEBUG) << "Energy limits: " << minE - restE << " + mc2 < E < " << maxE - restE << " + mc2\n";
 
     for (int it = 0; it < maxit_state; ++it)
     {
@@ -873,13 +872,15 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     DiracState state;
     TurningPoint tp;
 
+    qnumSchro2Dirac(l, s, k);
+
     // First, check if it's already calculated
     if (!force && states[make_tuple(n, l, s)].converged)
     {
+        LOG(DEBUG) << "State with n = " << n << ", k = " << k << " already calculated";
         return;
     }
 
-    qnumSchro2Dirac(l, s, k);
     try
     {
         state = convergeState(n, k);
