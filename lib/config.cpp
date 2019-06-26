@@ -58,7 +58,7 @@ DiracAtom MuDiracInputFile::makeAtom()
     da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
     da.maxit_E = this->getIntValue("max_E_iter");
     da.maxit_nodes = this->getIntValue("max_nodes_iter");
-    da.maxit_state = this->getIntValue("max_state_iter");
+    da.maxit_state = this->getIntValue("max_state_iter");    
 
     return da;
 }

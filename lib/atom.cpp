@@ -309,6 +309,12 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
 
     // Potential
     V = CoulombSpherePotential(Z, R);
+
+    // Logging
+    LOG(INFO) << "Created atom with Z = " << Z << ", A = " << A << "\n";
+    LOG(INFO) << "Particle mass = " << m << " au, effective mass = " << mu << " au\n";
+    LOG(INFO) << "Atomic radius = " << R << " au\n";
+    LOG(INFO) << "Logarithmic grid parameters rc = " << rc << " au, dx = " << dx << "\n";
 }
 
 /**
@@ -396,7 +402,7 @@ double Atom::sphereNuclearModel(double A)
 DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
-    LOG(DEBUG) << "Dirac Atom created with rest energy = " << restE << "\n";
+    LOG(DEBUG) << "Rest energy = " << restE/Physical::eV << " eV\n";
 }
 
 void DiracAtom::reset()
