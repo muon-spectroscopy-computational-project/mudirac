@@ -117,6 +117,7 @@ DiracState::DiracState(const DiracState &s)
 {
     converged = s.converged;
     nodes = s.nodes;
+    nodesQ = s.nodesQ;
     E = s.E;
     k = s.k;
     grid_indices = pair<int, int>(s.grid_indices);
