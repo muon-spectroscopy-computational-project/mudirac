@@ -30,6 +30,8 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_ELEMENTS
+#define MUDIRAC_ELEMENTS
 struct isotope
 {
     const double mass;
@@ -54,6 +56,7 @@ int getElementZ(string symbol);
 string getElementSymbol(int Z);
 int getElementMainIsotope(string symbol);
 int getElementMainIsotope(int Z);
+#endif
 
 #ifndef ATOMIC_DATA
 #define ATOMIC_DATA
