@@ -126,3 +126,26 @@ TEST_CASE("Stripping strings", "[stripstring]")
     REQUIRE(stripString("abc") == "abc");
     REQUIRE(stripString("   \t").size() == 0);
 }
+
+TEST_CASE("Analysing IUPAC state labels", "[parseIupacState]")
+{
+    int n, l;
+    bool s;
+
+    parseIupacState("K", n, l, s);
+    REQUIRE(n == 1);
+    REQUIRE(l == 0);
+    parseIupacState("L2", n, l, s);
+    REQUIRE(n == 2);
+    REQUIRE(l == 1);
+    REQUIRE(s == false);
+    parseIupacState("M5", n, l, s);
+    REQUIRE(n == 3);
+    REQUIRE(l == 2);
+    REQUIRE(s == true);
+
+    // Exceptions
+    REQUIRE_THROWS(parseIupacState("B2", n, l, s));
+    REQUIRE_THROWS(parseIupacState("L4", n, l, s));
+    REQUIRE_THROWS(parseIupacState("M", n, l, s));
+}

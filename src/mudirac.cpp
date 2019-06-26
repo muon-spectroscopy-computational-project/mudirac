@@ -7,4 +7,7 @@ int main(int argc, char *argv[])
     if (argc > 1) {
         config.parseFile(argv[1]);
     }
+
+    // Prepare the DiracAtom
+    
 }

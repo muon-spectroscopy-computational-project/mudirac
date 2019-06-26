@@ -291,14 +291,57 @@ void qnumNodes2Principal(int nodes, int l, int &n)
  * @note   Convert from principal quantum number
  * and orbital quantum number l to number of nodes in the wavefunction
  * 
- * @param  n:      Principal quantum number
+ * @param  n:       Principal quantum number
  * @param  l:       Orbital quantum number
- * @param  &nodes:   Number of nodes
+ * @param  &nodes:  Number of nodes
  * @retval None
  */
 void qnumPrincipal2Nodes(int n, int l, int &nodes)
 {
     nodes = n - l - 1;
+}
+
+/**
+  * @brief  Parse an atomic state quantum numbers from IUPAC notation
+  * @note   Parse an atomic state quantum numbers from IUPAC X-ray notation.
+  * 
+  * @param  istate:     IUPAC notation string
+  * @param  &n:         Principal quantum number
+  * @param  &l:         Orbital quantum number
+  * @param  &s:         Spin quantum number
+  * @retval None
+ */
+void parseIupacState(string istate, int &n, int &l, bool &s)
+{
+    int len = istate.size();
+
+    if (len < 2)
+    {
+        if (istate == "K")
+        {
+            // A special case...
+            n = 1;
+            l = 0;
+            s = false;
+            return;
+        }
+        else
+        {
+            throw invalid_argument("istate is not a valid IUPAC notation state designation");
+        }
+    }
+    // The string is interpreted as a letter + a number
+    char shell = istate[0];
+    int orbit = stoi(istate.substr(1));
+
+    n = shell - 'J';
+    l = orbit / 2;
+    s = (orbit % 2) == 1;
+
+    if (n < 1 || l > n - 1)
+    {
+        throw invalid_argument("istate is not a valid IUPAC notation state designation");
+    }
 }
 
 /**

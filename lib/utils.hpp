@@ -46,6 +46,8 @@ void qnumDirac2Schro(int k, int &l, bool &s);
 void qnumNodes2Principal(int nodes, int l, int &n);
 void qnumPrincipal2Nodes(int n, int l, int &nodes);
 
+void parseIupacState(string istate, int &n, int &l, bool &s);
+
 vector<string> splitString(string s, string sep = " ", bool merge = false);
 string stripString(string s, string strip = " \t\n");
 
