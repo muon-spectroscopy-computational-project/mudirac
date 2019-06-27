@@ -433,7 +433,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     qnumDirac2Schro(k, l, s);
     qnumNodes2Principal(nodes, l, n);
 
-    // Not below the lowest potential energy, and not an antiparticle
+    // Not below the lowest potential energy, and also use the hydrogen-like energy as a reasonable lower bound scale
     minE = max(V.V(0) + restE, hydrogenicDiracEnergy(Z, mu, 1, -1, true) * 2 + restE);
     // Required for the state to be bound
     maxE = restE;
