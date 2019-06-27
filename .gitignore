@@ -35,7 +35,7 @@
 test/*
 !test/macros.hpp
 !test/*.cpp
-!test/datapath.h.in
+!test/datapath.in.h
 !test/catch
 !test/data
 !test/CMakeLists.txt
