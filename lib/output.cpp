@@ -35,7 +35,7 @@ void writeDiracState(DiracState ds, string fname)
     // Now write down the content
     for (int i = 0; i < ds.grid.size(); ++i)
     {
-        out << ds.grid[i] << '\t' << ds.V[i] << '\t' << ds.P[i] << '\t' << ds.Q[i] << '\n';
+        out << ds.grid[i] << '\t' << ds.V[i]/Physical::eV << '\t' << ds.P[i] << '\t' << ds.Q[i] << '\n';
     }
 
     out.close();
