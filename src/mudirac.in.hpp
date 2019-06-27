@@ -5,6 +5,7 @@
 #include <cmath>
 #include "../lib/config.hpp"
 #include "../lib/atom.hpp"
+#include "../lib/output.hpp"
 #include "../lib/utils.hpp"
 #include "../lib/elements.hpp"
 #include "../lib/constants.hpp"

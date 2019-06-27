@@ -103,21 +103,12 @@ int main(int argc, char *argv[])
         {
             for (int j = 0; j < 2; ++j)
             {
-                ofstream out(seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out");
+                string fname = seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out";
                 DiracState ds = (j == 0 ? trans_states[i].first : trans_states[i].second);
 
                 LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j + 1) << "\n";
 
-                out << "# " << ds.E / Physical::eV << '\n';
-                out << "# " << ds.getn() << '\t' << ds.getl() << '\t' << ds.gets() << '\n';
-                out << "# " << ds.nodes << '\t' << ds.nodesQ << '\n';
-
-                for (int k = 0; k < ds.grid.size(); ++k)
-                {
-                    out << ds.grid[k] << '\t' << ds.V[k] / Physical::eV << '\t' << ds.P[k] << '\t' << ds.Q[k] << '\n';
-                }
-
-                out.close();
+                writeDiracState(ds, fname);
             }
         }
     }
