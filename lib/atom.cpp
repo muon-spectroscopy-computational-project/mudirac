@@ -481,7 +481,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
 void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_nodes, double &minE, double &maxE)
 {
     int k;
-    int nl, nr;
+    int nl = -1, nr = -1;
     double El, Er, oldEl = maxE + 1, oldEr = maxE + 1;
     pair<int, int> glim;
 
@@ -493,7 +493,8 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
 
     for (int it = 0; it < maxit_nodes; ++it)
     {
-        LOG(TRACE) << "Iteration " << (it + 1) << ", El = " << El - restE << "+mc2, Er = " << Er - restE << "+mc2\n";
+        LOG(DEBUG) << "Iteration " << (it + 1) << ", El = " << El - restE << "+mc2, nl = " << nl << ", Er = "
+                   << Er - restE << "+mc2, nr = " << nr << "\n";
         if (El != oldEl)
         {
             state = initState(El, k);
@@ -664,8 +665,8 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     r_tp = Z / abs(B); // Coulombic turning point radius
 
-    LOG(DEBUG) << "Computing optimal grid size for state with E = " << E - restE << " + mc2, k = " << k << "\n";
-    LOG(DEBUG) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
+    LOG(TRACE) << "Computing optimal grid size for state with E = " << E - restE << " + mc2, k = " << k << "\n";
+    LOG(TRACE) << "K = " << K << ", gamma = " << gamma << ", r_tp = " << r_tp << "\n";
 
     // Upper limit
     if (out_eps > 1 || out_eps < 0)
@@ -674,7 +675,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     }
     r_out = r_tp - log(out_eps) / K;
 
-    LOG(DEBUG) << "Outer grid radius = " << r_out << "\n";
+    LOG(TRACE) << "Outer grid radius = " << r_out << "\n";
 
     // Lower limit
     if (in_eps > 1 || in_eps < 0)
@@ -683,7 +684,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
     }
     r_in = pow(in_eps, 1.0 / gamma) / M_E * gamma / K;
 
-    LOG(DEBUG) << "Inner grid radius = " << r_in << "\n";
+    LOG(TRACE) << "Inner grid radius = " << r_in << "\n";
 
     if (r_in > r_tp)
     {
@@ -740,11 +741,11 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
     {
         throw runtime_error("Can not integrate state with zero-sized grid");
     }
-    LOG(DEBUG) << "Integrating state with grid of size " << N << "\n";
+    LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
     // Start by applying boundary conditions
     boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0] ? R : -1);
     tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
-    LOG(DEBUG) << "Integration complete, turning point found at " << tp.i << "\n";
+    LOG(TRACE) << "Integration complete, turning point found at " << tp.i << "\n";
 
     return;
 }

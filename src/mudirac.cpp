@@ -59,8 +59,16 @@ int main(int argc, char *argv[])
 
         LOG(INFO) << "Computing transition " << states[0] << " - " << states[1] << "\n";
 
-        ds1 = da.getState(n1, l1, s1);
-        ds2 = da.getState(n2, l2, s2);
+        try
+        {
+            ds1 = da.getState(n1, l1, s1);
+            ds2 = da.getState(n2, l2, s2);
+        }
+        catch (AtomErrorCode aerr)
+        {
+            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << xr_lines[i] << " failed with AtomErrorCode " << aerr << "\n";
+            return -1;
+        }
 
         LOG(INFO) << "Transition energy = " << (ds2.E - ds1.E) / (Physical::eV * 1000) << " kEv\n";
 
@@ -98,7 +106,7 @@ int main(int argc, char *argv[])
                 ofstream out(seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out");
                 DiracState ds = (j == 0 ? trans_states[i].first : trans_states[i].second);
 
-                LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j+1) << "\n";
+                LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j + 1) << "\n";
 
                 out << "# " << ds.E / Physical::eV << '\n';
                 out << "# " << ds.getn() << '\t' << ds.getl() << '\t' << ds.gets() << '\n';
