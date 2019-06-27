@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "../lib/atom.hpp"
+#include "../lib/output.hpp"
 #include "../lib/hydrogenic.hpp"
 #include "../lib/constants.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
@@ -9,7 +10,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "arbitrary_state.log", "#message"),
+    AixLog::Log::init({make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "arbitrary_state.log"),
                        make_shared<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::special, "arbitrary_state.err")});
 
     LOG(INFO) << "Starting arbitrary_state...\n";
@@ -41,20 +42,25 @@ int main(int argc, char **argv)
     catch (AtomErrorCode acode)
     {
         LOG(ERROR) << SPECIAL << "FAILED: AtomErrorCode = " << acode << "\n";
+        return -1;
     }
     DiracState ds = DiracState(da.getrc(), da.getdx(), glim.first, glim.second);
     TurningPoint tp;
     ds.E = E;
     ds.k = k;
     ds.V = da.getV(ds.grid);
-    da.integrateState(ds, tp);
+    try
+    {
+        da.integrateState(ds, tp);
+    }
+    catch (const char *err)
+    {
+        LOG(ERROR) << err << "\n";
+    }
     ds.continuify(tp);
+    ds.normalize();
     ds.findNodes();
     LOG(TRACE) << "State converged, nodes = " << ds.nodes << ", nodesQ = " << ds.nodesQ << "\n";
 
-    int N = ds.grid.size();
-    for (int i = 0; i < N; ++i)
-    {
-        cout << ds.grid[i] << '\t' << ds.P[i] << '\t' << ds.Q[i] << '\n';
-    }
+    writeDiracState(ds, "arbitrary.dat");
 }

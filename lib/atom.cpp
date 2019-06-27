@@ -713,6 +713,8 @@ DiracState DiracAtom::initState(double E, int k)
     DiracState state;
     pair<int, int> glimits;
 
+    LOG(TRACE) << "Initialising state with E = " << E-restE << "+mc2, k = " << k << "\n";
+
     glimits = gridLimits(E, k);
     state = DiracState(rc, dx, glimits.first, glimits.second);
     state.k = k;

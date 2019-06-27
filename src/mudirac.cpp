@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
 
         try
         {
+            LOG(INFO) << "Computing state " << states[0] << "\n";
             ds1 = da.getState(n1, l1, s1);
+            LOG(INFO) << "Computing state " << states[1] << "\n";
             ds2 = da.getState(n2, l2, s2);
         }
         catch (AtomErrorCode aerr)
