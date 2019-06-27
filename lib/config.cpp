@@ -25,6 +25,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));    // Tolerance for electronic convergence
     this->defineDoubleNode("energy_damp", InputNode<double>(0.5));    // "Damping" used in steepest descent energy search
     this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));   // Maximum |dE|/E ratio in energy search
+    this->defineDoubleNode("node_tol", InputNode<double>(1e-6));      // Tolerance parameter used for counting nodes in wavefunctions
     this->defineDoubleNode("loggrid_step", InputNode<double>(0.005)); // Logarithmic grid step
     this->defineDoubleNode("loggrid_center", InputNode<double>(1.0)); // Logarithmic grid center (in units of 1/(Z*m))
     // Integer keywords
@@ -58,6 +59,7 @@ DiracAtom MuDiracInputFile::makeAtom()
     da.Etol = this->getDoubleValue("energy_tol");
     da.Edamp = this->getDoubleValue("energy_damp");
     da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
+    da.nodetol = this->getDoubleValue("node_tol");
     da.maxit_E = this->getIntValue("max_E_iter");
     da.maxit_nodes = this->getIntValue("max_nodes_iter");
     da.maxit_state = this->getIntValue("max_state_iter");

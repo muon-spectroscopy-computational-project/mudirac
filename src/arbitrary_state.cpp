@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "../lib/atom.hpp"
+#include "../lib/config.hpp"
 #include "../lib/output.hpp"
 #include "../lib/hydrogenic.hpp"
 #include "../lib/constants.hpp"
@@ -16,39 +17,22 @@ int main(int argc, char **argv)
     LOG(INFO) << "Starting arbitrary_state...\n";
 
     // Parameters
-    if (argc < 5)
-    {
-        cout << "Wrong number of arguments\n";
-        return -1;
-    }
-
-    int k;
-    double Z = stod(argv[1]);
+    MuDiracInputFile config;
+    config.parseFile(argv[1]);
     int l = stoi(argv[2]);
     bool s = stoi(argv[3]) != 0;
     double E = stod(argv[4]);
-    double A = argc > 5 ? stod(argv[5]) : -1;
 
-    DiracAtom da = DiracAtom(Z, 1, A);
+    int k;
+
+    DiracAtom da = config.makeAtom();
     E += da.getRestE();
     qnumSchro2Dirac(l, s, k);
 
-    pair<int, int> glim;
+    cout << hydrogenicDiracEnergy(da.getZ(), da.getmu(), 2, k, true) << "\n";
 
-    try
-    {
-        glim = da.gridLimits(E, k);
-    }
-    catch (AtomErrorCode acode)
-    {
-        LOG(ERROR) << SPECIAL << "FAILED: AtomErrorCode = " << acode << "\n";
-        return -1;
-    }
-    DiracState ds = DiracState(da.getrc(), da.getdx(), glim.first, glim.second);
+    DiracState ds = da.initState(E, k);
     TurningPoint tp;
-    ds.E = E;
-    ds.k = k;
-    ds.V = da.getV(ds.grid);
     try
     {
         da.integrateState(ds, tp);
@@ -59,7 +43,7 @@ int main(int argc, char **argv)
     }
     ds.continuify(tp);
     ds.normalize();
-    ds.findNodes();
+    ds.findNodes(config.getDoubleValue("node_tol"));
     LOG(TRACE) << "State converged, nodes = " << ds.nodes << ", nodesQ = " << ds.nodesQ << "\n";
 
     writeDiracState(ds, "arbitrary.dat");

@@ -226,6 +226,8 @@ int countNodes(vector<double> v, double tol)
         }
     }
 
+    LOG(TRACE) << "Counting nodes with tolerance " << tol << ", max = " << max << ", thr = " << max*tol << "\n";
+
     for (i0 = 0; i0 < v.size(); ++i0)
     {
         if (abs(v[i0]) / max > tol)

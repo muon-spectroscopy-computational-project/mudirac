@@ -174,12 +174,13 @@ void DiracState::continuify(TurningPoint tp)
  * @brief  Find and count the wavefunction's nodes
  * @note   Find and count the wavefunction's nodes
  * 
+ * @param  tol:         Relative tolerance used to define when the function counts as non-zero for node counting
  * @retval None
  */
-void DiracState::findNodes()
+void DiracState::findNodes(double tol)
 {
-    nodes = countNodes(P);
-    nodesQ = countNodes(Q);
+    nodes = countNodes(P, tol);
+    nodesQ = countNodes(Q, tol);
 }
 
 /**
@@ -501,7 +502,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
             integrateState(state, tp);
             state.continuify(tp);
             state.normalize();
-            state.findNodes();
+            state.findNodes(nodetol);
             nl = state.nodes;
             if (nl == targ_nodes)
             {
@@ -516,7 +517,7 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp, int targ_node
             integrateState(state, tp);
             state.continuify(tp);
             state.normalize();
-            state.findNodes();
+            state.findNodes(nodetol);
             nr = state.nodes;
             if (nr == targ_nodes)
             {
@@ -598,7 +599,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
             state.E = E;
             state.continuify(tp);
             state.normalize();
-            state.findNodes();
+            state.findNodes(nodetol);
             return;
         }
         // Apply maximum step ratio

@@ -93,7 +93,7 @@ public:
   double norm() override;
 
   void continuify(TurningPoint tp);
-  void findNodes();
+  void findNodes(double tol=1e-6);
   void normalize();
 };
 
@@ -103,6 +103,7 @@ public:
   // Tolerances and other details
   double Etol = 1e-7, Edamp = 0.5;
   double max_dE_ratio = 1e-1;
+  double nodetol = 1e-6;
   int maxit_E = 100;
   int maxit_nodes = 100;
   int maxit_state = 100;
