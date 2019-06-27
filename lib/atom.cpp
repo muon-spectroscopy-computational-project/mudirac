@@ -434,7 +434,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     qnumNodes2Principal(nodes, l, n);
 
     // Not below the lowest potential energy, and not an antiparticle
-    minE = max(V.V(0) + restE, -restE);
+    minE = max(V.V(0) + restE, hydrogenicDiracEnergy(Z, mu, 1, -1, true) * 2 + restE);
     // Required for the state to be bound
     maxE = restE;
 
@@ -714,7 +714,7 @@ DiracState DiracAtom::initState(double E, int k)
     DiracState state;
     pair<int, int> glimits;
 
-    LOG(TRACE) << "Initialising state with E = " << E-restE << "+mc2, k = " << k << "\n";
+    LOG(TRACE) << "Initialising state with E = " << E - restE << "+mc2, k = " << k << "\n";
 
     glimits = gridLimits(E, k);
     state = DiracState(rc, dx, glimits.first, glimits.second);
