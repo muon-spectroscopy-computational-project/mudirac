@@ -144,7 +144,7 @@ public:
 
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
-  void setUehling(bool s, int usteps = 1000);
+  void setUehling(bool s, int usteps = 1000, double cut_low=0, double cut_high=INFINITY);
 
   // Clear computed states
   virtual void reset(){};

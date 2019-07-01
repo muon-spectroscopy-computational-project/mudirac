@@ -330,12 +330,13 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
   * @param  usteps:     Number of integration steps used for it (default = 1000)
   * @retval None
  */
-void Atom::setUehling(bool s, int usteps)
+void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
 {
     use_uehling = s;
     if (s)
     {
         V_uehling = UehlingSpherePotential(Z, R, usteps);
+        V_uehling.set_exp_cutoffs(cut_low, cut_high);
     }
     reset();
 }
