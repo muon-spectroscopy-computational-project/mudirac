@@ -34,6 +34,9 @@ target_link_libraries(test_atom test_main mudiraclib)
 add_executable(test_wavefunction test_wavefunction.cpp)
 target_link_libraries(test_wavefunction test_main mudiraclib)
 
+add_executable(test_lines test_lines.cpp)
+target_link_libraries(test_lines test_main mudiraclib)
+
 add_executable(test_kappaa test_kappaa.cpp)
 target_link_libraries(test_kappaa mudiraclib)
 
