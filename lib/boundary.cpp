@@ -57,12 +57,18 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
     // Depends on whether we consider the nucleus of finite size or point-like
     if (R <= 0)
     {
+        double gamma = k * k - pow(Physical::alpha * Z, 2.0);
+        if (gamma < 0)
+        {
+            throw "Can't compute boundary conditions for state with point-like nucleus and negative gamma";
+        }
+        gamma = sqrt(gamma);
         // Point like
         // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
         for (int i = 0; i < 2; ++i)
         {
-            P[i] = pow(r[i], l + 1);
-            Q[i] = -Z * Physical::alpha / (l + 2 - k) * P[i];
+            P[i] = pow(r[i], gamma);
+            Q[i] = Z * Physical::alpha / (gamma - k) * P[i];
         }
     }
     else

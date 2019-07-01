@@ -177,23 +177,14 @@ P(r) &\approx e^{-Kr} \\
 Q(r) &\approx -\frac{K}{mc+E/c}P(r)
 \end{align}
 
-whereas for $r \rightarrow 0$ we find different results depending on whether we use a `true' Coulomb potential (point charge) or one where the charge is assumed to have a finite spherical size. For a point charge we find \cite{silbar2010}:
-
-\begin{align}\label{dirac_sys_zero_pc}
-	Q' &\approx \frac{1}{r}\left(kQ- \frac{Z}{c}P\right)  \\
-	P' &\approx \frac{1}{r}\left(-kP + \frac{Z}{c}Q\right)
-\end{align}
-
-leading to
+whereas for $r \rightarrow 0$ we find different results depending on whether we use a `true' Coulomb potential (point charge) or one where the charge is assumed to have a finite spherical size. By expanding $P$, $Q$ and $V$ in power series for a point charge we find \cite{grant2009}
 
 \begin{align}
-P(r) &\approx r^{l+1} \\
-Q(r) &\approx -\frac{Z}{c(l+2-k)}P(r)
+P(r) &\approx r^{\gamma} \\
+Q(r) &\approx -\frac{Z}{c(\gamma-k)}P(r)
 \end{align}
 
-while for a finite charge by expanding in a power series we find \cite{grant2009}
-
-so for $k < 0$
+with $\gamma = \sqrt{k^2-Z^2\alpha^2}$, while for a finite charge for $k < 0$ we have
 
 \begin{align}
 P(r) &\approx r^{-k} \\
