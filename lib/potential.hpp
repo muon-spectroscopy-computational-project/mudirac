@@ -70,12 +70,21 @@ public:
   UehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
   double V(double r) override;
 
+  void set_exp_cutoffs(double low, double high)
+  {
+    exp_cutoff_low = low;
+    exp_cutoff_high = high;
+  };
+
   static double ukernel_r_greater(double u, double r, double R);
   static double ukernel_r_smaller(double u, double r, double R);
+  static double ukernel_r_verysmall(double u, double R);
   static double ukernel_point(double u, double r);
 
 protected:
-  double Z, R, rho, K;
+  double exp_cutoff_high = INFINITY; // Cutoff point x beyond which we approximate exp(-x) = 0
+  double exp_cutoff_low = 0.0;       // Cutoff point x under which we approximate exp(-x) = 1
+  double Z, R, rho, K, V0, du, uint0;
   int usteps;
   vector<double> uarg;
 };

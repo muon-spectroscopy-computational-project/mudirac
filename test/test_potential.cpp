@@ -39,13 +39,23 @@ TEST_CASE("Uehling correction to Coulomb potential", "[CoulombSpherePotential]")
     REQUIRE(cpot.ukernel_point(0.5, 0.5 / (2 * Physical::c)) == Approx(2 * exp(-1)));
 
     // Now the actual potential
-    cpot = UehlingSpherePotential(92, Atom::sphereNuclearModel(238), 500);
-    REQUIRE(cpot.V(0.01) == Approx(-0.1796).epsilon(1e-3));
-    REQUIRE(cpot.V(5e-5) == Approx(-4438.7471).epsilon(1e-3));
     // Point-like atom
     cpot = UehlingSpherePotential(92, -1, 2000);
     REQUIRE(cpot.V(0.01) == Approx(-0.1795).epsilon(1e-3));
     REQUIRE(cpot.V(5e-5) == Approx(-10225.5698).epsilon(1e-3));
+    // Finite size atom
+    cpot = UehlingSpherePotential(92, Atom::sphereNuclearModel(238), 500);
+    REQUIRE(cpot.V(0.01) == Approx(-0.1796).epsilon(1e-3));
+    REQUIRE(cpot.V(5e-5) == Approx(-4438.7471).epsilon(1e-3));
+
+    // Now test that it still works with approximations
+    double rlow = 0.5 * Physical::alpha * 1e-6;
+    double Vlow = cpot.V(rlow);
+    double rhigh = 0.5 * Physical::alpha * 10;
+    double Vhigh = cpot.V(rhigh);
+    cpot.set_exp_cutoffs(1e-3, 5.0);
+    REQUIRE(cpot.V(rlow) == Approx(Vlow).epsilon(1e-3));
+    REQUIRE(cpot.V(rhigh) == Approx(Vhigh).margin(1e-3)); // This being a 0, we use absolute values
 }
 
 TEST_CASE("Background charge on grid potential", "[BkgGridPotential]")

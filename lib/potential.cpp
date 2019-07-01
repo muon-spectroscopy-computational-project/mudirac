@@ -61,15 +61,28 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
     this->Z = Z;
     this->R = R;
     this->usteps = usteps;
+    du = 1.0 / (usteps - 1.0);
+    uarg = vector<double>(usteps);
 
     if (R > 0)
+    {
         rho = Z * 0.75 / (M_PI * pow(R, 3));
+        // Compute the 'uint0' term
+        uarg[0] = 0;
+        double eps = 0.5 * 1e-7 * du;
+        for (int i = 1; i < usteps; ++i)
+        {
+            double u = i * du;
+            uarg[i] = ukernel_r_verysmall(u, R) * sqrt(1 - u * u) * (1 + 0.5 * u * u);
+        }
+        uint0 = trapzInt(du, uarg);
+    }
     else
+    {
         rho = Z / (M_PI * Physical::alpha); // Works so that the front constant stays the same
+    }
 
     K = -2 * pow(Physical::alpha, 2) / 3 * rho;
-
-    uarg = vector<double>(usteps);
 }
 
 double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
@@ -90,6 +103,11 @@ double UehlingSpherePotential::ukernel_r_smaller(double u, double r, double R)
     return ans;
 }
 
+double UehlingSpherePotential::ukernel_r_verysmall(double u, double R)
+{
+    return 4 * Physical::c / u * (-exp(-2 * R * Physical::c / u) * (0.5 * R * u * Physical::alpha + pow(u / (2 * Physical::c), 2)) + pow(u / (2 * Physical::c), 2));
+}
+
 double UehlingSpherePotential::ukernel_point(double u, double r)
 {
     return 1 / u * exp(-2 * r * Physical::c / u);
@@ -97,7 +115,15 @@ double UehlingSpherePotential::ukernel_point(double u, double r)
 
 double UehlingSpherePotential::V(double r)
 {
-    double du = 1.0 / (usteps - 1.0);
+    // Avoid all this mess if r is big enough
+    if (r > exp_cutoff_high * 0.5 * Physical::alpha)
+    {
+        return 0.0;
+    }
+    else if (r < exp_cutoff_low * 0.5 * du * Physical::alpha)
+    {
+        return K * uint0;
+    }
     // Fill in the u integration kernel
     uarg[0] = 0;
     for (int i = 1; i < usteps; ++i)
