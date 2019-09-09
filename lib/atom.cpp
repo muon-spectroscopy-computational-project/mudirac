@@ -248,9 +248,10 @@ bool DiracState::gets()
  * @param  Z_in: Atomic number (nuclear charge, can be fractional)
  * @param  m_in: Mass of the orbiting particle (e.g. electron)
  * @param  A_in: Atomic mass (amus, ignored if -1)
- * @param  R_in: Atomic radius (treated as point-like if <= 0)
+ * @param  R_in: Nuclear radius (treated as point-like if <= 0)
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a fraction
- *               of 1/(Z*mu), the 1s orbital radius for this atom (default = 1)
+ *               of 1/(Z*mu), the 1s orbital radius for this atom, or of
+ *               the nuclear radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
  * @retval 
  */
@@ -307,7 +308,7 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
     }
 
     // Grid
-    rc = fc / (Z * mu);
+    rc = fc*max(1 / (Z * mu), R);
     this->dx = dx;
 
     // Potential
