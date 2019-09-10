@@ -27,6 +27,15 @@ with open(os.path.join(dir, 'abundant.dat')) as f:
         Z, A = map(int, l.split())
         iso_abund[Z] = A
 
+# Load nuclear radii
+iso_radii = {}
+with open(os.path.join(dir, 'nuclear_radii.dat')) as f:
+    for l in f.readlines():
+        if l[0] == '#':
+            continue
+        Z, A = map(int, l.split()[:2])
+        iso_radii[(Z, A)] = float(l.split()[-1])
+
 ame_url = 'https://www-nds.iaea.org/amdc/ame2016/mass16.txt'
 nubase_url = 'https://www-nds.iaea.org/amdc/ame2016/nubase2016.txt'
 
@@ -112,12 +121,14 @@ for l in nubase_lines:
 cpp_string = 'const map<string, element> atomic_data = {'
 cpp_Z_string = 'const map<int, string> atomic_Z_lookup = {'
 for el, data in atomic_data.items():
-    cpp_string += '{{ "{0}", {{ {1}, {2}, {{'.format(el, data['Z'], iso_abund[data['Z']])
+    Z = data['Z']
+    cpp_string += '{{ "{0}", {{ {1}, {2}, {{\n'.format(el, Z, iso_abund[Z])
     for A, iso in data['isos'].items():
-        cpp_string += '{{ {0}, {{ {m}, {spin} }} }},'.format(A, m=iso['m'],
+        cpp_string += '{{ {0}, {{ {m}, {spin}, {R} }} }},\n'.format(A, m=iso['m'],
                                                              spin=(iso['spin'] if iso['spin']
-                                                                   is not None else 'NAN'))
-    cpp_string += '} } },'
+                                                                   is not None else 'NAN'), 
+                                                             R=iso_radii.get((Z, A), 'NAN'))
+    cpp_string += '} } },\n'
 
     cpp_Z_string += '{{ {0}, "{1}" }},'.format(data['Z'], el)
 cpp_string += '};\n'

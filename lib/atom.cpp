@@ -255,7 +255,7 @@ bool DiracState::gets()
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
  * @retval 
  */
-Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
+Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
            double fc, double dx)
 {
     // Set the properties
@@ -279,7 +279,8 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
 
     if (A > 0)
     {
-        mu = effectiveMass(m, A * Physical::amu);
+        M = getIsotopeMass(Z, A);
+        mu = effectiveMass(m, M * Physical::amu);
     }
     else
     {
@@ -299,7 +300,7 @@ Atom::Atom(double Z, double m, double A, NuclearRadiusModel radius_model,
             R = -1;
             break;
         case SPHERE:
-            R = sphereNuclearModel(A);
+            R = sphereNuclearModel(Z, A);
             break;
         default:
             R = -1;
@@ -399,12 +400,18 @@ vector<double> Atom::getV(vector<double> r)
  * @param  A:   Atomic mass
  * @retval      Nuclear radius
  */
-double Atom::sphereNuclearModel(double A)
+double Atom::sphereNuclearModel(int Z, int A)
 {
-    return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
+    try {
+        return Physical::fm*getIsotopeRadius(Z, A);
+    }
+    catch (invalid_argument e) {
+        LOG(TRACE) << "Isotope not found; falling back on default model for nuclear radius";
+        return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
+    }
 }
 
-DiracAtom::DiracAtom(double Z, double m, double A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
+DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
     LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";

@@ -69,6 +69,28 @@ double getIsotopeSpin(int Z, int isotope)
     return getIsotopeSpin(symbol, isotope);
 }
 
+double getIsotopeRadius(string symbol, int isotope)
+{
+    if (isotope == -1)
+    {
+        isotope = getElementMainIsotope(symbol);
+    }
+    try
+    {
+        return atomic_data.at(symbol).isotopes.at(isotope).radius;
+    }
+    catch (out_of_range e)
+    {
+        throw invalid_argument("Isotope/element does not exist");
+    }
+}
+
+double getIsotopeRadius(int Z, int isotope)
+{
+    string symbol = getElementSymbol(Z);
+    return getIsotopeRadius(symbol, isotope);
+}
+
 vector<int> getAllIsotopes(string symbol)
 {
     map<int, isotope> isos;

@@ -36,6 +36,7 @@ struct isotope
 {
     const double mass;
     const double spin;
+    const double radius;
 };
 
 struct element
@@ -49,6 +50,8 @@ double getIsotopeMass(string symbol, int isotope=-1);
 double getIsotopeMass(int Z, int isotope=-1);
 double getIsotopeSpin(string symbol, int isotope=-1);
 double getIsotopeSpin(int Z, int isotope=-1);
+double getIsotopeRadius(string symbol, int isotope=-1);
+double getIsotopeRadius(int Z, int isotope=-1);
 vector<int> getAllIsotopes(string symbol);
 vector<int> getAllIsotopes(int Z);
 

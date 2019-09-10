@@ -109,12 +109,12 @@ public:
   int maxit_state = 100;
 
   // Radius models
-  double static sphereNuclearModel(double A);
+  double static sphereNuclearModel(int Z, int A);
 
 protected:
   // Fundamental properties
-  double Z, A;  // Nuclear charge and mass
-  double m, mu; // Mass of the orbiting particle (e.g. muon, electron) and effective mass of the system
+  int Z, A;     // Nuclear charge and mass number
+  double m, M, mu; // Mass of the orbiting particle (e.g. muon, electron), of the nucleus, and effective mass of the system
   double R;     // Nuclear radius
   // Grid
   double rc = 1.0;   // Central radius
@@ -126,7 +126,7 @@ protected:
   UehlingSpherePotential V_uehling;
 
 public:
-  Atom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
+  Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double fc = 1.0, double dx = 0.005);
 
   // Basic getters
@@ -162,7 +162,7 @@ public:
   double in_eps = 1e-5;
   int min_n = 1000;
 
-  DiracAtom(double Z = 1, double m = 1, double A = -1, NuclearRadiusModel radius_model = POINT,
+  DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
             double fc = 1.0, double dx = 0.005);
 
   double getRestE() { return restE; };

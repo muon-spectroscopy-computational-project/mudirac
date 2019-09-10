@@ -47,7 +47,7 @@ DiracAtom MuDiracInputFile::makeAtom()
     // Now extract the relevant parameters
     int Z = getElementZ(this->getStringValue("element"));
     double m = this->getDoubleValue("mass") * Physical::m_mu;
-    double A = getIsotopeMass(Z, this->getIntValue("isotope"));
+    int A = this->getIntValue("isotope");
     if (nucmodelmap.find(this->getStringValue("nuclear_model")) == nucmodelmap.end())
     {
         throw invalid_argument("Invalid nuclear_model parameter in input file");
