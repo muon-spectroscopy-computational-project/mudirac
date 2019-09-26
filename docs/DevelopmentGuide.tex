@@ -1,6 +1,7 @@
 \documentclass[]{report}
 
 \usepackage{amsmath}
+\usepackage{braket}
 
 % Title Page
 \title{\texttt{mudirac} - a Dirac equation solver for muonic atoms
@@ -29,17 +30,17 @@ The basic solver makes use of the radial Dirac equation written in its coupled f
 
 as found for example in \cite{weinb2008, silbar2010, gross1999} and others. In this form, the final wavefunction can be reconstructed by combining it with the appropriate spherical harmonics:
 
-\begin{align}
+\begin{align}\label{dirac_wavef}
 \left<\mathbf{r}|\psi_{k\mu}\right> = \begin{pmatrix}
 \frac{P_k}{r}\left<\mathbf{\hat{r}}|k\mu\right> \\
 i\frac{Q_k}{r}\left<\mathbf{\hat{r}}|-k\mu\right>
 \end{pmatrix}
 \end{align}
 
-where it must be kept in mind that the quantum number $k$ depends on the total angular momentum of the electron, namely, whether its angular and spin momenta are aligned or not. It is $k=-(l+1)$ when $j = l-1/2$ and $k=l$ when $j=l+1/2$, and the spin spherical harmonics are:
+where it must be kept in mind that the quantum number $k$ depends on the total angular momentum of the electron, namely, whether its angular and spin momenta are aligned or not. It is $k=-(l+1)$ when $j = l+1/2$ and $k=l$ when $j=l-1/2$, and the spin spherical harmonics are:
 
 \begin{equation}
-\left|k\mu\right> = \sum_{s=\pm 1/2} c(l\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
+\left|k\mu\right> = \sum_{s=\pm 1/2} c(l,\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
 \end{equation}
 
 with
@@ -54,23 +55,20 @@ with
 \Phi\left(-\frac{1}{2}\right) = \begin{pmatrix}
 0 \\
 1
-\end{pmatrix} \\
-c(l\frac{1}{2};\mu-s, s) = \frac{(-1)^{l+\mu-1/2}}{(2j+1)^{1/2}}\begin{pmatrix}
-l & 1/2 & j \\
-m & s & \mu
-\end{pmatrix}
+\end{pmatrix} 
 \end{align}
 
-with $Y_{lm}$ being the spherical harmonics, the $c(l\frac{1}{2};\mu-s, s)$ being related to the Clebsch-Gordan coefficients \cite{weinb2008}, and $m=\mu-s$. The coefficients can also be conveniently expressed as
+with $Y_{lm}$ being the spherical harmonics, $c(l,\frac{1}{2};\mu-s, s)$ the Clebsch-Gordan coefficients \cite{weinb2008}, and $m=\mu-s$. The coefficients can also be conveniently expressed as
 
 \begin{equation}
-c(l\frac{1}{2};\mu-s, s) = \begin{cases}
+c(l,\frac{1}{2};\mu-s, s) = \begin{cases}
 -\mathrm{sign}(k)\sqrt{\frac{k+\frac{1}{2}-\mu}{2k+1}} \qquad s = \frac{1}{2} \\
 \sqrt{\frac{k+\frac{1}{2}+\mu}{2k+1}} \qquad s = -\frac{1}{2}
 \end{cases}
 \end{equation}
 
-as seen in \cite{gross1999}.\newline
+
+as seen in \cite{gross1999, biedernharn1981}.\newline
 Since this equation is one dimensional we don't need to worry about Q and P being complex-valued, as they will be always real. In general, P will be the `large' component, and in the limit of $c \rightarrow \infty$ we would have that $P^2(r) = r^2\Psi^2(r)$ where $\Psi$ is just the normal radial component of the Schr\"{o}dinger equation solution. A higher Q corresponds to a more `relativistic' behaviour.
 
 \section{Energy corrections}
@@ -138,6 +136,24 @@ X_{>}(r, u | R) =\int_0^R x \left(e^{-2c|r-x|/u}-e^{-2c(r+x)/u}\right)  dx = \\
 \end{multline}
 
 which is the expression used for the Uehling potential in the implementation. The integration over $u$ can be carried out numerically.
+
+\section{Dipole matrix elements}
+
+To compute the transition probabilities between two states in presence of an electromagnetic field we need to compute the dipole matrix element between them. For spontaneous emission between two states $a$ and $b$, in atomic units, we have \cite{payne1955}
+
+\begin{equation}
+W_{ab} = \frac{4}{3}\frac{E_{ab}}{c}|\braket{a||\vec{\alpha}|j_0(kr)|b}|^2
+\end{equation}
+
+with $E_{ab}$ transition energy, the wave vector has magnitude $k=E_{ab}/c$, and $\vec{\alpha}$ is the vector of Dirac matrices.
+If we consider the wavefunction written as seen in \ref{dirac_wavef}, 
+then it follows that each individual matrix element can be written as
+
+\begin{align}
+\braket{a|\alpha_ij_0(kr)|b} = & i\braket{k_b\mu_b|\alpha_i|-k_a\mu_a}\int_{0}^{\infty}j_0(kr)P_bQ_a dr + \\
+& i\braket{-k_b\mu_b|\alpha_i|k_a\mu_a}\int_{0}^{\infty}j_0(kr)P_aQ_b dr
+\end{align}
+
 
 \chapter{Numerical implementation}
 
