@@ -1,7 +1,11 @@
 \documentclass[]{report}
 
 \usepackage{amsmath}
-\usepackage{braket}
+
+\newcommand{\bra}[1]{\left<#1\right|}
+\newcommand{\ket}[1]{\left|#1\right>}
+\newcommand{\bket}[2]{\left<#1|#2\right>}
+\newcommand{\braket}[3]{\bra{#1}#2\ket{#3}}
 
 % Title Page
 \title{\texttt{mudirac} - a Dirac equation solver for muonic atoms
@@ -32,20 +36,20 @@ as found for example in \cite{weinb2008, silbar2010, gross1999} and others. In t
 
 \begin{align}\label{dirac_wavef}
 \left<\mathbf{r}|\psi_{k\mu}\right> = \begin{pmatrix}
-\frac{P_k}{r}\left<\mathbf{\hat{r}}|k\mu\right> \\
-i\frac{Q_k}{r}\left<\mathbf{\hat{r}}|-k\mu\right>
+\frac{P_k}{r}\bket{\mathbf{\hat{r}}}{k\mu} \\
+i\frac{Q_k}{r}\bket{\mathbf{\hat{r}}}{-k\mu}
 \end{pmatrix}
 \end{align}
 
 where it must be kept in mind that the quantum number $k$ depends on the total angular momentum of the electron, namely, whether its angular and spin momenta are aligned or not. It is $k=-(l+1)$ when $j = l+1/2$ and $k=l$ when $j=l-1/2$, and the spin spherical harmonics are:
 
-\begin{equation}
-\left|k\mu\right> = \sum_{s=\pm 1/2} c(l,\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
+\begin{equation}\label{dirac_kmu}
+\ket{k\mu} = \sum_{s=\pm 1/2} c(l,\frac{1}{2};\mu-s, s)\left|l,\mu-s\right>\Phi(s)
 \end{equation}
 
 with
 
-\begin{align}
+\begin{align}\label{dirac_spharm}
 \left<\mathbf{\hat{r}}|l,\mu-s\right> = Y_{l,\mu-s}(\mathbf{\hat{r}}) \\
 \Phi\left(\frac{1}{2}\right) = \begin{pmatrix}
 1 \\
@@ -60,9 +64,9 @@ with
 
 with $Y_{lm}$ being the spherical harmonics, $c(l,\frac{1}{2};\mu-s, s)$ the Clebsch-Gordan coefficients \cite{weinb2008}, and $m=\mu-s$. The coefficients can also be conveniently expressed as
 
-\begin{equation}
+\begin{equation}\label{dirac_cgsym}
 c(l,\frac{1}{2};\mu-s, s) = \begin{cases}
--\mathrm{sign}(k)\sqrt{\frac{k+\frac{1}{2}-\mu}{2k+1}} \qquad s = \frac{1}{2} \\
+-\mathrm{sgn}(k)\sqrt{\frac{k+\frac{1}{2}-\mu}{2k+1}} \qquad s = \frac{1}{2} \\
 \sqrt{\frac{k+\frac{1}{2}+\mu}{2k+1}} \qquad s = -\frac{1}{2}
 \end{cases}
 \end{equation}
@@ -141,19 +145,91 @@ which is the expression used for the Uehling potential in the implementation. Th
 
 To compute the transition probabilities between two states in presence of an electromagnetic field we need to compute the dipole matrix element between them. For spontaneous emission between two states $a$ and $b$, in atomic units, we have \cite{payne1955}
 
-\begin{equation}
-W_{ab} = \frac{4}{3}\frac{E_{ab}}{c}|\braket{a||\vec{\alpha}|j_0(kr)|b}|^2
+\begin{equation}\label{trans_prob}
+W_{ab} = \frac{4}{3}\frac{E_{ab}}{c}|\braket{a}{|\vec{\alpha}|j_0(kr)}{b}|^2
 \end{equation}
 
-with $E_{ab}$ transition energy, the wave vector has magnitude $k=E_{ab}/c$, and $\vec{\alpha}$ is the vector of Dirac matrices.
+with $E_{ab}$ transition energy, the wave vector has magnitude $k=E_{ab}/c$, and $\vec{\alpha}$ is the vector of Dirac matrices $\alpha_x, \alpha_y, \alpha_z$.
 If we consider the wavefunction written as seen in \ref{dirac_wavef}, 
 then it follows that each individual matrix element can be written as
 
-\begin{align}
-\braket{a|\alpha_ij_0(kr)|b} = & i\braket{k_b\mu_b|\alpha_i|-k_a\mu_a}\int_{0}^{\infty}j_0(kr)P_bQ_a dr + \\
-& i\braket{-k_b\mu_b|\alpha_i|k_a\mu_a}\int_{0}^{\infty}j_0(kr)P_aQ_b dr
+\begin{align}\label{matel_alphaj0}
+\braket{a}{\alpha_ij_0(kr)}{b} = & i\braket{k_a\mu_a}{\sigma_i}{-k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_aQ_b dr + \\
+& i\braket{-k_a\mu_a}{\sigma_i}{k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_bQ_a dr
 \end{align}
 
+with the $\sigma_i$ being the Pauli matrices, keeping in mind that
+
+\begin{equation}
+\alpha_i = \begin{bmatrix}
+0 & \sigma_i \\
+-\sigma_i & 0
+\end{bmatrix}
+\end{equation}
+
+. Now, keeping in mind Eq. \ref{dirac_kmu} and \ref{dirac_spharm}, and shortening the Clebsch-Gordan symbols seen in Eq. \ref{dirac_cgsym} as $c_{k\mu}^s = c(l,\frac{1}{2};\mu-s, s)$, we have
+
+\begin{equation}
+\ket{k\mu} = \begin{bmatrix}
+c_{k\mu}^{1/2} Y_{l,\mu-1/2} \\
+c_{k\mu}^{-1/2} Y_{l,\mu+1/2} \\
+\end{bmatrix}
+\end{equation}
+
+and therefore,
+
+\begin{equation}\label{matel_sz}
+\braket{k'\mu'}{\sigma_z}{k\mu} = \left(c_{k'\mu'}^{1/2}c_{k\mu}^{1/2}-c_{k'\mu'}^{-1/2}c_{k\mu}^{-1/2}\right)\delta_{ll'}\delta_{\mu\mu'}
+\end{equation}
+
+\begin{equation}\label{matel_sp}
+\braket{k'\mu'}{\sigma_+}{k\mu} = c_{k'\mu'}^{1/2} c_{k\mu}^{-1/2}\delta_{ll'}\delta_{\mu+1\mu'}
+\end{equation}
+
+\begin{equation}\label{matel_sm}
+\braket{k'\mu'}{\sigma_-}{k\mu} = c_{k'\mu'}^{-1/2} c_{k\mu}^{1/2}\delta_{ll'}\delta_{\mu\mu'+1}
+\end{equation}
+
+. If we also set for brevity
+
+\begin{equation}\label{pq_ints}
+J_{ab} = \int_{0}^{\infty}j_0(kr)P_aQ_b dr
+\end{equation}
+
+, and we consider that if to a certain $k$ corresponds an $l$, then to $-k$ corresponds $l-\mathrm{sgn}(k)$, then Eq. \ref{matel_alphaj0} reduces to
+
+\begin{align}\label{matel_alphaxj0}
+\braket{a}{\alpha_xj_0(kr)}{b} = & i\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
++ c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+&\left. 
+\left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
++ c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
+\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba} 
+\right] \nonumber
+\end{align}
+
+\begin{align}\label{matel_alphayj0}
+\braket{a}{\alpha_yj_0(kr)}{b} = & -\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
+- c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+&\left. 
+\left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
+- c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
+\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba} 
+\right] \nonumber
+\end{align}
+
+\begin{align}\label{matel_alphazj0}
+\braket{a}{\alpha_zj_0(kr)}{b} = & 2i\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{1/2}
+\delta_{\mu_a\mu_b}\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+&\left. 
+c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{1/2}
+\delta_{\mu_a\mu_b}\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba}
+\right) \nonumber
+\end{align}
+
+. From these it becomes then easy to compute the transition probability as seen in Eq. \ref{trans_prob}. The transition rules are easily seen: only transitions with $\Delta l = \pm 1$ and $\Delta \mu = 0, \pm1$ are allowed. The integrals $J_{ab}$ can be computed numerically.
 
 \chapter{Numerical implementation}
 
