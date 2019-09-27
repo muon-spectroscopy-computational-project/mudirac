@@ -48,6 +48,8 @@ void qnumDirac2Schro(int k, int &l, bool &s);
 void qnumNodes2Principal(int nodes, int l, int &n);
 void qnumPrincipal2Nodes(int n, int l, int &nodes);
 
+double cgCoeff(int k, double m, bool s);
+
 void parseIupacState(string istate, int &n, int &l, bool &s);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);

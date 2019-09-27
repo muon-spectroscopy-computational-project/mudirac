@@ -149,3 +149,28 @@ TEST_CASE("Analysing IUPAC state labels", "[parseIupacState]")
     REQUIRE_THROWS(parseIupacState("L4", n, l, s));
     REQUIRE_THROWS(parseIupacState("M", n, l, s));
 }
+
+TEST_CASE("Quantum numbers and Clebsch-Gordan coefficients", "[quantumNumbersAndCG]")
+{
+    int n, l, m, k;
+    bool s;
+
+    k = -1;
+    qnumDirac2Schro(k, l, s);
+    REQUIRE(((l == 0) && s));
+
+    k = 2;
+    qnumDirac2Schro(k, l, s);
+    REQUIRE(((l == 2) && !s));
+
+    l = 1;
+    s = true;
+    qnumSchro2Dirac(l, s, k);
+    REQUIRE(k == -2);
+
+    // Clebsch-Gordan coefficients
+    REQUIRE(cgCoeff(-1, 0.5, true) == Approx(1));
+    REQUIRE(cgCoeff(-1, -0.5, true) == Approx(0));
+    REQUIRE(cgCoeff(-3, 2.5, true) == Approx(1));
+    REQUIRE(cgCoeff(-3, 1.5, false) == Approx(sqrt(0.2)));
+}

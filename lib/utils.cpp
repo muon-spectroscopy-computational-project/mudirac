@@ -226,7 +226,7 @@ int countNodes(vector<double> v, double tol)
         }
     }
 
-    LOG(TRACE) << "Counting nodes with tolerance " << tol << ", max = " << max << ", thr = " << max*tol << "\n";
+    LOG(TRACE) << "Counting nodes with tolerance " << tol << ", max = " << max << ", thr = " << max * tol << "\n";
 
     for (i0 = 0; i0 < v.size(); ++i0)
     {
@@ -280,7 +280,7 @@ void qnumSchro2Dirac(int l, bool s, int &k)
  * the radial Dirac equation to its equivalent l
  * and s in the Schroedinger one.
  * 
- * @param  k:      Dirac quantum number
+ * @param  k:        Dirac quantum number
  * @param  &l:       Orbital quantum number
  * @param  &s:       Spin quantum number
  * @retval None
@@ -319,6 +319,33 @@ void qnumNodes2Principal(int nodes, int l, int &n)
 void qnumPrincipal2Nodes(int n, int l, int &nodes)
 {
     nodes = n - l - 1;
+}
+
+/**
+ * @brief  Clebsch-Gordan coefficients for spin 1/2 particle
+ * @note   Clebsch-Gordan coefficients for a spin 1/2 particle,
+ * as a function of k, m (magnetic quantum number for the total spin j)
+ * and spin orientation. Returns:
+ * 
+ * c(l, 1/2; m-s, s)
+ * 
+ * (see Development Guide for more details).
+ * 
+ * @param  k:       Dirac quantum number
+ * @param  m:       Magnetic quantum number
+ * @param  s:       Spin
+ * @retval Clebsch-Gordan coefficient
+ */
+double cgCoeff(int k, double m, bool s)
+{
+    if (s)
+    {
+        return -k / abs(k) * sqrt((k - m + 0.5) / (2.0 * k + 1.0));
+    }
+    else
+    {
+        return sqrt((k + m + 0.5) / (2 * k + 1.0));
+    }
 }
 
 /**
