@@ -93,8 +93,18 @@ public:
   double norm() override;
 
   void continuify(TurningPoint tp);
-  void findNodes(double tol=1e-6);
+  void findNodes(double tol = 1e-6);
   void normalize();
+};
+
+class TransitionMatrix
+{
+public:
+  vector<double> m1;
+  vector<double> m2;
+  vector<vector<double>> T;
+
+  TransitionMatrix(int k1, int k2);
 };
 
 class Atom
@@ -113,9 +123,9 @@ public:
 
 protected:
   // Fundamental properties
-  int Z, A;     // Nuclear charge and mass number
+  int Z, A;        // Nuclear charge and mass number
   double m, M, mu; // Mass of the orbiting particle (e.g. muon, electron), of the nucleus, and effective mass of the system
-  double R;     // Nuclear radius
+  double R;        // Nuclear radius
   // Grid
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
@@ -135,7 +145,7 @@ public:
   double getm() { return m; };
   double getmu() { return mu; };
   double getR() { return R; };
-  double getV(double r) { return V.V(r); };
+  double getV(double r) { return V.V(r) + (use_uehling ? V_uehling.V(r) : 0.0); };
   vector<double> getV(vector<double> r);
   double getrc() { return rc; };
   double getdx() { return dx; };
@@ -144,7 +154,7 @@ public:
 
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
-  void setUehling(bool s, int usteps = 1000, double cut_low=0, double cut_high=INFINITY);
+  void setUehling(bool s, int usteps = 1000, double cut_low = 0, double cut_high = INFINITY);
 
   // Clear computed states
   virtual void reset(){};
@@ -182,6 +192,7 @@ public:
   void convergeE(DiracState &state, TurningPoint &tp, double &minE, double &maxE);
   DiracState convergeState(int n = 1, int k = -1);
   DiracState getState(int n, int l, bool s);
+  TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2);
 };
 
 #endif

@@ -242,6 +242,39 @@ bool DiracState::gets()
 }
 
 /**
+ * @brief  Initialise a TransitionMatrix class instance
+ * @note   Initialise a TransitionMatrix class instance. 
+ * Uses the given quantum numbers to compute the number of
+ * m states to allocate.
+ * 
+ * @param  k1: Dirac quantum number for state 1
+ * @param  k2: Dirac quantum number for state 2
+ * @retval 
+ */
+TransitionMatrix::TransitionMatrix(int k1, int k2)
+{
+    // Remember:
+    // j = abs(k)-1/2
+    // 2j+1 = 2*abs(k)
+
+    int mn1 = 2 * abs(k1); // Number of m states for j
+    int mn2 = 2 * abs(k2);
+
+    m1 = vector<double>(mn1);
+    m2 = vector<double>(mn2);
+    T = vector<vector<double>>(mn1, vector<double>(mn2, 0));
+
+    for (int i = 0; i < mn1; ++i)
+    {
+        m1[i] = -(mn1 - 1.0) / 2.0 + i;
+    }
+    for (int i = 0; i < mn2; ++i)
+    {
+        m2[i] = -(mn2 - 1.0) / 2.0 + i;
+    }
+}
+
+/**
  * @brief  Initialise an Atom class instance
  * @note   Creates an Atom object defined by the given properties
  * 
@@ -309,7 +342,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
     }
 
     // Grid
-    rc = fc*max(1 / (Z * mu), R);
+    rc = fc * max(1 / (Z * mu), R);
     this->dx = dx;
 
     // Potential
@@ -402,10 +435,12 @@ vector<double> Atom::getV(vector<double> r)
  */
 double Atom::sphereNuclearModel(int Z, int A)
 {
-    try {
-        return Physical::fm*getIsotopeRadius(Z, A);
+    try
+    {
+        return Physical::fm * getIsotopeRadius(Z, A);
     }
-    catch (invalid_argument e) {
+    catch (invalid_argument e)
+    {
         LOG(TRACE) << "Isotope not found; falling back on default model for nuclear radius";
         return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
     }
@@ -965,4 +1000,27 @@ DiracState DiracAtom::getState(int n, int l, bool s)
     }
 
     return DiracState(st);
+}
+
+/**
+ * @brief  Return a matrix of transition probabilities between two states
+ * @note   Return a matrix containing all spontaneous transition probabilities 
+ * between two states of given quantum numbers n, l and s; the matrix corresponds
+ * to all possible transition between m states. The transition is expected to be 
+ * from 1 to 2: in other words, if the energy of 2 is higher than that of 1, 
+ * all probabilities will be returned as zero.
+ * 
+ * @param  n1: Principal quantum number of state 1
+ * @param  l1: Orbital quantum number of state 1
+ * @param  s1: Spin quantum number (true = 1/2 / false = -1/2) of state 1
+ * @param  n2: Principal quantum number of state 2
+ * @param  l2: Orbital quantum number of state 1
+ * @param  s2: Spin quantum number (true = 1/2 / false = -1/2) of state 2
+ * @retval Transition matrix
+ */
+TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2)
+{
+    TransitionMatrix tmat(-1, -1);
+
+    return tmat;
 }
