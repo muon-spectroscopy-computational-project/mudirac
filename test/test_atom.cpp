@@ -14,6 +14,17 @@
 
 using namespace std;
 
+TEST_CASE("Transition Matrix", "[TransitionMatrix]")
+{
+    TransitionMatrix tmat(-1, 2);
+
+    REQUIRE(tmat.m1.size() == 2);
+    REQUIRE(tmat.m2.size() == 4);
+    REQUIRE(tmat.T.size() == tmat.m1.size());
+    REQUIRE(tmat.T[0].size() == tmat.m2.size());
+    REQUIRE(tmat.T[0][0] == 0);
+}
+
 TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
 {
     double Z = 1;
@@ -62,7 +73,7 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
     TurningPoint tp;
 
     pair<double, double> limE = da.energyLimits();
-    REQUIRE(limE.first == Approx(-da.getRestE()));
+    REQUIRE(limE.first == Approx(2 * Es1 - da.getRestE()));
     REQUIRE(limE.second == Approx(da.getRestE()));
 
     // Test finding the nodes interval
