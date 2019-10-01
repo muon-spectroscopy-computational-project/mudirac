@@ -105,6 +105,8 @@ public:
   vector<vector<double>> T;
 
   TransitionMatrix(int k1, int k2);
+
+  double totalRate();
 };
 
 class Atom

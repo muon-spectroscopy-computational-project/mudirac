@@ -275,6 +275,30 @@ TransitionMatrix::TransitionMatrix(int k1, int k2)
 }
 
 /**
+ * @brief  Total transition rate between two shells
+ * @note   Total transition rate between two shells, 
+ * assuming the particle is in the first one and the
+ * second is empty. In this case the rate is summed 
+ * over the destination states, and averaged over
+ * the origin states.
+ * 
+ * @retval The total transition rate
+ */
+double TransitionMatrix::totalRate()
+{
+    double tot = 0;
+
+    for (int i = 0; i < m1.size(); ++i) {
+        for (int j = 0; j < m2.size(); ++j) {
+            tot += T[i][j];
+        }
+    }
+
+    tot /= m1.size();
+    return tot;
+}
+
+/**
  * @brief  Initialise an Atom class instance
  * @note   Creates an Atom object defined by the given properties
  * 
@@ -1085,7 +1109,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
                           (u3 * v2 * (m1 == m2 + 1) - u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
             double MSz = 2 * (u1 * v3 * (l1 == l2 - sgk2) * J12 + u3 * v1 * (l1 - sgk1 == l2) * J21) * (m1 == m2);
 
-            tmat.T[im1][im2] = 4.0/3.0*K*(pow(MSx, 2)+pow(MSy, 2)+pow(MSz, 2));
+            tmat.T[im1][im2] = 4.0 / 3.0 * K * (pow(MSx, 2) + pow(MSy, 2) + pow(MSz, 2));
         }
     }
 
