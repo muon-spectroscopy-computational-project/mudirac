@@ -1040,9 +1040,10 @@ DiracState DiracAtom::getState(int n, int l, bool s)
  * @param  n2: Principal quantum number of state 2
  * @param  l2: Orbital quantum number of state 1
  * @param  s2: Spin quantum number (true = 1/2 / false = -1/2) of state 2
+ * @param  approx_j0: If true, approximate the Bessel function j0(K*r) as 1 
  * @retval Transition matrix
  */
-TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2)
+TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2, bool approx_j0)
 {
     int k1, k2;
 
@@ -1075,7 +1076,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
 
     for (int i = 0; i < intgrid.size(); ++i)
     {
-        double j0 = sinc(K * intgrid[i]);
+        double j0 = (approx_j0? 1.0 : sinc(K * intgrid[i]));
         kerP1Q2[i] = psi1.P[i + delta1] * psi2.Q[i + delta2] * j0 * intgrid[i];
         kerP2Q1[i] = psi1.Q[i + delta1] * psi2.P[i + delta2] * j0 * intgrid[i];
     }
@@ -1112,6 +1113,17 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
             tmat.T[im1][im2] = 4.0 / 3.0 * K * (pow(MSx, 2) + pow(MSy, 2) + pow(MSz, 2));
         }
     }
+
+    /*
+    CURRENT OBSERVED PROBLEMS:
+
+    Based on comparison of results with Table III in Wilbur Payne's thesis
+
+    * j = l+1/2 and j = l-1/2 states seem swapped
+    * j = l+1/2 state (which now is returned by s = false instead of true) gives a rate approximately twice the correct one
+     
+     
+    */
 
     return tmat;
 }

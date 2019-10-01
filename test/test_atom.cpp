@@ -103,7 +103,7 @@ TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
 
     DiracAtom da = DiracAtom(Z, m);
 
-    TransitionMatrix tmat = da.getTransitionProbabilities(2, 1, false, 1, 0, true);
+    TransitionMatrix tmat = da.getTransitionProbabilities(3, 1, false, 1, 0, true, true);
 
     // cout << '\t';
     // for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {

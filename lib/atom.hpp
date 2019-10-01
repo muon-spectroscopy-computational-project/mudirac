@@ -194,7 +194,7 @@ public:
   void convergeE(DiracState &state, TurningPoint &tp, double &minE, double &maxE);
   DiracState convergeState(int n = 1, int k = -1);
   DiracState getState(int n, int l, bool s);
-  TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2);
+  TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2, bool approx_j0=false);
 };
 
 #endif
