@@ -95,3 +95,26 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
     ds = da.convergeState(2, -1);
     REQUIRE(ds.E == Approx(Es2));
 }
+
+TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
+{
+    double Z = 1;
+    double m = 1;
+
+    DiracAtom da = DiracAtom(Z, m);
+
+    TransitionMatrix tmat = da.getTransitionProbabilities(2, 1, true, 1, 0, true);
+
+    cout << '\t';
+    for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
+        cout << tmat.m2[m2] << '\t'<< '\t';
+    }
+    cout << '\n';
+    for (int m1 = 0; m1 < tmat.m1.size(); ++m1) {
+        cout << tmat.m1[m1] << '\t';
+        for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
+            cout << tmat.T[m1][m2]*Physical::s << '\t';
+        }
+        cout << '\n';
+    }    
+}

@@ -1020,7 +1020,74 @@ DiracState DiracAtom::getState(int n, int l, bool s)
  */
 TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2)
 {
-    TransitionMatrix tmat(-1, -1);
+    int k1, k2;
+
+    qnumSchro2Dirac(l1, s1, k1);
+    qnumSchro2Dirac(l2, s2, k2);
+
+    TransitionMatrix tmat(k1, k2);
+
+    // Get the relevant states
+    DiracState psi1 = getState(n1, l1, s1);
+    DiracState psi2 = getState(n2, l2, s2);
+
+    float DE = psi1.E - psi2.E;
+    float K = DE / Physical::c;
+
+    if (DE < 0 || abs(l2 - l1) != 1)
+    {
+        // Invalid: state 2 has a higher energy, or transition forbidden
+        return tmat;
+    }
+
+    // Now the integrals
+    int i0 = max(psi1.grid_indices.first, psi2.grid_indices.first);
+    int i1 = min(psi1.grid_indices.second, psi2.grid_indices.second);
+    int delta1 = max(i0 - psi1.grid_indices.first, 0);
+    int delta2 = max(i0 - psi2.grid_indices.first, 0);
+
+    vector<double> intgrid = logGrid(rc, dx, i0, i1)[1];
+    vector<double> kerP1Q2(i1 - i0 + 1), kerP2Q1(i1 - i0 + 1);
+
+    for (int i = 0; i < intgrid.size(); ++i)
+    {
+        double j0 = sinc(K * intgrid[i]);
+        kerP1Q2[i] = psi1.P[i + delta1] * psi2.Q[i + delta2] * j0 * intgrid[i];
+        kerP2Q1[i] = psi1.Q[i + delta1] * psi2.P[i + delta2] * j0 * intgrid[i];
+    }
+
+    double J12 = trapzInt(dx, kerP1Q2);
+    double J21 = trapzInt(dx, kerP2Q1);
+
+    int sgk1 = (k1 < 0 ? -1 : 1);
+    int sgk2 = (k2 < 0 ? -1 : 1);
+
+    // Now on to the full matrix elements
+    for (int im1 = 0; im1 < tmat.m1.size(); ++im1)
+    {
+        for (int im2 = 0; im2 < tmat.m2.size(); ++im2)
+        {
+            double m1 = tmat.m1[im1];
+            double m2 = tmat.m2[im2];
+
+            double u1 = cgCoeff(k1, m1, true);
+            double u2 = cgCoeff(k1, m1, false);
+            double u3 = cgCoeff(-k1, m1, true);
+            double u4 = cgCoeff(-k1, m1, false);
+            double v1 = cgCoeff(k2, m2, true);
+            double v2 = cgCoeff(k2, m2, false);
+            double v3 = cgCoeff(-k2, m2, true);
+            double v4 = cgCoeff(-k2, m2, false);
+
+            double MSx = ((u1 * v4 * (m1 == m2 + 1) + u2 * v3 * (m1 + 1 == m2)) * (l1 == l2 - sgk2) * J12 +
+                          (u3 * v2 * (m1 == m2 + 1) + u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
+            double MSy = ((u1 * v4 * (m1 == m2 + 1) - u2 * v3 * (m1 + 1 == m2)) * (l1 == l2 - sgk2) * J12 +
+                          (u3 * v2 * (m1 == m2 + 1) - u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
+            double MSz = 2 * (u1 * v3 * (l1 == l2 - sgk2) * J12 + u3 * v1 * (l1 - sgk1 == l2) * J21) * (m1 == m2);
+
+            tmat.T[im1][im2] = 4.0/3.0*K*(pow(MSx, 2)+pow(MSy, 2)+pow(MSz, 2));
+        }
+    }
 
     return tmat;
 }

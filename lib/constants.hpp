@@ -26,6 +26,7 @@ const double m_p = 1.0 / 5.44617021352e-4; // Proton mass
 
 // Units
 const double m = 1.0 / 5.2917721067e-11;  // Metre
+const double s = 1.0/2.4188843265857e-17; // Second
 const double ang = 1.0 / 5.2917721067e-1; // Angstrom
 const double fm = 1.0 / 5.2917721067e4;   // Femtometre
 const double eV = 1.0 / 27.211385;        // Electron volt
