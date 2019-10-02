@@ -221,12 +221,13 @@ J_{ab} = \int_{0}^{\infty}j_0(kr)P_aQ_b dr
 \end{align}
 
 \begin{align}\label{matel_alphazj0}
-\braket{a}{\alpha_zj_0(kr)}{b} = & 2i\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{1/2}
-\delta_{\mu_a\mu_b}\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+\braket{a}{\alpha_zj_0(kr)}{b} = & i\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{1/2}-
+ c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{-1/2}\right)
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
 &\left. 
-c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{1/2}
-\delta_{\mu_a\mu_b}\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba}
-\right) \nonumber
+\left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{1/2}-
+c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{-1/2}\right)\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba} 
+\right]\delta_{\mu_a\mu_b} \nonumber
 \end{align}
 
 . From these it becomes then easy to compute the transition probability as seen in Eq. \ref{trans_prob}. The transition rules are easily seen: only transitions with $\Delta l = \pm 1$ and $\Delta \mu = 0, \pm1$ are allowed. The integrals $J_{ab}$ can be computed numerically.

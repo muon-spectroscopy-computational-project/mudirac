@@ -41,7 +41,7 @@ TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
 
 TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
 {
-    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::fatal, AixLog::Type::normal);
+    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::trace, AixLog::Type::normal);
 
     double Z = 92;
     double m = 1;
@@ -106,6 +106,7 @@ void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
     TransitionMatrix tmat = da.getTransitionProbabilities(ds1.getn(), ds1.getl(), ds1.gets(),
                                                           ds2.getn(), ds2.getl(), ds2.gets());
 
+    cout << "\n\n";
     cout << '\t';
     for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
         cout << tmat.m2[m2] << '\t'<< '\t';
@@ -126,12 +127,12 @@ void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
 
 TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
 {
-    double Z = 26;
+    double Z = 1;
     double m = 1;
-    double A = 56;
+    double A = 1;
 
-    DiracAtom da = DiracAtom(Z, m, A, NuclearRadiusModel::SPHERE);
+    DiracAtom da = DiracIdealAtom(Z, m, A, NuclearRadiusModel::SPHERE);
 
-    transTest(da, 2, 1, true, 1, 0, false);
-    transTest(da, 3, 1, true, 1, 0, false);
+    transTest(da, 2, 1, true, 1, 0, true);
+    transTest(da, 2, 1, false, 1, 0, true);
 }

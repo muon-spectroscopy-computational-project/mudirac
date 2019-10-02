@@ -288,8 +288,10 @@ double TransitionMatrix::totalRate()
 {
     double tot = 0;
 
-    for (int i = 0; i < m1.size(); ++i) {
-        for (int j = 0; j < m2.size(); ++j) {
+    for (int i = 0; i < m1.size(); ++i)
+    {
+        for (int j = 0; j < m2.size(); ++j)
+        {
             tot += T[i][j];
         }
     }
@@ -864,6 +866,15 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     return;
 }
 
+/**
+ * @brief  Converge a state of given n and k
+ * @note   Converge a state of given n and k, searching for the 
+ * correct energy through an iterative process.
+ * 
+ * @param  n:   Principal quantum number
+ * @param  k:   Dirac quantum number
+ * @retval      Converged state
+ */
 DiracState DiracAtom::convergeState(int n, int k)
 {
     int l;
@@ -1076,7 +1087,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
 
     for (int i = 0; i < intgrid.size(); ++i)
     {
-        double j0 = (approx_j0? 1.0 : sinc(K * intgrid[i]));
+        double j0 = (approx_j0 ? 1.0 : sinc(K * intgrid[i]));
         kerP1Q2[i] = psi1.P[i + delta1] * psi2.Q[i + delta2] * j0 * intgrid[i];
         kerP2Q1[i] = psi1.Q[i + delta1] * psi2.P[i + delta2] * j0 * intgrid[i];
     }
@@ -1087,6 +1098,8 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
     int sgk1 = (k1 < 0 ? -1 : 1);
     int sgk2 = (k2 < 0 ? -1 : 1);
 
+    LOG(TRACE) << "Radial dipole integrals: J12 = " << J12 << "\t J21 = " << J21 << '\n';
+
     // Now on to the full matrix elements
     for (int im1 = 0; im1 < tmat.m1.size(); ++im1)
     {
@@ -1094,6 +1107,12 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
         {
             double m1 = tmat.m1[im1];
             double m2 = tmat.m2[im2];
+
+            if (abs(m1 - m2) > 1)
+            {
+                // Forbidden
+                continue;
+            }
 
             double u1 = cgCoeff(k1, m1, true);
             double u2 = cgCoeff(k1, m1, false);
@@ -1108,9 +1127,13 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
                           (u3 * v2 * (m1 == m2 + 1) + u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
             double MSy = ((u1 * v4 * (m1 == m2 + 1) - u2 * v3 * (m1 + 1 == m2)) * (l1 == l2 - sgk2) * J12 +
                           (u3 * v2 * (m1 == m2 + 1) - u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
-            double MSz = 2 * (u1 * v3 * (l1 == l2 - sgk2) * J12 + u3 * v1 * (l1 - sgk1 == l2) * J21) * (m1 == m2);
+            double MSz = ((u1 * v3 - u2 * v4) * (l1 == l2 - sgk2) * J12 + (u3 * v1 - u4 * v2) * (l1 - sgk1 == l2) * J21) * (m1 == m2);
+
+            LOG(TRACE) << "Perturbation matrix elements, m1 = " << m1 << ", m2 = " << m2 << ", [Mx My Mz] = [" << MSx << ' ' << MSy << ' ' << MSz << "]\n";
 
             tmat.T[im1][im2] = 4.0 / 3.0 * K * (pow(MSx, 2) + pow(MSy, 2) + pow(MSz, 2));
+
+            LOG(TRACE) << "Transition rate, W12 = " << tmat.T[im1][im2] * Physical::s << " s^-1\n";
         }
     }
 
@@ -1126,4 +1149,39 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
     */
 
     return tmat;
+}
+
+DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
+                               double fc, double dx) : DiracAtom(Z, m, A, radius_model, fc, dx)
+{
+}
+
+/**
+ * @brief  Converge a state of given n and k
+ * @note   Converge a state of given n and k.
+ * Since this is a DiracIdealAtom, only returns
+ * the calculated state for an ideal, hydrogen-like
+ * atom.
+ * 
+ * @param  n:   Principal quantum number
+ * @param  k:   Dirac quantum number
+ * @retval      Converged state
+ */
+DiracState DiracIdealAtom::convergeState(int n, int k)
+{
+    DiracState state;
+
+    state.E = hydrogenicDiracEnergy(Z, mu, n, k);
+
+    state = initState(state.E, k);
+
+    vector<vector<double>> PQ = hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
+    state.P = PQ[0];
+    state.Q = PQ[1];
+
+    state.findNodes();
+    state.normalize();
+    state.converged = true;
+
+    return state;
 }
