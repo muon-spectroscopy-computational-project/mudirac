@@ -41,7 +41,7 @@ TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
 
 TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
 {
-    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::trace, AixLog::Type::normal);
+    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::fatal, AixLog::Type::normal);
 
     double Z = 92;
     double m = 1;
@@ -96,27 +96,42 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
     REQUIRE(ds.E == Approx(Es2));
 }
 
+void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
+{
+    DiracState ds1, ds2;
+
+    ds1 = da.getState(n1, l1, s1);
+    ds2 = da.getState(n2, l2, s2);
+
+    TransitionMatrix tmat = da.getTransitionProbabilities(ds1.getn(), ds1.getl(), ds1.gets(),
+                                                          ds2.getn(), ds2.getl(), ds2.gets());
+
+    cout << '\t';
+    for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
+        cout << tmat.m2[m2] << '\t'<< '\t';
+    }
+    cout << '\n';
+    for (int m1 = 0; m1 < tmat.m1.size(); ++m1) {
+        cout << tmat.m1[m1] << '\t';
+        for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
+            cout << tmat.T[m1][m2]*Physical::s << '\t';
+        }
+        cout << '\n';
+    }
+
+    cout << "\nj = " << ds1.getl() + 0.5*(ds1.gets()? 1: -1) << '\n';
+
+    cout << (ds1.E - ds2.E) / Physical::eV * 8065.543937 << " cm^-1\t" << tmat.totalRate() * Physical::s << " s^-1\n";
+}
+
 TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
 {
-    double Z = 29;
+    double Z = 26;
     double m = 1;
+    double A = 56;
 
-    DiracAtom da = DiracAtom(Z, m);
+    DiracAtom da = DiracAtom(Z, m, A, NuclearRadiusModel::SPHERE);
 
-    TransitionMatrix tmat = da.getTransitionProbabilities(3, 1, false, 1, 0, true, true);
-
-    // cout << '\t';
-    // for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
-    //     cout << tmat.m2[m2] << '\t'<< '\t';
-    // }
-    // cout << '\n';
-    // for (int m1 = 0; m1 < tmat.m1.size(); ++m1) {
-    //     cout << tmat.m1[m1] << '\t';
-    //     for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
-    //         cout << tmat.T[m1][m2]*Physical::s << '\t';
-    //     }
-    //     cout << '\n';
-    // }    
-
-    cout << tmat.totalRate()*Physical::s << '\n';
+    transTest(da, 2, 1, true, 1, 0, false);
+    transTest(da, 3, 1, true, 1, 0, false);
 }
