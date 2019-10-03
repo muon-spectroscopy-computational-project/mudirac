@@ -396,6 +396,7 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
     use_uehling = s;
     if (s)
     {
+        LOG(INFO) << "Initialising Uehling potential with " << usteps << " integration steps\n";
         V_uehling = UehlingSpherePotential(Z, R, usteps);
         V_uehling.set_exp_cutoffs(cut_low, cut_high);
     }
@@ -422,6 +423,27 @@ void Atom::setgrid(double rc, double dx)
     this->dx = dx;
 
     reset();
+}
+
+/**
+ * @brief  Recalculate the electrostatic potential
+ * @note   Recalculate the electrostatic potential for an atom
+ * at a specific point.
+ *
+ * @param r:        Point to compute the potential on
+ * @retval          Computed potential
+ */
+double Atom::getV(double r)
+{
+    double Vout;
+
+    Vout = V.V(r);
+    if (use_uehling)
+    {
+        Vout += V_uehling.V(r);
+    }
+
+    return Vout;
 }
 
 /**

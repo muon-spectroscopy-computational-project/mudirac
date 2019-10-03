@@ -147,7 +147,7 @@ public:
   double getm() { return m; };
   double getmu() { return mu; };
   double getR() { return R; };
-  double getV(double r) { return V.V(r) + (use_uehling ? V_uehling.V(r) : 0.0); };
+  double getV(double r);
   vector<double> getV(vector<double> r);
   double getrc() { return rc; };
   double getdx() { return dx; };

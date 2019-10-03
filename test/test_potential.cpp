@@ -39,7 +39,7 @@ TEST_CASE("Uehling correction to Coulomb potential", "[CoulombSpherePotential]")
     REQUIRE(cpot.ukernel_point(0.5, 0.5 / (2 * Physical::c)) == Approx(2 * exp(-1)));
 
     // Now the actual potential
-    // Point-like atom
+    // Point-like atom (U)
     cpot = UehlingSpherePotential(92, -1, 2000);
     REQUIRE(cpot.V(0.01) == Approx(-0.1795).epsilon(1e-3));
     REQUIRE(cpot.V(5e-5) == Approx(-10225.5698).epsilon(1e-3));
