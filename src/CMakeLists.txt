@@ -10,9 +10,6 @@ target_link_libraries(arbitrary_state mudiraclib)
 add_executable(size_effect size_effect.cpp)
 target_link_libraries(size_effect mudiraclib)
 
-add_executable(eigenenergies eigenenergies.cpp)
-target_link_libraries(eigenenergies mudiraclib)
-
 add_executable(hydrogenic_print hydrogenic_print.cpp)
 target_link_libraries(hydrogenic_print mudiraclib)
 
