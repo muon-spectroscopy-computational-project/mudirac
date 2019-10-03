@@ -1105,7 +1105,10 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
     int delta2 = max(i0 - psi2.grid_indices.first, 0);
 
     vector<double> intgrid = logGrid(rc, dx, i0, i1)[1];
-    vector<double> kerP1Q2(i1 - i0 + 1), kerP2Q1(i1 - i0 + 1);
+    vector<double> kerP1Q2(intgrid.size()), kerP2Q1(intgrid.size());
+
+    LOG(TRACE) << "Computing radial dipole integrals in index range " << i0 << ", " << i1 << "\n";
+    LOG(TRACE) << "Grid deltas " << delta1 << ", " << delta2 << "\n";
 
     for (int i = 0; i < intgrid.size(); ++i)
     {
@@ -1136,6 +1139,8 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
                 continue;
             }
 
+            LOG(TRACE) << "Transition m1 = " << m1 << " => m2 = " << m2 << "\n";
+
             double u1 = cgCoeff(k1, m1, true);
             double u2 = cgCoeff(k1, m1, false);
             double u3 = cgCoeff(-k1, m1, true);
@@ -1145,15 +1150,28 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
             double v3 = cgCoeff(-k2, m2, true);
             double v4 = cgCoeff(-k2, m2, false);
 
-            double MSx = ((u1 * v4 * (m1 == m2 + 1) + u2 * v3 * (m1 + 1 == m2)) * (l1 == l2 - sgk2) * J12 +
-                          (u3 * v2 * (m1 == m2 + 1) + u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
-            double MSy = ((u1 * v4 * (m1 == m2 + 1) - u2 * v3 * (m1 + 1 == m2)) * (l1 == l2 - sgk2) * J12 +
-                          (u3 * v2 * (m1 == m2 + 1) - u4 * v1 * (m1 + 1 == m2)) * (l1 - sgk1 == l2) * J21);
-            double MSz = ((u1 * v3 - u2 * v4) * (l1 == l2 - sgk2) * J12 + (u3 * v1 - u4 * v2) * (l1 - sgk1 == l2) * J21) * (m1 == m2);
+            LOG(TRACE) << "C-G coefficients, state 1: [" << u1 << ' ' << u2 << ' ' << u3 << ' ' << u4 << "]\n";
+            LOG(TRACE) << "C-G coefficients, state 2: [" << v1 << ' ' << v2 << ' ' << v3 << ' ' << v4 << "]\n";
 
-            LOG(TRACE) << "Perturbation matrix elements, m1 = " << m1 << ", m2 = " << m2 << ", [Mx My Mz] = [" << MSx << ' ' << MSy << ' ' << MSz << "]\n";
+            double M2 = 0;
+            if (m1 == m2 + 1)
+            {
+                M2 = 2 * pow(u1 * v4 * (l1 == l2 - sgk2) * J12 +
+                                 u3 * v2 * (l1 - sgk1 == l2) * J21,
+                             2.0);
+            }
+            else if (m1 + 1 == m2)
+            {
+                M2 = 2 * pow(u2 * v3 * (l1 == l2 - sgk2) * J12 +
+                                 u4 * v1 * (l1 - sgk1 == l2) * J21,
+                             2.0);
+            }
+            else
+            {
+                M2 = pow((u1 * v3 - u2 * v4) * (l1 == l2 - sgk2) * J12 + (u3 * v1 - u4 * v2) * (l1 - sgk1 == l2) * J21, 2.0);
+            }
 
-            tmat.T[im1][im2] = 4.0 / 3.0 * K * (pow(MSx, 2) + pow(MSy, 2) + pow(MSz, 2));
+            tmat.T[im1][im2] = 4.0 / 3.0 * K * M2;
 
             LOG(TRACE) << "Transition rate, W12 = " << tmat.T[im1][im2] * Physical::s << " s^-1\n";
         }

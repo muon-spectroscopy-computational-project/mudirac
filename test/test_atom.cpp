@@ -104,7 +104,7 @@ void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
     ds2 = da.getState(n2, l2, s2);
 
     TransitionMatrix tmat = da.getTransitionProbabilities(ds1.getn(), ds1.getl(), ds1.gets(),
-                                                          ds2.getn(), ds2.getl(), ds2.gets());
+                                                          ds2.getn(), ds2.getl(), ds2.gets(), true);
 
     cout << "\n\n";
     cout << '\t';
@@ -127,12 +127,12 @@ void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
 
 TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
 {
-    double Z = 1;
-    double m = 1;
-    double A = 1;
+    DiracIdealAtom daH = DiracIdealAtom(1, 1, 1, NuclearRadiusModel::SPHERE);
 
-    DiracAtom da = DiracIdealAtom(Z, m, A, NuclearRadiusModel::SPHERE);
+    transTest(daH, 2, 1, true, 1, 0, true);
+    transTest(daH, 2, 1, false, 1, 0, true);
 
-    transTest(da, 2, 1, true, 1, 0, true);
-    transTest(da, 2, 1, false, 1, 0, true);
+    transTest(daH, 6, 1, true, 2, 0, true);
+    transTest(daH, 6, 1, false, 2, 0, true);
+    // transTest(daH, 3, 0, false, 1, 0, true);
 }
