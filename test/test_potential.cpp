@@ -43,8 +43,8 @@ TEST_CASE("Uehling correction to Coulomb potential", "[CoulombSpherePotential]")
     cpot = UehlingSpherePotential(92, -1, 2000);
     REQUIRE(cpot.V(0.01) == Approx(-0.1795).epsilon(1e-3));
     REQUIRE(cpot.V(5e-5) == Approx(-10225.5698).epsilon(1e-3));
-    // Finite size atom
-    cpot = UehlingSpherePotential(92, Atom::sphereNuclearModel(238), 500);
+    // Finite size atom (U-238 with A^1/3 size model)
+    cpot = UehlingSpherePotential(92, 1.2*pow(238.0, 1.0/3.0)*Physical::fm, 500);
     REQUIRE(cpot.V(0.01) == Approx(-0.1796).epsilon(1e-3));
     REQUIRE(cpot.V(5e-5) == Approx(-4438.7471).epsilon(1e-3));
 
