@@ -69,37 +69,37 @@ TEST_CASE("Calculated energies and corrections", "[energyCorrections]")
         REQUIRE(E_corr[2] == Approx(177.55).epsilon(1e-3));
     }
 
-    // SECTION("14Si")
-    // {
-    //     // 3d3/2-2p1/2
-    //     vector<double> E_corr = energyCorrections(14, 2, 1, false, 3, 2, false);
+    SECTION("14Si")
+    {
+        // 3d3/2-2p1/2
+        vector<double> E_corr = energyCorrections(14, 2, 1, false, 3, 2, false);
 
-    //     REQUIRE(E_corr[0] == Approx(76670.7).epsilon(1e-3));
-    //     REQUIRE(E_corr[1] == Approx(-7.4).epsilon(1));
-    //     REQUIRE(E_corr[2] == Approx(276.8).epsilon(1e-3));
+        REQUIRE(E_corr[0] == Approx(76670.7).epsilon(1e-3));
+        REQUIRE(E_corr[1] == Approx(-7.4).epsilon(1));
+        REQUIRE(E_corr[2] == Approx(276.8).epsilon(1e-3));
 
-    //     // 3d5/2-2p3/2
-    //     E_corr = energyCorrections(14, 2, 1, true, 3, 2, true);
+        // 3d5/2-2p3/2
+        E_corr = energyCorrections(14, 2, 1, true, 3, 2, true);
 
-    //     REQUIRE(E_corr[0] == Approx(76345.5).epsilon(1e-3));
-    //     REQUIRE(E_corr[1] == Approx(-2.6).epsilon(1));
-    //     REQUIRE(E_corr[2] == Approx(273.2).epsilon(1e-3));
-    // }
+        REQUIRE(E_corr[0] == Approx(76345.5).epsilon(1e-3));
+        REQUIRE(E_corr[1] == Approx(-2.6).epsilon(1));
+        REQUIRE(E_corr[2] == Approx(273.2).epsilon(1e-3));
+    }
 
-    // SECTION("82Pb")
-    // {
-    //     // 5g7/2-4f5/2
-    //     vector<double> E_corr = energyCorrections(82, 4, 3, false, 5, 4, false);
+    SECTION("82Pb")
+    {
+        // 5g7/2-4f5/2
+        vector<double> E_corr = energyCorrections(82, 4, 3, false, 5, 4, false);
 
-    //     REQUIRE(E_corr[0] == Approx(435664.0).epsilon(1e-3));
-    //     REQUIRE(E_corr[1] == Approx(-10.0).epsilon(1));
-    //     REQUIRE(E_corr[2] == Approx(2189.0).epsilon(1e-3));
+        REQUIRE(E_corr[0] == Approx(435664.0).epsilon(1e-3));
+        REQUIRE(E_corr[1] == Approx(-10.0).epsilon(1));
+        REQUIRE(E_corr[2] == Approx(2189.0).epsilon(1e-3));
 
-    //     // 5g9/2-4f7/2
-    //     E_corr = energyCorrections(82, 4, 3, true, 5, 4, true);
+        // 5g9/2-4f7/2
+        E_corr = energyCorrections(82, 4, 3, true, 5, 4, true);
 
-    //     REQUIRE(E_corr[0] == Approx(429343.0).epsilon(1e-3));
-    //     REQUIRE(E_corr[1] == Approx(-4.0).epsilon(1));
-    //     REQUIRE(E_corr[2] == Approx(2105.0).epsilon(1e-3));
-    // }
+        REQUIRE(E_corr[0] == Approx(429343.0).epsilon(1e-3));
+        REQUIRE(E_corr[1] == Approx(-4.0).epsilon(1));
+        REQUIRE(E_corr[2] == Approx(2105.0).epsilon(1e-3));
+    }
 }
