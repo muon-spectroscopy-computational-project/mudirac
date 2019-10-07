@@ -154,8 +154,8 @@ If we consider the wavefunction written as seen in \ref{dirac_wavef},
 then it follows that each individual matrix element can be written as
 
 \begin{align}\label{matel_alphaj0}
-\braket{a}{\alpha_ij_0(kr)}{b} = & i\braket{k_a\mu_a}{\sigma_i}{-k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_aQ_b dr + \\
-& i\braket{-k_a\mu_a}{\sigma_i}{k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_bQ_a dr
+\braket{a}{\alpha_ij_0(kr)}{b} = & i\braket{k_a\mu_a}{\sigma_i}{-k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_aQ_b dr - \\
+& i\braket{-k_a\mu_a}{\sigma_i}{k_b\mu_b}\int_{0}^{\infty}j_0(kr)P_bQ_a dr \nonumber
 \end{align}
 
 with the $\sigma_i$ being the Pauli matrices, keeping in mind that
@@ -167,7 +167,7 @@ with the $\sigma_i$ being the Pauli matrices, keeping in mind that
 \end{bmatrix}
 \end{equation}
 
-. Now, keeping in mind Eq. \ref{dirac_kmu} and \ref{dirac_spharm}, and shortening the Clebsch-Gordan symbols seen in Eq. \ref{dirac_cgsym} as $c_{k\mu}^s = c(l,\frac{1}{2};\mu-s, s)$, we have
+. It should be recalled that in Eq. \ref{matel_alphaj0} the minus sign appears because the part in the bra is the adjoint, and not merely the complex conjugate, of the wavefunction. Now, keeping in mind Eq. \ref{dirac_kmu} and \ref{dirac_spharm}, and shortening the Clebsch-Gordan symbols seen in Eq. \ref{dirac_cgsym} as $c_{k\mu}^s = c(l,\frac{1}{2};\mu-s, s)$, we have
 
 \begin{equation}
 \ket{k\mu} = \begin{bmatrix}
@@ -201,7 +201,7 @@ J_{ab} = \int_{0}^{\infty}j_0(kr)P_aQ_b dr
 \begin{align}\label{matel_alphaxj0}
 \braket{a}{\alpha_xj_0(kr)}{b} = & i\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
 + c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
-\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  - \right. \\
 &\left. 
 \left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
 + c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
@@ -212,7 +212,7 @@ J_{ab} = \int_{0}^{\infty}j_0(kr)P_aQ_b dr
 \begin{align}\label{matel_alphayj0}
 \braket{a}{\alpha_yj_0(kr)}{b} = & -\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
 - c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
-\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  - \right. \\
 &\left. 
 \left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{-1/2}\delta_{\mu_a\mu_b+1}
 - c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{1/2}\delta_{\mu_a+1\mu_b}\right)
@@ -223,7 +223,7 @@ J_{ab} = \int_{0}^{\infty}j_0(kr)P_aQ_b dr
 \begin{align}\label{matel_alphazj0}
 \braket{a}{\alpha_zj_0(kr)}{b} = & i\left[\left(c_{k_a\mu_a}^{1/2} c_{-k_b\mu_b}^{1/2}-
  c_{k_a\mu_a}^{-1/2} c_{-k_b\mu_b}^{-1/2}\right)
-\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  + \right. \\
+\delta_{l_al_b-\mathrm{sgn}(k_b)} J_{ab}  - \right. \\
 &\left. 
 \left(c_{-k_a\mu_a}^{1/2} c_{k_b\mu_b}^{1/2}-
 c_{-k_a\mu_a}^{-1/2} c_{k_b\mu_b}^{-1/2}\right)\delta_{l_a-\mathrm{sgn}(k_a)l_b} J_{ba} 

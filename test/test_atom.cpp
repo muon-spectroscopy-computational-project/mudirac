@@ -132,7 +132,11 @@ TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
     transTest(daH, 2, 1, true, 1, 0, true);
     transTest(daH, 2, 1, false, 1, 0, true);
 
-    transTest(daH, 6, 1, true, 2, 0, true);
-    transTest(daH, 6, 1, false, 2, 0, true);
+    transTest(daH, 3, 2, false, 2, 1, true);
+    transTest(daH, 3, 2, true, 2, 1, true);
+    transTest(daH, 3, 2, false, 2, 1, false);
     // transTest(daH, 3, 0, false, 1, 0, true);
+
+    transTest(daH, 6, 3, false, 3, 2, true);
+
 }

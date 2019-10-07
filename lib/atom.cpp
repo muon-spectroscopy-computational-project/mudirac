@@ -1156,19 +1156,22 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
             double M2 = 0;
             if (m1 == m2 + 1)
             {
-                M2 = 2 * pow(u1 * v4 * (l1 == l2 - sgk2) * J12 +
-                                 u3 * v2 * (l1 - sgk1 == l2) * J21,
+                M2 = 2 * pow(u1 * v4 * (l1 == (l2 - sgk2)) * J12 -
+                                 u3 * v2 * ((l1 - sgk1) == l2) * J21,
                              2.0);
+                LOG(TRACE) << "Matrix element = |A+|\n";
             }
             else if (m1 + 1 == m2)
             {
-                M2 = 2 * pow(u2 * v3 * (l1 == l2 - sgk2) * J12 +
-                                 u4 * v1 * (l1 - sgk1 == l2) * J21,
+                M2 = 2 * pow(u2 * v3 * (l1 == (l2 - sgk2)) * J12 -
+                                 u4 * v1 * ((l1 - sgk1) == l2) * J21,
                              2.0);
+                LOG(TRACE) << "Matrix element = |A-|\n";
             }
             else
             {
-                M2 = pow((u1 * v3 - u2 * v4) * (l1 == l2 - sgk2) * J12 + (u3 * v1 - u4 * v2) * (l1 - sgk1 == l2) * J21, 2.0);
+                M2 = pow((u1 * v3 - u2 * v4) * (l1 == (l2 - sgk2)) * J12 - (u3 * v1 - u4 * v2) * ((l1 - sgk1) == l2) * J21, 2.0);
+                LOG(TRACE) << "Matrix element = |Az|\n";
             }
 
             tmat.T[im1][im2] = 4.0 / 3.0 * K * M2;
