@@ -96,47 +96,25 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
     REQUIRE(ds.E == Approx(Es2));
 }
 
-void transTest(DiracAtom da, int n1, int l1, bool s1, int n2, int l2, bool s2)
-{
-    DiracState ds1, ds2;
-
-    ds1 = da.getState(n1, l1, s1);
-    ds2 = da.getState(n2, l2, s2);
-
-    TransitionMatrix tmat = da.getTransitionProbabilities(ds1.getn(), ds1.getl(), ds1.gets(),
-                                                          ds2.getn(), ds2.getl(), ds2.gets(), true);
-
-    cout << "\n\n";
-    cout << '\t';
-    for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
-        cout << tmat.m2[m2] << '\t'<< '\t';
-    }
-    cout << '\n';
-    for (int m1 = 0; m1 < tmat.m1.size(); ++m1) {
-        cout << tmat.m1[m1] << '\t';
-        for (int m2 = 0; m2 < tmat.m2.size(); ++m2) {
-            cout << tmat.T[m1][m2]*Physical::s << '\t';
-        }
-        cout << '\n';
-    }
-
-    cout << "\nj = " << ds1.getl() + 0.5*(ds1.gets()? 1: -1) << '\n';
-
-    cout << (ds1.E - ds2.E) / Physical::eV * 8065.543937 << " cm^-1\t" << tmat.totalRate() * Physical::s << " s^-1\n";
-}
-
 TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
-{
+{   
+    // Tests are carried out with an ideal hydrogen atom
+    // Exact values are taken from NIST database
     DiracIdealAtom daH = DiracIdealAtom(1, 1, 1, NuclearRadiusModel::SPHERE);
+    TransitionMatrix tmat(-1,-1);
 
-    transTest(daH, 2, 1, true, 1, 0, true);
-    transTest(daH, 2, 1, false, 1, 0, true);
+    // 2p3/2 => 1s1/2
+    tmat = daH.getTransitionProbabilities(2, 1, true, 1, 0, true);
+    REQUIRE(tmat.totalRate()*Physical::s == Approx(6.2648e+08).epsilon(1e-4));
+    // 2p1/2 => 1s1/2
+    tmat = daH.getTransitionProbabilities(2, 1, false, 1, 0, true);
+    REQUIRE(tmat.totalRate()*Physical::s == Approx(6.2649e+08).epsilon(1e-4));
 
-    transTest(daH, 3, 2, false, 2, 1, true);
-    transTest(daH, 3, 2, true, 2, 1, true);
-    transTest(daH, 3, 2, false, 2, 1, false);
-    // transTest(daH, 3, 0, false, 1, 0, true);
+    // 3d5/2 => 2p3/2
+    tmat = daH.getTransitionProbabilities(3, 2, true, 2, 1, true);
+    REQUIRE(tmat.totalRate()*Physical::s == Approx(6.4651e+07).epsilon(1e-4));
 
-    transTest(daH, 6, 3, false, 3, 2, true);
-
+    // 3d3/2 => 2p3/2
+    tmat = daH.getTransitionProbabilities(3, 2, false, 2, 1, true);
+    REQUIRE(tmat.totalRate()*Physical::s == Approx(1.0775e+07).epsilon(1e-4));
 }
