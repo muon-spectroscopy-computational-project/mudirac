@@ -117,4 +117,11 @@ TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
     // 3d3/2 => 2p3/2
     tmat = daH.getTransitionProbabilities(3, 2, false, 2, 1, true);
     REQUIRE(tmat.totalRate()*Physical::s == Approx(1.0775e+07).epsilon(1e-4));
+
+    // Iron-like atom
+    DiracAtom daFe = DiracAtom(26, 1, 56, NuclearRadiusModel::SPHERE);
+
+    // 3d3/2 => 3p1/2
+    tmat = daFe.getTransitionProbabilities(3, 2, false, 3, 1, false);
+    REQUIRE(tmat.totalRate()*Physical::s == Approx(1.31e7).epsilon(3e-2)); // Precision is not strong here... possibly needs improvement
 }
