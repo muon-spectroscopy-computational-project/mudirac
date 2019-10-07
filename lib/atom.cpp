@@ -1180,17 +1180,6 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
         }
     }
 
-    /*
-    CURRENT OBSERVED PROBLEMS:
-
-    Based on comparison of results with Table III in Wilbur Payne's thesis
-
-    * j = l+1/2 and j = l-1/2 states seem swapped
-    * j = l+1/2 state (which now is returned by s = false instead of true) gives a rate approximately twice the correct one
-     
-     
-    */
-
     return tmat;
 }
 

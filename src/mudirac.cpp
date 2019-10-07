@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     // Now unravel the required spectral lines
     vector<string> xr_lines = config.getStringValues("xr_lines");
     vector<pair<DiracState, DiracState>> trans_states;
+    vector<TransitionMatrix> trans_matrices;
 
     for (int i = 0; i < xr_lines.size(); ++i)
     {
@@ -72,9 +73,13 @@ int main(int argc, char *argv[])
             return -1;
         }
 
+        // Compute transition probability
+        TransitionMatrix tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
+
         LOG(INFO) << "Transition energy = " << (ds2.E - ds1.E) / (Physical::eV * 1000) << " kEv\n";
 
         trans_states.push_back(make_pair(ds1, ds2));
+        trans_matrices.push_back(tmat);
     }
 
     int output_verbosity = config.getIntValue("output");
@@ -87,12 +92,13 @@ int main(int argc, char *argv[])
         DiracState ds1, ds2;
 
         out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+        out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
 
         for (int i = 0; i < xr_lines.size(); ++i)
         {
             ds1 = trans_states[i].first;
             ds2 = trans_states[i].second;
-            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << '\n';
+            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << "\t\t" << trans_matrices[i].totalRate()*Physical::s << '\n';
         }
 
         out.close();
