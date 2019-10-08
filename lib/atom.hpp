@@ -100,6 +100,7 @@ public:
 class TransitionMatrix
 {
 public:
+  int k1, k2;
   vector<double> m1;
   vector<double> m2;
   vector<vector<double>> T;

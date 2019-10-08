@@ -257,6 +257,9 @@ TransitionMatrix::TransitionMatrix(int k1, int k2)
     // j = abs(k)-1/2
     // 2j+1 = 2*abs(k)
 
+    this->k1 = k1;
+    this->k2 = k2;
+
     int mn1 = 2 * abs(k1); // Number of m states for j
     int mn2 = 2 * abs(k2);
 

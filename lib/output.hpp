@@ -11,6 +11,7 @@
  */
 
 #include <fstream>
+#include <iomanip>
 #include <string>
 #include "atom.hpp"
 #include "constants.hpp"
@@ -21,5 +22,6 @@ using namespace std;
 #define MUDIRAC_OUTPUT
 
 void writeDiracState(DiracState ds, string fname);
+void writeTransitionMatrix(TransitionMatrix tmat, string fname);
 
 #endif

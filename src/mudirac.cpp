@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
 
                 writeDiracState(ds, fname);
             }
+            string fname = seed + "." + xr_lines[i] + ".tmat.out";
+            writeTransitionMatrix(trans_matrices[i], fname);
         }
     }
 }
