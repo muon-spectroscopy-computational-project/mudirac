@@ -54,6 +54,7 @@ void parseIupacState(string istate, int &n, int &l, bool &s);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);
 string stripString(string s, string strip = " \t\n");
+string upperString(string s);
 
 // Templated function declarations
 /**

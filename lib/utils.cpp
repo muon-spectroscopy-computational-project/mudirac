@@ -448,3 +448,20 @@ string stripString(string s, string strip)
 
     return s;
 }
+
+/**
+ * @brief   Make a string uppercase
+ * @note    Make a string uppercase
+ * 
+ * @param   s:      String to modify
+ * @retval          Uppercase string
+ */
+string upperString(string s)
+{
+    string s2;
+    for (int i = 0; i < s.size(); ++i) {
+        s2.push_back(toupper(s[i]));
+    }
+
+    return s2;
+}
