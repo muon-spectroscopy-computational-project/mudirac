@@ -391,6 +391,43 @@ void parseIupacState(string istate, int &n, int &l, bool &s)
     }
 }
 
+void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, vector<bool> &srange)
+{
+    nrange.clear();
+    lrange.clear();
+    srange.clear();
+
+    int n1, l1, n2, l2;
+    bool s1, s2;
+
+    vector<string> limits = splitString(irange, ":");
+    if (limits.size() == 1) {
+        // It's not a range
+        parseIupacState(limits[0], n1, l1, s1);
+        nrange.push_back(n1);
+        lrange.push_back(l1);
+        srange.push_back(s1);
+    }
+    else if (limits.size() == 2) {
+        // It's a range
+        parseIupacState(limits[0], n1, l1, s1);
+        parseIupacState(limits[1], n2, l2, s2);
+
+        for (int ni = n1; ni <= n2; ++ni) {
+            int omin = ni == n1? 2*l1+s1 : 1;
+            int omax = ni == n2? 2*l2+s2 : 2*ni-1;
+            for (int oi = omin; oi <= omax; ++oi) {
+                nrange.push_back(ni);
+                lrange.push_back(oi /2);
+                srange.push_back(oi%2 == 1 && oi != 1);
+            }
+        }
+    }
+    else {
+        throw invalid_argument("Invalid range passed to parseIupacRange");
+    }
+}
+
 /**
  * @brief  Split a string with a given separator
  * @note   Split a string s using each occurrence of a separator sep
@@ -459,7 +496,8 @@ string stripString(string s, string strip)
 string upperString(string s)
 {
     string s2;
-    for (int i = 0; i < s.size(); ++i) {
+    for (int i = 0; i < s.size(); ++i)
+    {
         s2.push_back(toupper(s[i]));
     }
 

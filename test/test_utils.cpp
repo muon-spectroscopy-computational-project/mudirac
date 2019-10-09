@@ -110,6 +110,7 @@ TEST_CASE("Node counting", "[countnodes]")
 TEST_CASE("Splitting strings", "[splitstring]")
 {
     // Basic
+    CHECK(splitString("abc") == vector<string>{"abc"});
     CHECK(splitString("a,b,c", ",") == vector<string>{"a", "b", "c"});
     // Merge
     CHECK(splitString("a  b c") == vector<string>{"a", "", "b", "c"});
@@ -149,10 +150,23 @@ TEST_CASE("Analysing IUPAC state labels", "[parseIupacState]")
     REQUIRE(l == 2);
     REQUIRE(s == true);
 
+    vector<int> nrange, lrange;
+    vector<bool> srange;
+
+    parseIupacRange("K1:M2", nrange, lrange, srange);
+    CHECK(nrange == vector<int>{1, 2, 2, 2, 3, 3});
+    CHECK(lrange == vector<int>{0, 0, 1, 1, 0, 1});
+    CHECK(srange == vector<bool>{false, false, false, true, false, false});
+    parseIupacRange("L3", nrange, lrange, srange);
+    CHECK(nrange == vector<int>{2});
+    CHECK(lrange == vector<int>{1});
+    CHECK(srange == vector<bool>{true});
+
     // Exceptions
     REQUIRE_THROWS(parseIupacState("B2", n, l, s));
     REQUIRE_THROWS(parseIupacState("L4", n, l, s));
     REQUIRE_THROWS(parseIupacState("M", n, l, s));
+    REQUIRE_THROWS(parseIupacRange("K1:L2:M3", nrange, lrange, srange));
 }
 
 TEST_CASE("Quantum numbers and Clebsch-Gordan coefficients", "[quantumNumbersAndCG]")
