@@ -21,6 +21,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineStringNode("nuclear_model", InputNode<string>("POINT", false));    // Model used for nucleus
     this->defineStringNode("uehling_correction", InputNode<string>("OFF", false)); // Whether to use the Uehling potential correction
     // Boolean keywords
+    this->defineBoolNode("ideal_atom", InputNode<bool>(false, true));       // If true, use the solution to the ideal hydrogen-like atom, ignore all corrections.
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));                   // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
@@ -58,20 +59,26 @@ DiracAtom MuDiracInputFile::makeAtom()
     double dx = this->getDoubleValue("loggrid_step");
 
     // Prepare the DiracAtom
-    DiracAtom da = DiracAtom(Z, m, A, nucmodel, fc, dx);
-    da.Etol = this->getDoubleValue("energy_tol");
-    da.Edamp = this->getDoubleValue("energy_damp");
-    da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
-    da.nodetol = this->getDoubleValue("node_tol");
-    da.maxit_E = this->getIntValue("max_E_iter");
-    da.maxit_nodes = this->getIntValue("max_nodes_iter");
-    da.maxit_state = this->getIntValue("max_state_iter");
+    DiracAtom da;
+    if (!this->getBoolValue("ideal_atom")) {
+        da = DiracAtom(Z, m, A, nucmodel, fc, dx);
+        da.Etol = this->getDoubleValue("energy_tol");
+        da.Edamp = this->getDoubleValue("energy_damp");
+        da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
+        da.nodetol = this->getDoubleValue("node_tol");
+        da.maxit_E = this->getIntValue("max_E_iter");
+        da.maxit_nodes = this->getIntValue("max_nodes_iter");
+        da.maxit_state = this->getIntValue("max_state_iter");
 
-    if (this->getStringValue("uehling_correction") == "ON")
-    {
-        da.setUehling(true, this->getIntValue("uehling_steps"),
-                      this->getDoubleValue("uehling_lowcut"),
-                      this->getDoubleValue("uehling_highcut"));
+        if (this->getStringValue("uehling_correction") == "ON")
+        {
+            da.setUehling(true, this->getIntValue("uehling_steps"),
+                        this->getDoubleValue("uehling_lowcut"),
+                        this->getDoubleValue("uehling_highcut"));
+        }
+    }
+    else {
+        da = DiracIdealAtom(Z, m, A, nucmodel, fc, dx);
     }
 
     return da;
