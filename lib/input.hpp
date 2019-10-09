@@ -66,6 +66,7 @@ class InputFile
 {
 private:
     map<string, InputNode<string>> string_values;
+    map<string, InputNode<bool>> bool_values;
     map<string, InputNode<double>> double_values;
     map<string, InputNode<int>> int_values;
 
@@ -76,16 +77,20 @@ public:
     void parseFile(string path);
 
     vector<string> getStringKeys();
+    vector<string> getBoolKeys();
     vector<string> getDoubleKeys();
     vector<string> getIntKeys();
     string getStringValue(string k, int i = 0);
+    bool getBoolValue(string k, int i = 0);
     double getDoubleValue(string k, int i = 0);
     int getIntValue(string k, int i = 0);
     vector<string> getStringValues(string k);
+    vector<bool> getBoolValues(string k);
     vector<double> getDoubleValues(string k);
     vector<int> getIntValues(string k);
 
     void defineStringNode(string name, InputNode<string> node = InputNode<string>(""));
+    void defineBoolNode(string name, InputNode<bool> node = InputNode<bool>(false));
     void defineDoubleNode(string name, InputNode<double> node = InputNode<double>(0));
     void defineIntNode(string name, InputNode<int> node = InputNode<int>(0));
 };

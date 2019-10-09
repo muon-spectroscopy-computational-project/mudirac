@@ -81,6 +81,8 @@ TEST_CASE("Input file", "[InputFile]")
         InputFile ifile = InputFile();
         ifile.defineIntNode("integer", InputNode<int>(0));
         ifile.defineIntNode("integers", InputNode<int>(vector<int>{0}));
+        ifile.defineBoolNode("bool", InputNode<bool>(true));
+        ifile.defineBoolNode("bools", InputNode<bool>(vector<bool>{false}, false));
         ifile.defineDoubleNode("double", InputNode<double>(0.0));
         ifile.defineDoubleNode("doubles", InputNode<double>(vector<double>{0.0}));
         ifile.defineStringNode("string", InputNode<string>(""));
@@ -88,10 +90,12 @@ TEST_CASE("Input file", "[InputFile]")
         ifile.parseFile(string(CURRENT_DATAPATH) + "/data/inputtest.in");
 
         REQUIRE(ifile.getStringValue("string") == "mostly harmless");
+        REQUIRE(ifile.getBoolValue("bool") == true);
         REQUIRE(ifile.getIntValue("integer") == 42);
         REQUIRE(ifile.getDoubleValue("double") == 3.14159);
 
         CHECK(ifile.getStringValues("strings") == vector<string>{"life", "the", "universe", "and", "everything"});
+        CHECK(ifile.getBoolValues("bools") == vector<bool>{true, true, false});
         CHECK(ifile.getIntValues("integers") == vector<int>{6, 7, 42});
         CHECK(ifile.getDoubleValues("doubles") == vector<double>{1.414, 2.718, 3.142});
     }

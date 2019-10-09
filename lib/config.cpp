@@ -20,6 +20,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineStringNode("element", InputNode<string>("H"));                     // Element to compute the spectrum for
     this->defineStringNode("nuclear_model", InputNode<string>("POINT", false));    // Model used for nucleus
     this->defineStringNode("uehling_correction", InputNode<string>("OFF", false)); // Whether to use the Uehling potential correction
+    // Boolean keywords
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));                   // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence

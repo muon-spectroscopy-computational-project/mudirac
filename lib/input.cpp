@@ -82,10 +82,12 @@ InputNode<T>::InputNode(vector<T> default_value, bool case_sensitive)
 template <>
 bool InputNode<bool>::parse(string s) const
 {
-    s = upperString(s);
-    if (s == "T" || s == "TRUE") 
+    if (!case_sensitive) {
+        s = upperString(s);
+    }
+    if (s == "T" || s == "TRUE")
         return true;
-    else 
+    else
         return false;
 }
 
@@ -112,10 +114,7 @@ string InputNode<string>::parse(string s) const
 {
     if (!case_sensitive)
     {
-        for (int i = 0; i < s.size(); ++i)
-        {
-            s[i] = toupper(s[i]);
-        }
+        s = upperString(s);
     }
     return s;
 }
@@ -274,6 +273,15 @@ void InputFile::copySchema(InputFile schema)
         string_values[it->first] = inode;
     }
 
+    bool_values.clear();
+    for (map<string, InputNode<bool>>::iterator it = schema.bool_values.begin();
+         it != schema.bool_values.end(); ++it)
+    {
+        InputNode<bool> inode = it->second;
+        inode.clear();
+        bool_values[it->first] = inode;
+    }
+
     double_values.clear();
     for (map<string, InputNode<double>>::iterator it = schema.double_values.begin();
          it != schema.double_values.end(); ++it)
@@ -315,6 +323,10 @@ void InputFile::parseFile(string path)
         {
             string_values[key].parseValue(value);
         }
+        else if (bool_values.find(key) != bool_values.end())
+        {
+            bool_values[key].parseValue(value);
+        }
         else if (double_values.find(key) != double_values.end())
         {
             double_values[key].parseValue(value);
@@ -338,6 +350,25 @@ vector<string> InputFile::getStringKeys()
 
     for (map<string, InputNode<string>>::iterator it = string_values.begin();
          it != string_values.end(); ++it)
+    {
+        keys.push_back(it->first);
+    }
+
+    return keys;
+}
+
+/**
+ * @brief  Return a list of keys for boolean type values
+ * @note   Return a list of keys for boolean type values.
+ * 
+ * @retval  Vector of bool keys
+ */
+vector<string> InputFile::getBoolKeys()
+{
+    vector<string> keys(0);
+
+    for (map<string, InputNode<bool>>::iterator it = bool_values.begin();
+         it != bool_values.end(); ++it)
     {
         keys.push_back(it->first);
     }
@@ -401,6 +432,23 @@ string InputFile::getStringValue(string k, int i)
 }
 
 /**
+ * @brief  Get a single bool value
+ * @note   Get a single bool value from the given key
+ * 
+ * @param  k:   bool value key
+ * @param  i:   bool value index (for vector values)
+ * @retval      Value
+ */
+bool InputFile::getBoolValue(string k, int i)
+{
+    if (bool_values.find(k) == bool_values.end())
+    {
+        throw "Invalid key";
+    }
+    return bool_values[k].getValue(i);
+}
+
+/**
  * @brief  Get a single double value
  * @note   Get a single double value from the given key
  * 
@@ -451,6 +499,22 @@ vector<string> InputFile::getStringValues(string k)
 }
 
 /**
+ * @brief  Get a vector of bool values
+ * @note   Get a vector of bool values for the given key
+ * 
+ * @param  k:   bool value key
+ * @retval      Value
+ */
+vector<bool> InputFile::getBoolValues(string k)
+{
+    if (bool_values.find(k) == bool_values.end())
+    {
+        throw "Invalid key";
+    }
+    return bool_values[k].getValues();
+}
+
+/**
  * @brief  Get a vector of double values
  * @note   Get a vector of double values for the given key.
  * 
@@ -493,6 +557,19 @@ vector<int> InputFile::getIntValues(string k)
 void InputFile::defineStringNode(string name, InputNode<string> node)
 {
     string_values[name] = node;
+}
+
+/**
+ * @brief  Define a bool valued node
+ * @note   Define an InputNode with a bool value and the given name
+ * 
+ * @param  name: Name of the new InputNode
+ * @param  node: Starting value of the InputNode
+ * @retval None
+ */
+void InputFile::defineBoolNode(string name, InputNode<bool> node)
+{
+    bool_values[name] = node;
 }
 
 /**
