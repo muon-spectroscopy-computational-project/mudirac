@@ -50,6 +50,13 @@ TEST_CASE("Single input nodes", "[InputNode]")
         CHECK(inode.getValues() == vector<int>{3, 5});
         REQUIRE_THROWS(inode.setValue(2));
     }
+    {
+        InputNode<bool> inode = InputNode<bool>(false);
+        inode.parseValue("TRUE");
+        REQUIRE(inode.getValue());
+        inode.parseValue("FALSE");
+        REQUIRE(!inode.getValue());
+    }
 }
 
 TEST_CASE("Input file", "[InputFile]")

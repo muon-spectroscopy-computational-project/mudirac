@@ -80,6 +80,16 @@ InputNode<T>::InputNode(vector<T> default_value, bool case_sensitive)
 
 // Parsers, type by type
 template <>
+bool InputNode<bool>::parse(string s) const
+{
+    s = upperString(s);
+    if (s == "T" || s == "TRUE") 
+        return true;
+    else 
+        return false;
+}
+
+template <>
 int InputNode<int>::parse(string s) const
 {
     return stoi(s);
@@ -230,6 +240,7 @@ void InputNode<T>::parseValue(string s)
 }
 
 // Acceptable types for InputNode
+template class InputNode<bool>;
 template class InputNode<int>;
 template class InputNode<float>;
 template class InputNode<double>;

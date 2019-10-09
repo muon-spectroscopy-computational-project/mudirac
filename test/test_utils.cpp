@@ -127,6 +127,11 @@ TEST_CASE("Stripping strings", "[stripstring]")
     REQUIRE(stripString("   \t").size() == 0);
 }
 
+TEST_CASE("Uppercase strings", "[upperstring]")
+{
+    REQUIRE(upperString("yes") == "YES");
+}
+
 TEST_CASE("Analysing IUPAC state labels", "[parseIupacState]")
 {
     int n, l;
@@ -173,7 +178,7 @@ TEST_CASE("Quantum numbers and Clebsch-Gordan coefficients", "[quantumNumbersAnd
     REQUIRE(cgCoeff(-1, -0.5, true) == Approx(0));
     REQUIRE(cgCoeff(-3, 2.5, true) == Approx(1));
     REQUIRE(cgCoeff(-3, 1.5, false) == Approx(sqrt(0.2)));
-    REQUIRE(cgCoeff(1, 0.5, true) == Approx(-sqrt(1.0/3.0)));
-    REQUIRE(cgCoeff(2, 0.5, false) == Approx(sqrt(3.0/5.0)));
-    REQUIRE(cgCoeff(2, 0.5, true) == Approx(-sqrt(2.0/5.0)));
+    REQUIRE(cgCoeff(1, 0.5, true) == Approx(-sqrt(1.0 / 3.0)));
+    REQUIRE(cgCoeff(2, 0.5, false) == Approx(sqrt(3.0 / 5.0)));
+    REQUIRE(cgCoeff(2, 0.5, true) == Approx(-sqrt(2.0 / 5.0)));
 }
