@@ -349,8 +349,8 @@ double cgCoeff(int k, double m, bool s)
 }
 
 /**
-  * @brief  Parse an atomic state quantum numbers from IUPAC notation
-  * @note   Parse an atomic state quantum numbers from IUPAC X-ray notation.
+  * @brief  Parse an atomic state's quantum numbers from IUPAC notation
+  * @note   Parse an atomic state's quantum numbers from IUPAC X-ray notation.
   * 
   * @param  istate:     IUPAC notation string
   * @param  &n:         Principal quantum number
@@ -391,6 +391,16 @@ void parseIupacState(string istate, int &n, int &l, bool &s)
     }
 }
 
+/**
+  * @brief  Parse a range of atomic states' quantum numbers from IUPAC notation
+  * @note   Parse a range of atomic states' quantum numbers from IUPAC notation.
+  * 
+  * @param  irange:          IUPAC notation range string (e.g.: K1:L3 will give all states of the first two shells)
+  * @param  &nrange:         Principal quantum numbers
+  * @param  &lrange:         Orbital quantum numbers
+  * @param  &srange:         Spin quantum numbers
+  * @retval None
+ */
 void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, vector<bool> &srange)
 {
     nrange.clear();

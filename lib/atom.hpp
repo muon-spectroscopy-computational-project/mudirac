@@ -185,6 +185,9 @@ public:
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
 
+  // Electronic background
+  // void setElectBkgConfig(string econfig=)
+
   // Convergence
   pair<double, double> energyLimits(int nodes = 0, int k = -1);
   pair<int, int> gridLimits(double E, int k);
