@@ -22,6 +22,7 @@ TEST_CASE("Atomic electronic configurations", "[atomEconfig]")
     REQUIRE(econf.getPopulation(2, 0) == 2); // 2s2
     REQUIRE(econf.getPopulation(2, 1) == 6); // 2p6
     REQUIRE(econf.getPopulation(3, 0) == 1); // 3s1
+    REQUIRE(econf.maxn() == 3);
 
     // Exceptions to the Madelung rule
     econf = ElectronicConfiguration("Cu");

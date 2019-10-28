@@ -53,6 +53,16 @@ int ElectronicConfiguration::getPopulation(int n, int l)
     return 0;
 }
 
+/**
+ * @brief  Maximum principal quantum number of this configuration
+ * @note   Maximum principal quantum number of this configuration.
+ * 
+ * @retval Maximum n for this configuration
+ */
+int ElectronicConfiguration::maxn() {
+    return epop.size();
+}
+
 vector<vector<int>> ElectronicConfiguration::parseConfig(string config)
 {
     vector<vector<int>> pop;

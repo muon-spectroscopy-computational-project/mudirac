@@ -28,6 +28,7 @@ class ElectronicConfiguration
 public:
     ElectronicConfiguration(string config);
     int getPopulation(int n, int l);
+    int maxn();
 
 private:
     vector<vector<int>> epop;
