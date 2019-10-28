@@ -407,6 +407,20 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
 }
 
 /**
+ * @brief  Set electronic background configuration
+ * @note   Set electronic background configuration to
+ * include electronic shielding for muons.
+ * 
+ * @param  s:           Whether the electronic background should be on/off
+ * @param  econf:       Electronic configuration to use
+ * @retval None
+ */
+void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf) {
+    use_econf = s;
+    this->econf = econf;
+}
+
+/**
   * @brief  Set grid parameters
   * @note   Set parameters defining the logarithmic grid, rc and dx.
   * The grid will be made of points at

@@ -21,6 +21,7 @@
 #include "integrate.hpp"
 #include "boundary.hpp"
 #include "elements.hpp"
+#include "econfigs.hpp"
 #include "potential.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
 
@@ -137,6 +138,8 @@ protected:
   // Additional potential terms
   bool use_uehling = false;
   UehlingSpherePotential V_uehling;
+  bool use_econf = false;
+  ElectronicConfiguration econf;
 
 public:
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
@@ -158,6 +161,8 @@ public:
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000, double cut_low = 0, double cut_high = INFINITY);
+  // Electronic background
+  void setElectBkgConfig(bool s, ElectronicConfiguration econf);
 
   // Clear computed states
   virtual void reset(){};
@@ -184,9 +189,6 @@ public:
 
   void calcState(int n, int l, bool s, bool force = false);
   void calcAllStates(int max_n, bool force = false);
-
-  // Electronic background
-  // void setElectBkgConfig(string econfig=)
 
   // Convergence
   pair<double, double> energyLimits(int nodes = 0, int k = -1);

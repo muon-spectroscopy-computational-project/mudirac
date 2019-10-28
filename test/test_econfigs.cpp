@@ -35,3 +35,14 @@ TEST_CASE("Atomic electronic configurations", "[atomEconfig]")
     REQUIRE_THROWS(ElectronicConfiguration("[He] [Ne]"));
     REQUIRE_THROWS(ElectronicConfiguration("5a2"));
 }
+
+TEST_CASE("Electronic density", "[atomEdens]")
+{
+    ElectronicConfiguration econf("He");
+
+    REQUIRE(econf.hydrogenicChargeDensity(1, 2) == Approx(64*exp(-4)));
+
+    econf = ElectronicConfiguration("Li");
+    
+    REQUIRE(econf.hydrogenicChargeDensity(1/3.0, 3, 1.0, true) == Approx(216/9.0*exp(-2)+1.0/(9*18)*exp(-1/3.0)));
+}

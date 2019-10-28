@@ -16,6 +16,7 @@
 
 #include "utils.hpp"
 #include "elements.hpp"
+#include "hydrogenic.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
@@ -26,9 +27,12 @@ using namespace std;
 class ElectronicConfiguration
 {
 public:
+    ElectronicConfiguration();
     ElectronicConfiguration(string config);
     int getPopulation(int n, int l);
     int maxn();
+
+    double hydrogenicChargeDensity(double r, int Z=1, double mu=1.0, bool shield=false, bool dirac=false);
 
 private:
     vector<vector<int>> epop;

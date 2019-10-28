@@ -30,6 +30,11 @@ ElectronicConfiguration::ElectronicConfiguration(string config)
     epop = this->parseConfig(config);
 }
 
+ElectronicConfiguration::ElectronicConfiguration()
+{
+    epop = vector<vector<int>>(0);
+}
+
 /**
  * @brief  Return the population of a given shell
  * @note   Return the population of a shell given the quantum
@@ -59,8 +64,79 @@ int ElectronicConfiguration::getPopulation(int n, int l)
  * 
  * @retval Maximum n for this configuration
  */
-int ElectronicConfiguration::maxn() {
+int ElectronicConfiguration::maxn()
+{
     return epop.size();
+}
+
+/**
+ * @brief  Electronic charge density with hydrogen-like orbitals
+ * @note   Electronic charge density at a given distance from the nucleus,
+ * assuming that orbitals have an hydrogen-like structure.
+ * 
+ * @param  r:           Radial distance at which to compute the density
+ * @param  Z:           Nuclear charge
+ * @param  mu:          Effective mass of the electron
+ * @param  shield:      If true, use the method outlined by Tauscher, Z. Phys. A, 1978 to
+ *                      account for the effect of shielding of internal electrons. All 
+ *                      electrons of shell N will thus see a nuclear charge shielded by
+ *                      the sum total of electrons in the N-1 shells below
+ * @param  dirac:       If true, use Dirac instead of Schroedinger orbitals for the density
+ * @retval 
+ */
+double ElectronicConfiguration::hydrogenicChargeDensity(double r, int Z, double mu, bool shield, bool dirac)
+{
+    double Zn = Z;
+    double rho = 0;
+
+    LOG(INFO) << "Computing hydrogen-like charge density at r = " << r << " for atom with Z = " << Z << ", mu = " << mu << "\n";
+    LOG(INFO) << "Shielding: " << shield << " - Dirac: " << dirac << "\n";
+
+    for (int n = 1; n <= epop.size(); ++n)
+    {
+        int npop = 0;
+
+        for (int l = 0; l < n; ++l)
+        {
+            if (dirac)
+            {
+                /* We need to take care here: for the same l-shell, the j = l-1/2 orbital ( k > 0 )
+                is always lower energy than the other, so we fill that first */
+                int ku, kd, pu, pd;
+                // j = l - 1/2
+                kd = l;
+                pd = min(epop[n - 1][l], 2 * l);
+                // j = l + 1/2
+                ku = -l - 1;
+                pu = max(epop[n - 1][l], 0);
+
+                vector<double> PQ;
+
+                PQ = hydrogenicDiracWavefunction(r, Zn, mu, n, kd);
+                rho += pd * (pow(PQ[0], 2) + pow(PQ[1], 2));
+                if (pu > 0)
+                {
+                    PQ = hydrogenicDiracWavefunction(r, Zn, mu, n, ku);
+                    rho += pu * (pow(PQ[0], 2) + pow(PQ[1], 2));
+                }
+            }
+            else
+            {
+                rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
+            }
+
+            LOG(TRACE) << pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2) << "\n";
+            LOG(TRACE) << "n = " << n << ", l = " << l << ", rhoTot =" << rho << "\n";
+
+            npop += epop[n - 1][l];
+        }
+        if (shield)
+        {
+            Zn -= npop;
+        }
+    }
+
+    return rho;
 }
 
 vector<vector<int>> ElectronicConfiguration::parseConfig(string config)
@@ -115,6 +191,11 @@ vector<vector<int>> ElectronicConfiguration::parseConfig(string config)
             vector<string> np = splitString(ctok[i], "spdf");
             string orb = stripString(ctok[i], "0123456789");
 
+            if (np.size() != 2)
+            {
+                throw(invalid_argument("Invalid electronic configuration string"));
+            }
+
             int n, p, l;
             try
             {
@@ -149,7 +230,7 @@ vector<vector<int>> ElectronicConfiguration::parseConfig(string config)
             if (pop[n - 1][l] > 2 * (2 * l + 1))
             {
                 throw(invalid_argument("Invalid electronic configuration string"));
-            }            
+            }
         }
     }
 
