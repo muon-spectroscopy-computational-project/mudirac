@@ -235,6 +235,7 @@ void shootNumerov(vector<double> &Q, vector<double> A, vector<double> B, double 
  * The following ODE is integrated:
  *  
  *      V'' + V' = rho(x)
+ * 
  * with the derivatives being in x (r = r0*exp(x)) and the density being already integrated over the angular
  * coordinates (so for example a constant density would have rho ~ r^2).
  * @param  &V:   Vector for V. Will return the integrated potential. 

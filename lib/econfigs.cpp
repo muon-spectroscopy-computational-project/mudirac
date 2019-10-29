@@ -21,18 +21,26 @@
  * Can include a single element symbol in square brackets 
  * to mean the full configuration of that element ("[Ne] 3s2" for Mg), or even
  * be just a single element symbol ("Mg" for non-ionized Mg).
+ * The other parameters define the behaviour used when computing the precise
+ * charge density at a given radius.
  * 
  * @param  config:      The electronic configuration string
+ * @param  Z:           Nuclear charge
+ * @param  mu:          Effective mass of the electron
+ * @param  shield:      If true, use the method outlined by Tauscher, Z. Phys. A, 1978 to
+ *                      account for the effect of shielding of internal electrons. All 
+ *                      electrons of shell N will thus see a nuclear charge shielded by
+ *                      the sum total of electrons in the N-1 shells below
+ * @param  dirac:       If true, use Dirac instead of Schroedinger orbitals for the density
  * @retval              
  */
-ElectronicConfiguration::ElectronicConfiguration(string config)
+ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu, bool shield, bool dirac)
 {
     epop = this->parseConfig(config);
-}
-
-ElectronicConfiguration::ElectronicConfiguration()
-{
-    epop = vector<vector<int>>(0);
+    this->Z = Z;
+    this->mu = mu;
+    this->shield = shield;
+    this->dirac = dirac;
 }
 
 /**
@@ -75,16 +83,9 @@ int ElectronicConfiguration::maxn()
  * assuming that orbitals have an hydrogen-like structure.
  * 
  * @param  r:           Radial distance at which to compute the density
- * @param  Z:           Nuclear charge
- * @param  mu:          Effective mass of the electron
- * @param  shield:      If true, use the method outlined by Tauscher, Z. Phys. A, 1978 to
- *                      account for the effect of shielding of internal electrons. All 
- *                      electrons of shell N will thus see a nuclear charge shielded by
- *                      the sum total of electrons in the N-1 shells below
- * @param  dirac:       If true, use Dirac instead of Schroedinger orbitals for the density
  * @retval 
  */
-double ElectronicConfiguration::hydrogenicChargeDensity(double r, int Z, double mu, bool shield, bool dirac)
+double ElectronicConfiguration::hydrogenicChargeDensity(double r)
 {
     double Zn = Z;
     double rho = 0;
@@ -121,7 +122,7 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r, int Z, double 
                 }
             }
             else
-            {   
+            {
                 LOG(TRACE) << "Psi: " << hydrogenicSchroWavefunction(r, Zn, mu, n, l) << "\n";
                 rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
             }
@@ -137,7 +138,7 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r, int Z, double 
         }
     }
 
-    return rho;
+    return -rho;
 }
 
 vector<vector<int>> ElectronicConfiguration::parseConfig(string config)

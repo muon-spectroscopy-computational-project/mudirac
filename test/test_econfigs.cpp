@@ -38,11 +38,11 @@ TEST_CASE("Atomic electronic configurations", "[atomEconfig]")
 
 TEST_CASE("Electronic density", "[atomEdens]")
 {
-    ElectronicConfiguration econf("He");
+    ElectronicConfiguration econf("He", 2);
 
-    REQUIRE(econf.hydrogenicChargeDensity(1, 2) == Approx(64*exp(-4)));
+    REQUIRE(econf.hydrogenicChargeDensity(1) == Approx(64*exp(-4)));
 
-    econf = ElectronicConfiguration("Li");
+    econf = ElectronicConfiguration("Li", 3, 1, true);
     
-    REQUIRE(econf.hydrogenicChargeDensity(1/3.0, 3, 1.0, true) == Approx(216/9.0*exp(-2)+25.0/(8*81.0)*exp(-1/3.0)));
+    REQUIRE(econf.hydrogenicChargeDensity(1/3.0) == Approx(216/9.0*exp(-2)+25.0/(8*81.0)*exp(-1/3.0)));
 }

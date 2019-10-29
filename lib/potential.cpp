@@ -156,13 +156,31 @@ BkgGridPotential::BkgGridPotential(vector<double> rho, double rc, double dx, int
     this->i0 = i0;
     this->i1 = i1;
 
-    rho0 = rho[0];
     grid = logGrid(rc, dx, i0, i1);
 
+    initPotential(rho);
+}
+
+BkgGridPotential::BkgGridPotential()
+{
+    rc = 1;
+    dx = 1e-3;
+    i0 = 0;
+    i1 = 0;
+    Vpot = vector<double>(1, 0.0);
+    V0 = 0;
+    Q = 0;
+    rho0 = 0;
+    grid = logGrid(rc, dx, i0, i1);
+}
+
+void BkgGridPotential::initPotential(vector<double> rho)
+{
+    rho0 = rho[0];
     Vpot = vector<double>(i1 - i0 + 1);
     shootPotentialLog(Vpot, rho, dx);
     // The charge is an integral plus an assumed constant charge density for r < r0
-    Q = trapzInt(dx, vectorOperation(rho, grid[1], '*')) + rho[0] * grid[1][0] / 3.0;
+    Q = trapzInt(dx, vectorOperation(rho, grid[1], '*')) + rho0 * grid[1][0] / 3.0;
     V0 = -Q / grid[1][i1 - i0] - Vpot[i1 - i0];
 }
 
@@ -209,4 +227,55 @@ double BkgGridPotential::Vgrid(int i)
             return -Q / r;
         }
     }
+}
+
+/**
+ * @brief  Initialise electronic configuration potential
+ * @note   Initialise electronic configuration potential from an ElectronicConfiguration object,
+ * grid parameters, and a tolerance. The limits of the grid will then be established based on
+ * where the charge goes below the given tolerance.
+ * 
+ * @param  econf:       The electronic configuration to use
+ * @param  rc:          Central point of the grid
+ * @param  dx:          Logarithmic step
+ * @param  rho_eps:     Tolerance value of the density at which to stop acquiring it
+ * @param  max_r0:      Maximum value for the inner radius of the grid. Will be ignored if negative
+ * @param  min_r1:      Minimum value for the outer radius of the grid. Will be ignored if negative
+ * @retval 
+ */
+EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc, double dx, double rho_eps,
+                               double max_r0, double min_r1)
+{
+    this->ec = econf;
+
+    // Now to find the boundaries...
+    double r = rc;
+    vector<double> rho = vector<double>(1, ec.hydrogenicChargeDensity(rc));
+    i0 = 0;
+    i1 = 0;
+
+    max_r0 = max_r0 < 0 ? 2 * rc : max_r0;
+    min_r1 = min_r1 < 0 ? rc / 2 : min_r1;
+
+    while (abs(rho.front()) > rho_eps || r > max_r0)
+    {
+        i0--;
+        r = rc * exp(i0 * dx);
+        rho.insert(rho.begin(), ec.hydrogenicChargeDensity(r));
+    }
+    while (abs(rho.back()) > rho_eps || r < min_r1)
+    {
+        i1++;
+        r = rc * exp(i1 * dx);
+        rho.push_back(ec.hydrogenicChargeDensity(r));
+    }
+
+    LOG(INFO) << "Electronic configuration potential grid boundaries found\n";
+    LOG(INFO) << "\ti0 = " << i0 << " = " << rc * exp(i0 * dx) << "\n";
+    LOG(INFO) << "\ti1 = " << i1 << " = " << rc * exp(i1 * dx) << "\n";
+
+    grid = logGrid(rc, dx, i0, i1);
+
+    // Now compute the charge density
+    initPotential(rho);
 }

@@ -14,6 +14,7 @@
 #include <vector>
 #include <stdexcept>
 #include "integrate.hpp"
+#include "econfigs.hpp"
 #include "../vendor/aixlog/aixlog.hpp"
 
 using namespace std;
@@ -99,17 +100,38 @@ protected:
 class BkgGridPotential : Potential
 {
 public:
+  BkgGridPotential();
   BkgGridPotential(vector<double> rho, double rc, double dx, int i0, int i1);
   double V(double r) override;
   double Vgrid(int i);
 
   double getQ() { return Q; };
+  vector<vector<double>> getGrid() { return grid; };
 
 protected:
   int i0, i1;
   double rc, dx, Q, rho0, V0;
   vector<double> Vpot;
   vector<vector<double>> grid;
+
+  void initPotential(vector<double> rho);
+};
+
+/**
+ * @brief  Coulomb potential from an electronic distribution on a logarithmic grid
+ * @note   Coulomb potential from a charge distribution on a fixed logarithmic grid
+ * generated from an electronic configuration. Changes only the way it's initialised,
+ * the potential is then calculated as in BkgGridPotential
+ * 
+ * @retval None
+ */
+class EConfPotential : public BkgGridPotential
+{
+  public:
+    EConfPotential(ElectronicConfiguration econf, double rc, double dx, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
+
+  protected:
+    ElectronicConfiguration ec;
 };
 
 #endif

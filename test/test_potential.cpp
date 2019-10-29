@@ -81,3 +81,21 @@ TEST_CASE("Background charge on grid potential", "[BkgGridPotential]")
     REQUIRE(bpot.Vgrid(0) == Approx(cpot.V(grid[1][-i0])));
     REQUIRE(bpot.Vgrid(i1) == Approx(cpot.V(grid[1][i1 - i0])));
 }
+
+TEST_CASE("Electronic configuration potential", "[EConfPotential]")
+{
+    ElectronicConfiguration hydrogen("H");
+    EConfPotential hpot(hydrogen, 1, 1e-2, 1e-3);
+
+    vector<double> rgrid = hpot.getGrid()[1];
+
+    REQUIRE(rgrid[0] < 2.3e-2);
+    REQUIRE(rgrid[rgrid.size()-1] > 5.5);
+
+    // Now test what happens when you add in grid limits
+    hpot = EConfPotential(hydrogen, 1, 1e-2, 1e-3, 1e-2, 6);
+    rgrid = hpot.getGrid()[1];
+
+    REQUIRE(rgrid[0] < 1e-2);
+    REQUIRE(rgrid[rgrid.size()-1] > 6);
+}

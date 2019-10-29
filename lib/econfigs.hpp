@@ -27,12 +27,16 @@ using namespace std;
 class ElectronicConfiguration
 {
 public:
-    ElectronicConfiguration();
-    ElectronicConfiguration(string config);
+    ElectronicConfiguration(string config="", int Z=1, double mu=1.0, bool shield=false, bool dirac=false);
+
+    int Z;
+    double mu;
+    bool shield;
+    bool dirac;
+
     int getPopulation(int n, int l);
     int maxn();
-
-    double hydrogenicChargeDensity(double r, int Z=1, double mu=1.0, bool shield=false, bool dirac=false);
+    double hydrogenicChargeDensity(double r);
 
 private:
     vector<vector<int>> epop;
