@@ -26,21 +26,38 @@ vector<double> applyFunc(double (*f)(double), vector<double> x)
     return y;
 }
 
-double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 200, bool step = false)
+double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 200, bool step = false, bool loggrid=false)
 {
-    vector<double> x, y;
+    double dx;
+    vector<double> x, y, lx;
 
     double ans;
-    x = linGrid(x0, x1, N);
-    y = applyFunc(f, x);
-
+    if (loggrid) {
+        vector<vector<double>> grid = logGrid(x0, x1, N);
+        lx = grid[0];
+        x = grid[1];
+        dx = lx[1]-lx[0];
+        y = applyFunc(f, x);
+        y = vectorOperation(y, x, '*');
+    }
+    else {
+        x = linGrid(x0, x1, N);
+        dx = x[1]-x[0];
+        y = applyFunc(f, x);
+    }
+    
     if (step)
     {
-        ans = trapzInt(x[1] - x[0], y);
+        ans = trapzInt(dx, y);
     }
     else
     {
-        ans = trapzInt(x, y);
+        if (loggrid) {
+            ans = trapzInt(lx, y);
+        }
+        else {
+            ans = trapzInt(x, y);
+        }
     }
 
     return ans;
@@ -200,6 +217,9 @@ TEST_CASE("Trapezoidal integration", "[trapzInt]")
     REQUIRE(trapzIntTest(sqrt, 1.0, 4.0) == Approx(14.0 / 3.0));
     REQUIRE(trapzIntTest(cbrt, 1.0, 8.0) == Approx(45.0 / 4.0));
     REQUIRE(trapzIntTest(cbrt, 1.0, 8.0, 200, true) == Approx(45.0 / 4.0));
+
+    // Logarithmic integration
+    REQUIRE(trapzIntTest(exp, 1e-2, 1, 1000, true, true) == Approx(exp(1) - exp(1e-2)));
 }
 
 TEST_CASE("Shooting integration", "[shootQ]")

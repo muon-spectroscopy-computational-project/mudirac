@@ -22,7 +22,7 @@ TEST_CASE("Schroedinger atom energies", "[hydrogenicSchroEnergy]")
 TEST_CASE("Schroedinger atom wavefunctions", "[hydrogenicSchroWavefunction]")
 {
     // Define a grid
-    vector<vector<double>> grid = logGrid(1, 0.01, -500, 500);
+    vector<vector<double>> grid = logGrid(1, 1e-2, -500, 500);
 
     vector<double> s1 = hydrogenicSchroWavefunction(grid[1], 1, 1, 1, 0);
     vector<double> s2 = hydrogenicSchroWavefunction(grid[1], 1, 1, 2, 0);
