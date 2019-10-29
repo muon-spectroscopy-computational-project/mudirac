@@ -106,12 +106,13 @@ public:
   double Vgrid(int i);
 
   double getQ() { return Q; };
+  vector<double> getrho() { return rho; };
   vector<vector<double>> getGrid() { return grid; };
 
 protected:
   int i0, i1;
   double rc, dx, Q, rho0, V0;
-  vector<double> Vpot;
+  vector<double> rho, Vpot;
   vector<vector<double>> grid;
 
   void initPotential(vector<double> rho);
@@ -128,7 +129,7 @@ protected:
 class EConfPotential : public BkgGridPotential
 {
   public:
-    EConfPotential(ElectronicConfiguration econf, double rc, double dx, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
+    EConfPotential(ElectronicConfiguration econf=ElectronicConfiguration(), double rc=1, double dx=1e-2, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
 
   protected:
     ElectronicConfiguration ec;

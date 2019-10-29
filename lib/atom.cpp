@@ -413,11 +413,18 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
  * 
  * @param  s:           Whether the electronic background should be on/off
  * @param  econf:       Electronic configuration to use
+ * @param  rho_eps:     Tolerance value of the electronic density at which to consider it zero
+ * @param  max_r0:      Maximum value for the inner radius of the electronic density grid. Will be ignored if negative
+ * @param  min_r1:      Minimum value for the outer radius of the electronic density grid. Will be ignored if negative
  * @retval None
  */
-void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf) {
+void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps, double max_r0, double min_r1) {
     use_econf = s;
-    this->econf = econf;
+    if (s) {
+        LOG(INFO) << "Initialising electronic background potential";
+        V_econf = EConfPotential(econf, rc, dx, rho_eps, max_r0, min_r1);
+    }
+    reset();
 }
 
 /**

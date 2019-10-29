@@ -25,7 +25,7 @@
  * charge density at a given radius.
  * 
  * @param  config:      The electronic configuration string
- * @param  Z:           Nuclear charge
+ * @param  Z:           Nuclear charge. If negative, calculate it to neutralise the electrons
  * @param  mu:          Effective mass of the electron
  * @param  shield:      If true, use the method outlined by Tauscher, Z. Phys. A, 1978 to
  *                      account for the effect of shielding of internal electrons. All 
@@ -37,6 +37,12 @@
 ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu, bool shield, bool dirac)
 {
     epop = this->parseConfig(config);
+
+    if (Z < 0)
+    {
+        Z = -totQ();
+    }
+
     this->Z = Z;
     this->mu = mu;
     this->shield = shield;
@@ -75,6 +81,26 @@ int ElectronicConfiguration::getPopulation(int n, int l)
 int ElectronicConfiguration::maxn()
 {
     return epop.size();
+}
+
+/**
+ * @brief  Total charge of this configuration
+ * @note   Total charge of this configuration
+ * 
+ * @retval Total electronic charge for this configuration
+ */
+int ElectronicConfiguration::totQ()
+{
+    int Q = 0;
+    for (int n = 0; n < epop.size(); ++n)
+    {
+        for (int l = 0; l < epop[n].size(); ++l)
+        {
+            Q -= epop[n][l];
+        }
+    }
+
+    return Q;
 }
 
 /**

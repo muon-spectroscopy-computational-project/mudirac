@@ -27,7 +27,7 @@ using namespace std;
 class ElectronicConfiguration
 {
 public:
-    ElectronicConfiguration(string config="", int Z=1, double mu=1.0, bool shield=false, bool dirac=false);
+    ElectronicConfiguration(string config="", int Z=-1, double mu=1.0, bool shield=false, bool dirac=false);
 
     int Z;
     double mu;
@@ -36,6 +36,7 @@ public:
 
     int getPopulation(int n, int l);
     int maxn();
+    int totQ();
     double hydrogenicChargeDensity(double r);
 
 private:

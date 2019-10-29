@@ -28,6 +28,9 @@ TEST_CASE("Atomic electronic configurations", "[atomEconfig]")
     econf = ElectronicConfiguration("Cu");
     REQUIRE(econf.getPopulation(3, 2) == 10); // 3d10
 
+    // Total charge
+    REQUIRE(econf.totQ() == -29); 
+
     // Failure cases
     REQUIRE_THROWS(ElectronicConfiguration("nonsense"));
     REQUIRE_THROWS(ElectronicConfiguration("1s2 1s4"));
@@ -40,9 +43,9 @@ TEST_CASE("Electronic density", "[atomEdens]")
 {
     ElectronicConfiguration econf("He", 2);
 
-    REQUIRE(econf.hydrogenicChargeDensity(1) == Approx(64*exp(-4)));
+    REQUIRE(econf.hydrogenicChargeDensity(1) == Approx(-64*exp(-4)));
 
     econf = ElectronicConfiguration("Li", 3, 1, true);
     
-    REQUIRE(econf.hydrogenicChargeDensity(1/3.0) == Approx(216/9.0*exp(-2)+25.0/(8*81.0)*exp(-1/3.0)));
+    REQUIRE(econf.hydrogenicChargeDensity(1/3.0) == Approx(-216/9.0*exp(-2)-25.0/(8*81.0)*exp(-1/3.0)));
 }

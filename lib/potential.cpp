@@ -175,7 +175,8 @@ BkgGridPotential::BkgGridPotential()
 }
 
 void BkgGridPotential::initPotential(vector<double> rho)
-{
+{   
+    this->rho = rho;
     rho0 = rho[0];
     Vpot = vector<double>(i1 - i0 + 1);
     shootPotentialLog(Vpot, rho, dx);

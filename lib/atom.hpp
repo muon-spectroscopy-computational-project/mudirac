@@ -139,7 +139,7 @@ protected:
   bool use_uehling = false;
   UehlingSpherePotential V_uehling;
   bool use_econf = false;
-  ElectronicConfiguration econf;
+  EConfPotential V_econf;
 
 public:
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
@@ -162,7 +162,7 @@ public:
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000, double cut_low = 0, double cut_high = INFINITY);
   // Electronic background
-  void setElectBkgConfig(bool s, ElectronicConfiguration econf);
+  void setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
 
   // Clear computed states
   virtual void reset(){};
