@@ -44,5 +44,5 @@ TEST_CASE("Electronic density", "[atomEdens]")
 
     econf = ElectronicConfiguration("Li");
     
-    REQUIRE(econf.hydrogenicChargeDensity(1/3.0, 3, 1.0, true) == Approx(216/9.0*exp(-2)+1.0/(9*18)*exp(-1/3.0)));
+    REQUIRE(econf.hydrogenicChargeDensity(1/3.0, 3, 1.0, true) == Approx(216/9.0*exp(-2)+25.0/(8*81.0)*exp(-1/3.0)));
 }

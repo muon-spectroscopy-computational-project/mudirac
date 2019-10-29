@@ -121,7 +121,8 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r, int Z, double 
                 }
             }
             else
-            {
+            {   
+                LOG(TRACE) << "Psi: " << hydrogenicSchroWavefunction(r, Zn, mu, n, l) << "\n";
                 rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
             }
 
