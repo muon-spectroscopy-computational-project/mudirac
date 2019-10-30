@@ -37,6 +37,7 @@ public:
     int getPopulation(int n, int l);
     int maxn();
     int totQ();
+    double innerShellRadius();
     double hydrogenicChargeDensity(double r);
 
 private:

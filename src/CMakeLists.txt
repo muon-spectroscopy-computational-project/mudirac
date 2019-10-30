@@ -25,6 +25,9 @@ target_link_libraries(nucsize mudiraclib)
 add_executable(print_econf print_econf.cpp)
 target_link_libraries(print_econf mudiraclib)
 
+add_executable(calc_elempot calc_elempot.cpp)
+target_link_libraries(calc_elempot mudiraclib)
+
 configure_file(mudirac.in.hpp ${CMAKE_CURRENT_SOURCE_DIR}/mudirac.hpp)
 add_executable(mudirac mudirac.cpp)
 target_link_libraries(mudirac mudiraclib)

@@ -84,6 +84,38 @@ int ElectronicConfiguration::maxn()
 }
 
 /**
+ * @brief  Radius of the innermost electronic shell
+ * @note   Radius of the innermost electronic shell estimated
+ * as 
+ * 
+ * a = n/Z
+ * 
+ * for n the smallest shell with population greater than zero.
+ * 
+ * @retval The innermost shell's radius
+ */
+double ElectronicConfiguration::innerShellRadius()
+{
+    int nmin = 0;
+
+    for (int n = 1; n <= epop.size(); ++n)
+    {
+        int pop = 0;
+        for (int l = 0; l < epop[n - 1].size(); ++l)
+        {
+            pop += epop[n - 1][l];
+        }
+        if (pop > 0)
+        {
+            nmin = n;
+            break;
+        }
+    }
+
+    return nmin * 1.0 / Z;
+}
+
+/**
  * @brief  Total charge of this configuration
  * @note   Total charge of this configuration
  * 
@@ -130,17 +162,30 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
                 /* We need to take care here: for the same l-shell, the j = l-1/2 orbital ( k > 0 )
                 is always lower energy than the other, so we fill that first */
                 int ku, kd, pu, pd;
-                // j = l - 1/2
-                kd = l;
-                pd = min(epop[n - 1][l], 2 * l);
-                // j = l + 1/2
-                ku = -l - 1;
-                pu = max(epop[n - 1][l], 0);
-
                 vector<double> PQ;
 
-                PQ = hydrogenicDiracWavefunction(r, Zn, mu, n, kd);
-                rho += pd * (pow(PQ[0], 2) + pow(PQ[1], 2));
+                if (l > 0)
+                {
+                    // j = l - 1/2
+                    kd = l;
+                    pd = min(epop[n - 1][l], 2 * l);
+                    // j = l + 1/2
+                    ku = -l - 1;
+                    pu = max(epop[n - 1][l], 0);
+                }
+                else
+                {
+                    kd = 1;
+                    pd = 0;
+                    ku = -1;
+                    pu = epop[n - 1][l];
+                }
+
+                if (pd > 0)
+                {
+                    PQ = hydrogenicDiracWavefunction(r, Zn, mu, n, kd);
+                    rho += pd * (pow(PQ[0], 2) + pow(PQ[1], 2));
+                }
                 if (pu > 0)
                 {
                     PQ = hydrogenicDiracWavefunction(r, Zn, mu, n, ku);
@@ -149,11 +194,9 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
             }
             else
             {
-                LOG(TRACE) << "Psi: " << hydrogenicSchroWavefunction(r, Zn, mu, n, l) << "\n";
                 rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
             }
 
-            LOG(TRACE) << pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2) << "\n";
             LOG(TRACE) << "n = " << n << ", l = " << l << ", rhoTot =" << rho << "\n";
 
             npop += epop[n - 1][l];

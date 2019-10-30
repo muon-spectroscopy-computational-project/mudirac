@@ -106,6 +106,7 @@ public:
   double Vgrid(int i);
 
   double getQ() { return Q; };
+  double getV0() { return V0; };
   vector<double> getrho() { return rho; };
   vector<vector<double>> getGrid() { return grid; };
 

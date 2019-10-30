@@ -192,12 +192,12 @@ double BkgGridPotential::V(double r)
 
     if (xi < i0)
     {
-        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - inner\n";
+        LOG(TRACE) << "Computing potential from background charge at point " << r << " - inner\n";
         return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
     }
     else if (xi > i1)
     {
-        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - outer\n";
+        LOG(TRACE) << "Computing potential from background charge at point " << r << " - outer\n";
         return -Q / r;
     }
     else
@@ -206,7 +206,7 @@ double BkgGridPotential::V(double r)
         int il = floor(xi);
         int ir = ceil(xi);
 
-        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - on grid\n";
+        LOG(TRACE) << "Computing potential from background charge at point " << r << " - on grid\n";
         LOG(TRACE) << "Left and right grid points for interpolation: " << il << " - " << ir << "\n";
         if (il == ir) {
             return Vpot[il-i0] + V0;

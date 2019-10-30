@@ -15,6 +15,7 @@
 #include "input.hpp"
 #include "atom.hpp"
 #include "elements.hpp"
+#include "econfigs.hpp"
 
 #include "../vendor/aixlog/aixlog.hpp"
 

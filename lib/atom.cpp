@@ -421,8 +421,8 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
 void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps, double max_r0, double min_r1) {
     use_econf = s;
     if (s) {
-        LOG(INFO) << "Initialising electronic background potential";
-        V_econf = EConfPotential(econf, rc, dx, rho_eps, max_r0, min_r1);
+        LOG(INFO) << "Initialising electronic background potential\n";
+        V_econf = EConfPotential(econf, econf.innerShellRadius(), dx, rho_eps, max_r0, min_r1);
     }
     reset();
 }
@@ -466,6 +466,10 @@ double Atom::getV(double r)
     {
         Vout += V_uehling.V(r);
     }
+    if (use_econf)
+    {
+        Vout += V_econf.V(r);
+    }
 
     return Vout;
 }
@@ -485,11 +489,7 @@ vector<double> Atom::getV(vector<double> r)
 
     for (int i = 0; i < N; ++i)
     {
-        Vout[i] = V.V(r[i]);
-        if (use_uehling)
-        {
-            Vout[i] += V_uehling.V(r[i]);
-        }
+        Vout[i] = getV(r[i]);
     }
 
     return Vout;
