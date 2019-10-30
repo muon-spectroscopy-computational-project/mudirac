@@ -207,9 +207,13 @@ double BkgGridPotential::V(double r)
         int ir = ceil(xi);
 
         LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - on grid\n";
-        double drl = grid[1][il] * (exp(xi - il) - 1);
-        double f = drl / (grid[1][ir] - grid[1][il]);
-        return lerp(Vpot[il], Vpot[ir], f);
+        LOG(TRACE) << "Left and right grid points for interpolation: " << il << " - " << ir << "\n";
+        if (il == ir) {
+            return Vpot[il-i0] + V0;
+        }
+        double drl = grid[1][il-i0] * (exp((xi - il)*dx) - 1);
+        double f = drl / (grid[1][ir-i0] - grid[1][il-i0]);
+        return lerp(Vpot[il-i0], Vpot[ir-i0], f) + V0;
     }
 }
 

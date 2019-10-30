@@ -21,13 +21,19 @@ int main(int argc, char *argv[])
 
     ElectronicConfiguration econf(ecstr, -1, 1, true);
     EConfPotential V_econf(econf, 1.0, dx, 1e-3);
+    vector<double> lgrid = V_econf.getGrid()[0];
     vector<double> grid = V_econf.getGrid()[1];
     vector<double> rho = V_econf.getrho();
 
+    int i0 = lgrid[0]/dx;
+    int i1 = lgrid.back()/dx;
+
+    LOG(TRACE) << "Grid indices: from " << i0 << " to " << i1 << "\n";
+
     LOG(TRACE) << "Total integrated charge: " << V_econf.getQ() << "\n";
     LOG(TRACE) << "Recomputed charge: " << trapzInt(dx, vectorOperation(rho, grid, '*')) << "\n";
-    for (int i = 0; i < grid.size(); ++i)
+    for (int i = i0; i <= i1; ++i)
     {
-        cout << grid[i] << '\t' << rho[i] << '\t' << V_econf.V(grid[i]) << '\n';
+        cout << grid[i-i0] << '\t' << rho[i-i0] << '\t' << V_econf.Vgrid(i) << '\t' << V_econf.V(grid[i-i0]) << '\n';
     }
 }
