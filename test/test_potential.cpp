@@ -80,6 +80,14 @@ TEST_CASE("Background charge on grid potential", "[BkgGridPotential]")
     REQUIRE(bpot.Vgrid(i0) == Approx(cpot.V(grid[1][0])));
     REQUIRE(bpot.Vgrid(0) == Approx(cpot.V(grid[1][-i0])));
     REQUIRE(bpot.Vgrid(i1) == Approx(cpot.V(grid[1][i1 - i0])));
+
+    // Check that the interpolation works well even near the grid points
+    REQUIRE(bpot.Vgrid(i0) == Approx(bpot.V(grid[1][0])));
+    REQUIRE(bpot.Vgrid(0) == Approx(bpot.V(grid[1][-i0])));
+    REQUIRE(bpot.Vgrid(i1) == Approx(bpot.V(grid[1][i1 - i0])));
+
+    // Check behaviour at long range
+    REQUIRE(bpot.V(2) == Approx(-0.5));
 }
 
 TEST_CASE("Electronic configuration potential", "[EConfPotential]")
