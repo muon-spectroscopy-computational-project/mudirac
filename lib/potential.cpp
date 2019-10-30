@@ -192,10 +192,12 @@ double BkgGridPotential::V(double r)
 
     if (xi < i0)
     {
+        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - inner\n";
         return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
     }
-    else if (xi > i0)
+    else if (xi > i1)
     {
+        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - outer\n";
         return -Q / r;
     }
     else
@@ -204,6 +206,7 @@ double BkgGridPotential::V(double r)
         int il = floor(xi);
         int ir = ceil(xi);
 
+        LOG(TRACE) << "Computing potential from bacgkround charge at point " << r << " - on grid\n";
         double drl = grid[1][il] * (exp(xi - il) - 1);
         double f = drl / (grid[1][ir] - grid[1][il]);
         return lerp(Vpot[il], Vpot[ir], f);
@@ -248,6 +251,8 @@ EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc, double 
                                double max_r0, double min_r1)
 {
     this->ec = econf;
+    this->rc = rc;
+    this->dx = dx;
 
     // Now to find the boundaries...
     double r = rc;

@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     vector<double> rho = V_econf.getrho();
 
     LOG(TRACE) << "Total integrated charge: " << V_econf.getQ() << "\n";
+    LOG(TRACE) << "Recomputed charge: " << trapzInt(dx, vectorOperation(rho, grid, '*')) << "\n";
     for (int i = 0; i < grid.size(); ++i)
     {
         cout << grid[i] << '\t' << rho[i] << '\t' << V_econf.V(grid[i]) << '\n';
