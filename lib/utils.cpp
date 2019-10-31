@@ -170,7 +170,13 @@ double genLaguerrePoly(double x, int n, double alpha)
         return L;
         break;
     case 1:
-        return (1.0 + alpha - x);
+        return 1.0 + alpha - x;
+        break;
+    case 2:
+        return 0.5*x*x - (alpha+2.0)*x + 0.5*alpha*alpha + 1.5*alpha+1.0;
+        break;
+    case 3:
+        return -(x*x*x)/6.0+(alpha+3.0)*x*x/2.0-(0.5*alpha*alpha+2.5*alpha+3)*x + (alpha+1)*(alpha+2)*(alpha+3)/6.0;
         break;
     default:
         return ((2 * n - 1 + alpha - x) * genLaguerrePoly(x, n - 1, alpha) -
