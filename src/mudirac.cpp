@@ -72,6 +72,11 @@ int main(int argc, char *argv[])
             LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << xr_lines[i] << " failed with AtomErrorCode " << aerr << "\n";
             return -1;
         }
+        catch (const exception& e) 
+        {
+            LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
+            return -1;
+        }
 
         // Compute transition probability
         TransitionMatrix tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);

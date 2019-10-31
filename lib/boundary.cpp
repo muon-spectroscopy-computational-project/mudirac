@@ -41,13 +41,13 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
 
     if (P.size() != N || r.size() != N || N < 4)
     {
-        throw "Invalid array size passed to boundaryDiracCoulomb";
+        throw invalid_argument("Invalid array size passed to boundaryDiracCoulomb");
     }
 
     K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
     if (K < 0)
     {
-        throw "Can't compute boundary conditions for non-bound state";
+        throw invalid_argument("Can't compute boundary conditions for non-bound state");
     }
     K = sqrt(K);
 
@@ -60,7 +60,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         double gamma = k * k - pow(Physical::alpha * Z, 2.0);
         if (gamma < 0)
         {
-            throw "Can't compute boundary conditions for state with point-like nucleus and negative gamma";
+            throw invalid_argument("Can't compute boundary conditions for state with point-like nucleus and negative gamma");
         }
         gamma = sqrt(gamma);
         // Point like
@@ -101,8 +101,8 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         if (P[N - i] == 0)
         {
             // We went below numerical precision!
-            LOG(ERROR) << "Boundary conditions give zero at r = " << r[N - i] << "; a smaller grid is necessary";
-            throw "Boundary conditions give zero at the outside edge - you may need a smaller grid";
+            LOG(ERROR) << SPECIAL << "Boundary conditions give zero at r = " << r[N - i] << "; a smaller grid is necessary\n";
+            throw runtime_error("Boundary conditions give zero at the outside edge - you may need a smaller grid");
         }
     }
 
