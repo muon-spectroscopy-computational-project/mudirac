@@ -38,10 +38,12 @@ public:
     int maxn();
     int totQ();
     double innerShellRadius();
+    double outerShellRadius();
     double hydrogenicChargeDensity(double r);
 
 private:
     vector<vector<int>> epop;
+    vector<int> Zshell;
     vector<vector<int>> parseConfig(string config);
 };
 

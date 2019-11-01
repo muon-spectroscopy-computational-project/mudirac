@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
     ElectronicConfiguration econf(el, -1, 1, true, true);
     CoulombSpherePotential V_coulomb(-econf.totQ(), R);
-    EConfPotential V_econf(econf, econf.innerShellRadius(), dx, 1e-4);
+    EConfPotential V_econf(econf, econf.innerShellRadius(), dx, 1e-4, -1, econf.outerShellRadius());
     vector<double> lgrid = V_econf.getGrid()[0];
     vector<double> grid = V_econf.getGrid()[1];
     vector<double> rho = V_econf.getrho();

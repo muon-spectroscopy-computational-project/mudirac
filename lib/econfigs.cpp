@@ -41,12 +41,27 @@ ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu
     if (Z < 0)
     {
         Z = -totQ();
-    }
+    }    
 
     this->Z = Z;
     this->mu = mu;
     this->shield = shield;
     this->dirac = dirac;
+
+    // Assign the shell Z
+    if (shield) {
+        Zshell = vector<int>(0);
+        int etot = 0;
+        for (int n = 1; n <= epop.size(); ++n) {
+            Zshell.push_back(Z-etot);
+            for (int l = 0; l < n; ++l) {
+                etot += epop[n-1][l];
+            }
+        }
+    }
+    else {
+        Zshell = vector<int>(epop.size(), Z);
+    }
 }
 
 /**
@@ -116,6 +131,22 @@ double ElectronicConfiguration::innerShellRadius()
 }
 
 /**
+ * @brief  Radius of the outermost electronic shell
+ * @note   Radius of the outermost electronic shell estimated
+ * empirically as
+ * 
+ * a = n**3/(2Z)
+ * 
+ * for n the largest shell with population greater than zero.
+ * 
+ * @retval The outermost shell's radius
+ */
+double ElectronicConfiguration::outerShellRadius()
+{
+    return pow(epop.size(), 3.0) * 0.5 / Zshell[epop.size()-1];
+}
+
+/**
  * @brief  Total charge of this configuration
  * @note   Total charge of this configuration
  * 
@@ -145,12 +176,12 @@ int ElectronicConfiguration::totQ()
  */
 double ElectronicConfiguration::hydrogenicChargeDensity(double r)
 {
-    double Zn = Z;
     double rho = 0;
+    int Zn;
 
     for (int n = 1; n <= epop.size(); ++n)
     {
-        int npop = 0;
+        Zn = Zshell[n-1];
 
         for (int l = 0; l < n; ++l)
         {
@@ -168,7 +199,7 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
                     pd = min(epop[n - 1][l], 2 * l);
                     // j = l + 1/2
                     ku = -l - 1;
-                    pu = max(epop[n - 1][l]-pd, 0);
+                    pu = max(epop[n - 1][l] - pd, 0);
                 }
                 else
                 {
@@ -193,12 +224,6 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
             {
                 rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
             }
-
-            npop += epop[n - 1][l];
-        }
-        if (shield)
-        {
-            Zn -= npop;
         }
     }
 
