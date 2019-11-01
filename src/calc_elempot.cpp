@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    AixLog::Log::init<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "print_econf.log");
+    AixLog::Log::init<AixLog::SinkFile>(AixLog::Severity::trace, AixLog::Type::normal, "calc_elempot.log");
 
     if (argc < 2)
     {
@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 
     LOG(TRACE) << "Grid indices: from " << i0 << " to " << i1 << "\n";
 
+    LOG(TRACE) << "Electronic configuration charge: " << econf.totQ() << "\n";
     LOG(TRACE) << "Total integrated charge: " << V_econf.getQ() << "\n";
     LOG(TRACE) << "Recomputed charge: " << trapzInt(dx, vectorOperation(rho, grid, '*')) << "\n";
     for (int i = i0; i <= i1; ++i)

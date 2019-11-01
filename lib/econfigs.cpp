@@ -148,9 +148,6 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
     double Zn = Z;
     double rho = 0;
 
-    LOG(INFO) << "Computing hydrogen-like charge density at r = " << r << " for atom with Z = " << Z << ", mu = " << mu << "\n";
-    LOG(INFO) << "Shielding: " << shield << " - Dirac: " << dirac << "\n";
-
     for (int n = 1; n <= epop.size(); ++n)
     {
         int npop = 0;
@@ -171,7 +168,7 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
                     pd = min(epop[n - 1][l], 2 * l);
                     // j = l + 1/2
                     ku = -l - 1;
-                    pu = max(epop[n - 1][l], 0);
+                    pu = max(epop[n - 1][l]-pd, 0);
                 }
                 else
                 {
@@ -196,8 +193,6 @@ double ElectronicConfiguration::hydrogenicChargeDensity(double r)
             {
                 rho += epop[n - 1][l] * pow(hydrogenicSchroWavefunction(r, Zn, mu, n, l), 2);
             }
-
-            LOG(TRACE) << "n = " << n << ", l = " << l << ", rhoTot =" << rho << "\n";
 
             npop += epop[n - 1][l];
         }

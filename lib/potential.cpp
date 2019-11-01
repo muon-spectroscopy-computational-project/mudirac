@@ -276,9 +276,9 @@ EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc, double 
         rho.push_back(ec.hydrogenicChargeDensity(r));
     }
 
-    LOG(INFO) << "Electronic configuration potential grid boundaries found\n";
-    LOG(INFO) << "\ti0 = " << i0 << " = " << rc * exp(i0 * dx) << "\n";
-    LOG(INFO) << "\ti1 = " << i1 << " = " << rc * exp(i1 * dx) << "\n";
+    LOG(INFO) << "Electronic configuration potential grid boundaries found:";
+    LOG(INFO) << " i0 = " << i0 << " = " << rc * exp(i0 * dx) << "  ";
+    LOG(INFO) << " i1 = " << i1 << " = " << rc * exp(i1 * dx) << "\n";
 
     grid = logGrid(rc, dx, i0, i1);
 

@@ -421,7 +421,7 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
 void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps, double max_r0, double min_r1) {
     use_econf = s;
     if (s) {
-        LOG(INFO) << "Initialising electronic background potential\n";
+        LOG(INFO) << "Initialising electronic background potential using rc = " << econf.innerShellRadius() << "\n";
         V_econf = EConfPotential(econf, econf.innerShellRadius(), dx, rho_eps, max_r0, min_r1);
     }
     reset();
@@ -805,7 +805,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
 
     if (r_in > r_tp)
     {
-        LOG(ERROR) << "Inner grid radius " << r_in << " is smaller than turning point radius " << r_tp << "; please decrease in_eps\n";
+        LOG(ERROR) << SPECIAL << "Inner grid radius " << r_in << " is smaller than turning point radius " << r_tp << "; please decrease in_eps\n";
         throw runtime_error("Inner grid radius is too small for given atom and state; please decrease in_eps");
     }
 

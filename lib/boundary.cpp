@@ -89,7 +89,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => 0, P = [" << P[0] << "," << P[1] << "], Q = [" << Q[0] << "," << Q[1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => 0 (" << r[0] << "), P = [" << P[0] << "," << P[1] << "], Q = [" << Q[0] << "," << Q[1] << "]\n";
 
     // r = inf limit
     // Same as above
@@ -106,7 +106,7 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => inf, P = [" << P[N - 2] << "," << P[N - 1] << "], Q = [" << Q[N - 2] << "," << Q[N - 1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => inf (" << r[N - 1] << "), P = [" << P[N - 2] << "," << P[N - 1] << "], Q = [" << Q[N - 2] << "," << Q[N - 1] << "]\n";
 }
 
 /**
