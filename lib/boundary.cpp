@@ -91,17 +91,34 @@ void boundaryDiracCoulomb(DiracState &state, double m, double Z, double R)
 
     // r = inf limit
     // Same as above
+    int iinf = 0;
+    double Pinf = 0;
+    while (Pinf == 0)
+    {
+        iinf++;
+        Pinf = exp(-K * state.grid[N - iinf]);
+    }
+
+    if (N - iinf < 3)
+    {
+        LOG(ERROR) << SPECIAL << "Boundary conditions give zero up to r = " << state.grid[N - iinf + 1] << "; a finer grid is necessary\n";
+        throw runtime_error("Boundary conditions give zero too close to the inside edge - you may need a finer grid");
+    }
+
+    // Readjust state if necessary
+    if (iinf > 1)
+    {
+        int dsize = iinf - 1;
+        LOG(INFO) << "Grid was too big for boundary conditions: shortening by " << dsize << " points";
+        state.resize(state.grid_indices.first, state.grid_indices.second - dsize);
+        N -= dsize;
+    }
+
     for (int i = 1; i < 3; ++i)
     {
-        state.P[N - i] = exp(-K * state.grid[N - i]);
-        state.Q[N - i] = -K / (m * Physical::c + state.E * Physical::alpha) * state.P[N - i];
-
-        if (state.P[N - i] == 0)
-        {
-            // We went below numerical precision!
-            LOG(ERROR) << SPECIAL << "Boundary conditions give zero at r = " << state.grid[N - i] << "; a smaller grid is necessary\n";
-            throw runtime_error("Boundary conditions give zero at the outside edge - you may need a smaller grid");
-        }
+        Pinf = exp(-K * state.grid[N - iinf - i]);
+        state.P[N - i] = Pinf;
+        state.Q[N - i] = -K / (m * Physical::c + state.E * Physical::alpha) * Pinf;
     }
 
     LOG(TRACE) << "Boundary conditions at r => inf (" << state.grid[N - 1] << "), P = [" << state.P[N - 2];

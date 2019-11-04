@@ -61,6 +61,38 @@ int SchroState::getn()
 }
 
 /**
+ * @brief  Shortens a state by cutting either at the beginning or the end
+ * @note   Shortens a state by resizing all its vectors cutting either at the beginning
+ * or at the end.
+ * 
+ * @param  i0:      New inner grid index. Must be bigger than the current one.
+ * @param  i1:      New outer grid index. Must be smaller than the current one.
+ * @retval None
+ */
+void SchroState::resize(int i0, int i1)
+{
+    if (i0 < grid_indices.first || i1 > grid_indices.second)
+    {
+        throw invalid_argument("Can not resize state beyond its original bounds");
+    }
+    if (i1 < i0)
+    {
+        throw invalid_argument("Can not resize state for i1 < i0");
+    }
+
+    int d0 = i0 - grid_indices.first;
+    int d1 = grid_indices.second - i1;
+
+    grid = vector<double>(grid.begin() + d0, grid.end() - d1);
+    loggrid = vector<double>(loggrid.begin() + d0, loggrid.end() - d1);
+    V = vector<double>(V.begin() + d0, V.end() - d1);
+    R = vector<double>(R.begin() + d0, R.end() - d1);
+
+    grid_indices.first = i0;
+    grid_indices.second = i1;
+}
+
+/**
  * @brief  Initialise a DiracState instance
  * @note   Creates a DiracState with given grid size
  * 
@@ -148,6 +180,39 @@ double DiracState::norm()
     }
 
     return sqrt(trapzInt(loggrid, rho));
+}
+
+/**
+ * @brief  Shortens a state by cutting either at the beginning or the end
+ * @note   Shortens a state by resizing all its vectors cutting either at the beginning
+ * or at the end.
+ * 
+ * @param  i0:      New inner grid index. Must be bigger than the current one.
+ * @param  i1:      New outer grid index. Must be smaller than the current one.
+ * @retval None
+ */
+void DiracState::resize(int i0, int i1)
+{
+    if (i0 < grid_indices.first || i1 > grid_indices.second)
+    {
+        throw invalid_argument("Can not resize state beyond its original bounds");
+    }
+    if (i1 < i0)
+    {
+        throw invalid_argument("Can not resize state for i1 < i0");
+    }
+
+    int d0 = i0 - grid_indices.first;
+    int d1 = grid_indices.second - i1;
+
+    grid = vector<double>(grid.begin() + d0, grid.end() - d1);
+    loggrid = vector<double>(loggrid.begin() + d0, loggrid.end() - d1);
+    V = vector<double>(V.begin() + d0, V.end() - d1);
+    Q = vector<double>(Q.begin() + d0, Q.end() - d1);
+    P = vector<double>(P.begin() + d0, P.end() - d1);
+
+    grid_indices.first = i0;
+    grid_indices.second = i1;
 }
 
 /**
