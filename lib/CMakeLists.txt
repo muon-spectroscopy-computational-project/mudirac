@@ -1,5 +1,6 @@
 add_library(atom STATIC atom.cpp)
 add_library(boundary STATIC boundary.cpp)
+add_library(state STATIC state.cpp)
 add_library(econfigs STATIC econfigs.cpp)
 add_library(hydrogenic STATIC hydrogenic.cpp)
 add_library(potential STATIC potential.cpp)
@@ -15,6 +16,6 @@ add_library(config STATIC config.cpp)
 # Define interface library
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE config output
-                      atom boundary potential
+                      atom boundary state potential
                       econfigs hydrogenic transforms 
                       wavefunction integrate elements input utils)
