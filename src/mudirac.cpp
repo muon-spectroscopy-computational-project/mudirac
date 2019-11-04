@@ -10,6 +10,15 @@ int main(int argc, char *argv[])
         config.parseFile(argv[1]);
         seed = splitString(argv[1], ".")[0];
     }
+    else
+    {
+        cout << "Input file missing\n";
+        cout << "Please use the program as `mudirac <input_file>`\n";
+        cout << "Quitting...\n";
+        return -1;
+    }
+
+    int output_verbosity = config.getIntValue("output");
 
     // Set up logging
     AixLog::Severity log_verbosity;
@@ -37,6 +46,12 @@ int main(int argc, char *argv[])
     LOG(INFO) << " \n";
 
     DiracAtom da = config.makeAtom();
+
+    // Print out potential at high levels of verbosity
+    if (output_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC))
+    {
+        writeEConfPotential(da.getPotentialElectronic(), seed + ".epot.dat");
+    }
 
     // Now unravel the required spectral lines
     vector<string> xr_lines = config.getStringValues("xr_lines");
@@ -72,7 +87,7 @@ int main(int argc, char *argv[])
             LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << xr_lines[i] << " failed with AtomErrorCode " << aerr << "\n";
             return -1;
         }
-        catch (const exception& e) 
+        catch (const exception &e)
         {
             LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
             return -1;
@@ -86,8 +101,6 @@ int main(int argc, char *argv[])
         trans_states.push_back(make_pair(ds1, ds2));
         trans_matrices.push_back(tmat);
     }
-
-    int output_verbosity = config.getIntValue("output");
 
     // Now create output files
     if (output_verbosity >= 1)
@@ -103,7 +116,7 @@ int main(int argc, char *argv[])
         {
             ds1 = trans_states[i].first;
             ds2 = trans_states[i].second;
-            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << "\t\t" << trans_matrices[i].totalRate()*Physical::s << '\n';
+            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << "\t\t" << trans_matrices[i].totalRate() * Physical::s << '\n';
         }
 
         out.close();

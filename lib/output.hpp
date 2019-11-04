@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <string>
 #include "atom.hpp"
+#include "potential.hpp"
 #include "constants.hpp"
 
 using namespace std;
@@ -23,5 +24,6 @@ using namespace std;
 
 void writeDiracState(DiracState ds, string fname);
 void writeTransitionMatrix(TransitionMatrix tmat, string fname);
+void writeEConfPotential(EConfPotential epot, string fname);
 
 #endif

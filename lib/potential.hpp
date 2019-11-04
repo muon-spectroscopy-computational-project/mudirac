@@ -109,6 +109,7 @@ public:
   double getV0() { return V0; };
   vector<double> getrho() { return rho; };
   vector<vector<double>> getGrid() { return grid; };
+  pair<int, int> getGridLimits() { return pair<int, int>(i0, i1); };
 
 protected:
   int i0, i1;
@@ -129,11 +130,11 @@ protected:
  */
 class EConfPotential : public BkgGridPotential
 {
-  public:
-    EConfPotential(ElectronicConfiguration econf=ElectronicConfiguration(), double rc=1, double dx=1e-2, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
+public:
+  EConfPotential(ElectronicConfiguration econf = ElectronicConfiguration(), double rc = 1, double dx = 1e-2, double rho_eps = 1e-5, double max_r0 = -1, double min_r1 = -1);
 
-  protected:
-    ElectronicConfiguration ec;
+protected:
+  ElectronicConfiguration ec;
 };
 
 #endif

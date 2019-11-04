@@ -106,13 +106,21 @@ public:
   double getrc() { return rc; };
   double getdx() { return dx; };
 
+  // Potential getters
+  static const uint HAS_UEHLING = 1;
+  static const uint HAS_ELECTRONIC = 2;
+  uint getPotentialFlags() { return HAS_UEHLING * use_uehling + HAS_ELECTRONIC * use_econf; };
+  CoulombSpherePotential getPotentialCoulomb() { return V; };
+  UehlingSpherePotential getPotentialUehling() { return V_uehling; };
+  EConfPotential getPotentialElectronic() { return V_econf; };
+
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000, double cut_low = 0, double cut_high = INFINITY);
   // Electronic background
-  void setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps=1e-5, double max_r0=-1, double min_r1=-1);
+  void setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps = 1e-5, double max_r0 = -1, double min_r1 = -1);
 
   // Clear computed states
   virtual void reset(){};
@@ -156,11 +164,12 @@ public:
 // A class used mainly for debugging purposes, works as DiracAtom but uses the analytical hydrogen-like solution
 class DiracIdealAtom : public DiracAtom
 {
-  public:
-    DiracIdealAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-                  double fc = 1.0, double dx = 0.005);
-  private:
-    DiracState convergeState(int n = 1, int k = -1);
+public:
+  DiracIdealAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
+                 double fc = 1.0, double dx = 0.005);
+
+private:
+  DiracState convergeState(int n = 1, int k = -1);
 };
 
 #endif

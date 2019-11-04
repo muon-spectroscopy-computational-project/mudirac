@@ -57,24 +57,55 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname)
     // Header
     out << "#####################################################\n";
     out << "# TransitionMatrix from state with k = " << tmat.k1 << " to state with k = " << tmat.k2 << "\n";
-    out << "# Total rate = " << tmat.totalRate()*Physical::s << " s^-1\n";
+    out << "# Total rate = " << tmat.totalRate() * Physical::s << " s^-1\n";
     out << "#####################################################\n";
 
-    for (int i = -1; i < (int)tmat.m1.size(); ++i) {
-        for (int j = -1; j < (int)tmat.m2.size(); ++j) {
-            if (j == -1 && i == -1) {
+    for (int i = -1; i < (int)tmat.m1.size(); ++i)
+    {
+        for (int j = -1; j < (int)tmat.m2.size(); ++j)
+        {
+            if (j == -1 && i == -1)
+            {
                 out << setw(5) << ' ';
             }
-            else if (j == -1) {
+            else if (j == -1)
+            {
                 out << setw(5) << tmat.m1[i];
             }
-            else if (i == -1) {
+            else if (i == -1)
+            {
                 out << setw(15) << tmat.m2[j];
             }
-            else {
+            else
+            {
                 out << setw(15) << tmat.T[i][j];
             }
         }
         out << '\n';
+    }
+}
+
+/**
+ * @brief  Write an EConfPotential object to a text file
+ * @note   Write down a full Electronic Configuration
+ * Potential in ASCII format, as grid, charge density,
+ * and potential.
+ * 
+ * @param  epot:        EConfPotential to print
+ * @param  fname:       Filename
+ * @retval None
+ */
+void writeEConfPotential(EConfPotential epot, string fname)
+{
+    ofstream out(fname);
+
+    int i0 = epot.getGridLimits().first;
+    vector<double> r = epot.getGrid()[1];
+
+    out << "# Q = " << epot.getQ() << "\n";
+
+    for (int i = 0; i < r.size(); ++i)
+    {
+        out << r[i] << '\t' << epot.getrho()[i] << '\t' << epot.Vgrid(i0 + i) << '\n';
     }
 }
