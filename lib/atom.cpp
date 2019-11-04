@@ -637,7 +637,8 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
     }
     LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
     // Start by applying boundary conditions
-    boundaryDiracCoulomb(state.Q, state.P, state.grid, state.E, state.k, mu, Z, R > state.grid[0] ? R : -1);
+    boundaryDiracCoulomb(state, mu, Z, R > state.grid[0] ? R : -1);
+    LOG(TRACE) << state.P[0] << "\n";
     tp = shootDiracLog(state.Q, state.P, state.grid, state.V, state.E, state.k, mu, dx);
     LOG(TRACE) << "Integration complete, turning point found at " << tp.i << "\n";
 

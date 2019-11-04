@@ -20,31 +20,28 @@
  * radial Dirac equations" - J. Phys. B: At. Mol. Opt. Phys., 42:055002, Jan 2009, and found in the Development Guide.
  * This method is used before passing Q and P to a routine such as shootDiracLog for integration.
  * 
- * @param  &Q: Vector for Q. Must have size greater than 4.
- * @param  &P: Vector for P. Must have size equal to Q.
- * @param  r:  Radial grid
- * @param  E:  Energy (binding + mc^2)
- * @param  k:  Quantum number (default = -1)
- * @param  m:  Mass of the particle (default = 1)
- * @param  Z:  Nuclear charge (default = 1)
- * @param  R:  Nuclear radius; considered point-like if <= 0 (default = -1)
+ * @param  &state: Dirac State to apply the boundary conditions to
+ * @param  m:      Mass of the particle (default = 1)
+ * @param  Z:      Nuclear charge (default = 1)
+ * @param  R:      Nuclear radius; considered point-like if <= 0 (default = -1)
  * @retval None
  */
-void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r, double E, int k, double m, double Z, double R)
+void boundaryDiracCoulomb(DiracState &state, double m, double Z, double R)
 {
     int l; // Angular momentum number
     bool s;
-    int N = Q.size();
+    int N = state.size();
     double K;
+    int k = state.k;
 
     qnumDirac2Schro(k, l, s);
 
-    if (P.size() != N || r.size() != N || N < 4)
+    if (N < 4)
     {
-        throw invalid_argument("Invalid array size passed to boundaryDiracCoulomb");
+        throw invalid_argument("Invalid state size passed to boundaryDiracCoulomb");
     }
 
-    K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
+    K = pow(m * Physical::c, 2) - pow(state.E * Physical::alpha, 2);
     if (K < 0)
     {
         throw invalid_argument("Can't compute boundary conditions for non-bound state");
@@ -67,8 +64,8 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
         for (int i = 0; i < 2; ++i)
         {
-            P[i] = pow(r[i], gamma);
-            Q[i] = Z * Physical::alpha / (gamma - k) * P[i];
+            state.P[i] = pow(state.grid[i], gamma);
+            state.Q[i] = Z * Physical::alpha / (gamma - k) * state.P[i];
         }
     }
     else
@@ -78,35 +75,37 @@ void boundaryDiracCoulomb(vector<double> &Q, vector<double> &P, vector<double> r
         {
             if (k < 0)
             {
-                P[i] = pow(r[i], -k);
-                Q[i] = pow(r[i], -k + 1) * 1.5 * Z * Physical::alpha / (R * (-2 * k + 1));
+                state.P[i] = pow(state.grid[i], -k);
+                state.Q[i] = pow(state.grid[i], -k + 1) * 1.5 * Z * Physical::alpha / (R * (-2 * k + 1));
             }
             else
             {
-                P[i] = pow(r[i], k + 2);
-                Q[i] = -pow(r[i], k + 1) * Physical::c * (2 * k + 1) * R / (1.5 * Z);
+                state.P[i] = pow(state.grid[i], k + 2);
+                state.Q[i] = -pow(state.grid[i], k + 1) * Physical::c * (2 * k + 1) * R / (1.5 * Z);
             }
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => 0 (" << r[0] << "), P = [" << P[0] << "," << P[1] << "], Q = [" << Q[0] << "," << Q[1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => 0 (" << state.grid[0] << "), P = [" << state.P[0];
+    LOG(TRACE) << "," << state.P[1] << "], Q = [" << state.Q[0] << "," << state.Q[1] << "]\n";
 
     // r = inf limit
     // Same as above
     for (int i = 1; i < 3; ++i)
     {
-        P[N - i] = exp(-K * r[N - i]);
-        Q[N - i] = -K / (m * Physical::c + E * Physical::alpha) * P[N - i];
+        state.P[N - i] = exp(-K * state.grid[N - i]);
+        state.Q[N - i] = -K / (m * Physical::c + state.E * Physical::alpha) * state.P[N - i];
 
-        if (P[N - i] == 0)
+        if (state.P[N - i] == 0)
         {
             // We went below numerical precision!
-            LOG(ERROR) << SPECIAL << "Boundary conditions give zero at r = " << r[N - i] << "; a smaller grid is necessary\n";
+            LOG(ERROR) << SPECIAL << "Boundary conditions give zero at r = " << state.grid[N - i] << "; a smaller grid is necessary\n";
             throw runtime_error("Boundary conditions give zero at the outside edge - you may need a smaller grid");
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => inf (" << r[N - 1] << "), P = [" << P[N - 2] << "," << P[N - 1] << "], Q = [" << Q[N - 2] << "," << Q[N - 1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => inf (" << state.grid[N - 1] << "), P = [" << state.P[N - 2];
+    LOG(TRACE) << "," << state.P[N - 1] << "], Q = [" << state.Q[N - 2] << "," << state.Q[N - 1] << "]\n";
 }
 
 /**

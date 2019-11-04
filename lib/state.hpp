@@ -32,6 +32,7 @@ public:
   State();
 
   virtual double norm() = 0;
+  virtual int size() = 0;
 };
 
 class SchroState : public State
@@ -44,6 +45,7 @@ public:
 
   int getn();
   double norm() override;
+  int size() override { return R.size(); };
 };
 
 class DiracState : public State
@@ -63,6 +65,7 @@ public:
   int getl();
   bool gets();
   double norm() override;
+  int size() override { return Q.size(); };
 
   void continuify(TurningPoint tp);
   void findNodes(double tol = 1e-6);
