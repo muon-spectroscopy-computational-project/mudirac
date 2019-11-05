@@ -5,16 +5,21 @@ int main(int argc, char *argv[])
     string seed = "mudirac";
     MuDiracInputFile config;
 
-    if (argc > 1)
-    {
-        config.parseFile(argv[1]);
-        seed = splitString(argv[1], ".")[0];
-    }
-    else
+    if (argc < 2)
     {
         cout << "Input file missing\n";
         cout << "Please use the program as `mudirac <input_file>`\n";
         cout << "Quitting...\n";
+        return -1;
+    }
+
+    seed = splitString(argv[1], ".")[0];
+    try {
+        config.parseFile(argv[1]);
+    }
+    catch (runtime_error e) {
+        cout << "Invalid configuration file:\n";
+        cout << e.what() << "\n";
         return -1;
     }
 

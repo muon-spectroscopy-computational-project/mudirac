@@ -82,7 +82,8 @@ InputNode<T>::InputNode(vector<T> default_value, bool case_sensitive)
 template <>
 bool InputNode<bool>::parse(string s) const
 {
-    if (!case_sensitive) {
+    if (!case_sensitive)
+    {
         s = upperString(s);
     }
     if (s == "T" || s == "TRUE")
@@ -334,6 +335,11 @@ void InputFile::parseFile(string path)
         else if (int_values.find(key) != int_values.end())
         {
             int_values[key].parseValue(value);
+        }
+        else
+        {
+            // Just non existant?
+            throw runtime_error("Invalid keyword " + key + " found in input file");
         }
     }
 }
