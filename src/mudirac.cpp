@@ -14,10 +14,12 @@ int main(int argc, char *argv[])
     }
 
     seed = splitString(argv[1], ".")[0];
-    try {
+    try
+    {
         config.parseFile(argv[1]);
     }
-    catch (runtime_error e) {
+    catch (runtime_error e)
+    {
         cout << "Invalid configuration file:\n";
         cout << e.what() << "\n";
         return -1;
@@ -60,35 +62,86 @@ int main(int argc, char *argv[])
 
     // Now unravel the required spectral lines
     vector<string> xr_lines = config.getStringValues("xr_lines");
-    vector<TransitionData> transitions;
+    vector<int> n1range, n2range, l1range, l2range;
+    vector<bool> s1range, s2range;
+    vector<TransLineSpec> transqnums;
 
     for (int i = 0; i < xr_lines.size(); ++i)
     {
-        int n1, l1, n2, l2;
-        bool s1, s2;
-        TransitionData tdata;
-        vector<string> states = splitString(xr_lines[i], "-");
+        vector<string> ranges = splitString(xr_lines[i], "-");
 
-        if (states.size() != 2)
+        if (ranges.size() != 2)
         {
             throw invalid_argument("Invalid spectral line in input file");
         }
 
-        parseIupacState(states[0], n1, l1, s1);
-        parseIupacState(states[1], n2, l2, s2);
+        vector<int> nr, lr;
+        vector<bool> sr;
 
-        LOG(INFO) << "Computing transition " << states[0] << " - " << states[1] << "\n";
+        parseIupacRange(ranges[0], nr, lr, sr);
+        n1range.insert(n1range.end(), nr.begin(), nr.end());
+        l1range.insert(l1range.end(), lr.begin(), lr.end());
+        s1range.insert(s1range.end(), sr.begin(), sr.end());
+
+        parseIupacRange(ranges[1], nr, lr, sr);
+        n2range.insert(n2range.end(), nr.begin(), nr.end());
+        l2range.insert(l2range.end(), lr.begin(), lr.end());
+        s2range.insert(s2range.end(), sr.begin(), sr.end());
+    }
+
+    for (int i = 0; i < n1range.size(); ++i)
+    {
+        for (int j = 0; j < n2range.size(); ++j)
+        {
+            TransLineSpec tnums;
+            tnums.n1 = n1range[i];
+            tnums.l1 = l1range[i];
+            tnums.s1 = s1range[i];
+
+            tnums.n2 = n2range[i];
+            tnums.l2 = l2range[i];
+            tnums.s2 = s2range[i];
+
+            if (tnums.n2 > tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
+            {
+                continue;
+            }
+
+            transqnums.push_back(tnums);
+        }
+    }
+
+    vector<TransitionData> transitions;
+
+    for (int i = 0; i < transqnums.size(); ++i)
+    {
+        int n1, l1, n2, l2;
+        bool s1, s2;
+        TransitionData tdata;
+
+        n1 = transqnums[i].n1;
+        l1 = transqnums[i].l1;
+        s1 = transqnums[i].s1;
+        n2 = transqnums[i].n2;
+        l2 = transqnums[i].l2;
+        s2 = transqnums[i].s2;
+
+        string state1, state2;
+        state1 = printIupacState(n1, l1, s1);
+        state2 = printIupacState(n2, l2, s2);
+
+        LOG(INFO) << "Computing transition " << state1 << " - " << state2 << "\n";
 
         try
         {
-            LOG(INFO) << "Computing state " << states[0] << "\n";
+            LOG(INFO) << "Computing state " << state1 << "\n";
             tdata.ds1 = da.getState(n1, l1, s1);
-            LOG(INFO) << "Computing state " << states[1] << "\n";
+            LOG(INFO) << "Computing state " << state2 << "\n";
             tdata.ds2 = da.getState(n2, l2, s2);
         }
         catch (AtomErrorCode aerr)
         {
-            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << xr_lines[i] << " failed with AtomErrorCode " << aerr << "\n";
+            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << state1 << "-" << state2 << " failed with AtomErrorCode " << aerr << "\n";
             return -1;
         }
         catch (const exception &e)
@@ -99,7 +152,7 @@ int main(int argc, char *argv[])
 
         // Compute transition probability
         tdata.tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
-        
+
         LOG(INFO) << "Transition energy = " << (tdata.ds2.E - tdata.ds1.E) / (Physical::eV * 1000) << " kEv\n";
 
         transitions.push_back(tdata);
