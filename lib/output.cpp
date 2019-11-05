@@ -138,7 +138,7 @@ void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, doub
 
     for (int i = 0; i < N; ++i)
     {
-        double E = transitions[i].ds2.E - transitions[i].ds1.E;
+        double E = (transitions[i].ds2.E - transitions[i].ds1.E) / Physical::eV;
         minE = min(E, minE);
         maxE = max(E, maxE);
 

@@ -119,6 +119,8 @@ TEST_CASE("Splitting strings", "[splitstring]")
     CHECK(splitString("a,b c", ", ") == vector<string>{"a", "b", "c"});
     // Separators at the beginning
     CHECK(splitString("  a,b c", ", ", true) == vector<string>{"a", "b", "c"});
+    // Maximum count
+    CHECK(splitString("a,b,c", ",", false, 1) == vector<string>{"a", "b,c"});
 }
 
 TEST_CASE("Stripping strings", "[stripstring]")

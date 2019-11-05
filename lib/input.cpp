@@ -317,7 +317,7 @@ void InputFile::parseFile(string path)
         if (line.size() == 0)
             continue;
 
-        tokens = splitString(line, ":");
+        tokens = splitString(line, ":", true, 1);
         key = stripString(tokens[0]);
         value = stripString(tokens[1]);
         if (string_values.find(key) != string_values.end())

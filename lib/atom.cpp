@@ -796,7 +796,7 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
     // First, check if it's already calculated
     if (!force && states[make_tuple(n, l, s)].converged)
     {
-        LOG(DEBUG) << "State with n = " << n << ", k = " << k << " already calculated";
+        LOG(DEBUG) << "State with n = " << n << ", k = " << k << " already calculated\n";
         return;
     }
 

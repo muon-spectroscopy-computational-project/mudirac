@@ -70,8 +70,11 @@ int main(int argc, char *argv[])
     {
         vector<string> ranges = splitString(xr_lines[i], "-");
 
+        LOG(TRACE) << "Parsing XR line specification " << xr_lines[i] << "\n";
+
         if (ranges.size() != 2)
         {
+            LOG(ERROR) << SPECIAL << "Line " << xr_lines[i] << " can not be interpreted properly\n";
             throw invalid_argument("Invalid spectral line in input file");
         }
 
@@ -98,20 +101,24 @@ int main(int argc, char *argv[])
             tnums.l1 = l1range[i];
             tnums.s1 = s1range[i];
 
-            tnums.n2 = n2range[i];
-            tnums.l2 = l2range[i];
-            tnums.s2 = s2range[i];
+            tnums.n2 = n2range[j];
+            tnums.l2 = l2range[j];
+            tnums.s2 = s2range[j];
 
-            if (tnums.n2 > tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
+            if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
             {
                 continue;
             }
 
             transqnums.push_back(tnums);
+
+            LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
+            LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\t";
         }
     }
 
     vector<TransitionData> transitions;
+    vector<string> linenames;
 
     for (int i = 0; i < transqnums.size(); ++i)
     {
@@ -129,8 +136,9 @@ int main(int argc, char *argv[])
         string state1, state2;
         state1 = printIupacState(n1, l1, s1);
         state2 = printIupacState(n2, l2, s2);
+        linenames.push_back(state1 + "-" + state2);
 
-        LOG(INFO) << "Computing transition " << state1 << " - " << state2 << "\n";
+        LOG(INFO) << "Computing transition " << linenames.back() << "\n";
 
         try
         {
@@ -141,7 +149,7 @@ int main(int argc, char *argv[])
         }
         catch (AtomErrorCode aerr)
         {
-            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << state1 << "-" << state2 << " failed with AtomErrorCode " << aerr << "\n";
+            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << linenames.back() << " failed with AtomErrorCode " << aerr << "\n";
             return -1;
         }
         catch (const exception &e)
@@ -169,7 +177,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < transitions.size(); ++i)
         {
-            out << xr_lines[i] << '\t' << (transitions[i].ds2.E - transitions[i].ds1.E) / Physical::eV;
+            out << linenames[i] << '\t' << (transitions[i].ds2.E - transitions[i].ds1.E) / Physical::eV;
             out << "\t\t" << transitions[i].tmat.totalRate() * Physical::s << '\n';
         }
 
@@ -186,18 +194,18 @@ int main(int argc, char *argv[])
     if (output_verbosity >= 2)
     {
         // Save each individual state
-        for (int i = 0; i < xr_lines.size(); ++i)
+        for (int i = 0; i < transitions.size(); ++i)
         {
             for (int j = 0; j < 2; ++j)
             {
-                string fname = seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out";
+                string fname = seed + "." + linenames[i] + "." + to_string(j + 1) + ".out";
                 DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
 
-                LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j + 1) << "\n";
+                LOG(DEBUG) << "Printing out state file for line " << linenames[i] << ", state " << (j + 1) << "\n";
 
                 writeDiracState(ds, fname);
             }
-            string fname = seed + "." + xr_lines[i] + ".tmat.out";
+            string fname = seed + "." + linenames[i] + ".tmat.out";
             writeTransitionMatrix(transitions[i].tmat, fname);
         }
     }

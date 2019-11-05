@@ -411,7 +411,8 @@ string printIupacState(int n, int l, bool s)
 {
     string ans = "";
 
-    if (n < 1 || l < 0 || l >= n) {
+    if (n < 1 || l < 0 || l >= n)
+    {
         throw invalid_argument("Invalid quantum numbers passed to printIupacState");
     }
 
@@ -480,15 +481,23 @@ void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, ve
  * @param  s:       String to split
  * @param  sep:     Separator
  * @param  merge:   If true, merge multiple consecutive occurrences of sep
+ * @param  maxn:    Maximum number of splits (counting from the beginning)
  * @retval          Vector of string fragments
  */
-vector<string> splitString(string s, string sep, bool merge)
+vector<string> splitString(string s, string sep, bool merge, int maxn)
 {
     int pos = -1;
     vector<string> fragments;
 
+    maxn = maxn < 0 ? s.size() : maxn;
+
     while (s.size() > 0)
     {
+        if (maxn == 0)
+        {
+            fragments.push_back(s);
+            break;
+        }
         pos = s.find_first_of(sep);
         while (pos == 0 && merge)
         {
@@ -501,6 +510,7 @@ vector<string> splitString(string s, string sep, bool merge)
         s = s.substr(pos + 1);
         if (pos == string::npos)
             break;
+        maxn--;
     }
 
     return fragments;

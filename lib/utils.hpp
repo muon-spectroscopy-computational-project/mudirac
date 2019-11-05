@@ -54,7 +54,7 @@ void parseIupacState(string istate, int &n, int &l, bool &s);
 string printIupacState(int n, int l, bool s);
 void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, vector<bool> &srange);
 
-vector<string> splitString(string s, string sep = " ", bool merge = false);
+vector<string> splitString(string s, string sep = " ", bool merge = false, int maxn=-1);
 string stripString(string s, string strip = " \t\n");
 string upperString(string s);
 
