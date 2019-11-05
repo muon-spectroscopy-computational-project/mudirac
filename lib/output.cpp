@@ -109,3 +109,54 @@ void writeEConfPotential(EConfPotential epot, string fname)
         out << r[i] << '\t' << epot.getrho()[i] << '\t' << epot.Vgrid(i0 + i) << '\n';
     }
 }
+
+/**
+ * @brief  Write a simulated spectrum as an ASCII file
+ * @note   Write a simulated spectrum from the given transition
+ * energies and probabilities. The spectrum will be composed of a series of Gaussian
+ * lines centred at the transition energies, with height proportional to the probabilities.
+ * An exponential decay can be added to account for the potential loss of sensitivity 
+ * at high energy of the detector.
+ * 
+ * @param  energies:            Transition energies
+ * @param  intensities:         Transition probabilities
+ * @param  dE:                  Step of the points in the spectrum
+ * @param  lw:                  Line width for the Gaussians
+ * @param  expd:                Exponential decay factor
+ * @param  fname:               Name of the file to save
+ * @retval None
+ */
+void writeSimSpec(vector<double> energies, vector<double> intensities, double dE, double lw, double expd, string fname)
+{
+    ofstream out(fname);
+    int N = energies.size();
+    double minE, maxE; // Looking for the boundaries
+    minE = INFINITY;
+    maxE = 0;
+
+    for (int i = 0; i < N; ++i)
+    {
+        double E = energies[i];
+        minE = min(E, minE);
+        maxE = max(E, maxE);
+    }
+
+    // Now adjust the boundaries
+    minE = max(0.0, minE - 5 * lw);
+    maxE += 5 * lw;
+
+    for (double E = minE; E <= maxE; E += dE)
+    {
+        out << E << '\t';
+        double S = 0.0;
+        for (int i = 0; i < N; ++i)
+        {
+            S += exp(-0.5 * pow((energies[i] - E) / lw, 2)) * intensities[i];
+        }
+        if (expd > 0)
+        {
+            S *= exp(-E / expd);
+        }
+        out << S << '\n';
+    }
+}

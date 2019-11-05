@@ -109,6 +109,8 @@ int main(int argc, char *argv[])
         ofstream out(seed + ".xr.out");
         DiracState ds1, ds2;
 
+        vector<double> tE, tP;
+
         out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
         out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
 
@@ -116,7 +118,16 @@ int main(int argc, char *argv[])
         {
             ds1 = trans_states[i].first;
             ds2 = trans_states[i].second;
-            out << xr_lines[i] << '\t' << (ds2.E - ds1.E) / Physical::eV << "\t\t" << trans_matrices[i].totalRate() * Physical::s << '\n';
+            tE.push_back((ds2.E - ds1.E) / Physical::eV);
+            tP.push_back(trans_matrices[i].totalRate() * Physical::s);
+            out << xr_lines[i] << '\t' << tE.back() << "\t\t" << tP.back() << '\n';
+        }
+
+        if (config.getBoolValue("write_spec"))
+        {
+            // Write a spectrum
+            writeSimSpec(tE, tP, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
+                         seed + ".spec.dat");
         }
 
         out.close();

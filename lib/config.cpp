@@ -23,6 +23,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     // Boolean keywords
     this->defineBoolNode("uehling_correction", InputNode<bool>(false, false)); // Whether to use the Uehling potential correction
     this->defineBoolNode("ideal_atom", InputNode<bool>(false, false));         // If true, use the solution to the ideal hydrogen-like atom, ignore all corrections.
+    this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));                   // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
@@ -36,6 +37,9 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineDoubleNode("econf_rhoeps", InputNode<double>(1e-4));        // Density threshold at which to truncate the electronic charge background
     this->defineDoubleNode("econf_rin_max", InputNode<double>(-1));         // Upper limit to innermost radius for electronic charge background grid
     this->defineDoubleNode("econf_rout_min", InputNode<double>(-1));        // Lower limit to outermost radius for electronic charge background grid
+    this->defineDoubleNode("spec_step", InputNode<double>(1e2));           // Simulated spectrum: energy step (eV)
+    this->defineDoubleNode("spec_linewidth", InputNode<double>(1e3));     // Simulated spectrum: width of Gaussian-broadened lines (eV)
+    this->defineDoubleNode("spec_expdec", InputNode<double>(-1.0));       // Simulated spectrum: exponential decay factor (reproduces instrumental sensitivity)
     // Integer keywords
     this->defineIntNode("isotope", InputNode<int>(-1));         // Isotope to use for element
     this->defineIntNode("max_E_iter", InputNode<int>(100));     // Max iterations in energy search
