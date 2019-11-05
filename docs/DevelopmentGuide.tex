@@ -141,6 +141,26 @@ X_{>}(r, u | R) =\int_0^R x \left(e^{-2c|r-x|/u}-e^{-2c(r+x)/u}\right)  dx = \\
 
 which is the expression used for the Uehling potential in the implementation. The integration over $u$ can be carried out numerically.
 
+\subsection{Electronic shielding}
+
+The effect of other electrons orbiting the nucleus in shielding its positive charge from the muon, thus shifting the energy, is usually quite small. It becomes bigger for heavier nuclei and higher muon transitions, but in practice it never seems to exceed $\sim100 \,\mathrm{eV}$ in most cases that matter \cite{borie1982}. Accounting for it in full would require one to solve the Schr\"{o}dinger or Dirac equation simultaneously for the muon and for all orbiting electrons, using methods such as Density Functional Theory to account for the many-body interactions. This method would be overly complex and time consuming for a minimal gain in accuracy. Here we elect instead to make use of the method developed by Tauscher et al. \cite{tauscher1978}. This approximation uses the following algorithm:
+
+\begin{itemize}
+	\item treat the muon as close enough to the nucleus to shield completely its charge, thus reducing it to Z-1;
+	\item compute the density of the electrons in the n=1 shell as if they occupied unperturbed orbitals for a hydrogen-like atom;
+	\item subtract the total charge of the electrons added in this way from the effective nuclear charge that determines the orbitals of the electrons in the shell above; repeat until all electrons are placed.
+\end{itemize}
+
+So, for example, for a neutral sodium atom (Z=11), one would construct a total density consisting of:
+
+\begin{itemize}
+	\item 2 electrons in a 1s orbital calculated with Z = 10;
+	\item 8 electrons distributed between a 2s and a 2p orbital, both calculated with Z = 8;
+	\item 1 electron in a 3s orbital calculated with Z = 1.
+\end{itemize}
+
+In this way we account crudely for the shielding effect that inner electrons have on outer ones. The potential from this charge background is then calculated with the integration technique described in section \ref{subsec_bkg_pot}, and the result is added to the other terms (Coulomb and Uehling). The Uehling correction to the muon-electron interactions is considered trivial and ignored. This method has been shown to give the correct electronic shielding energy contribution for muons to a 5\% accuracy.
+
 \section{Dipole matrix elements}
 
 To compute the transition probabilities between two states in presence of an electromagnetic field we need to compute the dipole matrix element between them. For spontaneous emission between two states $a$ and $b$, in atomic units, we have \cite{payne1955}
@@ -314,7 +334,7 @@ V_N(r) = \begin{cases}
 \end{cases}
 \end{equation}
 
-\subsubsection{Background charge potential}
+\subsubsection{Background charge potential}\label{subsec_bkg_pot}
 In presence of a radial background charge distribution, one builds the potential by integrating the equation:
 
 \begin{equation}
