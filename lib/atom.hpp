@@ -56,9 +56,17 @@ public:
   vector<double> m2;
   vector<vector<double>> T;
 
+  TransitionMatrix() { return; };
   TransitionMatrix(int k1, int k2);
 
   double totalRate();
+};
+
+struct TransitionData
+{
+  DiracState ds1;
+  DiracState ds2;
+  TransitionMatrix tmat;
 };
 
 class Atom

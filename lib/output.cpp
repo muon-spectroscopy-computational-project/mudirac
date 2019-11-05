@@ -118,27 +118,32 @@ void writeEConfPotential(EConfPotential epot, string fname)
  * An exponential decay can be added to account for the potential loss of sensitivity 
  * at high energy of the detector.
  * 
- * @param  energies:            Transition energies
- * @param  intensities:         Transition probabilities
+ * @param  transitions:         A vector of TransitionData structs, containing all the necessary information
  * @param  dE:                  Step of the points in the spectrum
  * @param  lw:                  Line width for the Gaussians
  * @param  expd:                Exponential decay factor
  * @param  fname:               Name of the file to save
  * @retval None
  */
-void writeSimSpec(vector<double> energies, vector<double> intensities, double dE, double lw, double expd, string fname)
+void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, double expd, string fname)
 {
     ofstream out(fname);
-    int N = energies.size();
+
+    int N = transitions.size();
     double minE, maxE; // Looking for the boundaries
+    vector<double> energies, intensities;
+
     minE = INFINITY;
     maxE = 0;
 
     for (int i = 0; i < N; ++i)
     {
-        double E = energies[i];
+        double E = transitions[i].ds2.E - transitions[i].ds1.E;
         minE = min(E, minE);
         maxE = max(E, maxE);
+
+        energies.push_back(E);
+        intensities.push_back(transitions[i].tmat.totalRate() * transitions[i].tmat.m1.size());
     }
 
     // Now adjust the boundaries

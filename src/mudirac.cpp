@@ -60,14 +60,13 @@ int main(int argc, char *argv[])
 
     // Now unravel the required spectral lines
     vector<string> xr_lines = config.getStringValues("xr_lines");
-    vector<pair<DiracState, DiracState>> trans_states;
-    vector<TransitionMatrix> trans_matrices;
+    vector<TransitionData> transitions;
 
     for (int i = 0; i < xr_lines.size(); ++i)
     {
         int n1, l1, n2, l2;
         bool s1, s2;
-        DiracState ds1, ds2;
+        TransitionData tdata;
         vector<string> states = splitString(xr_lines[i], "-");
 
         if (states.size() != 2)
@@ -83,9 +82,9 @@ int main(int argc, char *argv[])
         try
         {
             LOG(INFO) << "Computing state " << states[0] << "\n";
-            ds1 = da.getState(n1, l1, s1);
+            tdata.ds1 = da.getState(n1, l1, s1);
             LOG(INFO) << "Computing state " << states[1] << "\n";
-            ds2 = da.getState(n2, l2, s2);
+            tdata.ds2 = da.getState(n2, l2, s2);
         }
         catch (AtomErrorCode aerr)
         {
@@ -99,12 +98,11 @@ int main(int argc, char *argv[])
         }
 
         // Compute transition probability
-        TransitionMatrix tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
+        tdata.tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
+        
+        LOG(INFO) << "Transition energy = " << (tdata.ds2.E - tdata.ds1.E) / (Physical::eV * 1000) << " kEv\n";
 
-        LOG(INFO) << "Transition energy = " << (ds2.E - ds1.E) / (Physical::eV * 1000) << " kEv\n";
-
-        trans_states.push_back(make_pair(ds1, ds2));
-        trans_matrices.push_back(tmat);
+        transitions.push_back(tdata);
     }
 
     // Now create output files
@@ -112,26 +110,20 @@ int main(int argc, char *argv[])
     {
         // Save a file for all lines
         ofstream out(seed + ".xr.out");
-        DiracState ds1, ds2;
-
-        vector<double> tE, tP;
 
         out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
         out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
 
-        for (int i = 0; i < xr_lines.size(); ++i)
+        for (int i = 0; i < transitions.size(); ++i)
         {
-            ds1 = trans_states[i].first;
-            ds2 = trans_states[i].second;
-            tE.push_back((ds2.E - ds1.E) / Physical::eV);
-            tP.push_back(trans_matrices[i].totalRate() * Physical::s);
-            out << xr_lines[i] << '\t' << tE.back() << "\t\t" << tP.back() << '\n';
+            out << xr_lines[i] << '\t' << (transitions[i].ds2.E - transitions[i].ds1.E) / Physical::eV;
+            out << "\t\t" << transitions[i].tmat.totalRate() * Physical::s << '\n';
         }
 
         if (config.getBoolValue("write_spec"))
         {
             // Write a spectrum
-            writeSimSpec(tE, tP, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
+            writeSimSpec(transitions, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
                          seed + ".spec.dat");
         }
 
@@ -146,14 +138,14 @@ int main(int argc, char *argv[])
             for (int j = 0; j < 2; ++j)
             {
                 string fname = seed + "." + xr_lines[i] + "." + to_string(j + 1) + ".out";
-                DiracState ds = (j == 0 ? trans_states[i].first : trans_states[i].second);
+                DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
 
                 LOG(DEBUG) << "Printing out state file for line " << xr_lines[i] << ", state " << (j + 1) << "\n";
 
                 writeDiracState(ds, fname);
             }
             string fname = seed + "." + xr_lines[i] + ".tmat.out";
-            writeTransitionMatrix(trans_matrices[i], fname);
+            writeTransitionMatrix(transitions[i].tmat, fname);
         }
     }
 }
