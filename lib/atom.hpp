@@ -100,6 +100,7 @@ public:
   double getA() { return A; };
   double getm() { return m; };
   double getmu() { return mu; };
+  double getM() { return M; };
   double getR() { return R; };
   double getV(double r);
   vector<double> getV(vector<double> r);

@@ -84,7 +84,8 @@ DiracAtom MuDiracInputFile::makeAtom()
 
         if (this->getStringValue("electronic_config") != "")
         {
-            ElectronicConfiguration econf(this->getStringValue("electronic_config"), da.getZ(), da.getmu(), true, true);
+            double e_mu = effectiveMass(1.0, da.getM());
+            ElectronicConfiguration econf(this->getStringValue("electronic_config"), da.getZ() - 1, e_mu, true, true);
             da.setElectBkgConfig(true, econf, this->getDoubleValue("econf_rhoeps"),
                                  this->getDoubleValue("econf_rin_max"),
                                  this->getDoubleValue("econf_rout_min"));
