@@ -173,10 +173,10 @@ double genLaguerrePoly(double x, int n, double alpha)
         return 1.0 + alpha - x;
         break;
     case 2:
-        return 0.5*x*x - (alpha+2.0)*x + 0.5*alpha*alpha + 1.5*alpha+1.0;
+        return 0.5 * x * x - (alpha + 2.0) * x + 0.5 * alpha * alpha + 1.5 * alpha + 1.0;
         break;
     case 3:
-        return -(x*x*x)/6.0+(alpha+3.0)*x*x/2.0-(0.5*alpha*alpha+2.5*alpha+3)*x + (alpha+1)*(alpha+2)*(alpha+3)/6.0;
+        return -(x * x * x) / 6.0 + (alpha + 3.0) * x * x / 2.0 - (0.5 * alpha * alpha + 2.5 * alpha + 3) * x + (alpha + 1) * (alpha + 2) * (alpha + 3) / 6.0;
         break;
     default:
         return ((2 * n - 1 + alpha - x) * genLaguerrePoly(x, n - 1, alpha) -
@@ -398,6 +398,30 @@ void parseIupacState(string istate, int &n, int &l, bool &s)
 }
 
 /**
+ * @brief  Return a IUPAC string describing the given state
+ * @note   Return a string description of a state of given n,
+ * l and s in standard IUPAC X-ray notation.
+ * 
+ * @param  n:   Principal quantum number
+ * @param  l:   Orbital quantum number
+ * @param  s:   Spin quantum number
+ * @retval 
+ */
+string printIupacState(int n, int l, bool s)
+{
+    string ans = "";
+
+    if (n < 1 || l < 0 || l >= n) {
+        throw invalid_argument("Invalid quantum numbers passed to printIupacState");
+    }
+
+    ans += 'J' + n;
+    ans += to_string(l == 0 ? 1 : (2 * l + s));
+
+    return ans;
+}
+
+/**
   * @brief  Parse a range of atomic states' quantum numbers from IUPAC notation
   * @note   Parse a range of atomic states' quantum numbers from IUPAC notation.
   * 
@@ -417,29 +441,34 @@ void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, ve
     bool s1, s2;
 
     vector<string> limits = splitString(irange, ":");
-    if (limits.size() == 1) {
+    if (limits.size() == 1)
+    {
         // It's not a range
         parseIupacState(limits[0], n1, l1, s1);
         nrange.push_back(n1);
         lrange.push_back(l1);
         srange.push_back(s1);
     }
-    else if (limits.size() == 2) {
+    else if (limits.size() == 2)
+    {
         // It's a range
         parseIupacState(limits[0], n1, l1, s1);
         parseIupacState(limits[1], n2, l2, s2);
 
-        for (int ni = n1; ni <= n2; ++ni) {
-            int omin = ni == n1? 2*l1+s1 : 1;
-            int omax = ni == n2? 2*l2+s2 : 2*ni-1;
-            for (int oi = omin; oi <= omax; ++oi) {
+        for (int ni = n1; ni <= n2; ++ni)
+        {
+            int omin = ni == n1 ? 2 * l1 + s1 : 1;
+            int omax = ni == n2 ? 2 * l2 + s2 : 2 * ni - 1;
+            for (int oi = omin; oi <= omax; ++oi)
+            {
                 nrange.push_back(ni);
-                lrange.push_back(oi /2);
-                srange.push_back(oi%2 == 1 && oi != 1);
+                lrange.push_back(oi / 2);
+                srange.push_back(oi % 2 == 1 && oi != 1);
             }
         }
     }
-    else {
+    else
+    {
         throw invalid_argument("Invalid range passed to parseIupacRange");
     }
 }

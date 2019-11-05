@@ -162,11 +162,19 @@ TEST_CASE("Analysing IUPAC state labels", "[parseIupacState]")
     CHECK(lrange == vector<int>{1});
     CHECK(srange == vector<bool>{true});
 
+    // String printing
+    CHECK(printIupacState(1, 0, false) == "K1");
+    CHECK(printIupacState(1, 0, true) == "K1");
+    CHECK(printIupacState(2, 1, false) == "L2");
+    CHECK(printIupacState(3, 2, true) == "M5");
+
     // Exceptions
     REQUIRE_THROWS(parseIupacState("B2", n, l, s));
     REQUIRE_THROWS(parseIupacState("L4", n, l, s));
     REQUIRE_THROWS(parseIupacState("M", n, l, s));
     REQUIRE_THROWS(parseIupacRange("K1:L2:M3", nrange, lrange, srange));
+    REQUIRE_THROWS(printIupacState(-1, 0, false));
+    REQUIRE_THROWS(printIupacState(1, 2, false));
 }
 
 TEST_CASE("Quantum numbers and Clebsch-Gordan coefficients", "[quantumNumbersAndCG]")

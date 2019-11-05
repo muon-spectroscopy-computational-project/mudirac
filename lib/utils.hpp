@@ -51,6 +51,7 @@ void qnumPrincipal2Nodes(int n, int l, int &nodes);
 double cgCoeff(int k, double m, bool s);
 
 void parseIupacState(string istate, int &n, int &l, bool &s);
+string printIupacState(int n, int l, bool s);
 void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, vector<bool> &srange);
 
 vector<string> splitString(string s, string sep = " ", bool merge = false);
