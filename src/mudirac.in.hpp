@@ -16,3 +16,10 @@
 #define PROJECT_VERSION "${PROJECT_VERSION}"
 
 using namespace std;
+
+struct TransLineSpec
+{
+    int n1, n2;
+    int l1, l2;
+    bool s1, s2;
+};
