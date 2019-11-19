@@ -169,6 +169,8 @@ vector<double> hydrogenicDiracWavefunction(double r, double Z, double mu, int n,
     rho = 2 * C * r;
     rhodep = pow(rho, gamma) * exp(-0.5 * rho);
 
+    // LOG(TRACE) << gamma << " " << C << " "<< rho << " " << rhodep << "\n";
+
     /* Formulas are from Wikipedia. No reliable reference could be found - Wiki
     references "The Quantum Theory of the Hydrogen Atom" by Felix Nendzig, 
     which is not an official publication.

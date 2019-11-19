@@ -14,12 +14,19 @@
 
 /**
  * @brief  Compute the effective mass of a two-body system
+ * @note   Compute the effective mass of a two-body system.
+ * Treat negative masses as infinite.
  *
  * @param  m1:  First mass
  * @param  m2:  Second mass
  * @retval      Effective mass
  */
-double effectiveMass(double m1, double m2) { return (m1 * m2) / (m1 + m2); }
+double effectiveMass(double m1, double m2)
+{
+    double im1 = m1 > 0 ? 1.0 / m1 : 0.0;
+    double im2 = m2 > 0 ? 1.0 / m2 : 0.0;
+    return 1.0 / (im1 + im2);
+}
 
 /**
  * @brief  Factorial of n

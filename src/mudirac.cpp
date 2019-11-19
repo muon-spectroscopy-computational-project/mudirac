@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
             transqnums.push_back(tnums);
 
             LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
-            LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\t";
+            LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
         }
     }
 
