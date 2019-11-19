@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
     }
 
     vector<TransitionData> transitions;
-    vector<string> linenames;
 
     for (int i = 0; i < transqnums.size(); ++i)
     {
@@ -136,9 +135,9 @@ int main(int argc, char *argv[])
         string state1, state2;
         state1 = printIupacState(n1, l1, s1);
         state2 = printIupacState(n2, l2, s2);
-        linenames.push_back(state1 + "-" + state2);
+        tdata.name = state1 + "-" + state2;
 
-        LOG(INFO) << "Computing transition " << linenames.back() << "\n";
+        LOG(INFO) << "Computing transition " << tdata.name << "\n";
 
         try
         {
@@ -149,7 +148,7 @@ int main(int argc, char *argv[])
         }
         catch (AtomErrorCode aerr)
         {
-            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << linenames.back() << " failed with AtomErrorCode " << aerr << "\n";
+            LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << tdata.name << " failed with AtomErrorCode " << aerr << "\n";
             return -1;
         }
         catch (const exception &e)
@@ -166,6 +165,15 @@ int main(int argc, char *argv[])
         transitions.push_back(tdata);
     }
 
+    // Sort transitions by energy if requested
+    if (config.getBoolValue("sort_byE"))
+    {
+        sort(transitions.begin(), transitions.end(),
+             [](TransitionData t1, TransitionData t2) {
+                 return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
+             });
+    }
+
     // Now create output files
     if (output_verbosity >= 1)
     {
@@ -177,8 +185,12 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < transitions.size(); ++i)
         {
-            out << linenames[i] << '\t' << (transitions[i].ds2.E - transitions[i].ds1.E) / Physical::eV;
-            out << "\t\t" << transitions[i].tmat.totalRate() * Physical::s << '\n';
+            double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
+            double tRate = transitions[i].tmat.totalRate();
+            if (dE <= 0 || tRate <= 0)
+                continue; // Transition is invisible
+            out << transitions[i].name << '\t' << dE / Physical::eV;
+            out << "\t\t" << tRate * Physical::s << '\n';
         }
 
         if (config.getBoolValue("write_spec"))
@@ -198,14 +210,14 @@ int main(int argc, char *argv[])
         {
             for (int j = 0; j < 2; ++j)
             {
-                string fname = seed + "." + linenames[i] + "." + to_string(j + 1) + ".out";
+                string fname = seed + "." + transitions[i].name + "." + to_string(j + 1) + ".out";
                 DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
 
-                LOG(DEBUG) << "Printing out state file for line " << linenames[i] << ", state " << (j + 1) << "\n";
+                LOG(DEBUG) << "Printing out state file for line " << transitions[i].name << ", state " << (j + 1) << "\n";
 
                 writeDiracState(ds, fname);
             }
-            string fname = seed + "." + linenames[i] + ".tmat.out";
+            string fname = seed + "." + transitions[i].name + ".tmat.out";
             writeTransitionMatrix(transitions[i].tmat, fname);
         }
     }

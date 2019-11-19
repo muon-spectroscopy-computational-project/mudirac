@@ -64,6 +64,7 @@ public:
 
 struct TransitionData
 {
+  string name;
   DiracState ds1;
   DiracState ds2;
   TransitionMatrix tmat;

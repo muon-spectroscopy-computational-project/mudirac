@@ -24,6 +24,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineBoolNode("uehling_correction", InputNode<bool>(false, false)); // Whether to use the Uehling potential correction
     this->defineBoolNode("ideal_atom", InputNode<bool>(false, false));         // If true, use the solution to the ideal hydrogen-like atom, ignore all corrections.
     this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
+    this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
     // Double keywords
     this->defineDoubleNode("mass", InputNode<double>(1));                   // Mass of orbiting particle (in muon masses)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence

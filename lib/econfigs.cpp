@@ -53,6 +53,11 @@ ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu
         Zshell = vector<int>(0);
         int etot = 0;
         for (int n = 1; n <= epop.size(); ++n) {
+            if (Z-etot <= 0) {
+                LOG(INFO) << "Truncating electronic configuration at n = " << n << " due to the entire nuclear charge being shielded\n";
+                epop = vector<vector<int>>(epop.begin(), epop.begin()+n-1);
+                break;
+            }
             Zshell.push_back(Z-etot);
             for (int l = 0; l < n; ++l) {
                 etot += epop[n-1][l];
