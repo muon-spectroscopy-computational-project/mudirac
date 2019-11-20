@@ -62,7 +62,21 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
     this->R = R;
     this->usteps = usteps;
     du = 1.0 / (usteps - 1.0);
-    uarg = vector<double>(usteps);
+    uarg = vector<double>(usteps, 0);
+    uker = vector<double>(usteps, 0);
+    u24c2 = vector<double>(usteps, 0);
+    uker_great = vector<double>(usteps, 0);
+    uker_small = vector<double>(usteps, 0);
+
+    // Initialise values to be reused
+    for (int i = 1; i < usteps; ++i)
+    {
+        double u = i * du;
+        uker[i] = sqrt(1 - u * u) * (1 + 0.5 * u * u);
+        u24c2[i] = pow(u * Physical::alpha, 2.0) / 4.0;
+        uker_great[i] = ukernel_r_greater(u, 0, R);
+        uker_small[i] = exp(-2 * R * Physical::c / u) * (R * u * Physical::alpha / 2 + u24c2[i]) - u24c2[i];
+    }
 
     if (R > 0)
     {
@@ -73,7 +87,7 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
         for (int i = 1; i < usteps; ++i)
         {
             double u = i * du;
-            uarg[i] = ukernel_r_verysmall(u, R) * sqrt(1 - u * u) * (1 + 0.5 * u * u);
+            uarg[i] = ukernel_r_verysmall(u, R) * uker[i];
         }
         uint0 = trapzInt(du, uarg);
     }
@@ -85,6 +99,14 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
     K = -2 * pow(Physical::alpha, 2) / 3 * rho;
 }
 
+/**
+ * @brief  Compute the Uehling integral kernel for r > R
+ * 
+ * @param  u
+ * @param  r 
+ * @param  R 
+ * @retval Kernel value
+ */
 double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
 {
     double ans = exp(-2 * r * Physical::c / u);
@@ -94,12 +116,78 @@ double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
     return ans;
 }
 
+/**
+ * @brief  Compute the Uehling integral kernel for r > R
+ * @note   Compute the Uehling integral kernel for r > R.
+ * This version of the function makes use of stored, pre-computed
+ * values for the u-grid and simplifications for the r = R case 
+ * for maximum efficiency.
+ * 
+ * @param  i    Grid index for u (u = du*i)
+ * @param  r    
+ * @param  rR   If true, consider r = R
+ * @retval Kernel value
+ */
+double UehlingSpherePotential::ukernel_r_greater(int i, double r, bool rR)
+{
+    double ans;
+    if (!rR)
+    {
+        ans = exp(-2 * r * Physical::c / (du * i));
+        ans *= uker_great[i];
+    }
+    else
+    {
+        double u = du * i;
+        ans = (r * u * Physical::alpha / 2 - u24c2[i]) + exp(-4 * r * Physical::c / u) * (r * u * Physical::alpha / 2 + u24c2[i]);
+    }
+    return ans;
+}
+
+/**
+ * @brief  Compute the Uehling integral kernel for r < R
+ * 
+ * @param  u
+ * @param  r 
+ * @param  R 
+ * @retval Kernel value
+ */
 double UehlingSpherePotential::ukernel_r_smaller(double u, double r, double R)
 {
     double ans = (exp(-2 * r * Physical::c / u) - exp(2 * r * Physical::c / u));
     ans *= (exp(-2 * R * Physical::c / u) * (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4) -
             pow(u * Physical::alpha, 2) / 4);
 
+    return ans;
+}
+
+/**
+ * @brief  Compute the Uehling integral kernel for r < R
+ * @note   Compute the Uehling integral kernel for r < R.
+ * This version of the function makes use of stored, pre-computed
+ * values for the u-grid and simplifications for the r = R case 
+ * for maximum efficiency.
+ * 
+ * @param  i    Grid index for u (u = du*i)
+ * @param  r    
+ * @param  rR   If true, consider r = R
+ * @retval Kernel value
+ */
+double UehlingSpherePotential::ukernel_r_smaller(int i, double r, bool rR)
+{
+    double ans;
+    double u = du * i;
+
+    if (!rR)
+    {
+        ans = (exp(-2 * r * Physical::c / u) - exp(2 * r * Physical::c / u));
+        ans *= uker_small[i];
+    }
+    else
+    {
+        double ecru = exp(-2 * r * Physical::c / u);
+        ans = (r * u * Physical::alpha / 2 + u24c2[i]) * (pow(ecru, 2) - 1) + u24c2[i] * (1 / ecru - ecru);
+    }
     return ans;
 }
 
@@ -135,14 +223,14 @@ double UehlingSpherePotential::V(double r)
         }
         else if (r > R)
         {
-            uarg[i] = ukernel_r_greater(u, r, R);
+            uarg[i] = ukernel_r_greater(i, r);
         }
         else
         {
-            uarg[i] = ukernel_r_greater(u, r, r) + ukernel_r_smaller(u, r, R) - ukernel_r_smaller(u, r, r);
+            uarg[i] = ukernel_r_greater(i, r, true) + ukernel_r_smaller(i, r) - ukernel_r_smaller(i, r, true);
         }
 
-        uarg[i] *= sqrt(1 - u * u) * (1 + 0.5 * u * u);
+        uarg[i] *= uker[i];
     }
     double ans = trapzInt(du, uarg);
 
@@ -175,7 +263,7 @@ BkgGridPotential::BkgGridPotential()
 }
 
 void BkgGridPotential::initPotential(vector<double> rho)
-{   
+{
     this->rho = rho;
     rho0 = rho[0];
     Vpot = vector<double>(i1 - i0 + 1);
@@ -204,12 +292,13 @@ double BkgGridPotential::V(double r)
         int il = floor(xi);
         int ir = ceil(xi);
 
-        if (il == ir) {
-            return Vpot[il-i0] + V0;
+        if (il == ir)
+        {
+            return Vpot[il - i0] + V0;
         }
-        double drl = grid[1][il-i0] * (exp((xi - il)*dx) - 1);
-        double f = drl / (grid[1][ir-i0] - grid[1][il-i0]);
-        return lerp(Vpot[il-i0], Vpot[ir-i0], f) + V0;
+        double drl = grid[1][il - i0] * (exp((xi - il) * dx) - 1);
+        double f = drl / (grid[1][ir - i0] - grid[1][il - i0]);
+        return lerp(Vpot[il - i0], Vpot[ir - i0], f) + V0;
     }
 }
 

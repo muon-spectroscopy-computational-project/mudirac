@@ -78,7 +78,11 @@ public:
   };
 
   static double ukernel_r_greater(double u, double r, double R);
+  double ukernel_r_greater(int i, double r, bool rR = false);
+
   static double ukernel_r_smaller(double u, double r, double R);
+  double ukernel_r_smaller(int i, double r, bool rR = false);
+
   static double ukernel_r_verysmall(double u, double R);
   static double ukernel_point(double u, double r);
 
@@ -87,7 +91,7 @@ protected:
   double exp_cutoff_low = 0.0;       // Cutoff point x under which we approximate exp(-x) = 1
   double Z, R, rho, K, V0, du, uint0;
   int usteps;
-  vector<double> uarg;
+  vector<double> uarg, uker, u24c2, uker_great, uker_small;
 };
 
 /**
