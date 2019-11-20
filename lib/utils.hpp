@@ -54,11 +54,25 @@ void parseIupacState(string istate, int &n, int &l, bool &s);
 string printIupacState(int n, int l, bool s);
 void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, vector<bool> &srange);
 
-vector<string> splitString(string s, string sep = " ", bool merge = false, int maxn=-1);
+vector<string> splitString(string s, string sep = " ", bool merge = false, int maxn = -1);
 string stripString(string s, string strip = " \t\n");
 string upperString(string s);
 
 // Templated function declarations
+/**
+ * @brief  Search if a vector contains an element
+ * 
+ * @tparam T        Type of the vectors' elements
+ * @param  v        Vector
+ * @param  e        Element
+ * @retval          True if e is in v
+ */
+template <typename T>
+bool vectorContains(vector<T> v, T e)
+{
+    return find(v.begin(), v.end(), e) != v.end();
+}
+
 /**
  * @brief Perform an element-wise operation on two vectors
  * 
@@ -66,7 +80,7 @@ string upperString(string s);
  * @param v1        First vector
  * @param v2        Second vector
  * @param op        Operator (can be +, -, *, / or ^)
- * @return vector<T> 
+ * @retval vector<T> 
  */
 template <typename T>
 vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op)
@@ -119,7 +133,7 @@ vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op)
  * @param v         Vector
  * @param x         Scalar
  * @param op        Operator (can be +, -, *, / or ^)
- * @return vector<T> 
+ * @retval vector<T> 
  */
 template <typename T>
 vector<T> vectorOperation(vector<T> v, T x, char op)

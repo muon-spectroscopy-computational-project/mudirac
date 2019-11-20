@@ -68,6 +68,14 @@ TEST_CASE("Factorials", "[factorial]")
     REQUIRE_THROWS(factorial(-1));
 }
 
+TEST_CASE("Vector contains", "[vectorContains]")
+{
+    vector<string> v = {"H", "He", "Li", "Be"};
+
+    CHECK(vectorContains<string>(v, "Li"));
+    CHECK(!vectorContains<string>(v, "Ne"));
+}
+
 TEST_CASE("Vector operations", "[vectorOperation]")
 {
     vector<double> v1(3, 2), v2(3, 3);
