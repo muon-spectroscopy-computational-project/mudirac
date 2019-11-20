@@ -62,13 +62,13 @@ int main(int argc, char *argv[])
 
     // Now unravel the required spectral lines
     vector<string> xr_lines = config.getStringValues("xr_lines");
-    vector<int> n1range, n2range, l1range, l2range;
-    vector<bool> s1range, s2range;
     vector<TransLineSpec> transqnums;
 
     for (int i = 0; i < xr_lines.size(); ++i)
     {
         vector<string> ranges = splitString(xr_lines[i], "-");
+        vector<int> n1range, n2range, l1range, l2range;
+        vector<bool> s1range, s2range;
 
         LOG(TRACE) << "Parsing XR line specification " << xr_lines[i] << "\n";
 
@@ -90,33 +90,35 @@ int main(int argc, char *argv[])
         n2range.insert(n2range.end(), nr.begin(), nr.end());
         l2range.insert(l2range.end(), lr.begin(), lr.end());
         s2range.insert(s2range.end(), sr.begin(), sr.end());
-    }
 
-    for (int i = 0; i < n1range.size(); ++i)
-    {
-        for (int j = 0; j < n2range.size(); ++j)
-        {
-            TransLineSpec tnums;
-            tnums.n1 = n1range[i];
-            tnums.l1 = l1range[i];
-            tnums.s1 = s1range[i];
-
-            tnums.n2 = n2range[j];
-            tnums.l2 = l2range[j];
-            tnums.s2 = s2range[j];
-
-            if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
+        for (int j = 0; j < n1range.size(); ++j)
             {
-                continue;
+                for (int k = 0; k < n2range.size(); ++k)
+                {
+                    TransLineSpec tnums;
+                    tnums.n1 = n1range[j];
+                    tnums.l1 = l1range[j];
+                    tnums.s1 = s1range[j];
+
+                    tnums.n2 = n2range[k];
+                    tnums.l2 = l2range[k];
+                    tnums.s2 = s2range[k];
+
+                    if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
+                    {
+                        continue;
+                    }
+
+                    transqnums.push_back(tnums);
+
+                    LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
+                    LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
+                }
             }
 
-            transqnums.push_back(tnums);
-
-            LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
-            LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
-        }
     }
 
+    
     vector<TransitionData> transitions;
 
     for (int i = 0; i < transqnums.size(); ++i)
