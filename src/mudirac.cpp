@@ -121,13 +121,14 @@ int main(int argc, char *argv[])
 
     }
 
-    
+    vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
     vector<TransitionData> transitions;
 
     for (int i = 0; i < transqnums.size(); ++i)
     {
         int n1, l1, n2, l2;
         bool s1, s2;
+        bool success = true;
         TransitionData tdata;
 
         n1 = transqnums[i].n1;
@@ -142,6 +143,17 @@ int main(int argc, char *argv[])
         state2 = printIupacState(n2, l2, s2);
         tdata.name = state1 + "-" + state2;
 
+        // Have these been tried before?
+        if (vectorContains(failconv_states, state1)) {
+            LOG(INFO) << "Skipping line " << tdata.name << " because " << state1 << " failed to converge before\n";
+            continue;
+        }
+        if (vectorContains(failconv_states, state2)) {
+            LOG(INFO) << "Skipping line " << tdata.name << " because " << state2 << " failed to converge before\n";
+            continue;
+        }
+        
+
         LOG(INFO) << "Computing transition " << tdata.name << "\n";
 
         try
@@ -152,14 +164,24 @@ int main(int argc, char *argv[])
             tdata.ds2 = da.getState(n2, l2, s2);
         }
         catch (AtomErrorCode aerr)
-        {
+        {            
             LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << tdata.name << " failed with AtomErrorCode " << aerr << "\n";
-            return -1;
+            success = false;
         }
         catch (const exception &e)
         {
             LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
-            return -1;
+            success = false;
+        }
+        if (!success) {
+            LOG(INFO) << "Convergence of one state failed for line " << tdata.name << ", skipping\n";
+            if (!tdata.ds1.converged) {
+                failconv_states.push_back(state1);
+            }
+            else {
+                failconv_states.push_back(state2);
+            }
+            continue;
         }
 
         // Compute transition probability

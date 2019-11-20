@@ -189,11 +189,13 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
  * @param  min_r1:      Minimum value for the outer radius of the electronic density grid. Will be ignored if negative
  * @retval None
  */
-void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps, double max_r0, double min_r1) {
+void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_eps, double max_r0, double min_r1)
+{
     use_econf = s;
-    if (s) {
-        max_r0 = max_r0 > 0? max_r0 : econf.innerShellRadius()/2.0;
-        min_r1 = min_r1 > 0? min_r1 : econf.outerShellRadius();
+    if (s)
+    {
+        max_r0 = max_r0 > 0 ? max_r0 : econf.innerShellRadius() / 2.0;
+        min_r1 = min_r1 > 0 ? min_r1 : econf.outerShellRadius();
         LOG(INFO) << "Initialising electronic background potential using rc = " << econf.innerShellRadius() << "  ";
         LOG(INFO) << "max_r0 = " << max_r0 << "  min_r1 = " << min_r1 << "\n";
         V_econf = EConfPotential(econf, econf.innerShellRadius(), dx, rho_eps, max_r0, min_r1);
