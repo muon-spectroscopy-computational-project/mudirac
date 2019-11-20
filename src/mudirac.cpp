@@ -4,6 +4,9 @@ int main(int argc, char *argv[])
 {
     string seed = "mudirac";
     MuDiracInputFile config;
+    
+    chrono::high_resolution_clock::time_point t0, t1;
+    t0 = chrono::high_resolution_clock::now();
 
     if (argc < 2)
     {
@@ -223,4 +226,8 @@ int main(int argc, char *argv[])
             writeTransitionMatrix(transitions[i].tmat, fname);
         }
     }
+
+    t1 = chrono::high_resolution_clock::now();
+
+    LOG(INFO) << "Calculation completed in " << chrono::duration_cast<chrono::milliseconds>(t1-t0).count()/1.0e3 << " seconds\n";
 }

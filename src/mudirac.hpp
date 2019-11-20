@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <chrono>
 #include "../lib/config.hpp"
 #include "../lib/atom.hpp"
 #include "../lib/output.hpp"
