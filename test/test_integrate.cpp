@@ -127,15 +127,11 @@ double shootQPTest(double (*fQ)(double), double (*fP)(double),
     if (dir == 'f')
     {
         Q[0] = fQ(x[0]);
-        Q[1] = fQ(x[1]);
         P[0] = fP(x[0]);
-        P[1] = fP(x[1]);
     }
     else
     {
-        Q[N - 2] = fQ(x[N - 2]);
         Q[N - 1] = fQ(x[N - 1]);
-        P[N - 2] = fP(x[N - 2]);
         P[N - 1] = fP(x[N - 1]);
     }
 
@@ -225,11 +221,11 @@ TEST_CASE("Trapezoidal integration", "[trapzInt]")
     REQUIRE(trapzIntTest(exp, 1e-2, 1, 1000, true, true) == Approx(exp(1) - exp(1e-2)));
 }
 
-TEST_CASE("Shooting integration", "[shootQ]")
+TEST_CASE("Shooting integration", "[shootRungeKutta]")
 {
     /* 
         Q = tan(x)
-        Q' = tan(x)^2 + 1
+        Q' = tan(x)^2 + 1 = tan(x)Q+1
     */
     auto one = [](double x) { return 1.0; };
     REQUIRE(shootTest(tan, tan, one, 0, 1, 2000) < ERRTOL_VHIGH);
@@ -261,8 +257,8 @@ TEST_CASE("Coupled integration", "[shootQP]")
     auto one = [](double x) { return 1.0; };
     auto negone = [](double x) { return -1.0; };
     auto zero = [](double x) { return 0.0; };
-    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000) < ERRTOL_HIGH);
-    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000, 'b') < ERRTOL_HIGH);
+    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000) < ERRTOL_VHIGH);
+    REQUIRE(shootQPTest(fQ, fP, zero, one, negone, zero, 0, 1, 1000, 'b') < ERRTOL_VHIGH);
 }
 
 TEST_CASE("Potential integration", "[shootPotentialLog]")

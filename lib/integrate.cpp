@@ -122,15 +122,15 @@ void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, doub
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
     {
-        Amid = (A[i]+A[i-step])/2;
-        Bmid = (B[i]+B[i-step])/2;
-        Qp = Q[i-step];
-        k1 = (A[i-step]*Qp+B[i-step])*h*step;
-        k2 = (Amid*(Qp+k1/2)+Bmid)*h*step;
-        k3 = (Amid*(Qp+k2/2)+Bmid)*h*step;
-        k4 = (A[i]*(Qp+k3)+B[i])*h*step;
-        
-        Q[i] = Qp+1.0/6.0*(k1+2*k2+2*k3+k4);
+        Amid = (A[i] + A[i - step]) / 2;
+        Bmid = (B[i] + B[i - step]) / 2;
+        Qp = Q[i - step];
+        k1 = (A[i - step] * Qp + B[i - step]) * h * step;
+        k2 = (Amid * (Qp + k1 / 2) + Bmid) * h * step;
+        k3 = (Amid * (Qp + k2 / 2) + Bmid) * h * step;
+        k4 = (A[i] * (Qp + k3) + B[i]) * h * step;
+
+        Q[i] = Qp + 1.0 / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4);
     }
 
     return;
@@ -161,8 +161,12 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
 {
     int N = Q.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
+    int from_i = (step == 1) ? 1 : N - 2;
     double QA, QB, QC, PA, PB, PC;
+
+    double Qp, Pp;
+    double AAmid, ABmid, BAmid, BBmid;
+    double k1A, k1B, k2A, k2B, k3A, k3B, k4A, k4B;
 
     // First, check size
     if (P.size() != N || AA.size() != N || AB.size() != N || BA.size() != N || BB.size() != N)
@@ -177,14 +181,23 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
     {
-        QC = 1 / h * (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step;
-        PC = 1 / h * (2 * P[i - step] - 0.5 * P[i - 2 * step]) * step;
-        QA = (step * 1.5 / h - AA[i]);
-        QB = -AB[i];
-        PA = (step * 1.5 / h - BB[i]);
-        PB = -BA[i];
-        Q[i] = (PC * QB - PA * QC) / (PB * QB - PA * QA);
-        P[i] = (PB * QC - PC * QA) / (PB * QB - PA * QA);
+        AAmid = (AA[i] + AA[i - step]) / 2;
+        ABmid = (AB[i] + AB[i - step]) / 2;
+        BAmid = (BA[i] + BA[i - step]) / 2;
+        BBmid = (BB[i] + BB[i - step]) / 2;
+        Pp = P[i - step];
+        Qp = Q[i - step];
+        k1A = (AA[i - step] * Qp + AB[i - step] * Pp) * h * step;
+        k1B = (BA[i - step] * Qp + BB[i - step] * Pp) * h * step;
+        k2A = (AAmid * (Qp + k1A / 2.0) + ABmid * (Pp + k1B / 2.0)) * h * step;
+        k2B = (BAmid * (Qp + k1A / 2.0) + BBmid * (Pp + k1B / 2.0)) * h * step;
+        k3A = (AAmid * (Qp + k2A / 2.0) + ABmid * (Pp + k2B / 2.0)) * h * step;
+        k3B = (BAmid * (Qp + k2A / 2.0) + BBmid * (Pp + k2B / 2.0)) * h * step;
+        k4A = (AA[i] * (Qp + k3A) + AB[i] * (Pp + k3B)) * h * step;
+        k4B = (BA[i] * (Qp + k3A) + BB[i] * (Pp + k3B)) * h * step;
+
+        Q[i] = Qp + 1.0 / 6.0 * (k1A + 2 * k2A + 2 * k3A + k4A);
+        P[i] = Pp + 1.0 / 6.0 * (k1B + 2 * k2B + 2 * k3B + k4B);
     }
 
     return;
