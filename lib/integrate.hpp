@@ -44,7 +44,7 @@ private:
 
 double trapzInt(vector<double> x, vector<double> y);
 double trapzInt(double dx, vector<double> y);
-void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h = 1, int stop_i = -1, char dir = 'f');
+void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, double h = 1, int stop_i = -1, char dir = 'f');
 void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<double> AB, vector<double> BA, vector<double> BB,
              double h = 1, int stop_i = -1, char dir = 'f');
 void shootNumerov(vector<double> &Q, vector<double> A, vector<double> B, double h = 1, int stop_i = -1, char dir = 'f');

@@ -8,6 +8,7 @@
 
 #include "../vendor/catch/catch.hpp"
 
+#define ERRTOL_VHIGH 1e-7
 #define ERRTOL_HIGH 1e-5
 #define ERRTOL_LOW 1e-3
 
@@ -64,7 +65,7 @@ double trapzIntTest(double (*f)(double), double x0 = 0, double x1 = 1, int N = 2
 }
 
 double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double),
-                 double x0 = 0, double x1 = 1, int N = 200, char type = 'Q', char dir = 'f')
+                 double x0 = 0, double x1 = 1, int N = 200, char type = 'R', char dir = 'f')
 {
     double err = 0.0;
     vector<double> x, A(N), B(N), Q(N);
@@ -77,18 +78,20 @@ double shootTest(double (*fQ)(double), double (*fA)(double), double (*fB)(double
     if (dir == 'f')
     {
         Q[0] = fQ(x[0]);
-        Q[1] = fQ(x[1]);
+        if (type == 'N') // Not required for Runge-Kutta
+            Q[1] = fQ(x[1]);
     }
     else
     {
-        Q[N - 2] = fQ(x[N - 2]);
+        if (type == 'N')
+            Q[N - 2] = fQ(x[N - 2]);
         Q[N - 1] = fQ(x[N - 1]);
     }
 
     switch (type)
     {
-    case 'Q':
-        shootQ(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
+    case 'R':
+        shootRungeKutta(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
         break;
     case 'N':
         shootNumerov(Q, A, B, x[1] - x[0], dir == 'f' ? -1 : 0, dir);
@@ -229,8 +232,8 @@ TEST_CASE("Shooting integration", "[shootQ]")
         Q' = tan(x)^2 + 1
     */
     auto one = [](double x) { return 1.0; };
-    REQUIRE(shootTest(tan, tan, one, 0, 1, 1000) < ERRTOL_HIGH);
-    REQUIRE(shootTest(tan, tan, one, 0, 1, 1000, 'Q', 'b') < ERRTOL_HIGH);
+    REQUIRE(shootTest(tan, tan, one, 0, 1, 2000) < ERRTOL_VHIGH);
+    REQUIRE(shootTest(tan, tan, one, 0, 1, 2000, 'R', 'b') < ERRTOL_VHIGH);
     /* 
         Q = exp(-x**2) + x
         Q' = -2x(Q-x) + 1 = (-2x)Q+(2x^2+1)
@@ -238,8 +241,8 @@ TEST_CASE("Shooting integration", "[shootQ]")
     auto fQ = [](double x) { return exp(-x * x) + x; };
     auto fA = [](double x) { return -2 * x; };
     auto fB = [](double x) { return 2 * x * x + 1; };
-    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000) < ERRTOL_HIGH);
-    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 1000, 'Q', 'b') < ERRTOL_HIGH);
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 2000) < ERRTOL_VHIGH);
+    REQUIRE(shootTest(fQ, fA, fB, 0, 1, 2000, 'R', 'b') < ERRTOL_VHIGH);
 }
 
 TEST_CASE("Numerov integration", "[shootNumerov]")

@@ -89,7 +89,7 @@ double trapzInt(double dx, vector<double> y)
  * 
  *      Q' = A*Q+B
  * 
- * with a second order shooting method, up to a given index, either forward or backwards.
+ * with a fourth order Runge-Kutta method, up to a given index, either forward or backwards.
  * 
  * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
  * @param  A: Vector for A (see definition above). Same size as Q.
@@ -99,12 +99,15 @@ double trapzInt(double dx, vector<double> y)
  * @param  dir: Integration direction, either forward 'f' or backwards 'b' (default = 'f').
  * @retval None
  */
-void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
+void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
 {
     int N = Q.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
+    int from_i = (step == 1) ? 1 : N - 2;
     double QA, QB;
+
+    double Amid, Bmid, Qp;
+    double k1, k2, k3, k4;
 
     // First, check size
     if (A.size() != N || B.size() != N)
@@ -119,9 +122,15 @@ void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
     {
-        QA = 1.5 * step / h - A[i];
-        QB = (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step / h + B[i];
-        Q[i] = QB / QA;
+        Amid = (A[i]+A[i-step])/2;
+        Bmid = (B[i]+B[i-step])/2;
+        Qp = Q[i-step];
+        k1 = (A[i-step]*Qp+B[i-step])*h*step;
+        k2 = (Amid*(Qp+k1/2)+Bmid)*h*step;
+        k3 = (Amid*(Qp+k2/2)+Bmid)*h*step;
+        k4 = (A[i]*(Qp+k3)+B[i])*h*step;
+        
+        Q[i] = Qp+1.0/6.0*(k1+2*k2+2*k3+k4);
     }
 
     return;
@@ -389,5 +398,5 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
     }
 
     // Now actually integrate
-    shootQ(zeta, A, B, dx, turn_i, dir);
+    shootRungeKutta(zeta, A, B, dx, turn_i, dir);
 }
