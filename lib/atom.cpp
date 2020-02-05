@@ -670,17 +670,22 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     zetai = vector<double>(N, 0);
     zetae = vector<double>(N, 0);
 
+
+    double eps = 0e-10;
+
     err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
+    err = tp.Qi * tp.Pi/ (pow(tp.Pi, 2)+eps) -  tp.Qe * tp.Pe/ (pow(tp.Pe, 2)+eps);
     // Compute the derivative of the error in dE
+
     for (int i = 0; i < N; ++i)
     {
-        y[i] = state.Q[i] / state.P[i];
+        y[i] = state.Q[i] * state.P[i]/ (pow(state.P[i], 2) + eps);
     }
     // First the forward version
-    y[tp.i] = tp.Qi / tp.Pi;
+    y[tp.i] = tp.Qi * tp.Pi/ (pow(tp.Pi, 2)+eps);
     shootDiracErrorDELog(zetai, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx);
     // Then the backwards one
-    y[tp.i] = tp.Qe / tp.Pe;
+    y[tp.i] = tp.Qe * tp.Pe/ (pow(tp.Pe, 2)+eps);
     boundaryDiracErrorDECoulomb(zetae, state.E, state.k, mu);
     shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
 

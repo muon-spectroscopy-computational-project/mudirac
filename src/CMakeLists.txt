@@ -13,6 +13,9 @@ target_link_libraries(size_effect mudiraclib)
 add_executable(hydrogenic_print hydrogenic_print.cpp)
 target_link_libraries(hydrogenic_print mudiraclib)
 
+add_executable(test_rkutta test_rkutta.cpp)
+target_link_libraries(test_rkutta mudiraclib)
+
 add_executable(map_E_basins map_E_basins.cpp)
 target_link_libraries(map_E_basins mudiraclib)
 

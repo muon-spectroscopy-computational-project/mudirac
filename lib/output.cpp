@@ -83,6 +83,8 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname)
         }
         out << '\n';
     }
+
+    out.close();
 }
 
 /**
@@ -108,6 +110,8 @@ void writeEConfPotential(EConfPotential epot, string fname)
     {
         out << r[i] << '\t' << epot.getrho()[i] << '\t' << epot.Vgrid(i0 + i) << '\n';
     }
+
+    out.close();
 }
 
 /**
@@ -164,4 +168,6 @@ void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, doub
         }
         out << S << '\n';
     }
+
+    out.close();
 }
