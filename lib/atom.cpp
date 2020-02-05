@@ -684,6 +684,8 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     boundaryDiracErrorDECoulomb(zetae, state.E, state.k, mu);
     shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
 
+    LOG(TRACE) << "Zeta function values at turning point: zetaL = " << zetai[tp.i] << ", zetaR = " << zetae[tp.i] << "\n";
+
     dE = err / (zetai[tp.i] - zetae[tp.i]);
 
     return;
