@@ -440,11 +440,7 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
     int step = (dir == 'f') ? 1 : -1;
     int from_i = (step == 1) ? 1 : N - 2;
     double mc = m * Physical::c;
-    double g, A0, A1, B0, B1;
-
-    //vector<double> A(N, 0);
-    //vector<double> B(N, 0);
-
+    double g, A0, A1, B0, B1, y02, y12;
 
     // Check size
     if (y.size() != N || r.size() != N || V.size() != N)
@@ -465,12 +461,14 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
         }
         else {
             g = (mc - (E - V[i]) * Physical::alpha);
+            y02 = pow(y[i-step], 2);
+            y12 = pow(y[i], 2);
             A0 = -2*(k+g*r[i-step]/y[i-step]);
             A1 = -2*(k+g*r[i]/y[i]);
-            B0 = r[i-step]*(1+pow(y[i-step], -2))*Physical::alpha;
-            B1 = r[i]*(1+pow(y[i], -2))*Physical::alpha;
+            B0 = r[i-step]*(1+1/y02)*Physical::alpha;
+            B1 = r[i]*(1+1/y12)*Physical::alpha;
 
-            zeta[i] = 1.0/stepRungeKutta(1.0/zeta[i-step], A0, A1, B0, B1, dx, step);
+            zeta[i] = -y12*stepRungeKutta(-zeta[i-step]/y02, A0, A1, B0, B1, dx, step);
         }
     }
 }
