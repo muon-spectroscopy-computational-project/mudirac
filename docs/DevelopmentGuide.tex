@@ -385,47 +385,32 @@ Both the nucleus and the charge distribution give rise to a further term due to 
 
 \subsection{Integration scheme}
 
-In order to integrate numerically the equations we make use of the following second order scheme for the first derivative of a function defined on a uniform grid with step $h$:
+In order to integrate numerically the equations we make use of a fourth order Runge-Kutta method (RK4) \cite{press1992} adapted to work with coupled differential equations. Specifically, to integrate a system of the form:
 
-\begin{equation}
-y'_i = \frac{3y_i-4y_{i-1}+y_{i-2}}{2h} + \mathcal{O}(h^3)
-\end{equation}
-
-and its backwards converse:
-
-\begin{equation}
-y'_i = -\frac{3y_i-4y_{i+1}+y_{i+2}}{2h} + \mathcal{O}(h^3)
-\end{equation}
-
-With this definition, any coupled system of the form:
-
-\begin{align}
+\begin{align}\label{rk_qp}
 Q'_i &= AA_i Q_i + AB_iP_i \\
 P'_i &= BA_i Q_i + BB_iP_i
 \end{align}
 
-can be solved by seeing how it's
+we apply the following rule:
 
 \begin{align}
-Q_i\left(\pm\frac{3}{2h}-AA_i\right) - AB_iP_i&= \pm\frac{1}{h}\left(2Q_{i\mp1}-\frac{1}{2}Q_{i\mp2}\right) \\
-P_i\left(\pm\frac{3}{2h}-BB_i\right) - BA_iQ_i&= \pm\frac{1}{h}\left(2P_{i\mp1}-\frac{1}{2}P_{i\mp2}\right)
+Q_i &= Q_{i-1} + \frac{1}{6}\left(k_{Q1}+2k_{Q2}+2k_{Q3}+k_{Q4}\right) \\
+P_i &= P_{i-1} + \frac{1}{6}\left(k_{P1}+2k_{P2}+2k_{P3}+k_{P4}\right)
 \end{align}
 
-the signs corresponding respectively to forward and backwards integration. Solving this linear system leads to the final formulas for $Q_i$ and $P_i$ at each step. If we define
+where we define
 
 \begin{align}
-AC_i &= \pm\frac{1}{h}\left(2Q_{i\mp1}-\frac{1}{2}Q_{i\mp2}\right) \\
-BC_i &= \pm\frac{1}{h}\left(2P_{i\mp1}-\frac{1}{2}P_{i\mp2}\right) \\
+k_{Q1} &= h\left(AA_{i-1}Q_{i-1}+AB_{i-1}P_{i-1}\right) \\
+k_{Q2} &= h\left[AA_{i-1/2}\left(Q_{i-1}+\frac{k_{Q1}}{2}\right)+
+AB_{i-1/2}\left(P_{i-1}+\frac{k_{P1}}{2}\right)\right] \\
+k_{Q3} &= h\left[AA_{i-1/2}\left(Q_{i-1}+\frac{k_{Q2}}{2}\right)+
+AB_{i-1/2}\left(P_{i-1}+\frac{k_{P2}}{2}\right)\right] \\
+k_{Q4} &= h\left[AA_{i}(Q_{i-1}+k_{Q3})+AB_{i}(P_{i-1}+k_{P3})\right] \\
 \end{align}
 
-then we have
-
-\begin{align}
-Q_i &= \frac{-BC_iAB_i-AC_i(\pm\frac{3}{2h}-BB_i)}{AB_iBA_i-(\pm\frac{3}{2h}-AA_i)(\pm\frac{3}{2h}-BB_i)} \\
-P_i &= \frac{-AC_iBA_i-BC_i(\pm\frac{3}{2h}-AA_i)}{AB_iBA_i-(\pm\frac{3}{2h}-AA_i)(\pm\frac{3}{2h}-BB_i)} \\
-\end{align}
-
-and this allows one to progressively integrate the equations given two initial points set with the boundary conditions.
+with similar expressions for the $k_P$, and with half-integers indices meaning $AA_{i-1/2} = (AA_i+AA_{i-1})/2$.
 
 \subsection{Finding the eigenvalue}
 
@@ -469,17 +454,23 @@ y' = \frac{Q'}{P} - \frac{Q}{P^2}P' = \frac{Q'}{P} + \frac{k}{r} y -g_+y^2
 
 we have
 
-\begin{equation}
+\begin{equation}\label{y_err_ode}
 y' = 2\frac{k}{r}y-g_+y^2+g_-
 \end{equation}
 
 However what we are interested in is $\zeta = \partial y / \partial E$. We can derive and find:
 
-\begin{equation}
+\begin{equation}\label{zeta_err_ode}
 \zeta' = 2\left(\frac{k}{r}-g_+y\right)\zeta-\frac{1}{c}(y^2+1)
 \end{equation}
 
-Since we already know the values of Q and P, and thus of y, integrating numerically this equation is trivial. We then have that
+It should be noted that integrating this expression becomes problematic around nodes of the function $P$, where $y$ has a singularity. However, this problem can easily be fixed as a very similar expression can be written looking at the inverse ratio, $P/Q$, and substituting it in Eq. \ref{y_err_ode}:
+
+\begin{equation}\label{eta_err_ode}
+\eta' =\frac{\partial^2}{\partial E\partial x}\left(\frac{1}{y}\right) = -\frac{1}{y^2}\zeta' = -2\left(\frac{k}{r}+g_-\frac{1}{y}\right)\zeta+\frac{1}{c}(\frac{1}{y^2}+1)
+\end{equation}
+
+Since we already know the values of Q and P, and thus of y, it's possible to integrate numerically Eq. \ref{zeta_err_ode}, switching then to Eq. \ref{eta_err_ode} when $y$ becomes too big (in the code we use $|y|>\alpha$ as our threshold). Then we can find
 
 \begin{equation}
 \frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_f - \frac{\partial}{\partial E}\left. \frac{Q}{P}\right|_b = \zeta_f-\zeta_b
