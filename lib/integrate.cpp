@@ -84,6 +84,38 @@ double trapzInt(double dx, vector<double> y)
 }
 
 /**
+ * @brief A single Runge-Kutta step
+ * @note  Perform a single Runge-Kutta integration step for methods like shootRungeKutta, for
+ * a differential equation of the form:
+ * 
+ *      Q' = A*Q+B
+ * 
+ * @param   Q0:   Value of the function at step i
+ * @param   A0:   Value of A at step i
+ * @param   A1:   Value of A at step i+1
+ * @param   B0:   Value of B at step i
+ * @param   B1:   Value of B at step i+1
+ * @param   h:    Integration step
+ * @param   step: Direction of integration (1 or -1)
+ * @retval  Value of the function at i+1
+ */ 
+double stepRungeKutta(double Q0, double A0, double A1, double B0, double B1, double h, int step) 
+{
+    double Amid, Bmid;
+    double k1, k2, k3, k4;
+
+    Amid = (A0+A1)/2.0;
+    Bmid = (B0+B1)/2.0;
+
+    k1 = (A0 * Q0 + B0) * h * step;
+    k2 = (Amid * (Q0 + k1 / 2) + Bmid) * h * step;
+    k3 = (Amid * (Q0 + k2 / 2) + Bmid) * h * step;
+    k4 = (A1 * (Q0 + k3) + B1) * h * step;
+
+    return Q0 + 1.0 / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4);
+}
+
+/**
  * @brief  Integrate a single ODE
  * @note   Integrate one differential equation of the form:
  * 
@@ -104,10 +136,6 @@ void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, doub
     int N = Q.size();
     int step = (dir == 'f') ? 1 : -1;
     int from_i = (step == 1) ? 1 : N - 2;
-    double QA, QB;
-
-    double Amid, Bmid, Qp;
-    double k1, k2, k3, k4;
 
     // First, check size
     if (A.size() != N || B.size() != N)
@@ -121,16 +149,8 @@ void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, doub
     }
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
-    {        
-        Amid = (A[i] + A[i - step]) / 2;
-        Bmid = (B[i] + B[i - step]) / 2;
-        Qp = Q[i - step];
-        k1 = (A[i - step] * Qp + B[i - step]) * h * step;
-        k2 = (Amid * (Qp + k1 / 2) + Bmid) * h * step;
-        k3 = (Amid * (Qp + k2 / 2) + Bmid) * h * step;
-        k4 = (A[i] * (Qp + k3) + B[i]) * h * step;
-
-        Q[i] = Qp + 1.0 / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4);
+    {       
+        Q[i] = stepRungeKutta(Q[i-step], A[i-step], A[i], B[i-step], B[i], h, step);
     }
 
     return;
