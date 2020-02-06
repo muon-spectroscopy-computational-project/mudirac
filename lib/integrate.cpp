@@ -438,12 +438,13 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
 {
     int N = zeta.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 0 : N - 1;
+    int from_i = (step == 1) ? 1 : N - 2;
     double mc = m * Physical::c;
-    double gp;
+    double g, A0, A1, B0, B1;
 
-    vector<double> A(N, 0);
-    vector<double> B(N, 0);
+    //vector<double> A(N, 0);
+    //vector<double> B(N, 0);
+
 
     // Check size
     if (y.size() != N || r.size() != N || V.size() != N)
@@ -453,21 +454,23 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
 
     for (int i = from_i; step * (i - turn_i) <= 0; i += step)
     {
-        gp = (mc + (E - V[i]) * Physical::alpha);
-        A[i] = 2 * (k - gp * r[i] * y[i]);
-        B[i] = -r[i] * (1 + y[i] * y[i]) * Physical::alpha;
-    }
+        if (abs(y[i]) < Physical::alpha || zeta[i-step] == 0) {
+            g = (mc + (E - V[i]) * Physical::alpha);
+            A0 = 2*(k-g*r[i-step]*y[i-step]);
+            A1 = 2*(k-g*r[i]*y[i]);
+            B0 = -r[i-step]*(1+pow(y[i-step], 2))*Physical::alpha;
+            B1 = -r[i]*(1+pow(y[i], 2))*Physical::alpha;
 
-    writeTabulated2ColFile(r, y, "shoot_error_y.dat");
-    // Now actually integrate    
-    shootRungeKutta(zeta, A, B, dx, turn_i, dir);
-    if (dir == 'f') 
-        writeTabulated2ColFile(r, zeta, "shootRungeKutta_f_zeta.dat");
-    else 
-        writeTabulated2ColFile(r, zeta, "shootRungeKutta_b_zeta.dat");
-    shootQ(zeta, A, B, dx, turn_i, dir);
-    if (dir == 'f') 
-        writeTabulated2ColFile(r, zeta, "shootQ_f_zeta.dat");
-    else 
-        writeTabulated2ColFile(r, zeta, "shootQ_b_zeta.dat");
+            zeta[i] = stepRungeKutta(zeta[i-step], A0, A1, B0, B1, dx, step);
+        }
+        else {
+            g = (mc - (E - V[i]) * Physical::alpha);
+            A0 = -2*(k+g*r[i-step]/y[i-step]);
+            A1 = -2*(k+g*r[i]/y[i]);
+            B0 = r[i-step]*(1+pow(y[i-step], -2))*Physical::alpha;
+            B1 = r[i]*(1+pow(y[i], -2))*Physical::alpha;
+
+            zeta[i] = 1.0/stepRungeKutta(1.0/zeta[i-step], A0, A1, B0, B1, dx, step);
+        }
+    }
 }

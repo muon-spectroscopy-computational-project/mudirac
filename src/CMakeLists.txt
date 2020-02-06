@@ -34,3 +34,6 @@ target_link_libraries(calc_elempot mudiraclib)
 configure_file(mudirac.in.hpp ${CMAKE_CURRENT_SOURCE_DIR}/mudirac.hpp)
 add_executable(mudirac mudirac.cpp)
 target_link_libraries(mudirac mudiraclib)
+
+add_executable(single_state single_state.cpp)
+target_link_libraries(single_state mudiraclib)
