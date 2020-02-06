@@ -121,7 +121,7 @@ void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, doub
     }
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
-    {
+    {        
         Amid = (A[i] + A[i - step]) / 2;
         Bmid = (B[i] + B[i - step]) / 2;
         Qp = Q[i - step];
@@ -418,7 +418,7 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
 {
     int N = zeta.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
+    int from_i = (step == 1) ? 0 : N - 1;
     double mc = m * Physical::c;
     double gp;
 
