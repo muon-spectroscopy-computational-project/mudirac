@@ -156,34 +156,6 @@ void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, doub
     return;
 }
 
-void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
-{
-    int N = Q.size();
-    int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
-    double QA, QB;
-
-    // First, check size
-    if (A.size() != N || B.size() != N)
-    {
-        throw invalid_argument("Invalid size for one or more arrays passed to shootQ");
-    }
-
-    if (stop_i == -1)
-    {
-        stop_i = (step == 1) ? N - 1 : 0;
-    }
-
-    for (int i = from_i; step * (i - stop_i) <= 0; i += step)
-    {
-        QA = 1.5 * step / h - A[i];
-        QB = (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step / h + B[i];
-        Q[i] = QB / QA;
-    }
-
-    return;
-}
-
 /**
  * @brief  Integrate two coupled ODEs
  * @note   Integrate a system of coupled differential equations of the form:

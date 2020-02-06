@@ -487,9 +487,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
 
         if (abs(dE) < Etol)
         {
-            E = E - dE;
             LOG(TRACE) << "Convergence complete after " << (it + 1) << " iterations\n";
-            state.E = E;
             state.continuify(tp);
             state.normalize();
             state.findNodes(nodetol);
