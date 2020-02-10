@@ -62,32 +62,26 @@ void boundaryDiracCoulomb(DiracState &state, double m, double Z, double R)
         gamma = sqrt(gamma);
         // Point like
         // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
-        for (int i = 0; i < 2; ++i)
-        {
-            state.P[i] = pow(state.grid[i], gamma);
-            state.Q[i] = Z * Physical::alpha / (gamma - k) * state.P[i];
-        }
+        state.P[0] = pow(state.grid[0], gamma);
+        state.Q[0] = Z * Physical::alpha / (gamma - k) * state.P[0];
     }
     else
     {
         // Finite size
-        for (int i = 0; i < 2; ++i)
+        if (k < 0)
         {
-            if (k < 0)
-            {
-                state.P[i] = pow(state.grid[i], -k);
-                state.Q[i] = pow(state.grid[i], -k + 1) * 1.5 * Z * Physical::alpha / (R * (-2 * k + 1));
-            }
-            else
-            {
-                state.P[i] = pow(state.grid[i], k + 2);
-                state.Q[i] = -pow(state.grid[i], k + 1) * Physical::c * (2 * k + 1) * R / (1.5 * Z);
-            }
+            state.P[0] = pow(state.grid[0], -k);
+            state.Q[0] = pow(state.grid[0], -k + 1) * 1.5 * Z * Physical::alpha / (R * (-2 * k + 1));
+        }
+        else
+        {
+            state.P[0] = pow(state.grid[0], k + 2);
+            state.Q[0] = -pow(state.grid[0], k + 1) * Physical::c * (2 * k + 1) * R / (1.5 * Z);
         }
     }
 
-    LOG(TRACE) << "Boundary conditions at r => 0 (" << state.grid[0] << "), P = [" << state.P[0];
-    LOG(TRACE) << "," << state.P[1] << "], Q = [" << state.Q[0] << "," << state.Q[1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => 0 (" << state.grid[0] << "), P(0) = " << state.P[0];
+    LOG(TRACE) << ", Q(0) = " << state.Q[0] << "\n";
 
     // r = inf limit
     // Same as above
@@ -114,15 +108,12 @@ void boundaryDiracCoulomb(DiracState &state, double m, double Z, double R)
         N -= dsize;
     }
 
-    for (int i = 1; i < 3; ++i)
-    {
-        Pinf = exp(-K * state.grid[N - iinf - i]);
-        state.P[N - i] = Pinf;
-        state.Q[N - i] = -K / (m * Physical::c + state.E * Physical::alpha) * Pinf;
-    }
+    Pinf = exp(-K * state.grid[N - iinf - 1]);
+    state.P[N - 1] = Pinf;
+    state.Q[N - 1] = -K / (m * Physical::c + state.E * Physical::alpha) * Pinf;
 
-    LOG(TRACE) << "Boundary conditions at r => inf (" << state.grid[N - 1] << "), P = [" << state.P[N - 2];
-    LOG(TRACE) << "," << state.P[N - 1] << "], Q = [" << state.Q[N - 2] << "," << state.Q[N - 1] << "]\n";
+    LOG(TRACE) << "Boundary conditions at r => inf (" << state.grid[N - 1] << "), P(inf) = " << state.P[N - 1];
+    LOG(TRACE) << ", Q(inf) = " << state.Q[N - 1] << "\n";
 }
 
 /**
@@ -153,7 +144,6 @@ void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k, double m
 
     // In the r=0 limit, it's fine to have it be 0
     zeta[0] = 0;
-    zeta[1] = 0;
 
     // r = inf limit
     K = pow(m * Physical::c, 2) - pow(E * Physical::alpha, 2);
@@ -164,5 +154,4 @@ void boundaryDiracErrorDECoulomb(vector<double> &zeta, double E, int k, double m
     }
     K = sqrt(K);
     zeta[N - 1] = E / (K * gp) * pow(Physical::alpha, 2) + K / pow(gp, 2) * Physical::alpha;
-    zeta[N - 2] = zeta[N - 1];
 }

@@ -13,6 +13,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <stdexcept>
 #include <functional>
 
@@ -57,6 +58,9 @@ void parseIupacRange(string irange, vector<int> &nrange, vector<int> &lrange, ve
 vector<string> splitString(string s, string sep = " ", bool merge = false, int maxn = -1);
 string stripString(string s, string strip = " \t\n");
 string upperString(string s);
+
+// Functions useful for debugging
+void writeTabulated2ColFile(vector<double> col1, vector<double> col2, string fname);
 
 // Templated function declarations
 /**

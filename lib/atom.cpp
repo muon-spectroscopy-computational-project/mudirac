@@ -487,9 +487,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
 
         if (abs(dE) < Etol)
         {
-            E = E - dE;
             LOG(TRACE) << "Convergence complete after " << (it + 1) << " iterations\n";
-            state.E = E;
             state.continuify(tp);
             state.normalize();
             state.findNodes(nodetol);
@@ -652,9 +650,10 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
  * given its E, k and V (which must be set in the DiracState
  * object itself). Computes also a suggested correction for the energy
  * 
- * @param  &state:  DiracState to integrate
- * @param  &tp:     TurningPoint object to store turning point info
- * @param  &dE:     Energy correction
+ * @param  &state:      DiracState to integrate
+ * @param  &tp:         TurningPoint object to store turning point info
+ * @param  &dE:         Energy correction
+ * @param  write_debug: If true, save y and zeta arrays as files for debugging purposes
  * @retval          
  */
 void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
@@ -671,6 +670,7 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     zetae = vector<double>(N, 0);
 
     err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
+
     // Compute the derivative of the error in dE
     for (int i = 0; i < N; ++i)
     {
@@ -685,8 +685,20 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp, double &dE)
     shootDiracErrorDELog(zetae, y, state.grid, state.V, tp.i, state.E, state.k, mu, dx, 'b');
 
     LOG(TRACE) << "Zeta function values at turning point: zetaL = " << zetai[tp.i] << ", zetaR = " << zetae[tp.i] << "\n";
+    LOG(TRACE) << "Q/P error = " << err << "\n";
 
     dE = err / (zetai[tp.i] - zetae[tp.i]);
+
+    if (write_debug)
+    {
+        string state_name = printIupacState(state.getn(), state.getl(), state.gets());
+        string fname = state_name + "_y.dat";
+        writeTabulated2ColFile(state.grid, y, fname);
+        fname = state_name + "_zetai.dat";
+        writeTabulated2ColFile(state.grid, zetai, fname);
+        fname = state_name + "_zetae.dat";
+        writeTabulated2ColFile(state.grid, zetae, fname);
+    }
 
     return;
 }

@@ -41,7 +41,7 @@ TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
 
 TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
 {
-    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::trace, AixLog::Type::normal);
+    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info, AixLog::Type::normal);
 
     double Z = 92;
     double m = 1;
@@ -78,17 +78,18 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
 
     // Test finding the nodes interval
     int nodes;
-    double minE = limE.first;
-    double maxE = limE.second;
     qnumPrincipal2Nodes(2, 0, nodes);
+    LOG(INFO) << nodes << "\n";
 
+    limE = da.energyLimits(nodes);
     ds.k = -1;
-    da.convergeNodes(ds, tp, nodes, minE, maxE);
+
+    da.convergeNodes(ds, tp, nodes, limE.first, limE.second);
     REQUIRE(ds.E > Es1);
     REQUIRE(ds.E < Es3);
 
     // Test finding the correct energy
-    da.convergeE(ds, tp, minE, maxE);
+    da.convergeE(ds, tp, limE.first, limE.second);
     REQUIRE(ds.E == Approx(Es2));
 
     // And test full convergence

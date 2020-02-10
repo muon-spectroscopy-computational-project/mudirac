@@ -13,6 +13,9 @@ target_link_libraries(size_effect mudiraclib)
 add_executable(hydrogenic_print hydrogenic_print.cpp)
 target_link_libraries(hydrogenic_print mudiraclib)
 
+add_executable(test_rkutta test_rkutta.cpp)
+target_link_libraries(test_rkutta mudiraclib)
+
 add_executable(map_E_basins map_E_basins.cpp)
 target_link_libraries(map_E_basins mudiraclib)
 
@@ -31,3 +34,6 @@ target_link_libraries(calc_elempot mudiraclib)
 configure_file(mudirac.in.hpp ${CMAKE_CURRENT_SOURCE_DIR}/mudirac.hpp)
 add_executable(mudirac mudirac.cpp)
 target_link_libraries(mudirac mudiraclib)
+
+add_executable(single_state single_state.cpp)
+target_link_libraries(single_state mudiraclib)

@@ -84,12 +84,44 @@ double trapzInt(double dx, vector<double> y)
 }
 
 /**
+ * @brief A single Runge-Kutta step
+ * @note  Perform a single Runge-Kutta integration step for methods like shootRungeKutta, for
+ * a differential equation of the form:
+ * 
+ *      Q' = A*Q+B
+ * 
+ * @param   Q0:   Value of the function at step i
+ * @param   A0:   Value of A at step i
+ * @param   A1:   Value of A at step i+1
+ * @param   B0:   Value of B at step i
+ * @param   B1:   Value of B at step i+1
+ * @param   h:    Integration step
+ * @param   step: Direction of integration (1 or -1)
+ * @retval  Value of the function at i+1
+ */ 
+double stepRungeKutta(double Q0, double A0, double A1, double B0, double B1, double h, int step) 
+{
+    double Amid, Bmid;
+    double k1, k2, k3, k4;
+
+    Amid = (A0+A1)/2.0;
+    Bmid = (B0+B1)/2.0;
+
+    k1 = (A0 * Q0 + B0) * h * step;
+    k2 = (Amid * (Q0 + k1 / 2) + Bmid) * h * step;
+    k3 = (Amid * (Q0 + k2 / 2) + Bmid) * h * step;
+    k4 = (A1 * (Q0 + k3) + B1) * h * step;
+
+    return Q0 + 1.0 / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4);
+}
+
+/**
  * @brief  Integrate a single ODE
  * @note   Integrate one differential equation of the form:
  * 
  *      Q' = A*Q+B
  * 
- * with a second order shooting method, up to a given index, either forward or backwards.
+ * with a fourth order Runge-Kutta method, up to a given index, either forward or backwards.
  * 
  * @param  &Q: Vector for Q. Will return the integrated values, must contain already the first two as boundary conditions.
  * @param  A: Vector for A (see definition above). Same size as Q.
@@ -99,12 +131,11 @@ double trapzInt(double dx, vector<double> y)
  * @param  dir: Integration direction, either forward 'f' or backwards 'b' (default = 'f').
  * @retval None
  */
-void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
+void shootRungeKutta(vector<double> &Q, vector<double> A, vector<double> B, double h, int stop_i, char dir)
 {
     int N = Q.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
-    double QA, QB;
+    int from_i = (step == 1) ? 1 : N - 2;
 
     // First, check size
     if (A.size() != N || B.size() != N)
@@ -118,10 +149,8 @@ void shootQ(vector<double> &Q, vector<double> A, vector<double> B, double h, int
     }
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
-    {
-        QA = 1.5 * step / h - A[i];
-        QB = (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step / h + B[i];
-        Q[i] = QB / QA;
+    {       
+        Q[i] = stepRungeKutta(Q[i-step], A[i-step], A[i], B[i-step], B[i], h, step);
     }
 
     return;
@@ -152,8 +181,12 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
 {
     int N = Q.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
+    int from_i = (step == 1) ? 1 : N - 2;
     double QA, QB, QC, PA, PB, PC;
+
+    double Qp, Pp;
+    double AAmid, ABmid, BAmid, BBmid;
+    double k1A, k1B, k2A, k2B, k3A, k3B, k4A, k4B;
 
     // First, check size
     if (P.size() != N || AA.size() != N || AB.size() != N || BA.size() != N || BB.size() != N)
@@ -168,14 +201,23 @@ void shootQP(vector<double> &Q, vector<double> &P, vector<double> AA, vector<dou
 
     for (int i = from_i; step * (i - stop_i) <= 0; i += step)
     {
-        QC = 1 / h * (2 * Q[i - step] - 0.5 * Q[i - 2 * step]) * step;
-        PC = 1 / h * (2 * P[i - step] - 0.5 * P[i - 2 * step]) * step;
-        QA = (step * 1.5 / h - AA[i]);
-        QB = -AB[i];
-        PA = (step * 1.5 / h - BB[i]);
-        PB = -BA[i];
-        Q[i] = (PC * QB - PA * QC) / (PB * QB - PA * QA);
-        P[i] = (PB * QC - PC * QA) / (PB * QB - PA * QA);
+        AAmid = (AA[i] + AA[i - step]) / 2;
+        ABmid = (AB[i] + AB[i - step]) / 2;
+        BAmid = (BA[i] + BA[i - step]) / 2;
+        BBmid = (BB[i] + BB[i - step]) / 2;
+        Pp = P[i - step];
+        Qp = Q[i - step];
+        k1A = (AA[i - step] * Qp + AB[i - step] * Pp) * h * step;
+        k1B = (BA[i - step] * Qp + BB[i - step] * Pp) * h * step;
+        k2A = (AAmid * (Qp + k1A / 2.0) + ABmid * (Pp + k1B / 2.0)) * h * step;
+        k2B = (BAmid * (Qp + k1A / 2.0) + BBmid * (Pp + k1B / 2.0)) * h * step;
+        k3A = (AAmid * (Qp + k2A / 2.0) + ABmid * (Pp + k2B / 2.0)) * h * step;
+        k3B = (BAmid * (Qp + k2A / 2.0) + BBmid * (Pp + k2B / 2.0)) * h * step;
+        k4A = (AA[i] * (Qp + k3A) + AB[i] * (Pp + k3B)) * h * step;
+        k4B = (BA[i] * (Qp + k3A) + BB[i] * (Pp + k3B)) * h * step;
+
+        Q[i] = Qp + 1.0 / 6.0 * (k1A + 2 * k2A + 2 * k3A + k4A);
+        P[i] = Pp + 1.0 / 6.0 * (k1B + 2 * k2B + 2 * k3B + k4B);
     }
 
     return;
@@ -368,12 +410,9 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
 {
     int N = zeta.size();
     int step = (dir == 'f') ? 1 : -1;
-    int from_i = (step == 1) ? 2 : N - 3;
+    int from_i = (step == 1) ? 1 : N - 2;
     double mc = m * Physical::c;
-    double gp;
-
-    vector<double> A(N, 0);
-    vector<double> B(N, 0);
+    double g, A0, A1, B0, B1, y02, y12;
 
     // Check size
     if (y.size() != N || r.size() != N || V.size() != N)
@@ -383,11 +422,25 @@ void shootDiracErrorDELog(vector<double> &zeta, vector<double> y, vector<double>
 
     for (int i = from_i; step * (i - turn_i) <= 0; i += step)
     {
-        gp = (mc + (E - V[i]) * Physical::alpha);
-        A[i] = 2 * (k - gp * r[i] * y[i]);
-        B[i] = -r[i] * (1 + y[i] * y[i]) * Physical::alpha;
-    }
+        if (abs(y[i]) < Physical::alpha || zeta[i-step] == 0) {
+            g = (mc + (E - V[i]) * Physical::alpha);
+            A0 = 2*(k-g*r[i-step]*y[i-step]);
+            A1 = 2*(k-g*r[i]*y[i]);
+            B0 = -r[i-step]*(1+pow(y[i-step], 2))*Physical::alpha;
+            B1 = -r[i]*(1+pow(y[i], 2))*Physical::alpha;
 
-    // Now actually integrate
-    shootQ(zeta, A, B, dx, turn_i, dir);
+            zeta[i] = stepRungeKutta(zeta[i-step], A0, A1, B0, B1, dx, step);
+        }
+        else {
+            g = (mc - (E - V[i]) * Physical::alpha);
+            y02 = pow(y[i-step], 2);
+            y12 = pow(y[i], 2);
+            A0 = -2*(k+g*r[i-step]/y[i-step]);
+            A1 = -2*(k+g*r[i]/y[i]);
+            B0 = r[i-step]*(1+1/y02)*Physical::alpha;
+            B1 = r[i]*(1+1/y12)*Physical::alpha;
+
+            zeta[i] = -y12*stepRungeKutta(-zeta[i-step]/y02, A0, A1, B0, B1, dx, step);
+        }
+    }
 }

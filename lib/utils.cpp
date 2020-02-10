@@ -565,3 +565,28 @@ string upperString(string s)
 
     return s2;
 }
+
+/**
+ * @brief Write a generic tabulated file with two columns
+ * @note Write a generic tabulated file with two columns of data. Used mostly 
+ * for debug purposes.
+ * 
+ * @param  col1:            Vector with first column of data
+ * @param  col2:            Vector with second column of data
+ * @param  fname:           Name of file to save
+ * @retval None 
+ */
+void writeTabulated2ColFile(vector<double> col1, vector<double> col2, string fname)
+{
+
+    ofstream out(fname);
+
+    int N = min(col1.size(), col2.size());
+
+    for (int i = 0; i < N; ++i)
+    {
+        out << col1[i] << "\t" << col2[i] << "\n";
+    }
+
+    out.close();
+}
