@@ -53,6 +53,7 @@ build/*
 # Downloaded data files
 utils/*.dat
 !utils/abundant.dat
+!utils/nuclear_radii.dat
 
 # VS Code
 .vscode
