@@ -467,7 +467,7 @@ However what we are interested in is $\zeta = \partial y / \partial E$. We can d
 It should be noted that integrating this expression becomes problematic around nodes of the function $P$, where $y$ has a singularity. However, this problem can easily be fixed as a very similar expression can be written looking at the inverse ratio, $P/Q$, and substituting it in Eq. \ref{y_err_ode}:
 
 \begin{equation}\label{eta_err_ode}
-\eta' =\frac{\partial^2}{\partial E\partial x}\left(\frac{1}{y}\right) = -\frac{1}{y^2}\zeta' = -2\left(\frac{k}{r}+g_-\frac{1}{y}\right)\zeta+\frac{1}{c}(\frac{1}{y^2}+1)
+\eta' =\frac{\partial^2}{\partial E\partial x}\left(\frac{1}{y}\right) = -\frac{1}{y^2}\zeta' = -2\left(\frac{k}{r}+g_-\frac{1}{y}\right)\eta+\frac{1}{c}(\frac{1}{y^2}+1)
 \end{equation}
 
 Since we already know the values of Q and P, and thus of y, it's possible to integrate numerically Eq. \ref{zeta_err_ode}, switching then to Eq. \ref{eta_err_ode} when $y$ becomes too big (in the code we use $|y|>\alpha$ as our threshold). Then we can find
