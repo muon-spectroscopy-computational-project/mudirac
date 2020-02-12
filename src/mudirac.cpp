@@ -234,17 +234,26 @@ int main(int argc, char *argv[])
 
     if (output_verbosity >= 2)
     {
+        vector<string> saved_states;
         // Save each individual state
         for (int i = 0; i < transitions.size(); ++i)
         {
             for (int j = 0; j < 2; ++j)
             {
-                string fname = seed + "." + (j == 0 ? transitions[i].sname1 : transitions[i].sname2) + ".out";
+                string sname = (j == 0 ? transitions[i].sname1 : transitions[i].sname2);
+                string fname = seed + "." + sname + ".out";
                 DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
 
-                LOG(DEBUG) << "Printing out state file for line " << transitions[i].name << ", state " << (j + 1) << "\n";
+                if (vectorContains(saved_states, sname))
+                {
+                    continue;
+                }
+
+                LOG(DEBUG) << "Printing out state file for state " << sname << "\n";
 
                 writeDiracState(ds, fname);
+
+                saved_states.push_back(sname);
             }
             string fname = seed + "." + transitions[i].name + ".tmat.out";
             writeTransitionMatrix(transitions[i].tmat, fname);
