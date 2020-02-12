@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
     string seed = "mudirac";
     MuDiracInputFile config;
-    
+
     chrono::high_resolution_clock::time_point t0, t1;
     t0 = chrono::high_resolution_clock::now();
 
@@ -95,30 +95,29 @@ int main(int argc, char *argv[])
         s2range.insert(s2range.end(), sr.begin(), sr.end());
 
         for (int j = 0; j < n1range.size(); ++j)
+        {
+            for (int k = 0; k < n2range.size(); ++k)
             {
-                for (int k = 0; k < n2range.size(); ++k)
+                TransLineSpec tnums;
+                tnums.n1 = n1range[j];
+                tnums.l1 = l1range[j];
+                tnums.s1 = s1range[j];
+
+                tnums.n2 = n2range[k];
+                tnums.l2 = l2range[k];
+                tnums.s2 = s2range[k];
+
+                if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
                 {
-                    TransLineSpec tnums;
-                    tnums.n1 = n1range[j];
-                    tnums.l1 = l1range[j];
-                    tnums.s1 = s1range[j];
-
-                    tnums.n2 = n2range[k];
-                    tnums.l2 = l2range[k];
-                    tnums.s2 = s2range[k];
-
-                    if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1)
-                    {
-                        continue;
-                    }
-
-                    transqnums.push_back(tnums);
-
-                    LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
-                    LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
+                    continue;
                 }
-            }
 
+                transqnums.push_back(tnums);
+
+                LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
+                LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
+            }
+        }
     }
 
     vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
@@ -138,33 +137,33 @@ int main(int argc, char *argv[])
         l2 = transqnums[i].l2;
         s2 = transqnums[i].s2;
 
-        string state1, state2;
-        state1 = printIupacState(n1, l1, s1);
-        state2 = printIupacState(n2, l2, s2);
-        tdata.name = state1 + "-" + state2;
+        tdata.sname1 = printIupacState(n1, l1, s1);
+        tdata.sname2 = printIupacState(n2, l2, s2);
+        tdata.name = tdata.sname1 + "-" + tdata.sname2;
 
         // Have these been tried before?
-        if (vectorContains(failconv_states, state1)) {
-            LOG(INFO) << "Skipping line " << tdata.name << " because " << state1 << " failed to converge before\n";
+        if (vectorContains(failconv_states, tdata.sname1))
+        {
+            LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname1 << " failed to converge before\n";
             continue;
         }
-        if (vectorContains(failconv_states, state2)) {
-            LOG(INFO) << "Skipping line " << tdata.name << " because " << state2 << " failed to converge before\n";
+        if (vectorContains(failconv_states, tdata.sname2))
+        {
+            LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname2 << " failed to converge before\n";
             continue;
         }
-        
 
         LOG(INFO) << "Computing transition " << tdata.name << "\n";
 
         try
         {
-            LOG(INFO) << "Computing state " << state1 << "\n";
+            LOG(INFO) << "Computing state " << tdata.sname1 << "\n";
             tdata.ds1 = da.getState(n1, l1, s1);
-            LOG(INFO) << "Computing state " << state2 << "\n";
+            LOG(INFO) << "Computing state " << tdata.sname2 << "\n";
             tdata.ds2 = da.getState(n2, l2, s2);
         }
         catch (AtomErrorCode aerr)
-        {            
+        {
             LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << tdata.name << " failed with AtomErrorCode " << aerr << "\n";
             success = false;
         }
@@ -173,13 +172,16 @@ int main(int argc, char *argv[])
             LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
             success = false;
         }
-        if (!success) {
+        if (!success)
+        {
             LOG(INFO) << "Convergence of one state failed for line " << tdata.name << ", skipping\n";
-            if (!tdata.ds1.converged) {
-                failconv_states.push_back(state1);
+            if (!tdata.ds1.converged)
+            {
+                failconv_states.push_back(tdata.sname1);
             }
-            else {
-                failconv_states.push_back(state2);
+            else
+            {
+                failconv_states.push_back(tdata.sname2);
             }
             continue;
         }
@@ -237,7 +239,7 @@ int main(int argc, char *argv[])
         {
             for (int j = 0; j < 2; ++j)
             {
-                string fname = seed + "." + transitions[i].name + "." + to_string(j + 1) + ".out";
+                string fname = seed + "." + (j == 0 ? transitions[i].sname1 : transitions[i].sname2) + ".out";
                 DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
 
                 LOG(DEBUG) << "Printing out state file for line " << transitions[i].name << ", state " << (j + 1) << "\n";
@@ -251,5 +253,5 @@ int main(int argc, char *argv[])
 
     t1 = chrono::high_resolution_clock::now();
 
-    LOG(INFO) << "Calculation completed in " << chrono::duration_cast<chrono::milliseconds>(t1-t0).count()/1.0e3 << " seconds\n";
+    LOG(INFO) << "Calculation completed in " << chrono::duration_cast<chrono::milliseconds>(t1 - t0).count() / 1.0e3 << " seconds\n";
 }
