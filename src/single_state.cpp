@@ -2,6 +2,8 @@
 
 int main(int argc, char *argv[])
 {
+    AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::error, AixLog::Type::normal);
+
     MuDiracInputFile config;
     double E, dE;
     int k;
@@ -35,9 +37,11 @@ int main(int argc, char *argv[])
     da.integrateState(ds, tp, dE);
     ds.continuify(tp);
     ds.normalize();
+    ds.findNodes();
 
     cout << "Turning point found at " << ds.grid[tp.i] << " atomic units\n";
     cout << "Energy error " << dE << "\n";
+    cout << "Number of nodes " << ds.nodes << "\n";
     state_name =  printIupacState(ds.getn(), ds.getl(), ds.gets());
 
     writeDiracState(ds, state_name + "_PQ.dat");
