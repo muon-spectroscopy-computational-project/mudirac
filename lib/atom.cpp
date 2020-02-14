@@ -609,6 +609,7 @@ DiracState DiracAtom::initState(double E, int k)
 
     glimits = gridLimits(E, k);
     state = DiracState(rc, dx, glimits.first, glimits.second);
+    state.m = mu;
     state.k = k;
     state.E = E;
     state.V = getV(state.grid);

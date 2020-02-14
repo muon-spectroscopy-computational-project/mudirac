@@ -152,6 +152,7 @@ DiracState::DiracState(const DiracState &s)
     nodesQ = s.nodesQ;
     E = s.E;
     k = s.k;
+    m = s.m;
     grid_indices = pair<int, int>(s.grid_indices);
     grid = vector<double>(s.grid);
     loggrid = vector<double>(s.loggrid);
@@ -304,6 +305,26 @@ bool DiracState::gets()
     bool s;
     qnumDirac2Schro(k, l, s);
     return s;
+}
+
+/**
+ * @brief   Get rest energy (mass must have been set)
+ * 
+ * @retval      Rest energy (mc^2)
+ */
+double DiracState::restE()
+{
+    return m*pow(Physical::c, 2);
+}
+
+/**
+ * @brief   Get binding energy (mass must have been set)
+ * 
+ * @retval      Binding energy (E-mc^2)
+ */
+double DiracState::bindingE()
+{
+    return E - restE();
 }
 
 /**

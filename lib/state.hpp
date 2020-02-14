@@ -57,6 +57,7 @@ public:
   vector<double> P;
   int k;
   int nodesQ = 0;
+  double m;
 
   DiracState(int N = 0);
   DiracState(double x0, double x1, int N);
@@ -66,13 +67,15 @@ public:
   int getn();
   int getl();
   bool gets();
+  double restE();
+  double bindingE();
   double norm() override;
   int size() override { return Q.size(); };
   void resize(int i0, int i1) override;
+  string name();
 
   void continuify(TurningPoint tp);
   void findNodes(double tol = 1e-6);
   void normalize();
-  string name();
 };
 #endif

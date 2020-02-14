@@ -26,7 +26,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
     this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
     // Double keywords
-    this->defineDoubleNode("mass", InputNode<double>(1));                   // Mass of orbiting particle (in muon masses)
+    this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
     this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
     this->defineDoubleNode("energy_damp", InputNode<double>(0.5));          // "Damping" used in steepest descent energy search
     this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));         // Maximum |dE|/E ratio in energy search
@@ -57,7 +57,7 @@ DiracAtom MuDiracInputFile::makeAtom()
 {
     // Now extract the relevant parameters
     int Z = getElementZ(this->getStringValue("element"));
-    double m = this->getDoubleValue("mass") * Physical::m_mu;
+    double m = this->getDoubleValue("mass");
     int A = this->getIntValue("isotope");
     if (nucmodelmap.find(this->getStringValue("nuclear_model")) == nucmodelmap.end())
     {

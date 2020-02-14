@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
         l2 = transqnums[i].l2;
         s2 = transqnums[i].s2;
 
-        tdata.sname1 = tdata.ds1.name();
-        tdata.sname2 = tdata.ds2.name();
+        tdata.sname1 = printIupacState(n1, l1, s1);
+        tdata.sname2 = printIupacState(n2, l2, s2);
         tdata.name = tdata.sname1 + "-" + tdata.sname2;
 
         // Have these been tried before?

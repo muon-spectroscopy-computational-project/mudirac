@@ -28,7 +28,7 @@ void writeDiracState(DiracState ds, string fname)
     // Start with writing a header
     out << "#####################################################\n";
     out << "# DiracState with n = " << ds.getn() << ", l = " << ds.getl() << ", s = " << ds.gets() << "\n";
-    out << "# E = " << ds.E / Physical::eV << " eV\n";
+    out << "# E = " << ds.bindingE() / Physical::eV << " + mc^2 = " << ds.E / Physical::eV << " eV\n";
     out << "# nodes = " << ds.nodes << ", " << ds.nodesQ << "\n";
     out << "#####################################################\n";
 
