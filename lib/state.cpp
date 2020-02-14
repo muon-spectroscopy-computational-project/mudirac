@@ -305,3 +305,13 @@ bool DiracState::gets()
     qnumDirac2Schro(k, l, s);
     return s;
 }
+
+/**
+ * @brief  Return IUPAC name of state
+ * 
+ * @retval      name
+ */
+string DiracState::name()
+{
+    return printIupacState(getn(), getl(), gets());
+}

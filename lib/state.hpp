@@ -73,5 +73,6 @@ public:
   void continuify(TurningPoint tp);
   void findNodes(double tol = 1e-6);
   void normalize();
+  string name();
 };
 #endif

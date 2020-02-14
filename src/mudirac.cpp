@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
         l2 = transqnums[i].l2;
         s2 = transqnums[i].s2;
 
-        tdata.sname1 = printIupacState(n1, l1, s1);
-        tdata.sname2 = printIupacState(n2, l2, s2);
+        tdata.sname1 = tdata.ds1.name();
+        tdata.sname2 = tdata.ds2.name();
         tdata.name = tdata.sname1 + "-" + tdata.sname2;
 
         // Have these been tried before?
@@ -240,9 +240,9 @@ int main(int argc, char *argv[])
         {
             for (int j = 0; j < 2; ++j)
             {
-                string sname = (j == 0 ? transitions[i].sname1 : transitions[i].sname2);
-                string fname = seed + "." + sname + ".out";
                 DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
+                string sname = ds.name();
+                string fname = seed + "." + sname + ".out";
 
                 if (vectorContains(saved_states, sname))
                 {
