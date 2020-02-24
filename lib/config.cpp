@@ -42,13 +42,14 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineDoubleNode("spec_linewidth", InputNode<double>(1e3));     // Simulated spectrum: width of Gaussian-broadened lines (eV)
     this->defineDoubleNode("spec_expdec", InputNode<double>(-1.0));       // Simulated spectrum: exponential decay factor (reproduces instrumental sensitivity)
     // Integer keywords
-    this->defineIntNode("isotope", InputNode<int>(-1));         // Isotope to use for element
-    this->defineIntNode("max_E_iter", InputNode<int>(100));     // Max iterations in energy search
-    this->defineIntNode("max_nodes_iter", InputNode<int>(100)); // Max iterations in nodes search
-    this->defineIntNode("max_state_iter", InputNode<int>(100)); // Max iterations in state search
-    this->defineIntNode("uehling_steps", InputNode<int>(100));  // Uehling correction integration steps
-    this->defineIntNode("verbosity", InputNode<int>(1));        // Verbosity level (1 to 3)
-    this->defineIntNode("output", InputNode<int>(1));           // Output level (1 to 3)
+    this->defineIntNode("isotope", InputNode<int>(-1));             // Isotope to use for element
+    this->defineIntNode("max_E_iter", InputNode<int>(100));         // Max iterations in energy search
+    this->defineIntNode("max_nodes_iter", InputNode<int>(100));     // Max iterations in nodes search
+    this->defineIntNode("max_state_iter", InputNode<int>(100));     // Max iterations in state search
+    this->defineIntNode("uehling_steps", InputNode<int>(100));      // Uehling correction integration steps
+    this->defineIntNode("xr_print_precision", InputNode<int>(-1));  // Number of digits to print out in values in .xr.out file
+    this->defineIntNode("verbosity", InputNode<int>(1));            // Verbosity level (1 to 3)
+    this->defineIntNode("output", InputNode<int>(1));               // Output level (1 to 3)
     // Vector string keywords
     this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}, false)); // List of spectral lines to compute
 }

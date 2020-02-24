@@ -212,6 +212,11 @@ int main(int argc, char *argv[])
         out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
         out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
 
+        if (config.getIntValue("xr_print_precision") > -1) {
+            out << fixed;
+            out << setprecision(config.getIntValue("xr_print_precision"));
+        }
+
         for (int i = 0; i < transitions.size(); ++i)
         {
             double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
