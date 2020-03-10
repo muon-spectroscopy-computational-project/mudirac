@@ -11,4 +11,5 @@ add_subdirectory(lib)
 add_subdirectory(src bin)
 
 # Now, test executables
+enable_testing()
 add_subdirectory(test)
