@@ -1,3 +1,15 @@
+/**
+ * MuDirac - A muonic atom Dirac equation solver
+ * by Simone Sturniolo (2019-2020)
+ * 
+ * mudirac.cpp
+ * 
+ * Main binary of the program
+ * 
+ * @author Simone Sturniolo
+ * @version 1.0 20/03/2020
+ */
+
 #include "mudirac.hpp"
 
 int main(int argc, char *argv[])

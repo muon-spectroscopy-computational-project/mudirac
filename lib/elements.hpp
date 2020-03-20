@@ -1,6 +1,6 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
- * by Simone Sturniolo (2019)
+ * by Simone Sturniolo (2019-2020)
  * 
  * elements.hpp
  * 
@@ -18,7 +18,7 @@
  *         Chinese Physics C41 030001, March 2017.
  * 
  * @author Simone Sturniolo
- * @version 0.1 04/02/2019
+ * @version 1.0 20/03/2020
  */
 
 #include <map>
