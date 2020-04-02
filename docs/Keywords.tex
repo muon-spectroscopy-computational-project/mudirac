@@ -33,7 +33,8 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 	\item \texttt{element}: symbol of the element for the calculation. Determines the nuclear charge. Can be any symbol in the periodic table up to Z=111, Roentgenium (Rg). Default is H.
 	\item \texttt{nuclear\_model}: model used to describe the nucleus. Can be POINT (point charge) or SPHERE (finite size, uniformly charged spherical nucleus). Default is POINT.
 	\item \texttt{electronic\_config}: electronic configuration to use in order to describe the negative charge background. Can be a full string describing the configuration (e.g. \texttt{1s2 2s2 2p2}), an element symbol to represent the default configuration of that atom when neutral (e.g. \texttt{C}) or a mix of the two (e.g. \texttt{[He] 2s2 2p2}). Default is the empty string (no electrons).
-	\item \texttt{xr\_lines}: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation. Multiple lines can be separated by commas. For example
+    \item \texttt{ideal\_atom\_minshell}: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (K $\implies$ n = 1, L $\implies$ n = 2, etc.). Default is the empty string (no ideal solutions used).
+    \item \texttt{xr\_lines}: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation. Multiple lines can be separated by commas. For example
 	
 	\begin{verbatim}
 	xr_lines: K1-L2,K1-L3
@@ -48,7 +49,6 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 
 \begin{itemize}
 	\item \texttt{uehling\_correction}: whether to turn on or not the Uehling correction. Default is FALSE.
-	\item \texttt{ideal\_atom}: if true, don't run any convergence to find the eigenstates, and simply use the formulas for the hydrogen-like point charge Dirac atom. Mostly useful for debugging, but can produce acceptable results for very light atoms. Default is FALSE.
 	\item \texttt{write\_spec}: if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other parameters can be specified with different keywords. Default is FALSE.
 	\item \texttt{sort\_byE}: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 \end{itemize}

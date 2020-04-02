@@ -1,3 +1,15 @@
+/**
+ * MuDirac - A muonic atom Dirac equation solver
+ * by Simone Sturniolo (2019-2020)
+ * 
+ * mudirac.hpp
+ * 
+ * Main binary of the program (header)
+ * 
+ * @author Simone Sturniolo
+ * @version 1.0 20/03/2020
+ */
+
 #include <exception>
 #include <iostream>
 #include <iomanip>
@@ -15,7 +27,7 @@
 
 #include "../vendor/aixlog/aixlog.hpp"
 
-#define PROJECT_VERSION "0.1.0"
+#define PROJECT_VERSION "1.0"
 
 using namespace std;
 

@@ -146,6 +146,7 @@ private:
   double restE; // Rest energy
   // Eigenstates
   map<tuple<int, int, bool>, DiracState> states;
+  int idshell = -1;
 
 public:
   double out_eps = 1e-5;
@@ -153,7 +154,7 @@ public:
   int min_n = 1000;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-            double fc = 1.0, double dx = 0.005);
+            double fc = 1.0, double dx = 0.005, int ideal_minshell=-1);
 
   double getRestE() { return restE; };
 
@@ -175,15 +176,12 @@ public:
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2, int l2, bool s2, bool approx_j0 = false);
 };
 
-// A class used mainly for debugging purposes, works as DiracAtom but uses the analytical hydrogen-like solution
+// A class used mainly for debugging purposes, works as DiracAtom but uses only the analytical hydrogen-like solution
 class DiracIdealAtom : public DiracAtom
 {
 public:
   DiracIdealAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
                  double fc = 1.0, double dx = 0.005);
-
-private:
-  DiracState convergeState(int n = 1, int k = -1);
 };
 
 #endif

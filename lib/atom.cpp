@@ -78,10 +78,10 @@ double TransitionMatrix::totalRate()
  * @brief  Initialise an Atom class instance
  * @note   Creates an Atom object defined by the given properties
  * 
- * @param  Z_in: Atomic number (nuclear charge, can be fractional)
- * @param  m_in: Mass of the orbiting particle (e.g. electron)
- * @param  A_in: Atomic mass (amus, ignored if -1)
- * @param  R_in: Nuclear radius (treated as point-like if <= 0)
+ * @param  Z: Atomic number (nuclear charge, can be fractional)
+ * @param  m: Mass of the orbiting particle (e.g. electron)
+ * @param  A: Atomic mass (amus, ignored if -1)
+ * @param  radius_model: Which NuclearRadiusModel to use
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a fraction
  *               of 1/(Z*mu), the 1s orbital radius for this atom, or of
  *               the nuclear radius, depending on which one is bigger (default = 1)
@@ -295,10 +295,30 @@ double Atom::sphereNuclearModel(int Z, int A)
     }
 }
 
-DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc, double dx) : Atom(Z, m, A, radius_model, fc, dx)
+/**
+ * @brief  Initialise a DiracAtom class instance
+ * @note   Creates a DiracAtom object defined by the given properties
+ * 
+ * @param  Z: Atomic number (nuclear charge, can be fractional)
+ * @param  m: Mass of the orbiting particle (e.g. electron)
+ * @param  A: Atomic mass (amus, ignored if -1)
+ * @param  radius_model: Which NuclearRadiusModel to use
+ * @param  fc:   Central point of the grid (corresponding to i = 0), as a fraction
+ *               of 1/(Z*mu), the 1s orbital radius for this atom, or of
+ *               the nuclear radius, depending on which one is bigger (default = 1)
+ * @param  dx:   Logarithmic step of the grid (default = 0.005)
+ * @param ideal_minshell:   Shell from which the atom will just use the ideal Dirac 
+ *                          hydrogen-like solution as an approximation. Never used
+ *                          if negative (default = -1)
+ * @retval 
+ */
+DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc, double dx, int ideal_minshell) : Atom(Z, m, A, radius_model, fc, dx)
 {
     restE = mu * pow(Physical::c, 2);
     LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
+    idshell = ideal_minshell;
+    if (idshell > 0)
+        LOG(INFO) << "Using hydrogen-like solution for n >= " << 'J' + idshell << "\n";
 }
 
 void DiracAtom::reset()
@@ -723,6 +743,26 @@ DiracState DiracAtom::convergeState(int n, int k)
     DiracState state;
     TurningPoint tp;
 
+    if (idshell > 0 && n >= idshell) {
+        // Just use the ideal version
+
+        LOG(DEBUG) << "Using hydrogen-like solution for state with n = " << n << ", k = " << k << "\n";
+
+        state.E = hydrogenicDiracEnergy(Z, mu, n, k);
+
+        state = initState(state.E, k);
+
+        vector<vector<double>> PQ = hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
+        state.P = PQ[0];
+        state.Q = PQ[1];
+
+        state.findNodes();
+        state.normalize();
+        state.converged = true;
+
+        return state;
+    }
+
     // Compute the required number of nodes
     qnumDirac2Schro(k, l, s);
     qnumPrincipal2Nodes(n, l, targ_nodes);
@@ -1000,36 +1040,6 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1, 
 }
 
 DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
-                               double fc, double dx) : DiracAtom(Z, m, A, radius_model, fc, dx)
-{
-}
-
-/**
- * @brief  Converge a state of given n and k
- * @note   Converge a state of given n and k.
- * Since this is a DiracIdealAtom, only returns
- * the calculated state for an ideal, hydrogen-like
- * atom.
- * 
- * @param  n:   Principal quantum number
- * @param  k:   Dirac quantum number
- * @retval      Converged state
- */
-DiracState DiracIdealAtom::convergeState(int n, int k)
-{
-    DiracState state;
-
-    state.E = hydrogenicDiracEnergy(Z, mu, n, k);
-
-    state = initState(state.E, k);
-
-    vector<vector<double>> PQ = hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
-    state.P = PQ[0];
-    state.Q = PQ[1];
-
-    state.findNodes();
-    state.normalize();
-    state.converged = true;
-
-    return state;
+                               double fc, double dx) : DiracAtom(Z, m, A, radius_model, fc, dx, 1)
+{    
 }
