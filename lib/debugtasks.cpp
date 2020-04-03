@@ -60,5 +60,7 @@ void runEdEscan(MuDiracInputFile infile)
         nodes[i] = ds.nodes;
     }
 
-    writeEdEscan(Erange, dEs, nodes);
+    string fname = "EdEscan_" + to_string(k) + ".dat";
+
+    writeEdEscan(Erange, dEs, nodes, fname);
 }
