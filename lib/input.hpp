@@ -19,6 +19,9 @@
 
 using namespace std;
 
+#ifndef MUDIRAC_INPUT
+#define MUDIRAC_INPUT
+
 /**
  * @class InputNode
  * 
@@ -94,3 +97,5 @@ public:
     void defineDoubleNode(string name, InputNode<double> node = InputNode<double>(0));
     void defineIntNode(string name, InputNode<int> node = InputNode<int>(0));
 };
+
+#endif

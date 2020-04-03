@@ -28,4 +28,7 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname);
 void writeEConfPotential(EConfPotential epot, string fname);
 void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, double expd, string fname);
 
+// Debug tasks
+void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, string fname="EdEscan.dat");
+
 #endif

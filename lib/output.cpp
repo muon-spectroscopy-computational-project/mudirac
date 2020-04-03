@@ -171,3 +171,17 @@ void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, doub
 
     out.close();
 }
+
+// Debug tasks
+
+void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, string fname)
+{
+    ofstream out(fname);
+    int N = Es.size();
+
+    for (int i = 0; i < N; ++i) {
+        out << Es[i]*Physical::eV << "\t" << dEs[i]*Physical::eV << "\t" << nodes[i] << "\n";
+    }
+
+    out.close();
+}

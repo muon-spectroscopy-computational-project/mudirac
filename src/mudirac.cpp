@@ -67,6 +67,16 @@ int main(int argc, char *argv[])
     LOG(INFO) << "Released under the MIT License (2019)\n";
     LOG(INFO) << " \n";
 
+    // Are we running any debug tasks?
+    string debugtask = config.getStringValue("devel_debug_task");
+
+    if (debugtask == "EdEscan")
+    {
+        LOG(INFO) << "Running debug task: E=>dE scan\n";
+        runEdEscan(config);
+        return 0;
+    }
+
     DiracAtom da = config.makeAtom();
 
     // Print out potential at high levels of verbosity
@@ -224,7 +234,8 @@ int main(int argc, char *argv[])
         out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
         out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
 
-        if (config.getIntValue("xr_print_precision") > -1) {
+        if (config.getIntValue("xr_print_precision") > -1)
+        {
             out << fixed;
             out << setprecision(config.getIntValue("xr_print_precision"));
         }

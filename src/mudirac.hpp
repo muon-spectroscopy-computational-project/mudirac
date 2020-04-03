@@ -24,6 +24,7 @@
 #include "../lib/utils.hpp"
 #include "../lib/elements.hpp"
 #include "../lib/constants.hpp"
+#include "../lib/debugtasks.hpp"
 
 #include "../vendor/aixlog/aixlog.hpp"
 

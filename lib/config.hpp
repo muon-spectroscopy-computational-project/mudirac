@@ -36,12 +36,12 @@ using namespace std;
 class MuDiracInputFile : public InputFile
 {
 public:
-    MuDiracInputFile(void);
-    DiracAtom makeAtom();
+  MuDiracInputFile(void);
+  DiracAtom makeAtom();
 
 private:
-    map<string, NuclearRadiusModel> nucmodelmap = {{"POINT", POINT},
-                                                   {"SPHERE", SPHERE}};
+  map<string, NuclearRadiusModel> nucmodelmap = {{"POINT", POINT},
+                                                 {"SPHERE", SPHERE}};
 };
 
 #endif

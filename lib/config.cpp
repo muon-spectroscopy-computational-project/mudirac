@@ -54,6 +54,22 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineIntNode("output", InputNode<int>(1));              // Output level (1 to 3)
     // Vector string keywords
     this->defineStringNode("xr_lines", InputNode<string>(vector<string>{"K1-L2"}, false)); // List of spectral lines to compute
+
+    /* These keywords are reserved for developers and debugging */
+
+    // String keywords
+    this->defineStringNode("devel_debug_task", InputNode<string>("")); // Which debugging task to perform
+
+    // Integer keywords
+    this->defineIntNode("devel_EdEscan_k", InputNode<int>(-1));                 // Value of quantum number k for E->dE scan
+    this->defineIntNode("devel_EdEscan_steps", InputNode<int>(100));      // Energy steps for E->dE scan
+
+    // Double keywords
+    this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
+    this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
+
+    // Boolean keywords
+    this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false));   // Make the energy scan logarithmic
 }
 
 DiracAtom MuDiracInputFile::makeAtom()
