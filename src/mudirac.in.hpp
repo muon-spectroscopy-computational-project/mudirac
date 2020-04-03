@@ -7,7 +7,7 @@
  * Main binary of the program (header)
  * 
  * @author Simone Sturniolo
- * @version 1.0 20/03/2020
+ * @version ${PROJECT_VERSION} 20/03/2020
  */
 
 #include <exception>
