@@ -208,7 +208,7 @@ double UehlingSpherePotential::V(double r)
     {
         return 0.0;
     }
-    else if (r < exp_cutoff_low * 0.5 * du * Physical::alpha)
+    else if (r <= exp_cutoff_low * 0.5 * du * Physical::alpha)
     {
         return K * uint0;
     }
