@@ -121,7 +121,7 @@ DiracAtom MuDiracInputFile::makeAtom()
 
     if (this->getStringValue("electronic_config") != "")
     {
-        double e_mu = effectiveMass(1.0, da.getM());
+        double e_mu = effectiveMass(1.0, da.getM()*Physical::amu);
         LOG(TRACE) << "Electronic effective mass: " << e_mu << "\n";
         ElectronicConfiguration econf(this->getStringValue("electronic_config"), da.getZ() - 1, e_mu, true, true);
         da.setElectBkgConfig(true, econf, this->getDoubleValue("econf_rhoeps"),
