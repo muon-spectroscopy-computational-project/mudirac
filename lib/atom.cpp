@@ -200,6 +200,7 @@ void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf, double rho_e
         LOG(INFO) << "max_r0 = " << max_r0 << "  min_r1 = " << min_r1 << "\n";
         V_econf = EConfPotential(econf, econf.innerShellRadius(), dx, rho_eps, max_r0, min_r1);
         LOG(INFO) << "Background potential initialised, total charge = " << V_econf.getQ() << "\n";
+        LOG(TRACE) << "V_elec(0) = " << V_econf.V(0.0) << "\n";
     }
     reset();
 }

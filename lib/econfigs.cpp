@@ -59,8 +59,10 @@ ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu
                 break;
             }
             Zshell.push_back(Z-etot);
+            LOG(TRACE) << "Shell n = " << n << ", effective Z = " << Zshell[n-1] << "\n";
             for (int l = 0; l < n; ++l) {
                 etot += epop[n-1][l];
+                LOG(TRACE) << "Channel l = " << l << ", population = " << epop[n-1][l] << "\n";
             }
         }
     }
