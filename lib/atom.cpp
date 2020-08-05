@@ -523,14 +523,14 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE, dou
         if (E > maxE)
         {
             // Something has gone wrong. Try to go back to a more reasonable search
-            E = (maxE + E + dE * Edamp) / 2.0;
+            E = (maxE + E + dE * Edamp_eff) / 2.0;
             LOG(TRACE) << "New energy exceeds maxE, resized to " << E - restE << " + mc2, reduced damping\n";
             Edamp_eff /= 2;
         }
         else if (E < minE)
         {
             // As above
-            E = (minE + E + dE * Edamp) / 2.0;
+            E = (minE + E + dE * Edamp_eff) / 2.0;
             LOG(TRACE) << "New energy below minE, resized to " << E - restE << " + mc2, reduced damping\n";
             Edamp_eff /= 2;
         }
