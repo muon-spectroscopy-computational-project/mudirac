@@ -97,7 +97,8 @@ protected:
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
   // Potential
-  CoulombSpherePotential V;
+  CoulombSpherePotential V_sphere;
+  CoulombFermi2Potential V_fermi2;
   // Additional potential terms
   bool use_uehling = false;
   UehlingSpherePotential V_uehling;
@@ -124,7 +125,7 @@ public:
   static const uint HAS_UEHLING = 1;
   static const uint HAS_ELECTRONIC = 2;
   uint getPotentialFlags() { return HAS_UEHLING * use_uehling + HAS_ELECTRONIC * use_econf; };
-  CoulombSpherePotential getPotentialCoulomb() { return V; };
+  CoulombSpherePotential getPotentialCoulomb() { return V_sphere; };
   UehlingSpherePotential getPotentialUehling() { return V_uehling; };
   EConfPotential getPotentialElectronic() { return V_econf; };
 

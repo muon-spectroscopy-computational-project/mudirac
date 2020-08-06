@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * mudirac.cpp
- * 
+ *
  * Main binary of the program
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
         log_verbosity = AixLog::Severity::info;
         break;
     }
-    AixLog::Log::init({make_shared<AixLog::SinkFile>(log_verbosity, AixLog::Type::normal, seed + ".log"),
-                       make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err")});
+    AixLog::Log::init({ make_shared<AixLog::SinkFile>(log_verbosity, AixLog::Type::normal, seed + ".log"),
+        make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err") });
 
     LOG(INFO) << "MuDirac, a muonic atomic solver\n";
     LOG(INFO) << "by Simone Sturniolo\n";
@@ -220,9 +220,9 @@ int main(int argc, char *argv[])
     if (config.getBoolValue("sort_byE"))
     {
         sort(transitions.begin(), transitions.end(),
-             [](TransitionData t1, TransitionData t2) {
-                 return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
-             });
+            [](TransitionData t1, TransitionData t2) {
+                return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
+            });
     }
 
     // Now create output files
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         {
             // Write a spectrum
             writeSimSpec(transitions, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
-                         seed + ".spec.dat");
+                seed + ".spec.dat");
         }
 
         out.close();

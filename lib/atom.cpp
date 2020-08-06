@@ -146,7 +146,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
     this->dx = dx;
 
     // Potential
-    V = CoulombSpherePotential(Z, R);
+    V_sphere = CoulombSpherePotential(Z, R);
 
     // Logging
     LOG(INFO) << "Created atom with Z = " << Z << ", A = " << A << "\n";
@@ -239,7 +239,7 @@ double Atom::getV(double r)
 {
     double Vout;
 
-    Vout = V.V(r);
+    Vout = V_sphere.V(r);
     if (use_uehling)
     {
         Vout += V_uehling.V(r);
@@ -348,7 +348,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     qnumNodes2Principal(nodes, l, n);
 
     // Not below the lowest potential energy, and also use the hydrogen-like energy as a reasonable lower bound scale
-    minE = max(V.V(0) + restE, hydrogenicDiracEnergy(Z, mu, 1, -1, true) * 2 + restE);
+    minE = max(V_sphere.V(0) + restE, hydrogenicDiracEnergy(Z, mu, 1, -1, true) * 2 + restE);
     // Required for the state to be bound
     maxE = restE;
 
