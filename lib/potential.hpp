@@ -54,7 +54,7 @@ public:
 class CoulombSpherePotential : Potential {
 public:
   CoulombSpherePotential(double Z = 1.0, double R = -1);
-  double V(double r) override;
+  virtual double V(double r) override;
 
 protected:
   double R, R3, VR, Z;
@@ -68,11 +68,11 @@ protected:
  *
  * @retval None
  */
-class CoulombFermi2Potential : CoulombSpherePotential {
+class CoulombFermi2Potential : public CoulombSpherePotential {
 public:
-  CoulombFermi2Potential(double Z = 1.0, double R = 1.0e-5, double A = 1.0,
+  CoulombFermi2Potential(double Z = 1.0, double R = -1, double A = 1.0,
                          int csteps = 5000);
-  double V(double r) override;
+  virtual double V(double r) override;
 
   double getc() { return c; }
 

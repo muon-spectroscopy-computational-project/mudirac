@@ -22,6 +22,10 @@
  * @retval
  */
 CoulombSpherePotential::CoulombSpherePotential(double Z, double R) {
+
+  LOG(INFO) << "Initialising Coulomb sphere potential, Z = " << Z
+            << ", R = " << R << "\n";
+
   this->Z = Z;
   this->R = R;
   R3 = pow(R, 3);
@@ -29,6 +33,7 @@ CoulombSpherePotential::CoulombSpherePotential(double Z, double R) {
 }
 
 double CoulombSpherePotential::V(double r) {
+
   if (r < 0) {
     throw invalid_argument("Negative radius not allowed for CoulombPotential");
   } else if (r < R) {
@@ -54,6 +59,12 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
     : CoulombSpherePotential(Z, R) {
 
   vector<double> rho;
+
+  if (R < 0) {
+    // Skip any initialisation, but the potential won't work properly
+    return;
+  }
+
   // First, define C for this radius
   if (A >= 5.0) {
     c = sqrt(R * R -
@@ -61,6 +72,8 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   } else {
     c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
   }
+
+  LOG(INFO) << "Initialising Coulomb Fermi-2 potential, c = " << c << "\n";
 
   // Then find the grid
   grid = logGrid(1e-8, 1e-2, csteps);
@@ -107,7 +120,6 @@ double CoulombFermi2Potential::V(double r) {
       return lerp(Vgrid[i0], Vgrid[i1], xi - i0) + VR;
     }
   }
-
   return 0.0;
 }
 
@@ -405,8 +417,8 @@ EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc,
     rho.push_back(ec.hydrogenicChargeDensity(r));
   }
 
-  LOG(INFO) << "Electronic configuration potential grid boundaries found:";
-  LOG(INFO) << " i0 = " << i0 << " = " << rc * exp(i0 * dx) << "  ";
+  LOG(INFO) << "Electronic configuration potential grid boundaries found:\n";
+  LOG(INFO) << " i0 = " << i0 << " = " << rc * exp(i0 * dx) << "\n";
   LOG(INFO) << " i1 = " << i1 << " = " << rc * exp(i1 * dx) << "\n";
 
   grid = logGrid(rc, dx, i0, i1);

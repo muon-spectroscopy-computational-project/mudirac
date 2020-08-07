@@ -22,7 +22,7 @@ TEST_CASE("Coulomb potential", "[CoulombSpherePotential]") {
 }
 
 TEST_CASE("Coulomb Fermi-2 potential", "[CoulombFermi2Potential]") {
-  CoulombFermi2Potential cpot = CoulombFermi2Potential();
+  CoulombFermi2Potential cpot = CoulombFermi2Potential(1, 1e-5);
 
   // Start by checking c
   REQUIRE(cpot.getc() == Approx(1.32234e-5));
@@ -36,6 +36,12 @@ TEST_CASE("Coulomb Fermi-2 potential", "[CoulombFermi2Potential]") {
   // r ~ c
   REQUIRE(cpot.V(1e-5) == Approx(-38519.8597).epsilon(1e-3));
   REQUIRE(cpot.V(3.981e-5) == Approx(-23338.5869).epsilon(1e-3));
+
+  // Inheritance test
+  CoulombSpherePotential *point = new CoulombFermi2Potential(1, 1e-5);
+
+  REQUIRE(point->V(1e-5) == Approx(-38519.8597).epsilon(1e-3));
+  REQUIRE(point->V(3.981e-5) == Approx(-23338.5869).epsilon(1e-3));
 }
 
 TEST_CASE("Uehling correction to Coulomb potential",
