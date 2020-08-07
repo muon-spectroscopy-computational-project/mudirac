@@ -28,10 +28,14 @@ TEST_CASE("Coulomb Fermi-2 potential", "[CoulombFermi2Potential]") {
   REQUIRE(cpot.getc() == Approx(1.32234e-5));
 
   // Far limit
-  REQUIRE(cpot.V(2.0) == Approx(-0.5));
-  REQUIRE(cpot.V(9e-3) == Approx(-1.0 / 9e-3));
+  REQUIRE(cpot.V(2.0) == Approx(-0.5));         // r > R
+  REQUIRE(cpot.V(9e-3) == Approx(-1.0 / 9e-3)); // c << r < R
+  // Near limit
+  REQUIRE(cpot.V(1e-9) == Approx(-40614.7308).epsilon(1e-3));
 
-  REQUIRE(cpot.V(1e-5) == Approx(-99299.159572));
+  // r ~ c
+  REQUIRE(cpot.V(1e-5) == Approx(-38519.8597).epsilon(1e-3));
+  REQUIRE(cpot.V(3.981e-5) == Approx(-23338.5869).epsilon(1e-3));
 }
 
 TEST_CASE("Uehling correction to Coulomb potential",

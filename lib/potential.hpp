@@ -42,7 +42,7 @@ public:
    * @param  r:  Distance from the center at which to evaluate potential
    * @retval     Potential
    */
-  virtual double V(double r){};
+  virtual double V(double r) { return 0; };
 };
 
 /**
@@ -70,7 +70,7 @@ protected:
  */
 class CoulombFermi2Potential : CoulombSpherePotential {
 public:
-  CoulombFermi2Potential(double Z = 1.0, double R = 1.0, double A = 1.0,
+  CoulombFermi2Potential(double Z = 1.0, double R = 1.0e-5, double A = 1.0,
                          int csteps = 5000);
   double V(double r) override;
 

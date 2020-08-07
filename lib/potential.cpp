@@ -11,7 +11,6 @@
  */
 
 #include "potential.hpp"
-#include <cmath>
 
 /**
  * @brief  Initialise Coulomb spherical potential
@@ -73,11 +72,11 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   }
   // Integrate to find the total charge
   dx = grid[0][1] - grid[0][0];
-  innerV = rho[0] / (2 * pow(grid[1][0], 3.0));
   double Q = trapzInt(dx, vectorOperation(grid[1], rho, '*'));
   Q += 1.0 / 3.0 * grid[1][0] * rho[0]; // Inner sphere volume
   // Adjust to make sure that total charge is indeed Z
   rho = vectorOperation(rho, Z / Q, '*');
+  innerV = rho[0] / (6 * pow(grid[1][0], 2.0));
 
   // Integrate potential
   Vgrid = vector<double>(csteps);
@@ -89,7 +88,9 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
 
 double CoulombFermi2Potential::V(double r) {
 
-  if (r > grid[1].back()) {
+  if (r < 0) {
+    throw invalid_argument("Negative radius not allowed for CoulombPotential");
+  } else if (r > grid[1].back()) {
     return -Z / r;
   } else if (r < grid[1][0]) {
     return innerV * pow(r, 2) + VR;
