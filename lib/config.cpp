@@ -61,15 +61,15 @@ MuDiracInputFile::MuDiracInputFile() : InputFile()
     this->defineStringNode("devel_debug_task", InputNode<string>("")); // Which debugging task to perform
 
     // Integer keywords
-    this->defineIntNode("devel_EdEscan_k", InputNode<int>(-1));                 // Value of quantum number k for E->dE scan
-    this->defineIntNode("devel_EdEscan_steps", InputNode<int>(100));      // Energy steps for E->dE scan
+    this->defineIntNode("devel_EdEscan_k", InputNode<int>(-1));      // Value of quantum number k for E->dE scan
+    this->defineIntNode("devel_EdEscan_steps", InputNode<int>(100)); // Energy steps for E->dE scan
 
     // Double keywords
     this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
     this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
 
     // Boolean keywords
-    this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false));   // Make the energy scan logarithmic
+    this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
 }
 
 DiracAtom MuDiracInputFile::makeAtom()
@@ -121,7 +121,7 @@ DiracAtom MuDiracInputFile::makeAtom()
 
     if (this->getStringValue("electronic_config") != "")
     {
-        double e_mu = effectiveMass(1.0, da.getM()*Physical::amu);
+        double e_mu = effectiveMass(1.0, da.getM() * Physical::amu);
         LOG(TRACE) << "Electronic effective mass: " << e_mu << "\n";
         ElectronicConfiguration econf(this->getStringValue("electronic_config"), da.getZ() - 1, e_mu, true, true);
         da.setElectBkgConfig(true, econf, this->getDoubleValue("econf_rhoeps"),

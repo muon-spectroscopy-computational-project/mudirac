@@ -32,21 +32,28 @@ using namespace std;
 #ifndef MUDIRAC_ATOM
 #define MUDIRAC_ATOM
 // Error codes
-enum AtomErrorCode {
+enum AtomErrorCode
+{
   UNBOUND_STATE = 1, // State is unbound, E - mc^2 > 0
   RMAX_SMALL,        // Upper bound of grid is smaller than turning point
   RMIN_LARGE,        // Lower bound of grid is bigger than turning point
-  SMALL_GAMMA, // Gamma parameter too small (won't happen for known elements)
-  NODES_HIGH,  // State has converged but does not contain the right amount of
-               // nodes (too many)
-  NODES_LOW,   // State has converged but does not contain the right amount of
-               // nodes (too few)
+  SMALL_GAMMA,       // Gamma parameter too small (won't happen for known elements)
+  NODES_HIGH,        // State has converged but does not contain the right amount of
+                     // nodes (too many)
+  NODES_LOW,         // State has converged but does not contain the right amount of
+                     // nodes (too few)
 };
 
-enum NuclearRadiusModel { POINT, SPHERE, FERMI2 };
+enum NuclearRadiusModel
+{
+  POINT,
+  SPHERE,
+  FERMI2
+};
 
 // Main classes
-class TransitionMatrix {
+class TransitionMatrix
+{
 public:
   int k1, k2;
   vector<double> m1;
@@ -59,7 +66,8 @@ public:
   double totalRate();
 };
 
-struct TransitionData {
+struct TransitionData
+{
   string name;
   string sname1;
   string sname2;
@@ -68,7 +76,8 @@ struct TransitionData {
   TransitionMatrix tmat;
 };
 
-class Atom {
+class Atom
+{
 public:
   // Tolerances and other details
   double Etol = 1e-7, Edamp = 0.5;
@@ -86,10 +95,11 @@ public:
 
 protected:
   // Fundamental properties
-  int Z, A;        // Nuclear charge and mass number
-  double m, M, mu; // Mass of the orbiting particle (e.g. muon, electron), of
-                   // the nucleus, and effective mass of the system
-  double R;        // Nuclear radius
+  int Z, A;                  // Nuclear charge and mass number
+  double m, M, mu;           // Mass of the orbiting particle (e.g. muon, electron), of
+                             // the nucleus, and effective mass of the system
+  double R;                  // Nuclear radius
+  NuclearRadiusModel rmodel; // Nuclear model
   // Grid
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
@@ -121,7 +131,8 @@ public:
   // Potential getters
   static const uint HAS_UEHLING = 1;
   static const uint HAS_ELECTRONIC = 2;
-  uint getPotentialFlags() {
+  uint getPotentialFlags()
+  {
     return HAS_UEHLING * use_uehling + HAS_ELECTRONIC * use_econf;
   };
   CoulombSpherePotential *getPotentialCoulomb() { return V_coulomb; };
@@ -131,6 +142,7 @@ public:
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
+  void setFermi2(double thickness = Physical::fermi2_T);
   bool getUehling() { return use_uehling; };
   void setUehling(bool s, int usteps = 1000, double cut_low = 0,
                   double cut_high = INFINITY);
@@ -143,7 +155,8 @@ public:
   virtual void reset(){};
 };
 
-class DiracAtom : public Atom {
+class DiracAtom : public Atom
+{
 private:
   double restE; // Rest energy
   // Eigenstates
@@ -185,7 +198,8 @@ public:
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
 // the analytical hydrogen-like solution
-class DiracIdealAtom : public DiracAtom {
+class DiracIdealAtom : public DiracAtom
+{
 public:
   DiracIdealAtom(int Z = 1, double m = 1, int A = -1,
                  NuclearRadiusModel radius_model = POINT, double fc = 1.0,

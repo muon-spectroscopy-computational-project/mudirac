@@ -33,7 +33,8 @@ using namespace std;
  *
  * @retval None
  */
-class Potential {
+class Potential
+{
 public:
   /**
    * @brief  Evaluate potential at r
@@ -51,7 +52,8 @@ public:
  *
  * @retval None
  */
-class CoulombSpherePotential : Potential {
+class CoulombSpherePotential : Potential
+{
 public:
   CoulombSpherePotential(double Z = 1.0, double R = -1);
   virtual double V(double r) override;
@@ -68,16 +70,17 @@ protected:
  *
  * @retval None
  */
-class CoulombFermi2Potential : public CoulombSpherePotential {
+class CoulombFermi2Potential : public CoulombSpherePotential
+{
 public:
   CoulombFermi2Potential(double Z = 1.0, double R = -1, double A = 1.0,
-                         int csteps = 5000);
+                         double thickness = Physical::fermi2_T, int csteps = 5000);
   virtual double V(double r) override;
 
   double getc() { return c; }
 
 protected:
-  double c, innerV, dx;
+  double c, innerV, dx, T;
   vector<vector<double>> grid;
   vector<double> Vgrid;
 };
@@ -90,12 +93,14 @@ protected:
  *
  * @retval None
  */
-class UehlingSpherePotential : Potential {
+class UehlingSpherePotential : Potential
+{
 public:
   UehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
   double V(double r) override;
 
-  void set_exp_cutoffs(double low, double high) {
+  void set_exp_cutoffs(double low, double high)
+  {
     exp_cutoff_low = low;
     exp_cutoff_high = high;
   };
@@ -126,7 +131,8 @@ protected:
  *
  * @retval None
  */
-class BkgGridPotential : Potential {
+class BkgGridPotential : Potential
+{
 public:
   BkgGridPotential();
   BkgGridPotential(vector<double> rho, double rc, double dx, int i0, int i1);
@@ -157,7 +163,8 @@ protected:
  *
  * @retval None
  */
-class EConfPotential : public BkgGridPotential {
+class EConfPotential : public BkgGridPotential
+{
 public:
   EConfPotential(ElectronicConfiguration econf = ElectronicConfiguration(),
                  double rc = 1, double dx = 1e-2, double rho_eps = 1e-5,
