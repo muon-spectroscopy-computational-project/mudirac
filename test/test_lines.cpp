@@ -21,7 +21,8 @@ Table VI
 */
 
 vector<double> energyCorrections(int Z, int n1, int l1, bool s1, int n2, int l2,
-                                 bool s2, NuclearRadiusModel rmodel = SPHERE) {
+                                 bool s2, NuclearRadiusModel rmodel = SPHERE)
+{
   vector<double> E_corr;
   DiracAtom da_point = DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z));
   DiracAtom da_sphere =
@@ -51,10 +52,12 @@ vector<double> energyCorrections(int Z, int n1, int l1, bool s1, int n2, int l2,
   return E_corr;
 }
 
-TEST_CASE("Calculated energies and corrections", "[energyCorrections]") {
+TEST_CASE("Calculated energies and corrections", "[energyCorrections]")
+{
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::warning,
                                       AixLog::Type::all);
-  SECTION("12Mg") {
+  SECTION("12Mg")
+  {
     // 3d3/2-2p1/2
     vector<double> E_corr = energyCorrections(12, 2, 1, false, 3, 2, false);
 
@@ -70,7 +73,8 @@ TEST_CASE("Calculated energies and corrections", "[energyCorrections]") {
     REQUIRE(E_corr[2] == Approx(177.55).epsilon(1e-3));
   }
 
-  SECTION("14Si") {
+  SECTION("14Si")
+  {
     // 3d3/2-2p1/2
     vector<double> E_corr = energyCorrections(14, 2, 1, false, 3, 2, false);
 
@@ -86,7 +90,8 @@ TEST_CASE("Calculated energies and corrections", "[energyCorrections]") {
     REQUIRE(E_corr[2] == Approx(273.2).epsilon(1e-3));
   }
 
-  SECTION("82Pb") {
+  SECTION("82Pb")
+  {
     // 5g7/2-4f5/2
     vector<double> E_corr = energyCorrections(82, 4, 3, false, 5, 4, false);
 
@@ -102,13 +107,10 @@ TEST_CASE("Calculated energies and corrections", "[energyCorrections]") {
     REQUIRE(E_corr[2] == Approx(2105.0).epsilon(1e-3));
 
     // 2p3/2-1s1/2
-    // E_corr = energyCorrections(82, 1, 0, true, 2, 1, true);
+    E_corr = energyCorrections(82, 1, 0, true, 2, 1, true,
+                               NuclearRadiusModel::FERMI2);
+    double E_tot = E_corr[0] + E_corr[1] + E_corr[2];
 
-    // cout << (E_corr[0] + E_corr[1] + E_corr[2]) / 1e3 << "\n";
-
-    // E_corr = energyCorrections(82, 1, 0, true, 2, 1, true,
-    //                            NuclearRadiusModel::FERMI2);
-
-    // cout << (E_corr[0] + E_corr[1] + E_corr[2]) / 1e3 << "\n";
+    REQUIRE(E_tot == Approx(5.9627e6).epsilon(1e-3));
   }
 }
