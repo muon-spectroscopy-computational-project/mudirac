@@ -87,7 +87,26 @@ Since muonic orbitals are squeezed in a much smaller space than electronic ones,
 R = 1.2 A^{1/3} \mathrm{fm} = 2.267\cdot10^{-5}A^3
 \end{equation}
 
-, where the second version is in atomic units.
+, where the second version is in atomic units.\newline
+While sufficient to achieve satisfying accuracy for most cases, this finite sphere approximation still produces significant errors in some extreme circumstances, in particular transitions between the first two shells in heavy elements such as lead. In this case, a further increase in accuracy can be achieved by smoothing the charge distribution from a sphere with a sharp cutoff to a Fermi 2-term distribution \cite{visscher1997}:
+
+\begin{equation}\label{s:theory:fermi2}
+\rho(r) = \rho_0\frac{1}{1+e^{4\ln (3) \frac{r-R_F}{\delta_F}}}
+\end{equation}
+
+, where $R_F$ and $\delta_F$ are two parameters corresponding roughly to the size of the nucleus and the thickness of its `skin', the shell across which the density falls to zero. In particular, $R_F$ is connected to the corresponding uniform sphere radius $R$  for the same nucleus by
+
+\begin{equation}\label{s:theory:fermi2radius_heavy}
+R_F = \sqrt{R^2-\frac{7}{3}\left(\frac{\pi \delta_F}{4\ln(3)}\right)^2}
+\end{equation}
+
+for atoms where in atomic mass units $A \ge 5$, while for lighter nuclei, where the above formula would fail, we set
+
+\begin{equation}\label{s:theory:fermi2radius_light}
+R_F = (2.2291\cdot10^{-5}A^{1/3}-0.90676\cdot10^{-5})
+\end{equation}
+
+in atomic units. In following with \cite{visscher1997}, we also take $\delta_F = 2.3 fm = 4.3464\cdot10^{-5}$ for all nuclei. The charge distribution in eq. \ref{s:theory:fermi2} does not produce a potential that can be described analytically.
 
 \subsection{Vacuum polarizability}\label{vacpot}
 
@@ -334,8 +353,8 @@ V_N(r) = \begin{cases}
 \end{cases}
 \end{equation}
 
-\subsubsection{Background charge potential}\label{subsec_bkg_pot}
-In presence of a radial background charge distribution, one builds the potential by integrating the equation:
+\subsubsection{Potential from a radial charge distribution}\label{subsec_bkg_pot}
+In presence of an arbitrary radial charge distribution, one builds the potential by integrating the equation:
 
 \begin{equation}
 \nabla^2 V = \rho
