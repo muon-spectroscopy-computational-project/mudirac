@@ -25,9 +25,9 @@ where the `.in` file can have any name one prefers. A full list of keywords empl
 
 ## Citing MuDirac
 
-For the theoretical background on the software and examples of its applications, see the published paper on the arXiv:
+For the theoretical background on the software and examples of its applications, see the published paper:
 
-[S. Sturniolo, "mudirac: a Dirac equation solver for elemental analysis with muonic X-rays"](https://arxiv.org/abs/2004.11876)
+*Sturniolo, S, Hillier, A.* Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays. *X‐Ray Spectrom. ***2020***; 1– 17.* [https://doi.org/10.1002/xrs.3212](https://doi.org/10.1002/xrs.3212)
 
 Cite the above paper if you make use of the software in your work too.
 
