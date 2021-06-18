@@ -12,7 +12,7 @@
 #include "../vendor/catch/catch.hpp"
 #include "macros.hpp"
 
-bool compareLaguerre(double tol = 1e-5)
+void compareLaguerre(double tol = 1e-5)
 {
     // Compare Laguerre polynomials with reference table
 
