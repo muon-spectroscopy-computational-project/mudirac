@@ -603,7 +603,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
     }
   }
 
-  throw runtime_error("Convergence failed in given numer of iterations");
+  throw runtime_error("Convergence failed in given number of iterations");
 }
 
 /**
