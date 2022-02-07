@@ -51,6 +51,9 @@ def run_mudirac(command='mudirac', path='.'):
     if not os.path.isfile(outfile):
         raise MuDiracError('Calculation failed')
 
+    log = open(os.path.join(path, 'mudirac.log')).read()
+    err = open(os.path.join(path, 'mudirac.err')).read()
+
     results = []
     with open(outfile) as f:
         lines = f.readlines()
@@ -64,7 +67,7 @@ def run_mudirac(command='mudirac', path='.'):
                 'W': float(W)
             })
 
-    return results
+    return results, log, err
             
 
 parser = argparse.ArgumentParser(description='Compile a text file database of MuDirac X-Ray lines')
@@ -87,6 +90,8 @@ parser.add_argument('--min-DE', type=float, default=1e-4,
                     help='Minimum energy difference (in eV) between two states to consider the line worth storing')
 parser.add_argument('--outfile', '-o', type=str, default=None,
                     help='Name of the file to save the database to')
+parser.add_argument('--save-logs', action='store_true', 
+                    help='Save all .log and .err files for each calculation run')
 
 args = parser.parse_args()
 
@@ -119,11 +124,17 @@ for i, (el, iso) in enumerate(to_calc):
 
         write_mudirac_input(el, iso, tmpdir, options)
         try:
-            results = run_mudirac(command, tmpdir)
+            results, log, err = run_mudirac(command, tmpdir)
         except MuDiracError:
             warnings.warn('Calculation failed for {0}{1}'.format(iso, el))
 
-        # Filter out the results
+        if args.save_logs:
+            with open('{0}-{1}.log'.format(el, iso), 'w') as f:
+                f.write(log)
+            with open('{0}-{1}.err'.format(el, iso), 'w') as f:
+                f.write(err)
+
+        # Filter out the lines
         results = [r for r in results if r['DE'] > args.min_DE]
 
         db_entries[el] = db_entries.get(el, {})
