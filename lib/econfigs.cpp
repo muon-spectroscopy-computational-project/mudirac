@@ -150,7 +150,13 @@ double ElectronicConfiguration::innerShellRadius()
  */
 double ElectronicConfiguration::outerShellRadius()
 {
-    return pow(epop.size(), 3.0) * 0.5 / Zshell[epop.size()-1];
+    int nmax = epop.size();
+
+    if (nmax < 1) {
+        return 0.0;
+    }
+
+    return pow(nmax, 3.0) * 0.5 / Zshell[nmax-1];
 }
 
 /**

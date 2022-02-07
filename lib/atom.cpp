@@ -228,6 +228,13 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
 void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf,
                              double rho_eps, double max_r0, double min_r1)
 {
+
+  // No point using an empty configuration
+  if (econf.maxn() == 0) {
+    LOG(INFO) << "Electronic configuration has zero population and will be ignored\n";
+    s = false;
+  }
+
   use_econf = s;
   if (s)
   {
@@ -362,7 +369,7 @@ DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
   if (idshell > 0)
-    LOG(INFO) << "Using hydrogen-like solution for n >= " << 'J' + idshell
+    LOG(INFO) << "Using hydrogen-like solution for n >= " << idshell
               << "\n";
 }
 
