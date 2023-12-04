@@ -1,6 +1,9 @@
 # mudirac
 A muonic atom Dirac equation solver.
 
+## Contact
+leandro.liborio@stfc.ac.uk
+
 ## Compiling
 
 To compile, create a directory called `build`; then, within that directory, execute the commands
