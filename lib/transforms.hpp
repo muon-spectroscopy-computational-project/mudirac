@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * transforms.hpp
- * 
+ *
  * Functions to perform various kinds of function transforms - header file
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */
