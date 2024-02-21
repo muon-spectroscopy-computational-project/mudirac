@@ -46,7 +46,8 @@ class ElectronicConfiguration {
   vector<vector<int>> parseConfig(string config);
 };
 
-const map<string, string> econfig_data = {{"H", "1s1"},
+const map<string, string> econfig_data = {
+  {"H", "1s1"},
   {"He", "1s2"},
   {"Li", "[He] 2s1"},
   {"Be", "[He] 2s2"},
