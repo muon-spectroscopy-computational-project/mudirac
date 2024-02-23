@@ -932,8 +932,7 @@ DiracState DiracAtom::getState(int n, int l, bool s) {
  * @retval Transition matrix
  */
 TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
-    int n2, int l2, bool s2,
-    bool approx_j0) {
+    int n2, int l2, bool s2, bool approx_j0) {
   int k1, k2;
 
   qnumSchro2Dirac(l1, s1, k1);

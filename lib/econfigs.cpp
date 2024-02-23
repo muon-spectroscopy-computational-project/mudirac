@@ -128,8 +128,7 @@ double ElectronicConfiguration::innerShellRadius() {
 
 /**
  * @brief  Radius of the outermost electronic shell
- * @note   Radius of the outermost electronic shell estimated
- * empirically as
+ * @note   Radius of the outermost electronic shell estimated empirically as
  *
  * a = n**3/(2Z)
  *

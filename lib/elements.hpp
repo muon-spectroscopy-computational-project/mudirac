@@ -61,7 +61,9 @@ int getElementMainIsotope(int Z);
 
 #ifndef ATOMIC_DATA
 #define ATOMIC_DATA
-const map<string, element> atomic_data = {{ "H", {
+const map<string, element> atomic_data = {
+  {
+    "H", {
       1, 1, {
         { 1, { 1.00782503224, 0.5, 1.133880424324658 } },
         { 2, { 2.01410177811, 1.0, 2.7654392086369692 } },

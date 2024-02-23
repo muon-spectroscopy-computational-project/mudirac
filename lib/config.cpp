@@ -19,12 +19,13 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineStringNode("element", InputNode<string>("H"));                  // Element to compute the spectrum for
   this->defineStringNode("nuclear_model", InputNode<string>("POINT", false)); // Model used for nucleus
   this->defineStringNode("electronic_config", InputNode<string>(""));         // Electronic configuration for background charge
-  this->defineStringNode("ideal_atom_minshell", InputNode<string>(""));       // Shell above which to treat the atom as ideal,
-  // and simply use standard hydrogen-like orbitals
+  this->defineStringNode("ideal_atom_minshell", InputNode<string>(""));       // Shell above which to treat the atom as ideal, and simply use standard hydrogen-like orbitals
+
   // Boolean keywords
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false)); // Whether to use the Uehling potential correction
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
   this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
+
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
   this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
@@ -40,8 +41,8 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineDoubleNode("econf_rout_min", InputNode<double>(-1));        // Lower limit to outermost radius for electronic charge background grid
   this->defineDoubleNode("spec_step", InputNode<double>(1e2));            // Simulated spectrum: energy step (eV)
   this->defineDoubleNode("spec_linewidth", InputNode<double>(1e3));       // Simulated spectrum: width of Gaussian-broadened lines (eV)
-  this->defineDoubleNode("spec_expdec", InputNode<double>(-1.0));         // Simulated spectrum: exponential decay factor
-  // (reproduces instrumental sensitivity)
+  this->defineDoubleNode("spec_expdec", InputNode<double>(-1.0));         // Simulated spectrum: exponential decay factor (reproduces instrumental sensitivity)
+
   // Integer keywords
   this->defineIntNode("isotope", InputNode<int>(-1));            // Isotope to use for element
   this->defineIntNode("max_E_iter", InputNode<int>(100));        // Max iterations in energy search

@@ -56,8 +56,7 @@ double CoulombSpherePotential::V(double r) {
  * @retval
  */
 CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
-    double thickness, int csteps)
-  : CoulombSpherePotential(Z, R) {
+    double thickness, int csteps): CoulombSpherePotential(Z, R) {
 
   vector<double> rho;
 

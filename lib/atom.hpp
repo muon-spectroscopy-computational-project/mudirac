@@ -37,10 +37,8 @@ enum AtomErrorCode {
   RMAX_SMALL,        // Upper bound of grid is smaller than turning point
   RMIN_LARGE,        // Lower bound of grid is bigger than turning point
   SMALL_GAMMA,       // Gamma parameter too small (won't happen for known elements)
-  NODES_HIGH,        // State has converged but does not contain the right amount of
-  // nodes (too many)
-  NODES_LOW,         // State has converged but does not contain the right amount of
-  // nodes (too few)
+  NODES_HIGH,        // State has converged but does not contain the right amount of nodes (too many)
+  NODES_LOW,         // State has converged but does not contain the right amount of nodes (too few)
 };
 
 enum NuclearRadiusModel {
@@ -91,17 +89,20 @@ class Atom {
   double static sphereNuclearModel(int Z, int A);
 
  protected:
+ 
   // Fundamental properties
   int Z, A;                  // Nuclear charge and mass number
-  double m, M, mu;           // Mass of the orbiting particle (e.g. muon, electron), of
-  // the nucleus, and effective mass of the system
+  double m, M, mu;           // Mass of the orbiting particle (e.g. muon, electron), of the nucleus, and effective mass of the system
   double R;                  // Nuclear radius
-  NuclearRadiusModel rmodel; // Nuclear model
-  // Grid
+  NuclearRadiusModel rmodel; // Nuclear model 
+
+  //Grid
   double rc = 1.0;   // Central radius
-  double dx = 0.005; // Step
-  // Potential
+  double dx = 0.005; // Step 
+  
+  //Potential
   CoulombSpherePotential *V_coulomb;
+
   // Additional potential terms
   bool use_uehling = false;
   UehlingSpherePotential V_uehling;
@@ -213,8 +214,7 @@ class DiracAtom : public Atom {
   DiracState convergeState(int n = 1, int k = -1);
   DiracState getState(int n, int l, bool s);
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
-      int l2, bool s2,
-      bool approx_j0 = false);
+      int l2, bool s2, bool approx_j0 = false);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
