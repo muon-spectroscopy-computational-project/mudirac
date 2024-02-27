@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * boundary.hpp
- * 
+ *
  * Boundary conditions - header file
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */

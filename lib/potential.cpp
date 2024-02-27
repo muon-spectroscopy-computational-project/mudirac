@@ -21,8 +21,7 @@
  * @param  R:      Nuclear radius (if omitted or negative, point-like)
  * @retval
  */
-CoulombSpherePotential::CoulombSpherePotential(double Z, double R)
-{
+CoulombSpherePotential::CoulombSpherePotential(double Z, double R) {
 
   LOG(INFO) << "Initialising Coulomb sphere potential, Z = " << Z
             << ", R = " << R << "\n";
@@ -33,19 +32,13 @@ CoulombSpherePotential::CoulombSpherePotential(double Z, double R)
   this->VR = R > 0 ? -1.5 * Z / R : 0;
 }
 
-double CoulombSpherePotential::V(double r)
-{
+double CoulombSpherePotential::V(double r) {
 
-  if (r < 0)
-  {
+  if (r < 0) {
     throw invalid_argument("Negative radius not allowed for CoulombPotential");
-  }
-  else if (r < R)
-  {
+  } else if (r < R) {
     return Z * pow(r, 2) / (2 * R3) + VR;
-  }
-  else
-  {
+  } else {
     return -Z / r;
   }
 }
@@ -63,28 +56,22 @@ double CoulombSpherePotential::V(double r)
  * @retval
  */
 CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
-                                               double thickness, int csteps)
-    : CoulombSpherePotential(Z, R)
-{
+    double thickness, int csteps): CoulombSpherePotential(Z, R) {
 
   vector<double> rho;
 
   T = thickness;
 
-  if (R < 0)
-  {
+  if (R < 0) {
     // Skip any initialisation, but the potential won't work properly
     return;
   }
 
   // First, define C for this radius
-  if (A >= 5.0)
-  {
+  if (A >= 5.0) {
     c = sqrt(R * R -
              7.0 / 3.0 * pow(M_PI * T / (4 * log(3.0)), 2));
-  }
-  else
-  {
+  } else {
     c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
   }
 
@@ -93,11 +80,10 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   // Then find the grid
   grid = logGrid(1e-8, 1e-2, csteps);
   // And define the density over it
-  for (int i = 0; i < csteps; ++i)
-  {
+  for (int i = 0; i < csteps; ++i) {
     rho.push_back(
-        4.0 * M_PI * pow(grid[1][i], 2.0) /
-        (1.0 + exp(4 * log(3.0) * (grid[1][i] - c) / T)));
+      4.0 * M_PI * pow(grid[1][i], 2.0) /
+      (1.0 + exp(4 * log(3.0) * (grid[1][i] - c) / T)));
   }
   // Integrate to find the total charge
   dx = grid[0][1] - grid[0][0];
@@ -115,34 +101,23 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   VR = -Z / grid[1].back() - Vgrid.back();
 }
 
-double CoulombFermi2Potential::V(double r)
-{
+double CoulombFermi2Potential::V(double r) {
 
-  if (r < 0)
-  {
+  if (r < 0) {
     throw invalid_argument("Negative radius not allowed for CoulombPotential");
-  }
-  else if (r > grid[1].back())
-  {
+  } else if (r > grid[1].back()) {
     return -Z / r;
-  }
-  else if (r < grid[1][0])
-  {
+  } else if (r < grid[1][0]) {
     return innerV * pow(r, 2) + VR;
-  }
-  else
-  {
+  } else {
     double x = log(r / grid[1][0]);
     double xi = x / dx;
     int i0 = floor(xi);
     int i1 = ceil(xi);
 
-    if (i0 == i1)
-    {
+    if (i0 == i1) {
       return Vgrid[i0] + VR;
-    }
-    else
-    {
+    } else {
       // Interpolate
       return lerp(Vgrid[i0], Vgrid[i1], xi - i0) + VR;
     }
@@ -161,8 +136,7 @@ double CoulombFermi2Potential::V(double r)
  * @param  usteps:     Steps used to integrate numerically over 'u' parameter
  * @retval
  */
-UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
-{
+UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps) {
   this->Z = Z;
   this->R = R;
   this->usteps = usteps;
@@ -174,32 +148,27 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
   uker_small = vector<double>(usteps, 0);
 
   // Initialise values to be reused
-  for (int i = 1; i < usteps; ++i)
-  {
+  for (int i = 1; i < usteps; ++i) {
     double u = i * du;
     uker[i] = sqrt(1 - u * u) * (1 + 0.5 * u * u);
     u24c2[i] = pow(u * Physical::alpha, 2.0) / 4.0;
     uker_great[i] = ukernel_r_greater(u, 0, R);
     uker_small[i] = exp(-2 * R * Physical::c / u) *
-                        (R * u * Physical::alpha / 2 + u24c2[i]) -
+                    (R * u * Physical::alpha / 2 + u24c2[i]) -
                     u24c2[i];
   }
 
-  if (R > 0)
-  {
+  if (R > 0) {
     rho = Z * 0.75 / (M_PI * pow(R, 3));
     // Compute the 'uint0' term
     uarg[0] = 0;
     double eps = 0.5 * 1e-7 * du;
-    for (int i = 1; i < usteps; ++i)
-    {
+    for (int i = 1; i < usteps; ++i) {
       double u = i * du;
       uarg[i] = ukernel_r_verysmall(u, R) * uker[i];
     }
     uint0 = trapzInt(du, uarg);
-  }
-  else
-  {
+  } else {
     rho = Z /
           (M_PI *
            Physical::alpha); // Works so that the front constant stays the same
@@ -216,13 +185,12 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps)
  * @param  R
  * @retval Kernel value
  */
-double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
-{
+double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R) {
   double ans = exp(-2 * r * Physical::c / u);
   ans *= (exp(2 * R * Physical::c / u) *
-              (R * u * Physical::alpha / 2 - pow(u * Physical::alpha, 2) / 4) +
+          (R * u * Physical::alpha / 2 - pow(u * Physical::alpha, 2) / 4) +
           exp(-2 * R * Physical::c / u) *
-              (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4));
+          (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4));
 
   return ans;
 }
@@ -239,20 +207,16 @@ double UehlingSpherePotential::ukernel_r_greater(double u, double r, double R)
  * @param  rR   If true, consider r = R
  * @retval Kernel value
  */
-double UehlingSpherePotential::ukernel_r_greater(int i, double r, bool rR)
-{
+double UehlingSpherePotential::ukernel_r_greater(int i, double r, bool rR) {
   double ans;
-  if (!rR)
-  {
+  if (!rR) {
     ans = exp(-2 * r * Physical::c / (du * i));
     ans *= uker_great[i];
-  }
-  else
-  {
+  } else {
     double u = du * i;
     ans = (r * u * Physical::alpha / 2 - u24c2[i]) +
           exp(-4 * r * Physical::c / u) *
-              (r * u * Physical::alpha / 2 + u24c2[i]);
+          (r * u * Physical::alpha / 2 + u24c2[i]);
   }
   return ans;
 }
@@ -265,11 +229,10 @@ double UehlingSpherePotential::ukernel_r_greater(int i, double r, bool rR)
  * @param  R
  * @retval Kernel value
  */
-double UehlingSpherePotential::ukernel_r_smaller(double u, double r, double R)
-{
+double UehlingSpherePotential::ukernel_r_smaller(double u, double r, double R) {
   double ans = (exp(-2 * r * Physical::c / u) - exp(2 * r * Physical::c / u));
   ans *= (exp(-2 * R * Physical::c / u) *
-              (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4) -
+          (R * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4) -
           pow(u * Physical::alpha, 2) / 4);
 
   return ans;
@@ -287,18 +250,14 @@ double UehlingSpherePotential::ukernel_r_smaller(double u, double r, double R)
  * @param  rR   If true, consider r = R
  * @retval Kernel value
  */
-double UehlingSpherePotential::ukernel_r_smaller(int i, double r, bool rR)
-{
+double UehlingSpherePotential::ukernel_r_smaller(int i, double r, bool rR) {
   double ans;
   double u = du * i;
 
-  if (!rR)
-  {
+  if (!rR) {
     ans = (exp(-2 * r * Physical::c / u) - exp(2 * r * Physical::c / u));
     ans *= uker_small[i];
-  }
-  else
-  {
+  } else {
     double ecru = exp(-2 * r * Physical::c / u);
     ans = (r * u * Physical::alpha / 2 + u24c2[i]) * (pow(ecru, 2) - 1) +
           u24c2[i] * (1 / ecru - ecru);
@@ -306,45 +265,33 @@ double UehlingSpherePotential::ukernel_r_smaller(int i, double r, bool rR)
   return ans;
 }
 
-double UehlingSpherePotential::ukernel_r_verysmall(double u, double R)
-{
+double UehlingSpherePotential::ukernel_r_verysmall(double u, double R) {
   return 4 * Physical::c / u *
          (-exp(-2 * R * Physical::c / u) *
-              (0.5 * R * u * Physical::alpha + pow(u / (2 * Physical::c), 2)) +
+          (0.5 * R * u * Physical::alpha + pow(u / (2 * Physical::c), 2)) +
           pow(u / (2 * Physical::c), 2));
 }
 
-double UehlingSpherePotential::ukernel_point(double u, double r)
-{
+double UehlingSpherePotential::ukernel_point(double u, double r) {
   return 1 / u * exp(-2 * r * Physical::c / u);
 }
 
-double UehlingSpherePotential::V(double r)
-{
+double UehlingSpherePotential::V(double r) {
   // Avoid all this mess if r is big enough
-  if (r > exp_cutoff_high * 0.5 * Physical::alpha)
-  {
+  if (r > exp_cutoff_high * 0.5 * Physical::alpha) {
     return 0.0;
-  }
-  else if (r <= exp_cutoff_low * 0.5 * du * Physical::alpha)
-  {
+  } else if (r <= exp_cutoff_low * 0.5 * du * Physical::alpha) {
     return K * uint0;
   }
   // Fill in the u integration kernel
   uarg[0] = 0;
-  for (int i = 1; i < usteps; ++i)
-  {
+  for (int i = 1; i < usteps; ++i) {
     double u = i * du;
-    if (R <= 0)
-    {
+    if (R <= 0) {
       uarg[i] = ukernel_point(u, r);
-    }
-    else if (r > R)
-    {
+    } else if (r > R) {
       uarg[i] = ukernel_r_greater(i, r);
-    }
-    else
-    {
+    } else {
       uarg[i] = ukernel_r_greater(i, r, true) + ukernel_r_smaller(i, r) -
                 ukernel_r_smaller(i, r, true);
     }
@@ -357,8 +304,7 @@ double UehlingSpherePotential::V(double r)
 }
 
 BkgGridPotential::BkgGridPotential(vector<double> rho, double rc, double dx,
-                                   int i0, int i1)
-{
+                                   int i0, int i1) {
   this->rc = rc;
   this->dx = dx;
   this->i0 = i0;
@@ -369,8 +315,7 @@ BkgGridPotential::BkgGridPotential(vector<double> rho, double rc, double dx,
   initPotential(rho);
 }
 
-BkgGridPotential::BkgGridPotential()
-{
+BkgGridPotential::BkgGridPotential() {
   rc = 1;
   dx = 1e-3;
   i0 = 0;
@@ -382,8 +327,7 @@ BkgGridPotential::BkgGridPotential()
   grid = logGrid(rc, dx, i0, i1);
 }
 
-void BkgGridPotential::initPotential(vector<double> rho)
-{
+void BkgGridPotential::initPotential(vector<double> rho) {
   this->rho = rho;
   rho0 = rho[0];
   Vpot = vector<double>(i1 - i0 + 1);
@@ -395,27 +339,20 @@ void BkgGridPotential::initPotential(vector<double> rho)
   V0 = -Q / grid[1][i1 - i0] - Vpot[i1 - i0];
 }
 
-double BkgGridPotential::V(double r)
-{
+double BkgGridPotential::V(double r) {
   // Find the index
   double xi = log(r / rc) / dx;
 
-  if (xi < i0)
-  {
+  if (xi < i0) {
     return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
-  }
-  else if (xi > i1)
-  {
+  } else if (xi > i1) {
     return -Q / r;
-  }
-  else
-  {
+  } else {
     // Interpolate
     int il = floor(xi);
     int ir = ceil(xi);
 
-    if (il == ir)
-    {
+    if (il == ir) {
       return Vpot[il - i0] + V0;
     }
     double drl = grid[1][il - i0] * (exp((xi - il) * dx) - 1);
@@ -424,21 +361,14 @@ double BkgGridPotential::V(double r)
   }
 }
 
-double BkgGridPotential::Vgrid(int i)
-{
-  if (i >= i0 && i <= i1)
-  {
+double BkgGridPotential::Vgrid(int i) {
+  if (i >= i0 && i <= i1) {
     return Vpot[i - i0] + V0;
-  }
-  else
-  {
+  } else {
     double r = rc * exp(i * dx);
-    if (i < i0)
-    {
+    if (i < i0) {
       return 1.0 / 6.0 * rho0 * pow(r / grid[1][0], 2.0) + V0;
-    }
-    else
-    {
+    } else {
       return -Q / r;
     }
   }
@@ -464,8 +394,7 @@ double BkgGridPotential::Vgrid(int i)
  */
 EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc,
                                double dx, double rho_eps, double max_r0,
-                               double min_r1)
-{
+                               double min_r1) {
   this->ec = econf;
   this->rc = rc;
   this->dx = dx;
@@ -479,14 +408,12 @@ EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc,
   max_r0 = max_r0 < 0 ? 2 * rc : max_r0;
   min_r1 = min_r1 < 0 ? rc / 2 : min_r1;
 
-  while (abs(rho.front()) > rho_eps || r > max_r0)
-  {
+  while (abs(rho.front()) > rho_eps || r > max_r0) {
     i0--;
     r = rc * exp(i0 * dx);
     rho.insert(rho.begin(), ec.hydrogenicChargeDensity(r));
   }
-  while (abs(rho.back()) > rho_eps || r < min_r1)
-  {
+  while (abs(rho.back()) > rho_eps || r < min_r1) {
     i1++;
     r = rc * exp(i1 * dx);
     rho.push_back(ec.hydrogenicChargeDensity(r));

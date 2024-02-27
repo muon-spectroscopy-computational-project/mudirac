@@ -65,117 +65,125 @@ void writeTabulated2ColFile(vector<double> col1, vector<double> col2, string fna
 // Templated function declarations
 /**
  * @brief  Search if a vector contains an element
- * 
+ *
  * @tparam T        Type of the vectors' elements
  * @param  v        Vector
  * @param  e        Element
  * @retval          True if e is in v
  */
 template <typename T>
-bool vectorContains(vector<T> v, T e)
-{
-    return find(v.begin(), v.end(), e) != v.end();
+bool vectorContains(vector<T> v, T e) {
+  return find(v.begin(), v.end(), e) != v.end();
 }
 
 /**
  * @brief Perform an element-wise operation on two vectors
- * 
+ *
  * @tparam T        Type of the vectors' elements
  * @param v1        First vector
  * @param v2        Second vector
  * @param op        Operator (can be +, -, *, / or ^)
- * @retval vector<T> 
+ * @retval vector<T>
  */
 template <typename T>
-vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op)
-{
-    if (v1.size() != v2.size())
-    {
-        throw runtime_error("Vectors don't match in size");
-    }
+vector<T> vectorOperation(vector<T> v1, vector<T> v2, char op) {
+  if (v1.size() != v2.size()) {
+    throw runtime_error("Vectors don't match in size");
+  }
 
-    vector<T> ans(v1.size());
+  vector<T> ans(v1.size());
 
-    T(*opfunc)
-    (T, T);
+  T(*opfunc)
+  (T, T);
 
-    switch (op)
-    {
+  switch (op) {
     case '+':
-        opfunc = [](T a, T b) { return a + b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a + b;
+      };
+      break;
     case '-':
-        opfunc = [](T a, T b) { return a - b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a - b;
+      };
+      break;
     case '*':
-        opfunc = [](T a, T b) { return a * b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a * b;
+      };
+      break;
     case '/':
-        opfunc = [](T a, T b) { return a / b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a / b;
+      };
+      break;
     case '^':
-        opfunc = pow;
-        break;
+      opfunc = pow;
+      break;
     default:
-        throw invalid_argument("Invalid operator code for vectorOperation");
-        break;
-    }
+      throw invalid_argument("Invalid operator code for vectorOperation");
+      break;
+  }
 
-    for (int i = 0; i < v1.size(); ++i)
-    {
-        ans[i] = opfunc(v1[i], v2[i]);
-    }
+  for (int i = 0; i < v1.size(); ++i) {
+    ans[i] = opfunc(v1[i], v2[i]);
+  }
 
-    return ans;
+  return ans;
 }
 
 /**
  * @brief Perform an element-wise operation on a vector
  * and a scalar
- * 
+ *
  * @tparam T        Type of the vectors' elements
  * @param v         Vector
  * @param x         Scalar
  * @param op        Operator (can be +, -, *, / or ^)
- * @retval vector<T> 
+ * @retval vector<T>
  */
 template <typename T>
-vector<T> vectorOperation(vector<T> v, T x, char op)
-{
+vector<T> vectorOperation(vector<T> v, T x, char op) {
 
-    vector<T> ans(v.size());
+  vector<T> ans(v.size());
 
-    T(*opfunc)
-    (T, T);
+  T(*opfunc)
+  (T, T);
 
-    switch (op)
-    {
+  switch (op) {
     case '+':
-        opfunc = [](T a, T b) { return a + b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a + b;
+      };
+      break;
     case '-':
-        opfunc = [](T a, T b) { return a - b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a - b;
+      };
+      break;
     case '*':
-        opfunc = [](T a, T b) { return a * b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a * b;
+      };
+      break;
     case '/':
-        opfunc = [](T a, T b) { return a / b; };
-        break;
+      opfunc = [](T a, T b) {
+        return a / b;
+      };
+      break;
     case '^':
-        opfunc = pow;
-        break;
+      opfunc = pow;
+      break;
     default:
-        throw invalid_argument("Invalid operator code for vectorOperation");
-        break;
-    }
+      throw invalid_argument("Invalid operator code for vectorOperation");
+      break;
+  }
 
-    for (int i = 0; i < v.size(); ++i)
-    {
-        ans[i] = opfunc(v[i], x);
-    }
+  for (int i = 0; i < v.size(); ++i) {
+    ans[i] = opfunc(v[i], x);
+  }
 
-    return ans;
+  return ans;
 }
 
 #endif

@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * debugtasks.hpp
- * 
+ *
  * Methods or classes used to perform debug specific tasks - header file
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */
