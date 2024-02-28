@@ -87,3 +87,4 @@ doctrees
 objects.inv
 _plantuml
 __pycache__
+docs/build/*
