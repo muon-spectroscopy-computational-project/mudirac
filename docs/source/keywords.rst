@@ -5,7 +5,7 @@
 
 .. _section_mudirac_input_keywords:
 
-mudirac- List of input keywords's documentation
+Input keywords
 ===========================================================
 
 .. toctree::
@@ -19,12 +19,10 @@ mudirac- List of input keywords's documentation
    Integer keywords
    ...
 
-Input keywords
-===============
 :literal:`mudirac` takes a single input file, containing multiple lines with the format :literal:`<keyword>: <value>`. Here, we list all the currently available keywords, divided by type, their purpose, and default values.
 
 String keywords
-----------------
+~~~~~~~~~~~~~~~~~
 These keywords take a string as value; invalid strings (e.g. a chemical symbol that doesn't correspond to a known element) will give rise to errors.
 
 * :literal:`element`: symbol of the element for the calculation. Determines the nuclear charge. Can be any symbol in the periodic table up to Z=111, Roentgenium (Rg). Default is H.
@@ -40,7 +38,7 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 In addition, colons can be used to indicate ranges of lines. The notation :literal:`K1:L3-M1` would compute the lines K1-M1, L1-M1, L2-M1 and L3-M1. Note that if some of these lines are forbidden by selection rules, they will simply be skipped. A double colon, like :literal:`K1:L3-K1:L3` would loop on both sides, and not count all repeated lines. 
 
 Boolean keywords
------------------
+~~~~~~~~~~~~~~~~~
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
 * :literal:`uehling_correction`: whether to turn on or not the Uehling correction. Default is FALSE.
@@ -48,7 +46,7 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 
 Floating point keywords
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 These keywords accept a non-integer number. It can be written normally (e.g. 105.3) or in scientific notation (e.g. 1.053E2).
 
 * :literal:`mass`:  mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
@@ -68,7 +66,7 @@ These keywords accept a non-integer number. It can be written normally (e.g. 105
 * :literal:`spec_expdec`: exponential decay parameter :math:`E_{\text{dec}}` for a sensitivity function for the simulated spectrum, in eV. Multiplies the entire spectrum by a function :math:`\exp(-E/E_{\text{dec}})`. Only has effect if :literal:`write\_spec = TRUE`. Default is -1 (no decay).
 
 Integer keywords
------------------
+~~~~~~~~~~~~~~~~~
 Keywords that take an integer number as value.
 
 * :literal:`isotope`: which isotope of the element to consider. Important to determine the mass of the nucleus and its size. Default is -1, which means the most common isotope for the element will be used.

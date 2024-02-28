@@ -1,46 +1,26 @@
 .. mudirac- homepage master file
 
-Welcome to mudirac's documentation
+Welcome to MuDirac's documentation
 ===================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   mudirac- List of input keywords's documentation
-   ...
+   
+   installation.rst
+   theory.rst
+   keywords.rst
+   example.rst
 
-mudirac is a muonic atom Dirac equation solver.
+MuDirac is a simulation software that integrates the Dirac equation for muonic atoms to compute their X-Ray transition energies; it is written in C++ and can be found on `GitHub <https://github.com/muon-spectroscopy-computational-project/mudirac>`_. Its use and functioning is extensively documented in the paper `S. Sturniolo, A. Hillier, "Mudirac: A Dirac equation solver for elemental analysiswith muonic X-rays", X-Ray Spectrom. 2020;1–17 <https://onlinelibrary.wiley.com/doi/full/10.1002/xrs.3212>`_, which should be cited by any work using it. Here we will give a quick tutorial on how to start using it for simple cases.
 
-Compiling
-==========
-To compile, create a directory called :literal:`mudirac`; then, within that directory, execute the commands
+Installation
+-------------
+Details for how to install and use MuDirac is given :doc:`here <installation>`.
 
-.. code-block:: bash
-
-   cmake ..
-   make mudirac
-
-In order to run the test suite. within the same directory, run
-
-.. code-block:: bash
-
-   make tests
-   make test
-
-and wait for a few seconds for the tests to complete. If you want :literal:`mudirac` to be accessible from any folder in your computer, add the resulting :literal:`bin` directory to your system :literal:`PATH` environment variable.
-
-Running
-========
-Simulations can be run simply with the command
-
-.. code-block:: bash
-
-   mudirac input.in
-
-where :literal:`.in` file can have any name one prefers. A full list of keywords employable in the :literal:`.in` file and their meaning can be found in :ref:`section_mudirac_input_keywords`.
 
 Citing mudirac
-===============
+---------------
 For the theoretical background on the software and examples of its applications, see the published paper:
 
 Sturniolo, S, Hillier, A. Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays. X‐Ray Spectrom. 2020; 1– 17. https://doi.org/10.1002/xrs.3212
@@ -48,10 +28,10 @@ Sturniolo, S, Hillier, A. Mudirac: A Dirac equation solver for elemental analysi
 Cite the above paper if you make use of the software in your work too.
 
 Contact
-========
+--------
 leandro.liborio@stfc.ac.uk
 
 Acknowledgments
-=================
+----------------
 Written with funding from the Ada Lovelace Centre, in collaboration with the ISIS Muon Group.
 
