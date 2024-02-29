@@ -8,17 +8,6 @@
 Input keywords
 ===========================================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   Homepage
-   Input keywords
-   String keywords
-   Boolean keywords
-   Floating point keywords
-   Integer keywords
-   ...
-
 :literal:`mudirac` takes a single input file, containing multiple lines with the format :literal:`<keyword>: <value>`. Here, we list all the currently available keywords, divided by type, their purpose, and default values.
 
 String keywords
@@ -31,9 +20,9 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 * :literal:`ideal_atom_minshell`: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (:math:`K \Rightarrow n=1`, :math:`L \Rightarrow n=2`, etc.). Default is the empty string (no ideal solutions used).
 * :literal:`xr_lines`: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example:
 	
-	::
-
-    :literal:`xr_lines: K1-L2,K1-L3`
+::
+      
+      xr_lines: K1-L2,K1-L3
 	
 In addition, colons can be used to indicate ranges of lines. The notation :literal:`K1:L3-M1` would compute the lines K1-M1, L1-M1, L2-M1 and L3-M1. Note that if some of these lines are forbidden by selection rules, they will simply be skipped. A double colon, like :literal:`K1:L3-K1:L3` would loop on both sides, and not count all repeated lines. 
 

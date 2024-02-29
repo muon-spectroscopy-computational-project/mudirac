@@ -75,7 +75,7 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Input keywords</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/keywords.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/muon-spectroscopy-computational-project/mudirac/blob/main/docs/sourcekeywords.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -89,19 +89,16 @@
 <section id="string-keywords">
 <h2>String keywords<a class="headerlink" href="#string-keywords" title="Link to this heading"></a></h2>
 <p>These keywords take a string as value; invalid strings (e.g. a chemical symbol that doesn’t correspond to a known element) will give rise to errors.</p>
-<ul>
+<ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">element</span></code>: symbol of the element for the calculation. Determines the nuclear charge. Can be any symbol in the periodic table up to Z=111, Roentgenium (Rg). Default is H.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">nuclear_model</span></code>: model used to describe the nucleus. Can be POINT (point charge), SPHERE (finite size, uniformly charged spherical nucleus) or FERMI2 (Fermi 2-term charge distribution). Default is POINT.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">electronic_config</span></code>: electronic configuration to use in order to describe the negative charge background. Can be a full string describing the configuration (e.g. <code class="docutils literal notranslate"><span class="pre">1s2</span> <span class="pre">2s2</span> <span class="pre">2p2</span></code>), an element symbol to represent the default configuration of that atom when neutral (e.g. <code class="docutils literal notranslate"><span class="pre">C</span></code>) or a mix of the two (e.g. <code class="docutils literal notranslate"><span class="pre">[He]</span> <span class="pre">2s2</span> <span class="pre">2p2</span></code>). Default is the empty string (no electrons).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ideal_atom_minshell</span></code>: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (<span class="math notranslate nohighlight">\(K \Rightarrow n=1\)</span>, <span class="math notranslate nohighlight">\(L \Rightarrow n=2\)</span>, etc.). Default is the empty string (no ideal solutions used).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">xr_lines</span></code>: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example:</p>
-<blockquote>
-<div><blockquote>
-<div></div></blockquote>
-<p><code class="docutils literal notranslate"><span class="pre">xr_lines:</span> <span class="pre">K1-L2,K1-L3</span></code></p>
-</div></blockquote>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xr_lines</span></code>: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example:</p></li>
 </ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xr_lines</span><span class="p">:</span> <span class="n">K1</span><span class="o">-</span><span class="n">L2</span><span class="p">,</span><span class="n">K1</span><span class="o">-</span><span class="n">L3</span>
+</pre></div>
+</div>
 <p>In addition, colons can be used to indicate ranges of lines. The notation <code class="docutils literal notranslate"><span class="pre">K1:L3-M1</span></code> would compute the lines K1-M1, L1-M1, L2-M1 and L3-M1. Note that if some of these lines are forbidden by selection rules, they will simply be skipped. A double colon, like <code class="docutils literal notranslate"><span class="pre">K1:L3-K1:L3</span></code> would loop on both sides, and not count all repeated lines.</p>
 </section>
 <section id="boolean-keywords">
