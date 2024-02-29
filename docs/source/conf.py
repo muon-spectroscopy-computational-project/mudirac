@@ -35,8 +35,8 @@ html_static_path = ['_static']
 
 html_context = {
     "display_github": True, # Integrate GitHub
-    "github_user": "MyTreeSings", # Username
-    "github_repo": "pymuon-suite", # Repo name
-    "github_version": "master", # Version
-    "conf_py_path": "/home/qsd31181/mudirac/docs/source", # Path in the checkout to the docs root
+    "github_user": "muon-spectroscopy-computational-project", # Username
+    "github_repo": "mudirac", # Repo name
+    "github_version": "main", # Version
+    "conf_py_path": "/docs/source", # Path in the checkout to the docs root
 }
