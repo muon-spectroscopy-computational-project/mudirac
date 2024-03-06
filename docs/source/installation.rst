@@ -1,7 +1,7 @@
 Installation of MuDirac
 ========================
 MuDirac used CMake as a build system, and requires a C++ compiler. In order to compile it and prepare it to be executed on a Linux, Unix, or MacOS system with a working C++ compiler installes, follow these steps:
-1. download and unpack (or :literal:`git clone`) the repository on your loacal system;
+1. download and unpack (or :literal:`git clone`) the repository on your local system;
 2. within the main folder of the repository (the one containing the :literal:`READ.md` file), create a subfolder called :literal:`build`;
 3. within the :literal:`build` folder, run the following commands:
 
@@ -21,7 +21,7 @@ and wait for a few seconds for the tests to complete. If you want :literal:`mudi
 
 Usage
 --------
-MuDirac works simplyby running it with an input file:
+MuDirac works simply by running it with an input file:
 
 .. code-block:: bash
 
