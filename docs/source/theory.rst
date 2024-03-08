@@ -12,9 +12,11 @@ While positive muons can be used as magnetic probes acting as if they were light
 
 3. the muon orbitals have much higher binding energies, which means they can also be treated only with a relativistic theory. In classical terms, you could say the muons are 'orbiting' the nucleus at speeds close to that of light.
 
-  PUT FIGURE 1 HERE.
 
-CAPTION: Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal. Side feeding and electron refilling, via radiative decay or electronic Auger decay, fill the electron holes. It is assumed that the number of 4s electrons is a constant during the cascade because of rapid N-shell side feeding. Figure taken from T. Okumura et. al. PHYSICAL REVIEW LETTERS 127, 053001 (2021)
-  
+.. figure:: _static/Figure-MuDirac.jpg
+   :alt: Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal. 
+
+   Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal. Side feeding and electron refilling, via radiative decay or electronic Auger decay, fill the electron holes. It is assumed that the number of 4s electrons is a constant during the cascade because of rapid N-shell side feeding. Figure taken from T. Okumura et. al. PHYSICAL REVIEW LETTERS 127, 053001 (2021). 
+
 
 The consequence of these facts is that when cascading on a nucleus to form a muonic atom, muons will shed their energy in the form of highly energetic X-Ray photons, and the specific energies of these photons will be tied to the transitions between levels that are unique for each element. For this reason, `muons can be an excellent probe for non-destructive elemental analysis <https://www.sciencedirect.com/science/article/abs/pii/S0026265X1500301X?via%3Dihub>`_. The exact characteristic energies for each element can be tabulated by experimental calibration, but they can also be modelled from first principles, by solving the quantum equations to find the orbitals and their energies. However, this is not as simple as applying the usual Schrödinger equation, because the muons orbit the nucleus at relativistic energies and the Dirac equation is necessary; plus, at these energies, the electrostatic potential itself stops being perfectly Coulombic. For these reasons, we have provided a software that easily allows one to perform these calculations by including all necessary details to achieve precision sufficient for the interpretation of experiments.
