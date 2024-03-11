@@ -23,8 +23,7 @@
  * @param  k2: Dirac quantum number for state 2
  * @retval
  */
-TransitionMatrix::TransitionMatrix(int k1, int k2)
-{
+TransitionMatrix::TransitionMatrix(int k1, int k2) {
   // Remember:
   // j = abs(k)-1/2
   // 2j+1 = 2*abs(k)
@@ -39,12 +38,10 @@ TransitionMatrix::TransitionMatrix(int k1, int k2)
   m2 = vector<double>(mn2);
   T = vector<vector<double>>(mn1, vector<double>(mn2, 0));
 
-  for (int i = 0; i < mn1; ++i)
-  {
+  for (int i = 0; i < mn1; ++i) {
     m1[i] = -(mn1 - 1.0) / 2.0 + i;
   }
-  for (int i = 0; i < mn2; ++i)
-  {
+  for (int i = 0; i < mn2; ++i) {
     m2[i] = -(mn2 - 1.0) / 2.0 + i;
   }
 }
@@ -59,14 +56,11 @@ TransitionMatrix::TransitionMatrix(int k1, int k2)
  *
  * @retval The total transition rate
  */
-double TransitionMatrix::totalRate()
-{
+double TransitionMatrix::totalRate() {
   double tot = 0;
 
-  for (int i = 0; i < m1.size(); ++i)
-  {
-    for (int j = 0; j < m2.size(); ++j)
-    {
+  for (int i = 0; i < m1.size(); ++i) {
+    for (int j = 0; j < m2.size(); ++j) {
       tot += T[i][j];
     }
   }
@@ -90,8 +84,7 @@ double TransitionMatrix::totalRate()
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
-           double dx)
-{
+           double dx) {
   // Set the properties
   this->Z = Z;
   this->A = A;
@@ -99,57 +92,44 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
   rmodel = radius_model;
 
   // Sanity checks
-  if (Z <= 0)
-  {
+  if (Z <= 0) {
     throw invalid_argument("Z must be positive");
   }
-  if (m <= 0)
-  {
+  if (m <= 0) {
     throw invalid_argument("Mass can not be negative");
   }
-  if (fc <= 0 || dx <= 0)
-  {
+  if (fc <= 0 || dx <= 0) {
     throw invalid_argument("Invalid grid parameters passed to Atom");
   }
 
-  if (A > 0)
-  {
+  if (A > 0) {
     M = getIsotopeMass(Z, A);
     mu = effectiveMass(m, M * Physical::amu);
-  }
-  else
-  {
+  } else {
     mu = m;
   }
 
   // Define radius
-  if (A == -1)
-  {
+  if (A == -1) {
     R = -1;
-  }
-  else
-  {
-    switch (radius_model)
-    {
-    case POINT:
-      R = -1;
-      break;
-    case SPHERE:
-    case FERMI2:
-      R = sphereNuclearModel(Z, A);
-      break;
-    default:
-      R = -1;
-      break;
+  } else {
+    switch (radius_model) {
+      case POINT:
+        R = -1;
+        break;
+      case SPHERE:
+      case FERMI2:
+        R = sphereNuclearModel(Z, A);
+        break;
+      default:
+        R = -1;
+        break;
     }
   }
 
-  if (radius_model == FERMI2)
-  {
+  if (radius_model == FERMI2) {
     V_coulomb = new CoulombFermi2Potential(Z, R, A);
-  }
-  else
-  {
+  } else {
     V_coulomb = new CoulombSpherePotential(Z, R);
   }
 
@@ -170,14 +150,12 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
  * @brief Set parameters for the Fermi 2-term potential term (if used)
  * @note  Set the thickness parameter for the Fermi 2-term potential term (if used).
  * Calling this function resets all computed states.
- * 
+ *
  * @param  thickness:  The new thickness to set up
  * @retval None
  */
-void Atom::setFermi2(double thickness)
-{
-  if (rmodel != FERMI2)
-  {
+void Atom::setFermi2(double thickness) {
+  if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to set up nuclear skin thickness for an atom"
                  << " not using a Fermi 2-term model\n";
     return;
@@ -197,11 +175,9 @@ void Atom::setFermi2(double thickness)
  * @param  usteps:     Number of integration steps used for it (default = 1000)
  * @retval None
  */
-void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
-{
+void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high) {
   use_uehling = s;
-  if (s)
-  {
+  if (s) {
     LOG(INFO) << "Initialising Uehling potential with " << usteps
               << " integration steps\n";
     V_uehling = UehlingSpherePotential(Z, R, usteps);
@@ -226,8 +202,7 @@ void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high)
  * @retval None
  */
 void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf,
-                             double rho_eps, double max_r0, double min_r1)
-{
+                             double rho_eps, double max_r0, double min_r1) {
 
   // No point using an empty configuration
   if (econf.maxn() == 0) {
@@ -236,8 +211,7 @@ void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf,
   }
 
   use_econf = s;
-  if (s)
-  {
+  if (s) {
     max_r0 = max_r0 > 0 ? max_r0 : econf.innerShellRadius() / 2.0;
     min_r1 = min_r1 > 0 ? min_r1 : econf.outerShellRadius();
     LOG(INFO) << "Initialising electronic background potential using rc = "
@@ -266,8 +240,7 @@ void Atom::setElectBkgConfig(bool s, ElectronicConfiguration econf,
  * @param  dx:         Logarithmic step of the grid
  * @retval None
  */
-void Atom::setgrid(double rc, double dx)
-{
+void Atom::setgrid(double rc, double dx) {
   this->rc = rc;
   this->dx = dx;
 
@@ -282,17 +255,14 @@ void Atom::setgrid(double rc, double dx)
  * @param r:        Point to compute the potential on
  * @retval          Computed potential
  */
-double Atom::getV(double r)
-{
+double Atom::getV(double r) {
   double Vout;
 
   Vout = V_coulomb->V(r);
-  if (use_uehling)
-  {
+  if (use_uehling) {
     Vout += V_uehling.V(r);
   }
-  if (use_econf)
-  {
+  if (use_econf) {
     Vout += V_econf.V(r);
   }
 
@@ -307,13 +277,11 @@ double Atom::getV(double r)
  * @param r:        Grid to compute the potential on
  * @retval          Computed potential
  */
-vector<double> Atom::getV(vector<double> r)
-{
+vector<double> Atom::getV(vector<double> r) {
   int N = r.size();
   vector<double> Vout(N, 0);
 
-  for (int i = 0; i < N; ++i)
-  {
+  for (int i = 0; i < N; ++i) {
     Vout[i] = getV(r[i]);
   }
 
@@ -330,16 +298,12 @@ vector<double> Atom::getV(vector<double> r)
  * @param  A:   Atomic mass
  * @retval      Nuclear radius
  */
-double Atom::sphereNuclearModel(int Z, int A)
-{
-  try
-  {
+double Atom::sphereNuclearModel(int Z, int A) {
+  try {
     return Physical::fm * getIsotopeRadius(Z, A);
-  }
-  catch (invalid_argument e)
-  {
+  } catch (invalid_argument e) {
     LOG(TRACE) << "Isotope not found; falling back on default model for "
-                  "nuclear radius";
+               "nuclear radius";
     return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
   }
 }
@@ -363,8 +327,7 @@ double Atom::sphereNuclearModel(int Z, int A)
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
                      double fc, double dx, int ideal_minshell)
-    : Atom(Z, m, A, radius_model, fc, dx)
-{
+  : Atom(Z, m, A, radius_model, fc, dx) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
@@ -373,7 +336,9 @@ DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
               << "\n";
 }
 
-void DiracAtom::reset() { states.clear(); }
+void DiracAtom::reset() {
+  states.clear();
+}
 
 /**
  * @brief  Bounds for the energy of a state with given k and nodes
@@ -385,8 +350,7 @@ void DiracAtom::reset() { states.clear(); }
  * @param  k:       Quantum number k
  * @retval          Lower and upper bounds for the energy
  */
-pair<double, double> DiracAtom::energyLimits(int nodes, int k)
-{
+pair<double, double> DiracAtom::energyLimits(int nodes, int k) {
   int n, l;
   bool s;
   double minE, maxE;
@@ -402,8 +366,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
   // Required for the state to be bound
   maxE = restE;
 
-  for (it = states.begin(); it != states.end(); it++)
-  {
+  for (it = states.begin(); it != states.end(); it++) {
     int itn, itl;
     bool its;
 
@@ -414,14 +377,10 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
     itl = get<1>(it->first);
     its = get<2>(it->first);
 
-    if (itl == l && its == s)
-    {
-      if (itn <= n)
-      {
+    if (itl == l && its == s) {
+      if (itn <= n) {
         minE = max(minE, it->second.E);
-      }
-      else
-      {
+      } else {
         maxE = min(maxE, it->second.E);
       }
     }
@@ -445,8 +404,7 @@ pair<double, double> DiracAtom::energyLimits(int nodes, int k)
  * @retval None
  */
 void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp,
-                              int targ_nodes, double &minE, double &maxE)
-{
+                              int targ_nodes, double &minE, double &maxE) {
   int k;
   int nl = -1, nr = -1;
   double El, Er, oldEl = maxE + 1, oldEr = maxE + 1;
@@ -459,37 +417,32 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp,
   LOG(DEBUG) << "Running convergeNodes to search energy with solution with "
              << targ_nodes << " nodes\n";
 
-  for (int it = 0; it < maxit_nodes; ++it)
-  {
+  for (int it = 0; it < maxit_nodes; ++it) {
     LOG(DEBUG) << "Iteration " << (it + 1) << ", El = " << El - restE
                << "+mc2, nl = " << nl << ", Er = " << Er - restE
                << "+mc2, nr = " << nr << "\n";
-    if (El != oldEl)
-    {
+    if (El != oldEl) {
       state = initState(El, k);
       integrateState(state, tp);
       state.continuify(tp);
       state.normalize();
       state.findNodes(nodetol);
       nl = state.nodes;
-      if (nl == targ_nodes)
-      {
+      if (nl == targ_nodes) {
         LOG(TRACE) << "State with " << targ_nodes
                    << " nodes found at E = " << El - restE << "+mc2\n";
         return;
       }
     }
 
-    if (Er != oldEr)
-    {
+    if (Er != oldEr) {
       state = initState(Er, k);
       integrateState(state, tp);
       state.continuify(tp);
       state.normalize();
       state.findNodes(nodetol);
       nr = state.nodes;
-      if (nr == targ_nodes)
-      {
+      if (nr == targ_nodes) {
         LOG(TRACE) << "State with " << targ_nodes
                    << " nodes found at E = " << Er - restE << "+mc2\n";
         return;
@@ -502,44 +455,36 @@ void DiracAtom::convergeNodes(DiracState &state, TurningPoint &tp,
     int dl = (nl - targ_nodes);
     int dr = (nr - targ_nodes);
 
-    if (dl > 0 && dr > 0)
-    {
+    if (dl > 0 && dr > 0) {
       // Both are too high
       oldEr = Er;
       Er = El;
       El = (minE + El) / 2.0;
       maxE = Er;
-    }
-    else if (dl < 0 && dr < 0)
-    {
+    } else if (dl < 0 && dr < 0) {
       // Both are too low
       oldEl = El;
       El = Er;
       Er = (maxE + Er) / 2.0;
       minE = El;
-    }
-    else if (dl < 0 && dr > 0)
-    {
+    } else if (dl < 0 && dr > 0) {
       // It's in between!
       oldEl = El;
       minE = El;
       El = (El + Er) / 2.0;
-    }
-    else
-    {
+    } else {
       // Doesn't make sense
       throw runtime_error(
-          "convergeNodes failed - higher number of nodes for lower energy");
+        "convergeNodes failed - higher number of nodes for lower energy");
     }
   }
 
   throw runtime_error(
-      "convergeNodes failed to find a suitable state - maximum iterations hit");
+    "convergeNodes failed to find a suitable state - maximum iterations hit");
 }
 
 void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
-                          double &maxE)
-{
+                          double &maxE) {
   int k;
   double E, dE;
   double Edamp_eff = abs(Edamp);
@@ -553,8 +498,7 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
   LOG(DEBUG) << "Energy limits: " << minE - restE << " + mc2 < E < "
              << maxE - restE << " + mc2\n";
 
-  for (int it = 0; it < maxit_E; ++it)
-  {
+  for (int it = 0; it < maxit_E; ++it) {
     LOG(TRACE) << "Iteration " << (it + 1) << ", E = " << E - restE
                << " + mc2\n";
 
@@ -563,13 +507,11 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
 
     LOG(TRACE) << "Integration complete, computed error dE = " << dE << "\n";
 
-    if (std::isnan(dE))
-    {
+    if (std::isnan(dE)) {
       throw runtime_error("Invalid dE value returned by integrateState");
     }
 
-    if (abs(dE) < Etol)
-    {
+    if (abs(dE) < Etol) {
       LOG(TRACE) << "Convergence complete after " << (it + 1)
                  << " iterations\n";
       state.continuify(tp);
@@ -578,23 +520,19 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
       return;
     }
     // Apply maximum step ratio
-    if (abs(dE / E) > max_dE_ratio)
-    {
+    if (abs(dE / E) > max_dE_ratio) {
       dE = abs(E) * max_dE_ratio * (dE > 0 ? 1 : -1);
       LOG(TRACE) << "Step exceeds maximum allowed dE/E ratio, resized to " << dE
                  << "\n";
     }
     E = E - dE * Edamp_eff;
-    if (E > maxE)
-    {
+    if (E > maxE) {
       // Something has gone wrong. Try to go back to a more reasonable search
       E = (maxE + E + dE * Edamp_eff) / 2.0;
       LOG(TRACE) << "New energy exceeds maxE, resized to " << E - restE
                  << " + mc2, reduced damping\n";
       Edamp_eff /= 2;
-    }
-    else if (E < minE)
-    {
+    } else if (E < minE) {
       // As above
       E = (minE + E + dE * Edamp_eff) / 2.0;
       LOG(TRACE) << "New energy below minE, resized to " << E - restE
@@ -619,21 +557,18 @@ void DiracAtom::convergeE(DiracState &state, TurningPoint &tp, double &minE,
  * @param  &failcode:   Error code in case of failure
  * @retval              Pair of limit indices for the grid {inner, outer}
  */
-pair<int, int> DiracAtom::gridLimits(double E, int k)
-{
+pair<int, int> DiracAtom::gridLimits(double E, int k) {
   double B;
   double K = pow(mu * Physical::c, 2) - pow(E / Physical::c, 2);
   double gamma = pow(k, 2) - pow(Z * Physical::alpha, 2);
   double r_out, r_in, r_tp;
   int i_out, i_in;
 
-  if (K < 0)
-  {
+  if (K < 0) {
     throw AtomErrorCode::UNBOUND_STATE;
     return {0, 0};
   }
-  if (gamma < 0)
-  {
+  if (gamma < 0) {
     throw AtomErrorCode::SMALL_GAMMA;
     return {0, 0};
   }
@@ -650,27 +585,24 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
              << "\n";
 
   // Upper limit
-  if (out_eps > 1 || out_eps < 0)
-  {
+  if (out_eps > 1 || out_eps < 0) {
     throw runtime_error(
-        "Invalid value for out_eps in DiracAtom; must be 0 < out_eps < 1");
+      "Invalid value for out_eps in DiracAtom; must be 0 < out_eps < 1");
   }
   r_out = r_tp - log(out_eps) / K;
 
   LOG(TRACE) << "Outer grid radius = " << r_out << "\n";
 
   // Lower limit
-  if (in_eps > 1 || in_eps < 0)
-  {
+  if (in_eps > 1 || in_eps < 0) {
     throw runtime_error(
-        "Invalid value for in_eps in DiracAtom; must be 0 < in_eps < 1");
+      "Invalid value for in_eps in DiracAtom; must be 0 < in_eps < 1");
   }
   r_in = pow(in_eps, 1.0 / gamma) / M_E * gamma / K;
 
   LOG(TRACE) << "Inner grid radius = " << r_in << "\n";
 
-  if (r_in > r_tp)
-  {
+  if (r_in > r_tp) {
     LOG(ERROR) << SPECIAL << "Inner grid radius " << r_in
                << " is smaller than turning point radius " << r_tp
                << "; please decrease in_eps\n";
@@ -694,8 +626,7 @@ pair<int, int> DiracAtom::gridLimits(double E, int k)
  * @param  k:           Quantum number k
  * @retval              Initialised state
  */
-DiracState DiracAtom::initState(double E, int k)
-{
+DiracState DiracAtom::initState(double E, int k) {
   DiracState state;
   pair<int, int> glimits;
 
@@ -722,13 +653,11 @@ DiracState DiracAtom::initState(double E, int k)
  * @param  &tp:     TurningPoint object to store turning point info
  * @retval
  */
-void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
-{
+void DiracAtom::integrateState(DiracState &state, TurningPoint &tp) {
   int N;
 
   N = state.grid.size();
-  if (N == 0)
-  {
+  if (N == 0) {
     throw runtime_error("Can not integrate state with zero-sized grid");
   }
   LOG(TRACE) << "Integrating state with grid of size " << N << "\n";
@@ -755,8 +684,7 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp)
  * @retval
  */
 void DiracAtom::integrateState(DiracState &state, TurningPoint &tp,
-                               double &dE)
-{
+                               double &dE) {
   int N;
   double err;
   vector<double> y, zetai, zetae;
@@ -771,8 +699,7 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp,
   err = tp.Qi / tp.Pi - tp.Qe / tp.Pe;
 
   // Compute the derivative of the error in dE
-  for (int i = 0; i < N; ++i)
-  {
+  for (int i = 0; i < N; ++i) {
     y[i] = state.Q[i] / state.P[i];
   }
   // First the forward version
@@ -791,10 +718,9 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp,
 
   dE = err / (zetai[tp.i] - zetae[tp.i]);
 
-  if (write_debug)
-  {
+  if (write_debug) {
     string state_name =
-        printIupacState(state.getn(), state.getl(), state.gets());
+      printIupacState(state.getn(), state.getl(), state.gets());
     string fname = state_name + "_y.dat";
     writeTabulated2ColFile(state.grid, y, fname);
     fname = state_name + "_zetai.dat";
@@ -815,8 +741,7 @@ void DiracAtom::integrateState(DiracState &state, TurningPoint &tp,
  * @param  k:   Dirac quantum number
  * @retval      Converged state
  */
-DiracState DiracAtom::convergeState(int n, int k)
-{
+DiracState DiracAtom::convergeState(int n, int k) {
   int l;
   bool s;
   int targ_nodes;
@@ -825,8 +750,7 @@ DiracState DiracAtom::convergeState(int n, int k)
   DiracState state;
   TurningPoint tp;
 
-  if (idshell > 0 && n >= idshell)
-  {
+  if (idshell > 0 && n >= idshell) {
     // Just use the ideal version
 
     LOG(DEBUG) << "Using hydrogen-like solution for state with n = " << n
@@ -837,7 +761,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     state = initState(state.E, k);
 
     vector<vector<double>> PQ =
-        hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
+                          hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
     state.P = PQ[0];
     state.Q = PQ[1];
 
@@ -861,8 +785,7 @@ DiracState DiracAtom::convergeState(int n, int k)
   LOG(DEBUG) << "Energy limits: " << minE - restE << " + mc2 < E < "
              << maxE - restE << " + mc2\n";
 
-  for (int it = 0; it < maxit_state; ++it)
-  {
+  for (int it = 0; it < maxit_state; ++it) {
     LOG(TRACE) << "Iteration " << (it + 1) << ", minE = " << minE - restE
                << "+mc2, maxE = " << maxE - restE << "+mc2\n";
     state.k = k;
@@ -870,8 +793,7 @@ DiracState DiracAtom::convergeState(int n, int k)
     convergeNodes(state, tp, targ_nodes, minE, maxE);
     // Now converge energy
     double hydroE = hydrogenicDiracEnergy(Z, mu, n, k);
-    if (it == 0 && hydroE > minE && hydroE < maxE)
-    {
+    if (it == 0 && hydroE > minE && hydroE < maxE) {
       // We only try this the first time; if it fails, it ain't working any
       // better later...
       LOG(TRACE) << "Using hydrogenic Dirac energy " << hydroE - restE
@@ -881,17 +803,13 @@ DiracState DiracAtom::convergeState(int n, int k)
     convergeE(state, tp, minE, maxE);
 
     // Check node condition
-    if (state.nodes != targ_nodes)
-    {
+    if (state.nodes != targ_nodes) {
       LOG(TRACE) << "Converged state contains " << state.nodes
                  << " nodes instead of " << targ_nodes << "\n";
       LOG(TRACE) << "Converged state has E = " << state.E - restE << "+mc2\n";
-      if (state.nodes > targ_nodes)
-      {
+      if (state.nodes > targ_nodes) {
         maxE = min(maxE, state.E);
-      }
-      else
-      {
+      } else {
         minE = max(minE, state.E);
       }
       // Store it for the future
@@ -899,9 +817,7 @@ DiracState DiracAtom::convergeState(int n, int k)
       state.converged = true;
       states[make_tuple(n, l, s)] = state;
       state = DiracState();
-    }
-    else
-    {
+    } else {
       state.normalize();
       state.converged = true;
 
@@ -930,8 +846,7 @@ DiracState DiracAtom::convergeState(int n, int k)
  * present
  * @retval None
  */
-void DiracAtom::calcState(int n, int l, bool s, bool force)
-{
+void DiracAtom::calcState(int n, int l, bool s, bool force) {
   int k;
   int dnode;
   double E0;
@@ -942,19 +857,15 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
   qnumSchro2Dirac(l, s, k);
 
   // First, check if it's already calculated
-  if (!force && states[make_tuple(n, l, s)].converged)
-  {
+  if (!force && states[make_tuple(n, l, s)].converged) {
     LOG(DEBUG) << "State with n = " << n << ", k = " << k
                << " already calculated\n";
     return;
   }
 
-  try
-  {
+  try {
     state = convergeState(n, k);
-  }
-  catch (runtime_error re)
-  {
+  } catch (runtime_error re) {
     LOG(ERROR) << "Convergence failed with error: " << re.what() << "\n";
   }
 
@@ -971,14 +882,10 @@ void DiracAtom::calcState(int n, int l, bool s, bool force)
  * present
  * @retval None
  */
-void DiracAtom::calcAllStates(int max_n, bool force)
-{
-  for (int n = 1; n <= max_n; ++n)
-  {
-    for (int l = 0; l < n; ++l)
-    {
-      for (int s = 0; s < 2; ++s)
-      {
+void DiracAtom::calcAllStates(int max_n, bool force) {
+  for (int n = 1; n <= max_n; ++n) {
+    for (int l = 0; l < n; ++l) {
+      for (int s = 0; s < 2; ++s) {
         calcState(n, l, bool(s), force);
       }
     }
@@ -996,13 +903,11 @@ void DiracAtom::calcAllStates(int max_n, bool force)
  * @param  s: Spin quantum number (true = 1/2 / false = -1/2)
  * @retval Requested orbital
  */
-DiracState DiracAtom::getState(int n, int l, bool s)
-{
+DiracState DiracAtom::getState(int n, int l, bool s) {
   calcState(n, l, s);
   DiracState st = states[make_tuple(n, l, s)];
 
-  if (!st.converged)
-  {
+  if (!st.converged) {
     throw runtime_error("State is not converged");
   }
 
@@ -1027,9 +932,7 @@ DiracState DiracAtom::getState(int n, int l, bool s)
  * @retval Transition matrix
  */
 TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
-                                                       int n2, int l2, bool s2,
-                                                       bool approx_j0)
-{
+    int n2, int l2, bool s2, bool approx_j0) {
   int k1, k2;
 
   qnumSchro2Dirac(l1, s1, k1);
@@ -1044,8 +947,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   float DE = psi1.E - psi2.E;
   float K = DE / Physical::c;
 
-  if (DE < 0 || abs(l2 - l1) != 1)
-  {
+  if (DE < 0 || abs(l2 - l1) != 1) {
     // Invalid: state 2 has a higher energy, or transition forbidden
     return tmat;
   }
@@ -1063,8 +965,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
              << ", " << i1 << "\n";
   LOG(TRACE) << "Grid deltas " << delta1 << ", " << delta2 << "\n";
 
-  for (int i = 0; i < intgrid.size(); ++i)
-  {
+  for (int i = 0; i < intgrid.size(); ++i) {
     double j0 = (approx_j0 ? 1.0 : sinc(K * intgrid[i]));
     kerP1Q2[i] = psi1.P[i + delta1] * psi2.Q[i + delta2] * j0 * intgrid[i];
     kerP2Q1[i] = psi1.Q[i + delta1] * psi2.P[i + delta2] * j0 * intgrid[i];
@@ -1080,15 +981,12 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
              << '\n';
 
   // Now on to the full matrix elements
-  for (int im1 = 0; im1 < tmat.m1.size(); ++im1)
-  {
-    for (int im2 = 0; im2 < tmat.m2.size(); ++im2)
-    {
+  for (int im1 = 0; im1 < tmat.m1.size(); ++im1) {
+    for (int im2 = 0; im2 < tmat.m2.size(); ++im2) {
       double m1 = tmat.m1[im1];
       double m2 = tmat.m2[im2];
 
-      if (abs(m1 - m2) > 1)
-      {
+      if (abs(m1 - m2) > 1) {
         // Forbidden
         continue;
       }
@@ -1110,24 +1008,19 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
                  << v3 << ' ' << v4 << "]\n";
 
       double M2 = 0;
-      if (m1 == m2 + 1)
-      {
+      if (m1 == m2 + 1) {
         M2 = 2 * pow(u1 * v4 * (l1 == (l2 - sgk2)) * J12 -
-                         u3 * v2 * ((l1 - sgk1) == l2) * J21,
+                     u3 * v2 * ((l1 - sgk1) == l2) * J21,
                      2.0);
         LOG(TRACE) << "Matrix element = |A+|\n";
-      }
-      else if (m1 + 1 == m2)
-      {
+      } else if (m1 + 1 == m2) {
         M2 = 2 * pow(u2 * v3 * (l1 == (l2 - sgk2)) * J12 -
-                         u4 * v1 * ((l1 - sgk1) == l2) * J21,
+                     u4 * v1 * ((l1 - sgk1) == l2) * J21,
                      2.0);
         LOG(TRACE) << "Matrix element = |A-|\n";
-      }
-      else
-      {
+      } else {
         M2 = pow((u1 * v3 - u2 * v4) * (l1 == (l2 - sgk2)) * J12 -
-                     (u3 * v1 - u4 * v2) * ((l1 - sgk1) == l2) * J21,
+                 (u3 * v1 - u4 * v2) * ((l1 - sgk1) == l2) * J21,
                  2.0);
         LOG(TRACE) << "Matrix element = |Az|\n";
       }
@@ -1145,4 +1038,4 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
 DiracIdealAtom::DiracIdealAtom(int Z, double m, int A,
                                NuclearRadiusModel radius_model, double fc,
                                double dx)
-    : DiracAtom(Z, m, A, radius_model, fc, dx, 1) {}
+  : DiracAtom(Z, m, A, radius_model, fc, dx, 1) {}

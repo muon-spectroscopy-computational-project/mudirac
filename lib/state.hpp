@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * state.hpp
- * 
+ *
  * State classes, designed to store the solution of quantum mechanical equations - header file
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */
@@ -18,9 +18,8 @@ using namespace std;
 #ifndef MUDIRAC_STATE
 #define MUDIRAC_STATE
 
-class State
-{
-public:
+class State {
+ public:
   bool converged = false; // Used to flag states that are "good" to use
   int nodes = 0;
   double E = 0;
@@ -33,12 +32,13 @@ public:
 
   virtual double norm() = 0;
   virtual int size() = 0;
-  virtual void resize(int i0, int i1) { return; };
+  virtual void resize(int i0, int i1) {
+    return;
+  };
 };
 
-class SchroState : public State
-{
-public:
+class SchroState : public State {
+ public:
   vector<double> R;
   int l;
 
@@ -46,13 +46,14 @@ public:
 
   int getn();
   double norm() override;
-  int size() override { return R.size(); };
+  int size() override {
+    return R.size();
+  };
   void resize(int i0, int i1) override;
 };
 
-class DiracState : public State
-{
-public:
+class DiracState : public State {
+ public:
   vector<double> Q;
   vector<double> P;
   int k;
@@ -70,7 +71,9 @@ public:
   double restE();
   double bindingE();
   double norm() override;
-  int size() override { return Q.size(); };
+  int size() override {
+    return Q.size();
+  };
   void resize(int i0, int i1) override;
   string name();
 

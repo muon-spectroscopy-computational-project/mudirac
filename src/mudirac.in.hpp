@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * mudirac.hpp
- * 
+ *
  * Main binary of the program (header)
- * 
+ *
  * @author Simone Sturniolo
  * @version ${PROJECT_VERSION} 20/03/2020
  */
@@ -32,9 +32,8 @@
 
 using namespace std;
 
-struct TransLineSpec
-{
-    int n1, n2;
-    int l1, l2;
-    bool s1, s2;
+struct TransLineSpec {
+  int n1, n2;
+  int l1, l2;
+  bool s1, s2;
 };

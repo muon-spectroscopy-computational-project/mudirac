@@ -1,11 +1,11 @@
 /**
  * MuDirac - A muonic atom Dirac equation solver
  * by Simone Sturniolo (2019-2020)
- * 
+ *
  * hydrogenic.hpp
- * 
+ *
  * Computes known hydrogenic atom solutions for reference - header file
- * 
+ *
  * @author Simone Sturniolo
  * @version 1.0 20/03/2020
  */

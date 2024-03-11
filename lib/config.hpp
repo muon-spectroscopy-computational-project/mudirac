@@ -35,13 +35,14 @@ using namespace std;
  * @retval None
  */
 class MuDiracInputFile : public InputFile {
-public:
+ public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
 
-private:
+ private:
   map<string, NuclearRadiusModel> nucmodelmap = {
-      {"POINT", POINT}, {"SPHERE", SPHERE}, {"FERMI2", FERMI2}};
+    {"POINT", POINT}, {"SPHERE", SPHERE}, {"FERMI2", FERMI2}
+  };
 };
 
 #endif
