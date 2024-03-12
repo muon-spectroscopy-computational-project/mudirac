@@ -10,7 +10,7 @@ MuDirac uses CMake as a build system, and requires a C++ compiler. In order to c
    cmake ..
    make mudirac
 
-In order to run the test suite. within the same directory, run
+In order to run the test suite, within the same directory run:
 
 .. code-block:: bash
 
