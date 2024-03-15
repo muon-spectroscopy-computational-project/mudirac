@@ -20,19 +20,21 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 * :literal:`ideal_atom_minshell`: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (:math:`K \Rightarrow n=1`, :math:`L \Rightarrow n=2`, etc.). Default is the empty string (no ideal solutions used).
 * :literal:`xr_lines`: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example:
 	
-::
+  ::
       
       xr_lines: K1-L2,K1-L3
 	
-In addition, colons can be used to indicate ranges of lines. The notation :literal:`K1:L3-M1` would compute the lines K1-M1, L1-M1, L2-M1 and L3-M1. Note that if some of these lines are forbidden by selection rules, they will simply be skipped. A double colon, like :literal:`K1:L3-K1:L3` would loop on both sides, and not count all repeated lines. 
+  In addition, colons can be used to indicate ranges of lines. The notation :literal:`K1:L3-M1` would compute the lines K1-M1, L1-M1, L2-M1 and L3-M1. Note that if some of these lines are forbidden by selection rules, they will simply be skipped. A double colon, like :literal:`K1:L3-K1:L3` would loop on both sides, and not count all repeated lines. 
 
 Boolean keywords
 ~~~~~~~~~~~~~~~~~
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
-* :literal:`uehling_correction`: whether to turn on or not the Uehling correction. Default is FALSE.
-* :literal:`write~_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other parameters can be specified with different keywords. Default is FALSE.
+* :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
+* :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+
+.. _floating_point_keywords:
 
 Floating point keywords
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -81,15 +81,17 @@
              
   <section id="installation-of-mudirac">
 <h1>Installation of MuDirac<a class="headerlink" href="#installation-of-mudirac" title="Link to this heading"></a></h1>
-<p>MuDirac used CMake as a build system, and requires a C++ compiler. In order to compile it and prepare it to be executed on a Linux, Unix, or MacOS system with a working C++ compiler installes, follow these steps:
-1. download and unpack (or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>) the repository on your local system;
-2. within the main folder of the repository (the one containing the <code class="docutils literal notranslate"><span class="pre">READ.md</span></code> file), create a subfolder called <code class="docutils literal notranslate"><span class="pre">build</span></code>;
-3. within the <code class="docutils literal notranslate"><span class="pre">build</span></code> folder, run the following commands:</p>
+<p>MuDirac uses CMake as a build system, and requires a C++ compiler. In order to compile it and prepare it to be executed on a Linux, Unix, or MacOS system with a working C++ compiler installed, follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Download and unpack (or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>) the repository on your local system.</p></li>
+<li><p>Within the main folder of the repository (the one containing the <code class="docutils literal notranslate"><span class="pre">READ.md</span></code> file), create a subfolder called <code class="docutils literal notranslate"><span class="pre">build</span></code>.</p></li>
+<li><p>Within the <code class="docutils literal notranslate"><span class="pre">build</span></code> folder, run the following commands:</p></li>
+</ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..
 make<span class="w"> </span>mudirac
 </pre></div>
 </div>
-<p>In order to run the test suite. within the same directory, run</p>
+<p>In order to run the test suite, within the same directory run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>tests
 make<span class="w"> </span><span class="nb">test</span>
 </pre></div>
