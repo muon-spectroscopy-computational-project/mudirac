@@ -31,8 +31,10 @@ Boolean keywords
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
-* :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`Floating point keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
+* :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+
+.. _floating_point_keywords:
 
 Floating point keywords
 ~~~~~~~~~~~~~~~~~~~~~~~~
