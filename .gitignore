@@ -74,3 +74,17 @@ cscope.files
 cscope.out
 cscope.in.out
 cscope.po.out
+
+# Sphinx
+.DS_Store
+.idea
+_build
+__source
+__test
+.doctrees
+doctrees
+.buildinfo
+objects.inv
+_plantuml
+__pycache__
+docs/build/*
