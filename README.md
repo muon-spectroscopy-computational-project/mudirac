@@ -1,5 +1,5 @@
 # mudirac
-A muonic atom Dirac equation solver.
+MuDirac is a simulation software that integrates the Dirac equation for muonic atoms to compute their X-Ray transition energies.
 
 ## Contact
 leandro.liborio@stfc.ac.uk
@@ -18,13 +18,17 @@ In order to run the test suite, within the same directory, run
 
 and wait for a few seconds for the tests to complete. If you want `mudirac` to be accessible from any folder in your computer, add the resulting `bin` directory to your system `PATH` environment variable.
 
-## Running
+## Running MuDirac on the command line
 
 Simulations can be run simply with the command
 
    mudirac input.in
 
-where the `.in` file can have any name one prefers. A full list of keywords employable in the `.in` file and their meaning can be found in `docs/Keywords.pdf`.
+where the `.in` file can have any name one prefers. Detailed documentation for MuDirac can be found [here](https://muon-spectroscopy-computational-project.github.io/mudirac/index.html).  The documentation contains an explanation of the theory behind MuDirac, a full list of keywords and their meaning, and some examples of MuDirac usage.
+
+## How to Contribute to MuDirac
+
+For contributing to the Muon Spectroscopy Computational Project's software tools, please refer to the [contributing guidelines](https://muon-spectroscopy-computational-project.github.io/contributions.html).
 
 ## Citing MuDirac
 
