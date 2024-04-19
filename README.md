@@ -1,4 +1,4 @@
-# mudirac
+# MuDirac
 A muonic atom Dirac equation solver.
 
 ## Contact
