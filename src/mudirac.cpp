@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 
         LOG(DEBUG) << "Printing out state file for state " << sname << "\n";
 
-        writeDiracState(ds, fname);
+        writeDiracState(ds, fname, config.getIntValue("state_print_precision"));
 
         saved_states.push_back(sname);
       }
