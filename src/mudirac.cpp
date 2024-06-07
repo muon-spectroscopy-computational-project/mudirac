@@ -210,10 +210,12 @@ int main(int argc, char *argv[]) {
 
     out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
     out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
+    out << fixed;
 
     if (config.getIntValue("xr_print_precision") > -1) {
-      out << fixed;
       out << setprecision(config.getIntValue("xr_print_precision"));
+    } else {
+      out << setprecision(15); //Setting the maximum precision
     }
 
     for (int i = 0; i < transitions.size(); ++i) {
