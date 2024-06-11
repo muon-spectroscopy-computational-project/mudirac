@@ -66,7 +66,7 @@ Keywords that take an integer number as value.
 * :literal:`max_state_iter`: maximum number of iterations to perform when searching for a state. This loop encloses both node-based and energy-based search. Once a state is converged, the program checks again that it has the correct number of nodes. If it does not, the state is stored for future use and to provide an upper or lower limit to the energy of the searches and then the process is repeated. This number represents how much can the process be repeated before failing. Should not generally need to be adjusted. Default is 100.
 * :literal:`uehling_steps`: integration steps for the Uehling potential. Higher numbers will make the Uehling energy more precise but increase computation times. Default is 100.
 * :literal:`xr_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.xr.out` file. Default is -1 (print as many as possible).
-* :literal:`state_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.{state name}.out` files
+* :literal:`state_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.{state name}.out` files. Default is -1 (print as many as possible). Only has effect if :literal:`output >= 2`.
 * :literal:`verbosity`: verbosity level. Going from 1 to 3 will increase the amount of information printed to the log file. Default is 1.
 * :literal:`output`: output level. Going from 1 to 3 will increase the amount of files produced. Specifically:
    1. will print out only the transition energies and rates in the :literal:`.xr.out` file;
