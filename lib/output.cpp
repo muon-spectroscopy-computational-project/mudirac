@@ -21,7 +21,7 @@
   * @param  fname:      Filename
   * @retval None
  */
-void writeDiracState(DiracState ds, string fname) {
+void writeDiracState(DiracState ds, string fname, int output_precision) {
   ofstream out(fname);
 
   // Start with writing a header
@@ -30,6 +30,11 @@ void writeDiracState(DiracState ds, string fname) {
   out << "# E = " << ds.bindingE() / Physical::eV << " + mc^2 = " << ds.E / Physical::eV << " eV\n";
   out << "# nodes = " << ds.nodes << ", " << ds.nodesQ << "\n";
   out << "#####################################################\n";
+
+  if (output_precision > -1) {
+    out << fixed;
+    out << setprecision(output_precision);
+  }
 
   // Now write down the content
   for (int i = 0; i < ds.grid.size(); ++i) {

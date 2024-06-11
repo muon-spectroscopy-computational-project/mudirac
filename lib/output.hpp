@@ -23,7 +23,7 @@ using namespace std;
 #ifndef MUDIRAC_OUTPUT
 #define MUDIRAC_OUTPUT
 
-void writeDiracState(DiracState ds, string fname);
+void writeDiracState(DiracState ds, string fname, int output_precision=-1);
 void writeTransitionMatrix(TransitionMatrix tmat, string fname);
 void writeEConfPotential(EConfPotential epot, string fname);
 void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, double expd, string fname);
