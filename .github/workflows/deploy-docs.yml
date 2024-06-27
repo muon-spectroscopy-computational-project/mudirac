@@ -34,5 +34,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ steps.build-docs.outputs.artifact }}
+          publish_dir: docs/build
  
