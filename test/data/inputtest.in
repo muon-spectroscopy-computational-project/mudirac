@@ -1,0 +1,9 @@
+# A comment
+integer: 42                                     # Another comment
+integers: 6, 7, 42
+bool: T
+bools: T, true, false
+double: 3.14159
+doubles: 1.414, 2.718, 3.142
+string: mostly harmless
+strings: life, the universe, and everything
