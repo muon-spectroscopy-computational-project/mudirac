@@ -4,8 +4,8 @@ name: Deploy Sphinx Documentation
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
+    paths: ['docs/**']
 
 jobs:
   build:
