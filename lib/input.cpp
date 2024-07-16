@@ -277,6 +277,11 @@ void InputFile::parseFile(string path) {
   ifstream ifile(path);
 
   while (getline(ifile, line)) {
+
+    // Catch empty lines before trying to split
+    if (line.size() == 0)
+      continue;
+
     // Remove comments
     line = splitString(line, "#")[0];
     line = stripString(line);
