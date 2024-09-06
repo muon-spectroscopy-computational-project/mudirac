@@ -83,7 +83,7 @@ double TransitionMatrix::totalRate() {
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
  * @retval
  */
-Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
+Atom::Atom(int Z, double m, int A, double radius, NuclearRadiusModel radius_model, double fc,
            double dx) {
   // Set the properties
   this->Z = Z;
@@ -112,24 +112,35 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
   // Define radius
   if (A == -1) {
     R = -1;
-  } else {
+  } else if (radius < 0) {
     switch (radius_model) {
       case POINT:
         R = -1;
         break;
       case SPHERE:
+        R = sphereNuclearModel(Z, A);
+        LOG(INFO) << "SPHERE: R extracted as " << R << "\n";
+        break;
       case FERMI2:
         R = sphereNuclearModel(Z, A);
+        LOG(INFO) << "FERMI2: R extracted as " << R << "\n";
         break;
       default:
         R = -1;
         break;
     }
-  }
+  } else{ R = radius * Physical::fm; }
 
+  if (radius_model==POINT) {
+    R = -1;
+  }
+  else {
+    LOG(INFO) << "R = " << radius << " fm\n";
+  }
+  
   if (radius_model == FERMI2) {
     V_coulomb = new CoulombFermi2Potential(Z, R, A);
-  } else {
+  } else if (radius_model == SPHERE) {
     V_coulomb = new CoulombSpherePotential(Z, R);
   }
 
@@ -325,9 +336,9 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * (default = -1)
  * @retval
  */
-DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
+DiracAtom::DiracAtom(int Z, double m, int A, double R, NuclearRadiusModel radius_model,
                      double fc, double dx, int ideal_minshell)
-  : Atom(Z, m, A, radius_model, fc, dx) {
+  : Atom(Z, m, A, R, radius_model, fc, dx) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
@@ -1035,7 +1046,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   return tmat;
 }
 
-DiracIdealAtom::DiracIdealAtom(int Z, double m, int A,
+DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, double R,
                                NuclearRadiusModel radius_model, double fc,
                                double dx)
-  : DiracAtom(Z, m, A, radius_model, fc, dx, 1) {}
+  : DiracAtom(Z, m, A, R, radius_model, fc, dx, 1) {}
