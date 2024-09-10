@@ -49,7 +49,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineIntNode("max_nodes_iter", InputNode<int>(100));    // Max iterations in nodes search
   this->defineIntNode("max_state_iter", InputNode<int>(100));    // Max iterations in state search
   this->defineIntNode("uehling_steps", InputNode<int>(100));     // Uehling correction integration steps
-  this->defineIntNode("xr_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in .xr.out file 
+  this->defineIntNode("xr_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in .xr.out file
   this->defineIntNode("state_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in Dirac state output .{state_name}.out files
   this->defineIntNode("verbosity", InputNode<int>(1));           // Verbosity level (1 to 3)
   this->defineIntNode("output", InputNode<int>(1));              // Output level (1 to 3)
