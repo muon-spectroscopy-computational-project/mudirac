@@ -27,9 +27,9 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
 
   // Double keywords
+  this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
   this->defineDoubleNode("radius", InputNode<double>(-1));                // Solid sphere equivalent radius
   this->defineDoubleNode("tFermi", InputNode<double>(-1));                // Skin thickness for Fermi model
-  this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
   this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
   this->defineDoubleNode("energy_damp", InputNode<double>(0.5));          // "Damping" used in steepest descent energy search
   this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));         // Maximum |dE|/E ratio in energy search
