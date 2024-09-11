@@ -34,6 +34,10 @@ For the theoretical background on the software and examples of its applications,
 
 Cite the above paper if you make use of the software in your work too.
 
+## Contributing
+
+Please follow the muon spectroscopy computational project [contributing guidelines](https://muon-spectroscopy-computational-project.github.io/contributions.html).
+
 ## Acknowledgments 
 
 Written with funding from the Ada Lovelace Centre, in collaboration with the ISIS Muon Group.
