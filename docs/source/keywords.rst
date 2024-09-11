@@ -40,7 +40,9 @@ Floating point keywords
 ~~~~~~~~~~~~~~~~~~~~~~~~
 These keywords accept a non-integer number. It can be written normally (e.g. 105.3) or in scientific notation (e.g. 1.053E2).
 
-* :literal:`mass`:  mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
+* :literal:`mass`: mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
+* :literal:`radius`: Solid sphere equivalent radius. (rms radius * sqrt(5/3)). By default it's set to values from Angeli and Marinova (2013).
+* :literal:`tFermi`: Skin thickness for a Fermi model nucleus. By default it's 2.3 fm.
 * :literal:`energy_tol`: absolute tolerance for energy convergence when searching for eigenvalues. Iterations will stop once the energy change is smaller than this number, in atomic units. Default is 1E-7.
 * :literal:`energy_damp`: a damping parameter used in steepest descent energy search to ease convergence. Used to multiply the suggested step :math:`\delta E` and make it smaller. Helps avoiding overshooting; fine-tuning it might help to converge difficult calculations, while making it bigger might make convergence faster in simple ones. Default is 0.5.
 * :literal:`max_dE_ratio`: maximum ratio between energy step, :math:`\delta E`, and current energy :math:`E` in convergence search. If the suggested step exceeds this ratio times the guessed energy, it will be rescaled. This also serves as a measure to avoid overshooting and can be tweaked to get around cases of bad convergence. Default is 0.1.

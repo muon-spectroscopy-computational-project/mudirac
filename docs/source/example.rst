@@ -71,3 +71,29 @@ Note the significant changes - the energies are almost three times smaller than 
 1. try adding more :literal:`xr_lines`, for example L1-M2 and L1-M3;
 2. try adding a range of lines; this can be written as K1:M5-K1:M5. It will compute all transitions within the given ranges that obey the selection rules to be allowed;
 3. try plotting the spectra in the :literal:`.spec.dat files`, using Gnuplot or importing them in software like Excel or Origin.
+
+You can also vary the size and shape of the nucleus using the radius and tFermi keywords. For example, you can evaluate what happens if you increase the radius by 1%, or change the skin thickness parameter in the Fermi model to 2.1 fm (rather than the conventional 2.3 fm). Increasing the radius and decreasing the skin thickness should both reduce the transition energies.
+
+.. code-block:: bash
+
+    element: Au
+    isotope: 197
+    xr_lines: K1-L2,K1-L3
+    write_spec: T
+    nuclear_model: FERMI2
+    uehling_correction: T
+    electronic_config: Au
+    radius: 7.09
+    tFermi: 2.5
+
+Which changes the output to the following
+
+.. code-block:: bash
+
+    # Z = 79, A = 197 amu, m = 206.768 au
+    Line    DeltaE (eV)     W_12 (s^-1)
+    K1-L2   5.54813e+06             1.60217e+18
+    K1-L3   5.71535e+06             1.74712e+18
+    # Z = 79, A = 197 amu, m = 206.768 au
+
+The transition energies have indeed shifted down. Even such a minor change has induced a 45 keV shift.
