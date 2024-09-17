@@ -129,15 +129,16 @@ Atom::Atom(int Z, double m, int A, double radius, NuclearRadiusModel radius_mode
         R = -1;
         break;
     }
-  } else{ R = radius * Physical::fm; }
+  } else {
+    R = radius * Physical::fm;
+  }
 
   if (radius_model==POINT) {
     R = -1;
-  }
-  else {
+  } else {
     LOG(INFO) << "R = " << radius << " fm\n";
   }
-  
+
   if (radius_model == FERMI2) {
     V_coulomb = new CoulombFermi2Potential(Z, R, A);
   } else if (radius_model == SPHERE) {

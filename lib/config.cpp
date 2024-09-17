@@ -82,7 +82,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   double t = this->getDoubleValue("tFermi");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
-  
+
   if (A == -1) {
     A = getElementMainIsotope(Z);
   }
@@ -127,7 +127,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t != -1){
+  if (t != -1) {
     da.setFermi2(t * Physical::fm);
     LOG(INFO) << "t = " << t << "\n";
   }
