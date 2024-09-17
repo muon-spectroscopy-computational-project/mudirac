@@ -89,17 +89,17 @@ class Atom {
   double static sphereNuclearModel(int Z, int A);
 
  protected:
- 
+
   // Fundamental properties
   int Z, A;                  // Nuclear charge and mass number
   double m, M, mu;           // Mass of the orbiting particle (e.g. muon, electron), of the nucleus, and effective mass of the system
   double R;                  // Nuclear radius
-  NuclearRadiusModel rmodel; // Nuclear model 
+  NuclearRadiusModel rmodel; // Nuclear model
 
   //Grid
   double rc = 1.0;   // Central radius
-  double dx = 0.005; // Step 
-  
+  double dx = 0.005; // Step
+
   //Potential
   CoulombSpherePotential *V_coulomb;
 
