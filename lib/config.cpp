@@ -78,7 +78,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
-  double R = this->getDoubleValue("radius");
+  double radius = this->getDoubleValue("radius");
   double t = this->getDoubleValue("tFermi");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
@@ -103,7 +103,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, R, nucmodel, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, radius, nucmodel, fc, dx, idshell);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
