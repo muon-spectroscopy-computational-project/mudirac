@@ -76,6 +76,7 @@ double TransitionMatrix::totalRate() {
  * @param  Z: Atomic number (nuclear charge, can be fractional)
  * @param  m: Mass of the orbiting particle (e.g. electron)
  * @param  A: Atomic mass (amus, ignored if -1)
+ * @param  radius: Solid sphere equivalent radius (fm, ignored if -1)
  * @param  radius_model: Which NuclearRadiusModel to use
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
@@ -112,7 +113,7 @@ Atom::Atom(int Z, double m, int A, double radius, NuclearRadiusModel radius_mode
   // Define radius
   if (A == -1) {
     R = -1;
-  } else if (radius < 0) {
+  } else if (radius == -1) {
     switch (radius_model) {
       case POINT:
         R = -1;
@@ -141,7 +142,7 @@ Atom::Atom(int Z, double m, int A, double radius, NuclearRadiusModel radius_mode
 
   if (radius_model == FERMI2) {
     V_coulomb = new CoulombFermi2Potential(Z, R, A);
-  } else if (radius_model == SPHERE) {
+  } else {
     V_coulomb = new CoulombSpherePotential(Z, R);
   }
 
@@ -327,6 +328,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param  Z: Atomic number (nuclear charge, can be fractional)
  * @param  m: Mass of the orbiting particle (e.g. electron)
  * @param  A: Atomic mass (amus, ignored if -1)
+ * @param  radius: Solid sphere equivalent radius (fm, ignored if -1)
  * @param  radius_model: Which NuclearRadiusModel to use
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
@@ -337,9 +339,9 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * (default = -1)
  * @retval
  */
-DiracAtom::DiracAtom(int Z, double m, int A, double R, NuclearRadiusModel radius_model,
+DiracAtom::DiracAtom(int Z, double m, int A, double radius, NuclearRadiusModel radius_model,
                      double fc, double dx, int ideal_minshell)
-  : Atom(Z, m, A, R, radius_model, fc, dx) {
+  : Atom(Z, m, A, radius, radius_model, fc, dx) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
@@ -1047,7 +1049,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   return tmat;
 }
 
-DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, double R,
+DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, double radius,
                                NuclearRadiusModel radius_model, double fc,
                                double dx)
-  : DiracAtom(Z, m, A, R, radius_model, fc, dx, 1) {}
+  : DiracAtom(Z, m, A, radius, radius_model, fc, dx, 1) {}

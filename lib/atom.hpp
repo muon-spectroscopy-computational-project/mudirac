@@ -188,7 +188,7 @@ class DiracAtom : public Atom {
   double in_eps = 1e-5;
   int min_n = 1000;
 
-  DiracAtom(int Z = 1, double m = 1, int A = -1, double R = -1,
+  DiracAtom(int Z = 1, double m = 1, int A = -1, double radius = -1,
             NuclearRadiusModel radius_model = POINT, double fc = 1.0,
             double dx = 0.005, int ideal_minshell = -1);
 
@@ -221,7 +221,7 @@ class DiracAtom : public Atom {
 // the analytical hydrogen-like solution
 class DiracIdealAtom : public DiracAtom {
  public:
-  DiracIdealAtom(int Z = 1, double m = 1, int A = -1, double R = -1,
+  DiracIdealAtom(int Z = 1, double m = 1, int A = -1, double radius = -1,
                  NuclearRadiusModel radius_model = POINT, double fc = 1.0,
                  double dx = 0.005);
 };
