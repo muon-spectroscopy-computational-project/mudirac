@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     // Now, simulations
     for (int i = 0; i < dataZ.size(); ++i)
     {
-        DiracAtom da = DiracAtom(dataZ[i], Physical::m_mu, dataA[i], SPHERE);
+        DiracAtom da = DiracAtom(dataZ[i], Physical::m_mu, dataA[i], -1, SPHERE);
         DiracState p2 = da.getState(2, 1, false);
         DiracState s1 = da.getState(1, 0, false);
 
