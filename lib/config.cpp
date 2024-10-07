@@ -103,7 +103,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, radius, nucmodel, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");

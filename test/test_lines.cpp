@@ -21,14 +21,14 @@ Table VI
 */
 
 vector<double> energyCorrections(int Z, int n1, int l1, bool s1, int n2, int l2,
-                                 bool s2, NuclearRadiusModel rmodel = SPHERE, double radius= -1)
+                                 bool s2, NuclearRadiusModel rmodel = SPHERE)
 {
   vector<double> E_corr;
   DiracAtom da_point = DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z));
   DiracAtom da_sphere =
-      DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z), radius, rmodel);
+      DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z), rmodel);
   DiracAtom da_uehling =
-      DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z), radius, rmodel);
+      DiracAtom(Z, Physical::m_mu, getElementMainIsotope(Z), rmodel);
   da_uehling.setUehling(true, 100);
 
   double E_point = da_point.getState(n2, l2, s2).E;
