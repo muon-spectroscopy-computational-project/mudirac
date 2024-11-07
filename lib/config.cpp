@@ -28,6 +28,8 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
+  this->defineDoubleNode("radius", InputNode<double>(-1));                // Solid sphere equivalent radius
+  this->defineDoubleNode("tFermi", InputNode<double>(-1));                // Skin thickness for Fermi model
   this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
   this->defineDoubleNode("energy_damp", InputNode<double>(0.5));          // "Damping" used in steepest descent energy search
   this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));         // Maximum |dE|/E ratio in energy search
@@ -76,8 +78,11 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
+  double radius = this->getDoubleValue("radius");
+  double t = this->getDoubleValue("tFermi");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
+
   if (A == -1) {
     A = getElementMainIsotope(Z);
   }
@@ -98,7 +103,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, nucmodel, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
@@ -120,6 +125,11 @@ DiracAtom MuDiracInputFile::makeAtom() {
     da.setElectBkgConfig(true, econf, this->getDoubleValue("econf_rhoeps"),
                          this->getDoubleValue("econf_rin_max"),
                          this->getDoubleValue("econf_rout_min"));
+  }
+
+  if (t != -1) {
+    da.setFermi2(t * Physical::fm);
+    LOG(INFO) << "t = " << t << "\n";
   }
 
   return da;
