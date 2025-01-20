@@ -85,8 +85,8 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   // And define the density over it
 
   //Check the value of fermi2_potential
-  if (c > grid[1][0]){
-    LOG(ERROR) << "Value of Fermi-2 potential c = " << c << "is greater than r = " << grid[1][0] << "\n";
+  if (c < grid[1][0]){
+    LOG(ERROR) << "Value of Fermi-2 potential c = " << c << "is less than r = " << grid[1][0] << "\n";
   }
   
 
