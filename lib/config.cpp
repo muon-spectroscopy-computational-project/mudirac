@@ -133,7 +133,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
     if( t == -1){
       t = Physical::fermi2_thickenss;
     }
-    da.setFermi2(t * Physical::fm,c_param);
+    da.setFermi2(t * Physical::fm,c_param * Physical::fm);
     LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
   }
 
