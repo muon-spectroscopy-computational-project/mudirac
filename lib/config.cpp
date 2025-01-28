@@ -29,8 +29,8 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
   this->defineDoubleNode("radius", InputNode<double>(-1));                // Solid sphere equivalent radius
-  this->defineDoubleNode("tFermi", InputNode<double>(-1));                // Skin thickness for Fermi model
-  this->defineDoubleNode("fermi2_potential", InputNode<double>(-1));     // Half radius parameter c for Fermi-2 distribution
+  this->defineDoubleNode("fermi_t", InputNode<double>(-1));               // Skin thickness for Fermi model
+  this->defineDoubleNode("fermi_c", InputNode<double>(-1));               // Half radius parameter c for Fermi-2 distribution
   this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
   this->defineDoubleNode("energy_damp", InputNode<double>(0.5));          // "Damping" used in steepest descent energy search
   this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));         // Maximum |dE|/E ratio in energy search
@@ -80,8 +80,8 @@ DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
   double radius = this->getDoubleValue("radius");
-  double t = this->getDoubleValue("tFermi");
-  double c_param = this->getDoubleValue("fermi2_potential");
+  double t = this->getDoubleValue("fermi_t");
+  double c_param = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
 
