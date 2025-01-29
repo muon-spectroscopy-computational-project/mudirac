@@ -72,7 +72,7 @@ Note the significant changes - the energies are almost three times smaller than 
 2. try adding a range of lines; this can be written as K1:M5-K1:M5. It will compute all transitions within the given ranges that obey the selection rules to be allowed;
 3. try plotting the spectra in the :literal:`.spec.dat files`, using Gnuplot or importing them in software like Excel or Origin.
 
-You can also vary the size and shape of the nucleus using the radius and tFermi keywords. For example, you can evaluate what happens if you increase the radius by 1%, or change the skin thickness parameter in the Fermi model to 2.1 fm (rather than the conventional 2.3 fm). Increasing the radius and decreasing the skin thickness should both reduce the transition energies.
+You can also vary the size and shape of the nucleus using the radius and fermi_t keywords. For example, you can evaluate what happens if you increase the radius by 1%, or change the skin thickness parameter in the Fermi model to 2.1 fm (rather than the conventional 2.3 fm). Increasing the radius and decreasing the skin thickness should both reduce the transition energies.
 
 .. code-block:: bash
 
@@ -84,7 +84,7 @@ You can also vary the size and shape of the nucleus using the radius and tFermi 
     uehling_correction: T
     electronic_config: Au
     radius: 7.09
-    tFermi: 2.5
+    fermi_t: 2.5
 
 Which changes the output to the following
 
