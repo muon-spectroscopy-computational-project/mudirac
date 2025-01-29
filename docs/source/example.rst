@@ -74,6 +74,7 @@ Note the significant changes - the energies are almost three times smaller than 
 
 You can also vary the size and shape of the nucleus using the radius and fermi_t keywords. For example, you can evaluate what happens if you increase the radius by 1%, or change the skin thickness parameter in the Fermi model to 2.1 fm (rather than the conventional 2.3 fm). Increasing the radius and decreasing the skin thickness should both reduce the transition energies.
 
+
 .. code-block:: bash
 
     element: Au
@@ -85,6 +86,7 @@ You can also vary the size and shape of the nucleus using the radius and fermi_t
     electronic_config: Au
     radius: 7.09
     fermi_t: 2.5
+
 
 Which changes the output to the following
 
