@@ -32,8 +32,12 @@
 
 using namespace std;
 
+
 struct TransLineSpec {
   int n1, n2;
   int l1, l2;
   bool s1, s2;
 };
+
+vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da);
+vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
