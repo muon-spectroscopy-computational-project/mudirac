@@ -160,7 +160,7 @@ class Atom {
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
-  void setFermi2(double thickness = Physical::fermi2_T);
+  void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
   bool getUehling() {
     return use_uehling;
   };
