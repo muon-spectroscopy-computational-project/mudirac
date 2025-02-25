@@ -26,6 +26,20 @@ using namespace std;
 #define MUDIRAC_CONFIG
 
 /**
+ * @class ExperimentalResultFile
+ *
+ * @brief  A specialised InputFile class for the experimental results input file in mudirac
+ * @note   A specialised InputFile class for the experimental results input file in mudirac.
+ * Initialises all the relevant keywords.
+ *
+ * @retval None
+ */
+class ExperimentalResultFile : public InputFile {
+  public:
+   ExperimentalResultFile(void);
+};
+
+/**
  * @class MuDiracInputFile
  *
  * @brief  A specialised InputFile class for the config input file in mudirac

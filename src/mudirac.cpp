@@ -15,6 +15,7 @@
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
+  ExperimentalResultFile measurements;
 
   chrono::high_resolution_clock::time_point t0, t1;
   t0 = chrono::high_resolution_clock::now();
@@ -36,6 +37,19 @@ int main(int argc, char *argv[]) {
   }
 
   int output_verbosity = config.getIntValue("output");
+
+  if (argc == 3 && config.getBoolValue("optimise_fermi_parameters")){
+    try {
+      measurements.parseFile(argv[2]);
+      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+    } catch (runtime_error e) {
+      cout << "Invalid experimental measurements file:\n";
+      cout << e.what() << "\n";
+      return -1;
+    }
+  }
 
   // Set up logging
   AixLog::Severity log_verbosity;

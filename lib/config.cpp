@@ -11,6 +11,17 @@
  */
 
 #include "config.hpp"
+ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
+  // Vector string keywords
+  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {"K1-L2"}, false)); // List of spectral lines experimentally measured
+  
+  // Vector double keywords
+  this->defineDoubleNode("xr_energy", InputNode<double>(vector<double>{0}, false));
+  this->defineDoubleNode("xr_error", InputNode<double>(vector<double>{0}, false));
+
+  /* These keywords are reserved for developers and debugging */
+
+}
 
 MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Definition of all input keywords that can be used
@@ -25,6 +36,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false)); // Whether to use the Uehling potential correction
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
   this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
+  this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, optimise 2pF parameters c and t for experimental results.
 
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
