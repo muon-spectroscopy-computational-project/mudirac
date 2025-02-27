@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 
   int output_verbosity = config.getIntValue("output");
 
+  // read in experimental measurement file if provided and required
   if (argc == 3 && config.getBoolValue("optimise_fermi_parameters")){
     try {
       measurements.parseFile(argv[2]);
