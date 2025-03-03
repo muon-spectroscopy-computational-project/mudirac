@@ -106,7 +106,42 @@ int main(int argc, char *argv[]) {
   // The idea is that we will calculate all transition energies and rates for many different pairs
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
-  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "fermi2"){
+  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2"){
+    ExperimentalResultFile measurements;
+    bool xr_measurement_read_success = false;
+    try {
+      measurements.parseFile(argv[2]);
+      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+      for (auto transition: xr_lines_measured){
+        LOG(DEBUG) << transition << ", ";
+      }
+      LOG(DEBUG) << "\n";
+      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+
+      LOG(DEBUG) << "Reading experimental Xray energies: ";
+      for (auto transition_energy: xr_energies){
+        LOG(DEBUG) << transition_energy << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+
+      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+      for (auto transition_energy_error: xr_errors){
+        LOG(DEBUG) << transition_energy_error << ", ";
+      }
+      LOG(DEBUG) << "\n";
+      xr_measurement_read_success = true;
+
+    } catch (runtime_error e) {
+      cout << "Invalid experimental measurements file:\n";
+      cout << e.what() << "\n";
+      return -1;
+    }
+
+    if (xr_measurement_read_success){
+      LOG(DEBUG) << "Successfully read xray measurements input file \n";
 
     // In here, we will need to loop over the pairs of (c,t) values
     // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
@@ -119,8 +154,9 @@ int main(int argc, char *argv[]) {
     // least squares optimise
     // 
     // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
-    // for the optimal pair of parameters?
+    // for the optimal pair of parameters?  
 
+    }
 
   }else{
     // Default mudirac behaviour
