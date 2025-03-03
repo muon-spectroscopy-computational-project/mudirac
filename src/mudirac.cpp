@@ -12,6 +12,7 @@
 
 #include "mudirac.hpp"
 
+
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
