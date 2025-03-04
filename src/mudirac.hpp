@@ -20,6 +20,7 @@
 #include <chrono>
 #include "../lib/config.hpp"
 #include "../lib/experiment.hpp"
+#include "../lib/parameterise.hpp"
 #include "../lib/atom.hpp"
 #include "../lib/output.hpp"
 #include "../lib/utils.hpp"

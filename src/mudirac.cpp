@@ -89,8 +89,7 @@ int main(int argc, char *argv[]) {
   // i.e
   // K1-L2 300000 1
   // K1-L3 500000 10
-  // 
-                              
+
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
 
@@ -141,20 +140,48 @@ int main(int argc, char *argv[]) {
     }
 
     if (xr_measurement_read_success){
-      LOG(DEBUG) << "Successfully read xray measurements input file \n";
+      LOG(INFO) << "Successfully read xray measurements input file \n";
+      // fermi parameters for the optimisation routine
+      double opt_fermi_c = 0;
+      double opt_fermi_t = 0;
+      double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
+      // define RMS_0
+      double rms_radius = sqrt(3.0/5.0) * uniform_radius;
+      // set a theta
+      double theta = M_PI/8;
+      // In here, we will need to loop over the pairs of (c,t) values
+      // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
+      // This could be user specified, but we will probably need some reasonable defaults
 
-    // In here, we will need to loop over the pairs of (c,t) values
-    // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
-    // This could be user specified, but we will probably need some reasonable defaults
-  
-    // loop over c:
-    //   loop over t:
-    //     getAllTransitions
-    //  
-    // least squares optimise
-    // 
-    // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
-    // for the optimal pair of parameters?  
+      // define a polar coordinate domain for loop
+
+      // use a default or set RMS range and a scanning resolution
+      // same for theta
+      // loop over theta:
+      //   loop over RMS:
+      //     getAllTransitions
+
+      // one iteration of the optimisation
+      tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
+      // set new iteration of fermi parameters and get transitions
+      config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
+      config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
+      LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t <<"\n";
+      DiracAtom opt_da = config.makeAtom();
+      transitions = getAllTransitions(transqnums, opt_da);
+
+      // store MSE for each transition in a vector, RMS, theta,MSE
+      // store points where MSE < 1 for all bands
+      // store minimum MSE point for combination.
+      // end of loop want optimum c,t with MSE < 1
+      // convert ranges of RMS, theta to c,t
+
+      // least squares optimise
+
+      // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
+      // for the optimal pair of parameters?
+      // for now we will assert that the xr lines in the config
+      //are the same as the experimentally supplied ones.
 
     }
 
