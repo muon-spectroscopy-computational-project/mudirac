@@ -26,3 +26,9 @@ using namespace std;
  * @retval a pair of doubles fermi_c and fermi_t
  */
 pair<double, double> fermiParameters(double rms_radius, double theta);
+
+struct OptimisationData {
+    double rms_radius_opt;
+    double theta_opt;
+    double mse;
+  };

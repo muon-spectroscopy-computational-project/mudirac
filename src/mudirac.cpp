@@ -108,15 +108,18 @@ int main(int argc, char *argv[]) {
   if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2"){
     ExperimentalResultFile measurements;
     bool xr_measurement_read_success = false;
+    vector<string> xr_lines_measured;
+    vector<double> xr_energies;
+    vector<double> xr_errors;
     try {
       measurements.parseFile(argv[2]);
-      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      xr_lines_measured = measurements.getStringValues("xr_lines");
       LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
       for (auto transition: xr_lines_measured){
         LOG(DEBUG) << transition << ", ";
       }
       LOG(DEBUG) << "\n";
-      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+      xr_energies = measurements.getDoubleValues("xr_energy");
 
       LOG(DEBUG) << "Reading experimental Xray energies: ";
       for (auto transition_energy: xr_energies){
@@ -124,7 +127,7 @@ int main(int argc, char *argv[]) {
       }
       LOG(DEBUG) << "\n";
 
-      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+      xr_errors = measurements.getDoubleValues("xr_error");
 
       LOG(DEBUG) << "Reading experimental Xray energy errors: ";
       for (auto transition_energy_error: xr_errors){
@@ -141,14 +144,22 @@ int main(int argc, char *argv[]) {
 
     if (xr_measurement_read_success){
       LOG(INFO) << "Successfully read xray measurements input file \n";
+      // data structure for tracking best parameters
+      OptimisationData optimal_fermi_parameter;
+      optimal_fermi_parameter.mse = 1.0;
+      vector<OptimisationData> optimal_fermi_parameters;
+      vector<TransitionData> optimal_transitions;
       // fermi parameters for the optimisation routine
       double opt_fermi_c = 0;
       double opt_fermi_t = 0;
       double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
       // define RMS_0
-      double rms_radius = sqrt(3.0/5.0) * uniform_radius;
+      double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
+      double rms_radius = rms_radius_0 * 0.95;
+      double rms_radius_max = 1.05 * rms_radius_0;
+      int precision = 10;
       // set a theta
-      double theta = M_PI/8;
+      double theta;
       // In here, we will need to loop over the pairs of (c,t) values
       // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
       // This could be user specified, but we will probably need some reasonable defaults
@@ -160,17 +171,78 @@ int main(int argc, char *argv[]) {
       // loop over theta:
       //   loop over RMS:
       //     getAllTransitions
+      while (rms_radius < rms_radius_max){
+        for (int i=0; i< precision; ++i){
+          theta = i * M_PI/(3.0*(double) precision);
+                // one iteration of the optimisation
+          tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
+          // set new iteration of fermi parameters and get transitions
+          config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
+          config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
+          opt_fermi_t = config.getDoubleValue("fermi_t");
+          opt_fermi_c = config.getDoubleValue("fermi_c");
+          LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t;
+          LOG(DEBUG) << " RMS radius: " << rms_radius << "\n";
+          DiracAtom opt_da = config.makeAtom();
+          transitions = getAllTransitions(transqnums, opt_da);
 
-      // one iteration of the optimisation
-      tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
-      // set new iteration of fermi parameters and get transitions
-      config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
-      config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
-      LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t <<"\n";
-      DiracAtom opt_da = config.makeAtom();
-      transitions = getAllTransitions(transqnums, opt_da);
+          // store MSE for each transition in a vector, RMS, theta,MSE
+          double mean_square_error = 0;
+          bool valid_fermi_parameters = true;
+          OptimisationData fermi_parameter_iteration;
+          LOG(DEBUG) << "MSE loop \n";
+          for (int i = 0; i < transitions.size(); ++i) {
+            double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
+            double tRate = transitions[i].tmat.totalRate();
+            double square_error = 0;
+            if (dE <= 0 || tRate <= 0)
+              continue; // Transition is invisible
+            if (transitions[i].name == xr_lines_measured[i]){
+              double transition_energy = dE / Physical::eV;
+              double square_deviation = (transition_energy-xr_energies[i])*(transition_energy-xr_energies[i]);
+              double valid_uncertainty = (xr_errors[i])*(xr_errors[i]);
+              square_error = square_deviation/valid_uncertainty; 
+              LOG(DEBUG) << transitions[i].name << " SE: "<< square_error << "\n";
+            }
+            if (square_error >= 1){
+              LOG(DEBUG) << "c,t doesnt fit\n";
+              valid_fermi_parameters = false;
+              break;
+            }
+            mean_square_error += square_error;
+            //out << transitions[i].name << '\t' << dE / Physical::eV;
+            //out << "\t\t" << tRate * Physical::s << '\n';
+          }
+          if (valid_fermi_parameters){
+            LOG(DEBUG) << "fermi parameters valid\n";
+            fermi_parameter_iteration.rms_radius_opt = rms_radius;
+            fermi_parameter_iteration.theta_opt = theta;
+            fermi_parameter_iteration.mse = mean_square_error;
 
-      // store MSE for each transition in a vector, RMS, theta,MSE
+            optimal_fermi_parameters.push_back(fermi_parameter_iteration);
+            if (mean_square_error < optimal_fermi_parameter.mse){
+              optimal_fermi_parameter = fermi_parameter_iteration;
+              optimal_transitions = transitions;
+            }
+          }
+
+
+        }
+        rms_radius+= 0.01;
+      }
+
+      if (optimal_fermi_parameter.mse >= 1.0){
+        LOG(DEBUG) << "no valid fermi parameters found\n";
+        return -1;
+      }
+      else {
+        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_parameter.rms_radius_opt;
+        LOG(INFO) << ", "<< optimal_fermi_parameter.theta_opt << "\n";
+        tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_parameter.rms_radius_opt, optimal_fermi_parameter.theta_opt);
+        LOG(INFO) << "found optimal fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t << "\n";
+        transitions = optimal_transitions;
+      }
+
       // store points where MSE < 1 for all bands
       // store minimum MSE point for combination.
       // end of loop want optimum c,t with MSE < 1
