@@ -180,46 +180,47 @@ int main(int argc, char *argv[]) {
       LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
       while (rms_radius < rms_radius_max){
         for (int i=0; i< theta_iterations; ++i){
+
           theta = i * M_PI/(3.0*(double) theta_iterations);
-                // one iteration of the optimisation
           tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
           // set new iteration of fermi parameters and get transitions
           config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
           config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
-          opt_fermi_t = config.getDoubleValue("fermi_t");
-          opt_fermi_c = config.getDoubleValue("fermi_c");
           LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t;
           LOG(DEBUG) << " RMS radius: " << rms_radius << "\n";
           DiracAtom opt_da = config.makeAtom();
           transitions = getAllTransitions(transqnums, opt_da);
 
-          // store MSE for each transition in a vector, RMS, theta,MSE
           double mean_square_error = 0;
           bool valid_fermi_parameters = true;
+          // store MSE for each transition in a vector, RMS, theta, MSE
           OptimisationData fermi_polar_parameter_iteration;
           LOG(DEBUG) << "MSE loop \n";
           for (int i = 0; i < transitions.size(); ++i) {
+            // calculate transition energy and rate
             double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
             double tRate = transitions[i].tmat.totalRate();
             double square_error = 0;
             if (dE <= 0 || tRate <= 0)
               continue; // Transition is invisible
+            // check transition allign with experimental transitions
             if (transitions[i].name == xr_lines_measured[i]){
               double transition_energy = dE / Physical::eV;
+              // calculate the square error of each transition
               double square_deviation = (transition_energy-xr_energies[i])*(transition_energy-xr_energies[i]);
               double valid_uncertainty = (xr_errors[i])*(xr_errors[i]);
               square_error = square_deviation/valid_uncertainty; 
               LOG(DEBUG) << transitions[i].name << " SE: "<< square_error << "\n";
             }
+            // break MSE loop if c, t are invalid for any of the transitions
             if (square_error >= 1){
               LOG(DEBUG) << "c,t doesnt fit\n";
               valid_fermi_parameters = false;
               break;
             }
             mean_square_error += square_error;
-            //out << transitions[i].name << '\t' << dE / Physical::eV;
-            //out << "\t\t" << tRate * Physical::s << '\n';
           }
+          // store the parameters if valid
           if (valid_fermi_parameters){
             LOG(DEBUG) << "fermi parameters valid\n";
             fermi_polar_parameter_iteration.rms_radius_opt = rms_radius;
