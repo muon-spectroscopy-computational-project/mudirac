@@ -145,9 +145,9 @@ int main(int argc, char *argv[]) {
     if (xr_measurement_read_success){
       LOG(INFO) << "Successfully read xray measurements input file \n";
       // data structure for tracking best parameters
-      OptimisationData optimal_fermi_parameter;
-      optimal_fermi_parameter.mse = 1.0;
-      vector<OptimisationData> optimal_fermi_parameters;
+      OptimisationData optimal_fermi_polar_parameter;
+      optimal_fermi_polar_parameter.mse = 1.0;
+      vector<OptimisationData> valid_fermi_polar_parameters;
       vector<TransitionData> optimal_transitions;
       // fermi parameters for the optimisation routine
       double opt_fermi_c = 0;
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
           // store MSE for each transition in a vector, RMS, theta,MSE
           double mean_square_error = 0;
           bool valid_fermi_parameters = true;
-          OptimisationData fermi_parameter_iteration;
+          OptimisationData fermi_polar_parameter_iteration;
           LOG(DEBUG) << "MSE loop \n";
           for (int i = 0; i < transitions.size(); ++i) {
             double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
@@ -222,13 +222,15 @@ int main(int argc, char *argv[]) {
           }
           if (valid_fermi_parameters){
             LOG(DEBUG) << "fermi parameters valid\n";
-            fermi_parameter_iteration.rms_radius_opt = rms_radius;
-            fermi_parameter_iteration.theta_opt = theta;
-            fermi_parameter_iteration.mse = mean_square_error;
+            fermi_polar_parameter_iteration.rms_radius_opt = rms_radius;
+            fermi_polar_parameter_iteration.theta_opt = theta;
+            fermi_polar_parameter_iteration.mse = mean_square_error;
 
-            optimal_fermi_parameters.push_back(fermi_parameter_iteration);
-            if (mean_square_error < optimal_fermi_parameter.mse){
-              optimal_fermi_parameter = fermi_parameter_iteration;
+            // store points where MSE < 1 for all bands
+            valid_fermi_polar_parameters.push_back(fermi_polar_parameter_iteration);
+            if (mean_square_error < optimal_fermi_polar_parameter.mse){
+              // store minimum MSE point for combination.
+              optimal_fermi_polar_parameter = fermi_polar_parameter_iteration;
               optimal_transitions = transitions;
             }
           }
@@ -238,22 +240,19 @@ int main(int argc, char *argv[]) {
         rms_radius+= rms_radius_increment;
       }
 
-      if (optimal_fermi_parameter.mse >= 1.0){
+      if (optimal_fermi_polar_parameter.mse >= 1.0){
         LOG(DEBUG) << "no valid fermi parameters found\n";
         return -1;
       }
       else {
-        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_parameter.rms_radius_opt;
-        LOG(INFO) << ", "<< optimal_fermi_parameter.theta_opt << "\n";
-        tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_parameter.rms_radius_opt, optimal_fermi_parameter.theta_opt);
+        // end of loop want optimum c,t with MSE < 1
+        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_polar_parameter.rms_radius_opt;
+        LOG(INFO) << ", "<< optimal_fermi_polar_parameter.theta_opt << "\n";
+        // convert ranges of RMS, theta to c,t
+        tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_polar_parameter.rms_radius_opt, optimal_fermi_polar_parameter.theta_opt);
         LOG(INFO) << "found optimal fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t << "\n";
         transitions = optimal_transitions;
       }
-
-      // store points where MSE < 1 for all bands
-      // store minimum MSE point for combination.
-      // end of loop want optimum c,t with MSE < 1
-      // convert ranges of RMS, theta to c,t
 
       // least squares optimise
 
