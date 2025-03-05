@@ -155,9 +155,11 @@ int main(int argc, char *argv[]) {
       double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
       // define RMS_0
       double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
-      double rms_radius = rms_radius_0 * 0.95;
-      double rms_radius_max = 1.05 * rms_radius_0;
-      int precision = 10;
+      double rms_radius = rms_radius_0 * config.getDoubleValue("rms_radius_min");
+      double rms_radius_max = rms_radius_0 * config.getDoubleValue("rms_radius_max");
+      int theta_iterations = config.getIntValue("theta_iterations");
+      double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
+      int total_2pF_iterations = theta_iterations * (1 + (int)((rms_radius_max - rms_radius)*rms_iterations_factor));
       // set a theta
       double theta;
       // In here, we will need to loop over the pairs of (c,t) values
@@ -171,9 +173,14 @@ int main(int argc, char *argv[]) {
       // loop over theta:
       //   loop over RMS:
       //     getAllTransitions
+      double rms_radius_increment = 1.0/rms_iterations_factor;
+      LOG(INFO) << "Starting scan for optimal fermi parameters \n";
+      LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]"<<"\n";
+      LOG(INFO) << "search domain: theta: [0, pi/3]\n";
+      LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
       while (rms_radius < rms_radius_max){
-        for (int i=0; i< precision; ++i){
-          theta = i * M_PI/(3.0*(double) precision);
+        for (int i=0; i< theta_iterations; ++i){
+          theta = i * M_PI/(3.0*(double) theta_iterations);
                 // one iteration of the optimisation
           tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
           // set new iteration of fermi parameters and get transitions
@@ -228,7 +235,7 @@ int main(int argc, char *argv[]) {
 
 
         }
-        rms_radius+= 0.01;
+        rms_radius+= rms_radius_increment;
       }
 
       if (optimal_fermi_parameter.mse >= 1.0){

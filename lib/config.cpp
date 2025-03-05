@@ -68,10 +68,14 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Integer keywords
   this->defineIntNode("devel_EdEscan_k", InputNode<int>(-1));      // Value of quantum number k for E->dE scan
   this->defineIntNode("devel_EdEscan_steps", InputNode<int>(100)); // Energy steps for E->dE scan
+  this->defineIntNode("rms_radius_decimals", InputNode<int>(2));      //N decimal places for rms radius iterations in fermi parameter optimisation
+  this->defineIntNode("theta_iterations", InputNode<int>(50));      // N theta values to iterate per rms radius scanned in fermi parameter optimisation
 
   // Double keywords
   this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
   this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
+  this->defineDoubleNode("rms_radius_min", InputNode<double>(0.97));          // minimum rms radius as proportion of uniform sphere rms radius in search domain for optimal fermi parameters
+  this->defineDoubleNode("rms_radius_max", InputNode<double>(1.03));          // maximum rms radius as proportion of uniform sphere rms radius in search domain for optimal fermi parameters
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
