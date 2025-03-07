@@ -31,4 +31,6 @@ struct OptimisationData {
     double rms_radius_opt;
     double theta_opt;
     double mse;
+    double fermi_c;
+    double fermi_t;
   };

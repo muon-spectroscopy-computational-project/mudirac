@@ -75,11 +75,11 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
   this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
   
-  // minimum rms radius as proportion of uniform sphere rms radius in search domain for optimal fermi parameters
-  this->defineDoubleNode("rms_radius_min", InputNode<double>(0.97));
+  // minimum rms radius in search domain for optimal fermi parameters
+  this->defineDoubleNode("rms_radius_min", InputNode<double>(0));
   
-  // maximum rms radius as proportion of uniform sphere rms radius in search domain for optimal fermi parameters
-  this->defineDoubleNode("rms_radius_max", InputNode<double>(1.03));         
+  // maximum rms radius in search domain for optimal fermi parameters
+  this->defineDoubleNode("rms_radius_max", InputNode<double>(8));         
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic

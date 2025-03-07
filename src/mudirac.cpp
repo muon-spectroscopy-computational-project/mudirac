@@ -152,11 +152,11 @@ int main(int argc, char *argv[]) {
       // fermi parameters for the optimisation routine
       double opt_fermi_c = 0;
       double opt_fermi_t = 0;
-      double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
+      //double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
       // define RMS_0
-      double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
-      double rms_radius = rms_radius_0 * config.getDoubleValue("rms_radius_min");
-      double rms_radius_max = rms_radius_0 * config.getDoubleValue("rms_radius_max");
+      // double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
+      double rms_radius = config.getDoubleValue("rms_radius_min");
+      double rms_radius_max = config.getDoubleValue("rms_radius_max");
       int theta_iterations = config.getIntValue("theta_iterations");
       double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
       int total_2pF_iterations = theta_iterations * (1 + (int)((rms_radius_max - rms_radius)*rms_iterations_factor));
@@ -176,12 +176,12 @@ int main(int argc, char *argv[]) {
       double rms_radius_increment = 1.0/rms_iterations_factor;
       LOG(INFO) << "Starting scan for optimal fermi parameters \n";
       LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]"<<"\n";
-      LOG(INFO) << "search domain: theta: [0, pi/3]\n";
+      LOG(INFO) << "search domain: theta: [0, pi/6]\n";
       LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
       while (rms_radius < rms_radius_max){
-        for (int i=0; i< theta_iterations; ++i){
+        for (int i=0; i < theta_iterations; ++i){
 
-          theta = i * M_PI/(3.0*(double) theta_iterations);
+          theta = i * M_PI/(6.0*(double) theta_iterations);
           tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
           // set new iteration of fermi parameters and get transitions
           config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
@@ -226,6 +226,7 @@ int main(int argc, char *argv[]) {
             fermi_polar_parameter_iteration.rms_radius_opt = rms_radius;
             fermi_polar_parameter_iteration.theta_opt = theta;
             fermi_polar_parameter_iteration.mse = mean_square_error;
+            tie(fermi_polar_parameter_iteration.fermi_c, fermi_polar_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
 
             // store points where MSE < 1 for all bands
             valid_fermi_polar_parameters.push_back(fermi_polar_parameter_iteration);
@@ -241,17 +242,25 @@ int main(int argc, char *argv[]) {
         rms_radius+= rms_radius_increment;
       }
 
+      // if there are no valid fermi parameters
       if (optimal_fermi_polar_parameter.mse >= 1.0){
         LOG(DEBUG) << "no valid fermi parameters found\n";
         return -1;
       }
       else {
         // end of loop want optimum c,t with MSE < 1
+        // rms radius scanned from lowest to highest so front/back of valid parameters vector contain min/max valid rms radius values
+        double max_valid_rms_radius = valid_fermi_polar_parameters.back().rms_radius_opt;
+        double min_valid_rms_radius = valid_fermi_polar_parameters.front().rms_radius_opt;
+        double rms_radius_uncertainty = (max_valid_rms_radius - min_valid_rms_radius)/2;
+        LOG(INFO) << "valid rms radius range [" << min_valid_rms_radius << ", " << max_valid_rms_radius << "]\n";
         LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_polar_parameter.rms_radius_opt;
         LOG(INFO) << ", "<< optimal_fermi_polar_parameter.theta_opt << "\n";
         // convert ranges of RMS, theta to c,t
-        tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_polar_parameter.rms_radius_opt, optimal_fermi_polar_parameter.theta_opt);
-        LOG(INFO) << "found optimal fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t << "\n";
+        // does this even make sense if it is wide?
+        // tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_polar_parameter.rms_radius_opt, optimal_fermi_polar_parameter.theta_opt);
+        LOG(INFO) << "found optimal fermi parameters: " << optimal_fermi_polar_parameter.fermi_c;
+        LOG(INFO) << ", " << optimal_fermi_polar_parameter.fermi_t << "\n";
         transitions = optimal_transitions;
       }
 
@@ -262,6 +271,20 @@ int main(int argc, char *argv[]) {
       // for now we will assert that the xr lines in the config
       //are the same as the experimentally supplied ones.
 
+      // output file containing all valid fermi parameters and the associated MSE
+      ofstream out(seed + ".fermi_parameters.out");
+      out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+      out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
+      out << fixed;
+
+      for (int i = 0; i < valid_fermi_polar_parameters.size(); ++i) {
+
+        out << valid_fermi_polar_parameters[i].fermi_c << '\t' << valid_fermi_polar_parameters[i].fermi_t << '\t';
+        out << valid_fermi_polar_parameters[i].rms_radius_opt << '\t' << valid_fermi_polar_parameters[i].theta_opt  << '\t';
+        out << valid_fermi_polar_parameters[i].mse << "\n";
+
+      }
+      out.close();
     }
 
   }else{
@@ -283,7 +306,6 @@ int main(int argc, char *argv[]) {
   if (output_verbosity >= 1) {
     // Save a file for all lines
     ofstream out(seed + ".xr.out");
-
     out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
     out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
     out << fixed;
