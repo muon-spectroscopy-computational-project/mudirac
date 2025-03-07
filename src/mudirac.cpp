@@ -192,6 +192,7 @@ int main(int argc, char *argv[]) {
           transitions = getAllTransitions(transqnums, opt_da);
 
           double mean_square_error = 0;
+          double total_square_error = 0;
           bool valid_fermi_parameters = true;
           // store MSE for each transition in a vector, RMS, theta, MSE
           OptimisationData fermi_polar_parameter_iteration;
@@ -218,13 +219,14 @@ int main(int argc, char *argv[]) {
               valid_fermi_parameters = false;
               break;
             }
-            mean_square_error += square_error;
+            total_square_error += square_error;
           }
           // store the parameters if valid
           if (valid_fermi_parameters){
             LOG(DEBUG) << "fermi parameters valid\n";
             fermi_polar_parameter_iteration.rms_radius_opt = rms_radius;
             fermi_polar_parameter_iteration.theta_opt = theta;
+            mean_square_error = total_square_error / transitions.size();
             fermi_polar_parameter_iteration.mse = mean_square_error;
             tie(fermi_polar_parameter_iteration.fermi_c, fermi_polar_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
 
@@ -277,8 +279,9 @@ int main(int argc, char *argv[]) {
       out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
       out << fixed;
 
+      // loop through valid fermi parameters
       for (int i = 0; i < valid_fermi_polar_parameters.size(); ++i) {
-
+        // output fermi_c, fermi_c, rms radius, theta, MSE
         out << valid_fermi_polar_parameters[i].fermi_c << '\t' << valid_fermi_polar_parameters[i].fermi_t << '\t';
         out << valid_fermi_polar_parameters[i].rms_radius_opt << '\t' << valid_fermi_polar_parameters[i].theta_opt  << '\t';
         out << valid_fermi_polar_parameters[i].mse << "\n";
