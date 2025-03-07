@@ -145,9 +145,9 @@ int main(int argc, char *argv[]) {
     if (xr_measurement_read_success){
       LOG(INFO) << "Successfully read xray measurements input file \n";
       // data structure for tracking best parameters
-      OptimisationData optimal_fermi_polar_parameter;
-      optimal_fermi_polar_parameter.mse = 1.0;
-      vector<OptimisationData> valid_fermi_polar_parameters;
+      OptimisationData optimal_fermi_parameter;
+      optimal_fermi_parameter.mse = 1.0;
+      vector<OptimisationData> valid_fermi_parameters;
       vector<TransitionData> optimal_transitions;
       // fermi parameters for the optimisation routine
       double opt_fermi_c = 0;
@@ -193,9 +193,9 @@ int main(int argc, char *argv[]) {
 
           double mean_square_error = 0;
           double total_square_error = 0;
-          bool valid_fermi_parameters = true;
+          bool fermi_parameters_are_valid = true;
           // store MSE for each transition in a vector, RMS, theta, MSE
-          OptimisationData fermi_polar_parameter_iteration;
+          OptimisationData fermi_parameter_iteration;
           LOG(DEBUG) << "MSE loop \n";
           for (int i = 0; i < transitions.size(); ++i) {
             // calculate transition energy and rate
@@ -216,25 +216,25 @@ int main(int argc, char *argv[]) {
             // break MSE loop if c, t are invalid for any of the transitions
             if (square_error >= 1){
               LOG(DEBUG) << "c,t doesnt fit\n";
-              valid_fermi_parameters = false;
+              fermi_parameters_are_valid = false;
               break;
             }
             total_square_error += square_error;
           }
           // store the parameters if valid
-          if (valid_fermi_parameters){
+          if (fermi_parameters_are_valid){
             LOG(DEBUG) << "fermi parameters valid\n";
-            fermi_polar_parameter_iteration.rms_radius_opt = rms_radius;
-            fermi_polar_parameter_iteration.theta_opt = theta;
+            fermi_parameter_iteration.rms_radius = rms_radius;
+            fermi_parameter_iteration.theta = theta;
             mean_square_error = total_square_error / transitions.size();
-            fermi_polar_parameter_iteration.mse = mean_square_error;
-            tie(fermi_polar_parameter_iteration.fermi_c, fermi_polar_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
+            fermi_parameter_iteration.mse = mean_square_error;
+            tie(fermi_parameter_iteration.fermi_c, fermi_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
 
             // store points where MSE < 1 for all bands
-            valid_fermi_polar_parameters.push_back(fermi_polar_parameter_iteration);
-            if (mean_square_error < optimal_fermi_polar_parameter.mse){
+            valid_fermi_parameters.push_back(fermi_parameter_iteration);
+            if (mean_square_error < optimal_fermi_parameter.mse){
               // store minimum MSE point for combination.
-              optimal_fermi_polar_parameter = fermi_polar_parameter_iteration;
+              optimal_fermi_parameter = fermi_parameter_iteration;
               optimal_transitions = transitions;
             }
           }
@@ -245,24 +245,24 @@ int main(int argc, char *argv[]) {
       }
 
       // if there are no valid fermi parameters
-      if (optimal_fermi_polar_parameter.mse >= 1.0){
+      if (optimal_fermi_parameter.mse >= 1.0){
         LOG(DEBUG) << "no valid fermi parameters found\n";
         return -1;
       }
       else {
         // end of loop want optimum c,t with MSE < 1
         // rms radius scanned from lowest to highest so front/back of valid parameters vector contain min/max valid rms radius values
-        double max_valid_rms_radius = valid_fermi_polar_parameters.back().rms_radius_opt;
-        double min_valid_rms_radius = valid_fermi_polar_parameters.front().rms_radius_opt;
+        double max_valid_rms_radius = valid_fermi_parameters.back().rms_radius;
+        double min_valid_rms_radius = valid_fermi_parameters.front().rms_radius;
         double rms_radius_uncertainty = (max_valid_rms_radius - min_valid_rms_radius)/2;
         LOG(INFO) << "valid rms radius range [" << min_valid_rms_radius << ", " << max_valid_rms_radius << "]\n";
-        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_polar_parameter.rms_radius_opt;
-        LOG(INFO) << ", "<< optimal_fermi_polar_parameter.theta_opt << "\n";
+        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_parameter.rms_radius;
+        LOG(INFO) << ", "<< optimal_fermi_parameter.theta << "\n";
         // convert ranges of RMS, theta to c,t
         // does this even make sense if it is wide?
-        // tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_polar_parameter.rms_radius_opt, optimal_fermi_polar_parameter.theta_opt);
-        LOG(INFO) << "found optimal fermi parameters: " << optimal_fermi_polar_parameter.fermi_c;
-        LOG(INFO) << ", " << optimal_fermi_polar_parameter.fermi_t << "\n";
+        // tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_parameter.rms_radius, optimal_fermi_parameter.theta);
+        LOG(INFO) << "found optimal fermi parameters: " << optimal_fermi_parameter.fermi_c;
+        LOG(INFO) << ", " << optimal_fermi_parameter.fermi_t << "\n";
         transitions = optimal_transitions;
       }
 
@@ -280,11 +280,11 @@ int main(int argc, char *argv[]) {
       out << fixed;
 
       // loop through valid fermi parameters
-      for (int i = 0; i < valid_fermi_polar_parameters.size(); ++i) {
+      for (int i = 0; i < valid_fermi_parameters.size(); ++i) {
         // output fermi_c, fermi_c, rms radius, theta, MSE
-        out << valid_fermi_polar_parameters[i].fermi_c << '\t' << valid_fermi_polar_parameters[i].fermi_t << '\t';
-        out << valid_fermi_polar_parameters[i].rms_radius_opt << '\t' << valid_fermi_polar_parameters[i].theta_opt  << '\t';
-        out << valid_fermi_polar_parameters[i].mse << "\n";
+        out << valid_fermi_parameters[i].fermi_c << '\t' << valid_fermi_parameters[i].fermi_t << '\t';
+        out << valid_fermi_parameters[i].rms_radius << '\t' << valid_fermi_parameters[i].theta  << '\t';
+        out << valid_fermi_parameters[i].mse << "\n";
 
       }
       out.close();

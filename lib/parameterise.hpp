@@ -28,8 +28,8 @@ using namespace std;
 pair<double, double> fermiParameters(double rms_radius, double theta);
 
 struct OptimisationData {
-    double rms_radius_opt;
-    double theta_opt;
+    double rms_radius;
+    double theta;
     double mse;
     double fermi_c;
     double fermi_t;
