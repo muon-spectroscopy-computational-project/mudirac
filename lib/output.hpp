@@ -17,7 +17,7 @@
 #include "atom.hpp"
 #include "potential.hpp"
 #include "constants.hpp"
-#include "parameterise.hpp"
+#include "experiment.hpp"
 
 using namespace std;
 
