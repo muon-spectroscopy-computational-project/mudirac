@@ -37,13 +37,18 @@ pair<double, double> fermiParameters(double rms_radius, double theta){
 }
 
 void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_success, vector<string> &xr_lines, vector<double> &xr_energies, vector<double> &xr_errors, char *argv[]){
+  // read experimental measurements input file
   xr_measurements.parseFile(argv[2]);
+
+  // copy measured transitions labels into xr_lines variable and LOG
   xr_lines = xr_measurements.getStringValues("xr_lines");
   LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
   for (auto transition: xr_lines){
     LOG(DEBUG) << transition << ", ";
   }
   LOG(DEBUG) << "\n";
+
+  // copy measured transitions energies into xr_energies variable and LOG
   xr_energies = xr_measurements.getDoubleValues("xr_energy");
 
   LOG(DEBUG) << "Reading experimental Xray energies: ";
@@ -52,6 +57,7 @@ void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_su
   }
   LOG(DEBUG) << "\n";
 
+  // copy measured transitions energy errors into xr_errors variable and LOG
   xr_errors = xr_measurements.getDoubleValues("xr_error");
 
   LOG(DEBUG) << "Reading experimental Xray energy errors: ";
@@ -59,6 +65,8 @@ void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_su
     LOG(DEBUG) << transition_energy_error << ", ";
   }
   LOG(DEBUG) << "\n";
+
+  // set referenced read_success to true in main function
   read_success = true;
 }
 

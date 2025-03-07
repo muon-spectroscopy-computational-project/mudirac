@@ -62,6 +62,25 @@ struct OptimisationData {
     double fermi_t;
   };
 
+
+/**
+ * 
+ *
+ * @brief  A function to read the experimental measurements input file
+ * and store the data in referenced variables
+ * @note   A function which reads the experimental measurements input file
+ * into the referenced xr_measurements object. The data of xr_lines, energies errors
+ * are copied into referenced vector variables. if successful the references read_success
+ * variable is true so the main function can continue with 2 parameter fermi optimisation.
+ * 
+ * @param xr_measurements:    object to contain data from xr input file
+ * @param read_success:     switch to control whether 2pF optimisation should occur
+ * @param xr_lines:     list of measured xray transitions
+ * @param xr_energies:      list of measured xray energies
+ * @param xr_errors:      list of measured xray errors
+ * @param argv:      MuDirac argument containing the experimental input file
+ *
+ */
 void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_success, vector<string> &xr_lines, vector<double> &xr_energies, vector<double> &xr_errors, char *argv[]);
 
 #endif
