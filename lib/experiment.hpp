@@ -62,4 +62,6 @@ struct OptimisationData {
     double fermi_t;
   };
 
+void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_success, vector<string> &xr_lines, vector<double> &xr_energies, vector<double> &xr_errors, char *argv[]);
+
 #endif

@@ -106,36 +106,15 @@ int main(int argc, char *argv[]) {
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
   if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2"){
+    
+    // variables to store experimental values passed by reference to readXrayMeasurements function
     ExperimentalResultFile measurements;
     bool xr_measurement_read_success = false;
     vector<string> xr_lines_measured;
     vector<double> xr_energies;
     vector<double> xr_errors;
     try {
-      measurements.parseFile(argv[2]);
-      xr_lines_measured = measurements.getStringValues("xr_lines");
-      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
-      for (auto transition: xr_lines_measured){
-        LOG(DEBUG) << transition << ", ";
-      }
-      LOG(DEBUG) << "\n";
-      xr_energies = measurements.getDoubleValues("xr_energy");
-
-      LOG(DEBUG) << "Reading experimental Xray energies: ";
-      for (auto transition_energy: xr_energies){
-        LOG(DEBUG) << transition_energy << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      xr_errors = measurements.getDoubleValues("xr_error");
-
-      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
-      for (auto transition_energy_error: xr_errors){
-        LOG(DEBUG) << transition_energy_error << ", ";
-      }
-      LOG(DEBUG) << "\n";
-      xr_measurement_read_success = true;
-
+      readXrayMeasurements(measurements, xr_measurement_read_success,  xr_lines_measured,  xr_energies, xr_errors, argv);
     } catch (runtime_error e) {
       cout << "Invalid experimental measurements file:\n";
       cout << e.what() << "\n";

@@ -35,3 +35,30 @@ pair<double, double> fermiParameters(double rms_radius, double theta){
     pair<double, double> fermi_parameters = {common_constant*var_cos, common_constant*var_sin};
     return fermi_parameters;
 }
+
+void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_success, vector<string> &xr_lines, vector<double> &xr_energies, vector<double> &xr_errors, char *argv[]){
+  xr_measurements.parseFile(argv[2]);
+  xr_lines = xr_measurements.getStringValues("xr_lines");
+  LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+  for (auto transition: xr_lines){
+    LOG(DEBUG) << transition << ", ";
+  }
+  LOG(DEBUG) << "\n";
+  xr_energies = xr_measurements.getDoubleValues("xr_energy");
+
+  LOG(DEBUG) << "Reading experimental Xray energies: ";
+  for (auto transition_energy: xr_energies){
+    LOG(DEBUG) << transition_energy << ", ";
+  }
+  LOG(DEBUG) << "\n";
+
+  xr_errors = xr_measurements.getDoubleValues("xr_error");
+
+  LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+  for (auto transition_energy_error: xr_errors){
+    LOG(DEBUG) << transition_energy_error << ", ";
+  }
+  LOG(DEBUG) << "\n";
+  read_success = true;
+}
+
