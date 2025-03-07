@@ -274,20 +274,7 @@ int main(int argc, char *argv[]) {
       //are the same as the experimentally supplied ones.
 
       // output file containing all valid fermi parameters and the associated MSE
-      ofstream out(seed + ".fermi_parameters.out");
-      out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
-      out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
-      out << fixed;
-
-      // loop through valid fermi parameters
-      for (int i = 0; i < valid_fermi_parameters.size(); ++i) {
-        // output fermi_c, fermi_c, rms radius, theta, MSE
-        out << valid_fermi_parameters[i].fermi_c << '\t' << valid_fermi_parameters[i].fermi_t << '\t';
-        out << valid_fermi_parameters[i].rms_radius << '\t' << valid_fermi_parameters[i].theta  << '\t';
-        out << valid_fermi_parameters[i].mse << "\n";
-
-      }
-      out.close();
+      writeFermiParameters(da, valid_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
   }else{

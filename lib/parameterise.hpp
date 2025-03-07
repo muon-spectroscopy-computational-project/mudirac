@@ -27,6 +27,9 @@ using namespace std;
  */
 pair<double, double> fermiParameters(double rms_radius, double theta);
 
+#ifndef OPT_DATA
+#define OPT_DATA
+
 struct OptimisationData {
     double rms_radius;
     double theta;
@@ -34,3 +37,5 @@ struct OptimisationData {
     double fermi_c;
     double fermi_t;
   };
+
+#endif

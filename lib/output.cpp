@@ -13,6 +13,42 @@
 #include "output.hpp"
 
 /**
+  * @brief  Write valid 2 parameter Fermi Distribution parameters to a file
+  * @note   Write a tsv of valid fermi parameters which fit the input experimental results in an ASCII file.
+  * The file has columns of fermi_c, fermi_t, rms_radius, theta, mean_sq_error, where fermi_c and fermi_t are
+  * the parameters for the Fermi distribution, rms_radius is the root mean square radius of that distribution,
+  * theta is a polar coordinate which maps the rms_radius to the fermi parameters, and mean_sq_error is the
+  * mean square error between the experimental xray transition energies and the transition energies simulated
+  * by mudirac using the fermi parameters in the row.
+  *
+  * @param  da:         Dirac Atom containing required configuration data (Z, A, m)
+  * @param  fermi_parameters:         vector containing valid fermi parameter data to be output
+  * @param  fname:      Filename
+  * @param  output_precision: output decimal places
+  * 
+  * @retval None
+ */
+void writeFermiParameters(DiracAtom da, const vector<OptimisationData> &fermi_parameters, string fname, int output_precision){
+
+  // output file containing all valid fermi parameters and the associated MSE
+  ofstream out(fname);
+  out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
+  out << fixed;
+  out << setprecision(output_precision);
+
+  // loop through valid fermi parameters
+  for (int i = 0; i < fermi_parameters.size(); ++i) {
+    // output fermi_c, fermi_c, rms radius, theta, MSE
+    out << fermi_parameters[i].fermi_c << '\t' << fermi_parameters[i].fermi_t << '\t';
+    out << fermi_parameters[i].rms_radius << '\t' << fermi_parameters[i].theta  << '\t';
+    out << fermi_parameters[i].mse << "\n";
+
+  }
+  out.close();
+}
+
+/**
   * @brief  Write a DiracState object to a text file
   * @note   Write down a full DiracState object in an ASCII file,
   * saving potential and P and Q component values
