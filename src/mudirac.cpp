@@ -127,123 +127,7 @@ int main(int argc, char *argv[]) {
       OptimisationData optimal_fermi_parameter;
       optimal_fermi_parameter.mse = 1.0;
       vector<OptimisationData> valid_fermi_parameters;
-      vector<TransitionData> optimal_transitions;
-      // fermi parameters for the optimisation routine
-      double opt_fermi_c = 0;
-      double opt_fermi_t = 0;
-      //double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
-      // define RMS_0
-      // double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
-      double rms_radius = config.getDoubleValue("rms_radius_min");
-      double rms_radius_max = config.getDoubleValue("rms_radius_max");
-      int theta_iterations = config.getIntValue("theta_iterations");
-      double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
-      int total_2pF_iterations = theta_iterations * (1 + (int)((rms_radius_max - rms_radius)*rms_iterations_factor));
-      // set a theta
-      double theta;
-      // In here, we will need to loop over the pairs of (c,t) values
-      // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
-      // This could be user specified, but we will probably need some reasonable defaults
-
-      // define a polar coordinate domain for loop
-
-      // use a default or set RMS range and a scanning resolution
-      // same for theta
-      // loop over theta:
-      //   loop over RMS:
-      //     getAllTransitions
-      double rms_radius_increment = 1.0/rms_iterations_factor;
-      LOG(INFO) << "Starting scan for optimal fermi parameters \n";
-      LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]"<<"\n";
-      LOG(INFO) << "search domain: theta: [0, pi/6]\n";
-      LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
-      while (rms_radius < rms_radius_max){
-        for (int i=0; i < theta_iterations; ++i){
-
-          theta = i * M_PI/(6.0*(double) theta_iterations);
-          tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
-          // set new iteration of fermi parameters and get transitions
-          config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
-          config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
-          LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t;
-          LOG(DEBUG) << " RMS radius: " << rms_radius << "\n";
-          DiracAtom opt_da = config.makeAtom();
-          transitions = getAllTransitions(transqnums, opt_da);
-
-          double mean_square_error = 0;
-          double total_square_error = 0;
-          bool fermi_parameters_are_valid = true;
-          // store MSE for each transition in a vector, RMS, theta, MSE
-          OptimisationData fermi_parameter_iteration;
-          LOG(DEBUG) << "MSE loop \n";
-          for (int i = 0; i < transitions.size(); ++i) {
-            // calculate transition energy and rate
-            double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
-            double tRate = transitions[i].tmat.totalRate();
-            double square_error = 0;
-            if (dE <= 0 || tRate <= 0)
-              continue; // Transition is invisible
-            // check transition allign with experimental transitions
-            if (transitions[i].name == xr_lines_measured[i]){
-              double transition_energy = dE / Physical::eV;
-              // calculate the square error of each transition
-              double square_deviation = (transition_energy-xr_energies[i])*(transition_energy-xr_energies[i]);
-              double valid_uncertainty = (xr_errors[i])*(xr_errors[i]);
-              square_error = square_deviation/valid_uncertainty; 
-              LOG(DEBUG) << transitions[i].name << " SE: "<< square_error << "\n";
-            }
-            // break MSE loop if c, t are invalid for any of the transitions
-            if (square_error >= 1){
-              LOG(DEBUG) << "c,t doesnt fit\n";
-              fermi_parameters_are_valid = false;
-              break;
-            }
-            total_square_error += square_error;
-          }
-          // store the parameters if valid
-          if (fermi_parameters_are_valid){
-            LOG(DEBUG) << "fermi parameters valid\n";
-            fermi_parameter_iteration.rms_radius = rms_radius;
-            fermi_parameter_iteration.theta = theta;
-            mean_square_error = total_square_error / transitions.size();
-            fermi_parameter_iteration.mse = mean_square_error;
-            tie(fermi_parameter_iteration.fermi_c, fermi_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
-
-            // store points where MSE < 1 for all bands
-            valid_fermi_parameters.push_back(fermi_parameter_iteration);
-            if (mean_square_error < optimal_fermi_parameter.mse){
-              // store minimum MSE point for combination.
-              optimal_fermi_parameter = fermi_parameter_iteration;
-              optimal_transitions = transitions;
-            }
-          }
-
-
-        }
-        rms_radius+= rms_radius_increment;
-      }
-
-      // if there are no valid fermi parameters
-      if (optimal_fermi_parameter.mse >= 1.0){
-        LOG(DEBUG) << "no valid fermi parameters found\n";
-        return -1;
-      }
-      else {
-        // end of loop want optimum c,t with MSE < 1
-        // rms radius scanned from lowest to highest so front/back of valid parameters vector contain min/max valid rms radius values
-        double max_valid_rms_radius = valid_fermi_parameters.back().rms_radius;
-        double min_valid_rms_radius = valid_fermi_parameters.front().rms_radius;
-        double rms_radius_uncertainty = (max_valid_rms_radius - min_valid_rms_radius)/2;
-        LOG(INFO) << "valid rms radius range [" << min_valid_rms_radius << ", " << max_valid_rms_radius << "]\n";
-        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_parameter.rms_radius;
-        LOG(INFO) << ", "<< optimal_fermi_parameter.theta << "\n";
-        // convert ranges of RMS, theta to c,t
-        // does this even make sense if it is wide?
-        // tie(opt_fermi_c, opt_fermi_t) = fermiParameters(optimal_fermi_parameter.rms_radius, optimal_fermi_parameter.theta);
-        LOG(INFO) << "found optimal fermi parameters: " << optimal_fermi_parameter.fermi_c;
-        LOG(INFO) << ", " << optimal_fermi_parameter.fermi_t << "\n";
-        transitions = optimal_transitions;
-      }
+      optimiseFermiParameters(xr_lines_measured, xr_energies, xr_errors, transqnums, valid_fermi_parameters, optimal_fermi_parameter, transitions, config);
 
       // least squares optimise
 
@@ -464,4 +348,107 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config){
   }
 
   return transqnums;
+}
+
+
+void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums,  vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config ){
+  double opt_fermi_c, opt_fermi_t;
+      //double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
+      // define RMS_0
+      // double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
+      double rms_radius = config.getDoubleValue("rms_radius_min");
+      double rms_radius_max = config.getDoubleValue("rms_radius_max");
+      int theta_iterations = config.getIntValue("theta_iterations");
+      double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
+      int total_2pF_iterations = theta_iterations * (1 + (int)((rms_radius_max - rms_radius)*rms_iterations_factor));
+      // set a theta
+      double theta;
+      double rms_radius_increment = 1.0/rms_iterations_factor;
+      LOG(INFO) << "Starting scan for optimal fermi parameters \n";
+      LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]"<<"\n";
+      LOG(INFO) << "search domain: theta: [0, pi/6]\n";
+      LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
+      while (rms_radius < rms_radius_max){
+        for (int i=0; i < theta_iterations; ++i){
+
+          theta = i * M_PI/(6.0*(double) theta_iterations);
+          tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
+          // set new iteration of fermi parameters and get transitions
+          config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
+          config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
+          LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t;
+          LOG(DEBUG) << " RMS radius: " << rms_radius << "\n";
+          DiracAtom opt_da = config.makeAtom();
+          vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, opt_da);
+
+          double mean_square_error = 0;
+          double total_square_error = 0;
+          bool fermi_parameters_are_valid = true;
+          // store MSE for each transition in a vector, RMS, theta, MSE
+          OptimisationData fermi_parameter_iteration;
+          LOG(DEBUG) << "MSE loop \n";
+          for (int i = 0; i < transitions_iteration.size(); ++i) {
+            // calculate transition energy and rate
+            double dE = (transitions_iteration[i].ds2.E - transitions_iteration[i].ds1.E);
+            double tRate = transitions_iteration[i].tmat.totalRate();
+            double square_error = 0;
+            if (dE <= 0 || tRate <= 0)
+              continue; // Transition is invisible
+            // check transition allign with experimental transitions
+            if (transitions_iteration[i].name == xr_lines_measured[i]){
+              double transition_energy = dE / Physical::eV;
+              // calculate the square error of each transition
+              double square_deviation = (transition_energy-xr_energies[i])*(transition_energy-xr_energies[i]);
+              double valid_uncertainty = (xr_errors[i])*(xr_errors[i]);
+              square_error = square_deviation/valid_uncertainty; 
+              LOG(DEBUG) << transitions_iteration[i].name << " SE: "<< square_error << "\n";
+            }
+            // break MSE loop if c, t are invalid for any of the transitions_iteration
+            if (square_error >= 1){
+              LOG(DEBUG) << "c,t doesnt fit\n";
+              fermi_parameters_are_valid = false;
+              break;
+            }
+            total_square_error += square_error;
+          }
+          // store the parameters if valid
+          if (fermi_parameters_are_valid){
+            LOG(DEBUG) << "fermi parameters valid\n";
+            fermi_parameter_iteration.rms_radius = rms_radius;
+            fermi_parameter_iteration.theta = theta;
+            mean_square_error = total_square_error / transitions_iteration.size();
+            fermi_parameter_iteration.mse = mean_square_error;
+            tie(fermi_parameter_iteration.fermi_c, fermi_parameter_iteration.fermi_t) = fermiParameters(rms_radius, theta);
+
+            // store points where MSE < 1 for all bands
+            valid_fermi_parameters.push_back(fermi_parameter_iteration);
+            if (mean_square_error < optimal_fermi_parameter.mse){
+              // store minimum MSE point for combination.
+              optimal_fermi_parameter = fermi_parameter_iteration;
+              optimal_transitions = transitions_iteration;
+            }
+          }
+
+
+        }
+        rms_radius+= rms_radius_increment;
+      }
+
+      // if there are no valid fermi parameters
+      if (optimal_fermi_parameter.mse >= 1.0){
+        LOG(DEBUG) << "no valid fermi parameters found\n";
+        exit(-1);
+      }
+      else {
+        // end of loop want optimum c,t with MSE < 1
+        // rms radius scanned from lowest to highest so front/back of valid parameters vector contain min/max valid rms radius values
+        double max_valid_rms_radius = valid_fermi_parameters.back().rms_radius;
+        double min_valid_rms_radius = valid_fermi_parameters.front().rms_radius;
+        double rms_radius_uncertainty = (max_valid_rms_radius - min_valid_rms_radius)/2;
+        LOG(INFO) << "valid rms radius range [" << min_valid_rms_radius << ", " << max_valid_rms_radius << "]\n";
+        LOG(INFO) << "found optimal fermi polar parameters " << optimal_fermi_parameter.rms_radius;
+        LOG(INFO) << ", "<< optimal_fermi_parameter.theta << "\n";
+        LOG(INFO) << "found optimal fermi parameters: " << optimal_fermi_parameter.fermi_c;
+        LOG(INFO) << ", " << optimal_fermi_parameter.fermi_t << "\n";
+      }
 }

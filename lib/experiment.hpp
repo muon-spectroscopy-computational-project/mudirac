@@ -16,7 +16,7 @@
 #include "../vendor/aixlog/aixlog.hpp"
 #include <math.h>
 #include <utility>
-
+#include "config.hpp"
 using namespace std;
 
 #ifndef OPT_DATA
@@ -82,5 +82,6 @@ struct OptimisationData {
  *
  */
 void readXrayMeasurements(ExperimentalResultFile &xr_measurements, bool &read_success, vector<string> &xr_lines, vector<double> &xr_energies, vector<double> &xr_errors, char *argv[]);
+
 
 #endif

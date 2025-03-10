@@ -41,3 +41,4 @@ struct TransLineSpec {
 
 vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da);
 vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
+void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums, vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config);
