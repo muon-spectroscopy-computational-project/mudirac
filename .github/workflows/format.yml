@@ -23,7 +23,7 @@ jobs:
 
             - name: Run Astyle format check
               run: | 
-                 astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --dry-run --formatted
+                 astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --formatted
             
             - name: Fail on format violations
               run: |
