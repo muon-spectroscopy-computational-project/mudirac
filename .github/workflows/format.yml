@@ -26,10 +26,10 @@ jobs:
                  astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --dry-run --formatted
             
             - name: Fail on format violations
-            run: |
-              if ! git diff --quiet; then
-                echo "❌ Code is not properly formatted."
-                echo "Run the following command to fix:"
-                echo "astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --suffix=none"
-                exit 1
-              fi
+              run: |
+                if ! git diff --quiet; then
+                  echo "❌ Code is not properly formatted."
+                  echo "Run the following command to fix:"
+                  echo "astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --suffix=none"
+                  exit 1
+                fi
