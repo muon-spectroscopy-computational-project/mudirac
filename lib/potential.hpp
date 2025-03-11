@@ -73,7 +73,9 @@ class CoulombSpherePotential : Potential {
 class CoulombFermi2Potential : public CoulombSpherePotential {
  public:
   CoulombFermi2Potential(double Z = 1.0, double R = -1, double A = 1.0,
-                         double thickness = Physical::fermi2_T, double fermi2_potential = -1, int csteps = 5000);
+
+                         double thickness = Physical::fermi2_t, double fermi2_potential = -1, int csteps = 5000);
+
   virtual double V(double r) override;
 
   double getc() {

@@ -130,13 +130,16 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t != -1 || c_param != -1) {
-    if( t == -1){
-      t = Physical::fermi2_thickenss;
-    }
-    da.setFermi2(t * Physical::fm,c_param * Physical::fm);
-    LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
+  if (t ==-1) {
+    t = Physical::fermi2_thickness;
   }
+
+  if (c_param == -1) {
+    da.setFermi2(t*Physical::fm);
+  } else {
+    da.setFermi2(t*Physical::fm, c_param*Physical::fm);
+  }
+  LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
 
   return da;
 }
