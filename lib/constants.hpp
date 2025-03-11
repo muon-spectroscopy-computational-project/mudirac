@@ -32,7 +32,8 @@ const double eV = 1.0 / 27.211385;          // Electron volt
 const double amu = 1822.888486192;          // Atomic mass unit
 
 // Other parameters
-const double fermi2_T = 2.3 * fm; // Fermi 2-term distribution skin thickness
+const double fermi2_thickness = 2.3;    // Default value for ferm 2-term distibution skin thickness in fm
+const double fermi2_t = fermi2_thickness * fm;       // Fermi 2-term distribution skin thickness
 
 } // namespace Physical
 
