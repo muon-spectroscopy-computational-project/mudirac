@@ -1,0 +1,35 @@
+name: Code format check
+
+on:
+    pull_request:
+    push:
+      branches:
+        - main
+        - "dev*"  # Matches branches like dev, dev-feature, dev-test, etc.
+               
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs:
+    format-check:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            
+            - name: Install Astyle
+              run: sudo apt-get update && sudo apt-get install -y astyle
+
+            - name: Run Astyle format check
+              run: | 
+                 astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --formatted
+            
+            - name: Fail on format violations
+              run: |
+                if ! git diff --quiet; then
+                  echo "❌ Code is not properly formatted."
+                  echo "Run the following command to fix:"
+                  echo "astyle src/*.cpp src/*.hpp lib/*.cpp lib/*.hpp --style=google -s2 -S --suffix=none"
+                  exit 1
+                fi
