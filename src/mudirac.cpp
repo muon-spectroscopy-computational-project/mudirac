@@ -384,8 +384,9 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   
   for (int i=0; i < theta_iterations; ++i){
     rms_radius = rms_radius_min;
+    theta = i * M_PI/(6.0*(double) theta_iterations);
     while (rms_radius < rms_radius_max){
-      theta = i * M_PI/(6.0*(double) theta_iterations);
+      
 
       // get fermi parameters from rms_radius, theta
       tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
@@ -408,11 +409,11 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
 
       // loop calculating MSE for each iteration of fermi parameters
       LOG(DEBUG) << "MSE loop \n";
-      for (int i = 0; i < transitions_iteration.size(); ++i) {
+      for (int k = 0; k < transitions_iteration.size(); ++k) {
 
         // calculate transition energy and rate
-        double dE = (transitions_iteration[i].ds2.E - transitions_iteration[i].ds1.E);
-        double tRate = transitions_iteration[i].tmat.totalRate();
+        double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+        double tRate = transitions_iteration[k].tmat.totalRate();
 
         // square error for each transitions calculated
         double square_error = 0;
@@ -421,17 +422,17 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
           continue; // Transition is invisible
 
         // check transition allign with experimental transitions
-        if (transitions_iteration[i].name == xr_lines_measured[i]){
+        if (transitions_iteration[k].name == xr_lines_measured[k]){
           // convert to eV
           double transition_energy = dE / Physical::eV;
 
           // calculate the square error of each transition
-          double square_deviation = (transition_energy-xr_energies[i])*(transition_energy-xr_energies[i]);
-          double valid_uncertainty = (xr_errors[i])*(xr_errors[i]);
+          double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+          double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
           square_error = square_deviation/valid_uncertainty;
 
           // output square error to LOG
-          LOG(DEBUG) << transitions_iteration[i].name << " SE: "<< square_error << "\n";
+          LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
         }
 
         // break MSE loop if c, t are invalid for any of the transitions_iteration
