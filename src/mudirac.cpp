@@ -367,6 +367,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
   double rms_radius_increment = 1.0/rms_iterations_factor;
   double rms_radius = rms_radius_min;
+  double rms_radius_iterations = (rms_radius_max - rms_radius_min)*rms_iterations_factor;
   // set variables for theta loop iterations
   double theta;
   int theta_iterations = config.getIntValue("theta_iterations");
@@ -383,11 +384,11 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   // optimisation loops
   
   for (int i=0; i < theta_iterations; ++i){
-    rms_radius = rms_radius_min;
-    theta = i * M_PI/(6.0*(double) theta_iterations);
-    while (rms_radius < rms_radius_max){
-      
+    theta = i * M_PI/(6.0*((double) theta_iterations));
 
+    //while (rms_radius < rms_radius_max){
+    for (int j=0; j < rms_radius_iterations; ++j){
+      rms_radius = rms_radius_min + ((double) j )* rms_radius_increment;
       // get fermi parameters from rms_radius, theta
       tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
 
@@ -467,9 +468,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
           optimal_transitions = transitions_iteration;
         }
       }
-      rms_radius+= rms_radius_increment;
     }
-    
   }
 
   // if there are no valid fermi parameters
