@@ -362,11 +362,11 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   // double rms_radius_0 = sqrt(3.0/5.0) * uniform_radius;
 
   // set variables for rms radius loop limits and increments
-  double rms_radius = config.getDoubleValue("rms_radius_min");
+  double rms_radius_min = config.getDoubleValue("rms_radius_min");
   double rms_radius_max = config.getDoubleValue("rms_radius_max");
   double rms_iterations_factor = (double) pow(10, config.getIntValue("rms_radius_decimals"));
   double rms_radius_increment = 1.0/rms_iterations_factor;
-
+  double rms_radius = rms_radius_min;
   // set variables for theta loop iterations
   double theta;
   int theta_iterations = config.getIntValue("theta_iterations");
@@ -381,9 +381,10 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
 
   // optimisation loops
-  while (rms_radius < rms_radius_max){
-    for (int i=0; i < theta_iterations; ++i){
-
+  
+  for (int i=0; i < theta_iterations; ++i){
+    rms_radius = rms_radius_min;
+    while (rms_radius < rms_radius_max){
       theta = i * M_PI/(6.0*(double) theta_iterations);
 
       // get fermi parameters from rms_radius, theta
@@ -393,7 +394,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
       config.defineDoubleNode("fermi_t", InputNode<double>(opt_fermi_t));
       config.defineDoubleNode("fermi_c", InputNode<double>(opt_fermi_c));
       LOG(DEBUG) << "creating atom with fermi parameters: " << opt_fermi_c << ", " << opt_fermi_t;
-      LOG(DEBUG) << " RMS radius: " << rms_radius << "\n";
+      LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
       DiracAtom opt_da = config.makeAtom();
       vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, opt_da);
 
@@ -465,8 +466,9 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
           optimal_transitions = transitions_iteration;
         }
       }
+      rms_radius+= rms_radius_increment;
     }
-    rms_radius+= rms_radius_increment;
+    
   }
 
   // if there are no valid fermi parameters
