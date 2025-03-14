@@ -20,6 +20,14 @@ In order to run the test suite, within the same directory run:
 
 and wait for a few seconds for the tests to complete. If you want :literal:`mudirac` to be accessible from any folder in your computer, add the resulting :literal:`bin` directory to your system :literal:`PATH` environment variable.
 
+Install MuDriac using conda
+---------------------------
+MuDirac is available as `conda <https://docs.conda.io/projects/conda/en/stable/>`_ package.
+To install mudirac using conda run the following
+.. code-block:: bash
+
+   conda install conda-forge::mudirac
+
 Usage
 --------
 MuDirac works simply by running it with an input file:
