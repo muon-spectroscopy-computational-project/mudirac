@@ -88,7 +88,6 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
     LOG(ERROR) << "Value of Fermi-2 potential c = " << c << "is less than r = " << grid[1][0] << "\n";
   }
 
-
   for (int i = 0; i < csteps; ++i) {
     rho.push_back(
       4.0 * M_PI * pow(grid[1][i], 2.0) /

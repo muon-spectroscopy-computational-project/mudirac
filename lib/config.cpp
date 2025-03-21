@@ -22,9 +22,10 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineStringNode("ideal_atom_minshell", InputNode<string>(""));       // Shell above which to treat the atom as ideal, and simply use standard hydrogen-like orbitals
 
   // Boolean keywords
-  this->defineBoolNode("uehling_correction", InputNode<bool>(false, false)); // Whether to use the Uehling potential correction
-  this->defineBoolNode("write_spec", InputNode<bool>(false, false));         // If true, write a simulated spectrum with the lines found
-  this->defineBoolNode("sort_byE", InputNode<bool>(false, false));           // If true, sort output transitions by energy in report
+  this->defineBoolNode("uehling_correction", InputNode<bool>(false, false));        // Whether to use the Uehling potential correction
+  this->defineBoolNode("write_spec", InputNode<bool>(false, false));                // If true, write a simulated spectrum with the lines found
+  this->defineBoolNode("sort_by_energy", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
+  this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, perform least squares optimisation using user-provided experimental energies for the fermi model
 
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
