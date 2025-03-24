@@ -27,6 +27,6 @@ using namespace std;
  * @retval None
  */
 class ExperimentalResultFile : public InputFile {
-  public:
-   ExperimentalResultFile(void);
+ public:
+  ExperimentalResultFile(void);
 };

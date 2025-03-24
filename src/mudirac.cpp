@@ -12,7 +12,6 @@
 
 #include "mudirac.hpp"
 
-
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
@@ -89,8 +88,8 @@ int main(int argc, char *argv[]) {
   // i.e
   // K1-L2 300000 1
   // K1-L3 500000 10
-  // 
-                              
+  //
+
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
 
@@ -106,21 +105,21 @@ int main(int argc, char *argv[]) {
   // The idea is that we will calculate all transition energies and rates for many different pairs
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
-  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2"){
+  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2") {
     ExperimentalResultFile measurements;
     bool xr_measurement_read_success = false;
     try {
       measurements.parseFile(argv[2]);
       vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
       LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
-      for (auto transition: xr_lines_measured){
+      for (auto transition: xr_lines_measured) {
         LOG(DEBUG) << transition << ", ";
       }
       LOG(DEBUG) << "\n";
       vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
 
       LOG(DEBUG) << "Reading experimental Xray energies: ";
-      for (auto transition_energy: xr_energies){
+      for (auto transition_energy: xr_energies) {
         LOG(DEBUG) << transition_energy << ", ";
       }
       LOG(DEBUG) << "\n";
@@ -128,7 +127,7 @@ int main(int argc, char *argv[]) {
       vector<double> xr_errors = measurements.getDoubleValues("xr_error");
 
       LOG(DEBUG) << "Reading experimental Xray energy errors: ";
-      for (auto transition_energy_error: xr_errors){
+      for (auto transition_energy_error: xr_errors) {
         LOG(DEBUG) << transition_energy_error << ", ";
       }
       LOG(DEBUG) << "\n";
@@ -140,25 +139,25 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    if (xr_measurement_read_success){
+    if (xr_measurement_read_success) {
       LOG(DEBUG) << "Successfully read xray measurements input file \n";
 
-    // In here, we will need to loop over the pairs of (c,t) values
-    // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
-    // This could be user specified, but we will probably need some reasonable defaults
-  
-    // loop over c:
-    //   loop over t:
-    //     getAllTransitions
-    //  
-    // least squares optimise
-    // 
-    // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
-    // for the optimal pair of parameters?  
+      // In here, we will need to loop over the pairs of (c,t) values
+      // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
+      // This could be user specified, but we will probably need some reasonable defaults
+
+      // loop over c:
+      //   loop over t:
+      //     getAllTransitions
+      //
+      // least squares optimise
+      //
+      // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
+      // for the optimal pair of parameters?
 
     }
 
-  }else{
+  } else {
     // Default mudirac behaviour
     // Wrapped the calculation of the states, their energies and the transition probabilities into here,
     // so that we can easily loop over it for least squares optimisation
@@ -166,7 +165,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Sort transitions by energy if requested
-  if (config.getBoolValue("sort_byE")) {
+  if (config.getBoolValue("sort_by_energy")) {
     sort(transitions.begin(), transitions.end(),
     [](TransitionData t1, TransitionData t2) {
       return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
@@ -236,7 +235,7 @@ int main(int argc, char *argv[]) {
 }
 
 // Calculate the states and transition probabilities
-vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da){
+vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da) {
 
   vector<TransitionData> transitions;
   vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
@@ -309,7 +308,7 @@ vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, Dirac
 }
 /** This takes in the input config and returns a vector of transitiondata
  */
-vector<TransLineSpec> parseXRLines(MuDiracInputFile config){
+vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
 
   // First we unravel the user specified string
   vector<string> xr_lines = config.getStringValues("xr_lines");

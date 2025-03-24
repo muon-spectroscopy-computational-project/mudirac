@@ -24,7 +24,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Boolean keywords
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false));        // Whether to use the Uehling potential correction
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));                // If true, write a simulated spectrum with the lines found
-  this->defineBoolNode("sort_byE", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
+  this->defineBoolNode("sort_by_energy", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
   this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, perform least squares optimisation using user-provided experimental energies for the fermi model
 
   // Double keywords
@@ -130,13 +130,16 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t != -1 || c_param != -1) {
-    if( t == -1){
-      t = Physical::fermi2_thickenss;
-    }
-    da.setFermi2(t * Physical::fm,c_param * Physical::fm);
-    LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
+  if (t ==-1) {
+    t = Physical::fermi2_thickness;
   }
+
+  if (c_param == -1) {
+    da.setFermi2(t*Physical::fm);
+  } else {
+    da.setFermi2(t*Physical::fm, c_param*Physical::fm);
+  }
+  LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
 
   return da;
 }
