@@ -74,6 +74,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
+  this->defineBoolNode("reduced_mass", InputNode<bool>(false, false)); // Use the reduced mass
 }
 
 DiracAtom MuDiracInputFile::makeAtom() {
