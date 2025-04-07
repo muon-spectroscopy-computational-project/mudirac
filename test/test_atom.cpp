@@ -43,6 +43,15 @@ TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
   REQUIRE(da.getRestE() == da.getmu() * pow(Physical::c, 2));
 }
 
+TEST_CASE("Dirac Atom - full mass", "[DiracAtom]")
+{
+  double Z = 1;
+  double m = 1;
+  double A = 1;
+  DiracAtom da = DiracAtom(Z, m, A, POINT, -1, 1, 0.005, -1, false);
+  REQUIRE (da.getmu() == m);
+}
+
 TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
 {
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info,
