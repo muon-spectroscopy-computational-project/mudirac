@@ -74,12 +74,18 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Double keywords
   this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
   this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
-  
+
   // minimum rms radius in search domain for optimal fermi parameters
-  this->defineDoubleNode("rms_radius_min", InputNode<double>(0));
-  
+  this->defineDoubleNode("rms_radius_min", InputNode<double>(3));
+
   // maximum rms radius in search domain for optimal fermi parameters
-  this->defineDoubleNode("rms_radius_max", InputNode<double>(8));         
+  this->defineDoubleNode("rms_radius_max", InputNode<double>(8));
+
+  // minimum theta as proporiton of Pi in search domain for optimal fermi parameters
+  this->defineDoubleNode("theta_min", InputNode<double>(0));
+
+  // maximum theta as proporiton of Pi in search domain for optimal fermi parameters
+  this->defineDoubleNode("theta_max", InputNode<double>(1.0/6.0));
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
@@ -139,7 +145,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   }
 
   if (t != -1 || c_param != -1) {
-    if( t == -1){
+    if( t == -1) {
       t = Physical::fermi2_thickenss;
     }
     da.setFermi2(t * Physical::fm,c_param * Physical::fm);

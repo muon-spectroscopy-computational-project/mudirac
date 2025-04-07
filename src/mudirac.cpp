@@ -105,8 +105,8 @@ int main(int argc, char *argv[]) {
   // The idea is that we will calculate all transition energies and rates for many different pairs
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
-  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2"){
-    
+  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2") {
+
     // variables to store experimental values passed by reference to readXrayMeasurements function
     // experimental measurements input file object
     ExperimentalResultFile measurements;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     vector<string> xr_lines_measured;
     vector<double> xr_energies;
     vector<double> xr_errors;
-    
+
     // read in experimental results file and populate the associated vectors
     try {
       readXrayMeasurements(measurements, xr_measurement_read_success,  xr_lines_measured,  xr_energies, xr_errors, argv);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (xr_measurement_read_success){
+    if (xr_measurement_read_success) {
       LOG(INFO) << "Successfully read xray measurements input file \n";
       // data structure for tracking best parameters.
       OptimisationData optimal_fermi_parameter;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
       writeFermiParameters(da, valid_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
-  }else{
+  } else {
     // Default mudirac behaviour
     // Wrapped the calculation of the states, their energies and the transition probabilities into here,
     // so that we can easily loop over it for least squares optimisation
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 }
 
 // Calculate the states and transition probabilities
-vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da){
+vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da) {
 
   vector<TransitionData> transitions;
   vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
@@ -294,7 +294,7 @@ vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, Dirac
 }
 /** This takes in the input config and returns a vector of transitiondata
  */
-vector<TransLineSpec> parseXRLines(MuDiracInputFile config){
+vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
 
   // First we unravel the user specified string
   vector<string> xr_lines = config.getStringValues("xr_lines");
@@ -355,7 +355,7 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config){
 }
 
 
-void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums,  vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config ){
+void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums,  vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config ) {
   double opt_fermi_c, opt_fermi_t;
   //double uniform_radius = 1.25 * cbrt((double) config.getIntValue("isotope"));
   // define RMS_0
@@ -371,23 +371,26 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   // set variables for theta loop iterations
   double theta;
   int theta_iterations = config.getIntValue("theta_iterations");
-  
-  // estimate iterations required for the logs 
+  double theta_min = M_PI * config.getDoubleValue("theta_min");
+  double theta_max =  M_PI * config.getDoubleValue("theta_max");
+  double theta_increment = (theta_max-theta_min)/((double)(theta_iterations));
+
+  // estimate iterations required for the logs
   int total_2pF_iterations = theta_iterations * (1 + (int)((rms_radius_max - rms_radius)*rms_iterations_factor));
 
   // ouput optimisation domain and iterations to log
   LOG(INFO) << "Starting scan for optimal fermi parameters \n";
-  LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]"<<"\n";
-  LOG(INFO) << "search domain: theta: [0, pi/6]\n";
+  LOG(INFO) << "search domain: rms_radius: [" <<rms_radius << ", "<< rms_radius_max << "]\n";
+  LOG(INFO) << "search domain: theta: [" <<theta_min << ", "<< theta_max << "]\n";
   LOG(INFO) << "total iterations: "<< total_2pF_iterations <<"\n";
 
   // optimisation loops
-  
-  for (int i=0; i < theta_iterations; ++i){
-    theta = i * M_PI/(6.0*((double) theta_iterations));
+
+  for (int i=0; i < theta_iterations; ++i) {
+    theta = theta_min + (i * theta_increment);
 
     //while (rms_radius < rms_radius_max){
-    for (int j=0; j < rms_radius_iterations; ++j){
+    for (int j=0; j < rms_radius_iterations; ++j) {
       rms_radius = rms_radius_min + ((double) j )* rms_radius_increment;
       // get fermi parameters from rms_radius, theta
       tie(opt_fermi_c, opt_fermi_t) = fermiParameters(rms_radius, theta);
@@ -423,7 +426,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
           continue; // Transition is invisible
 
         // check transition allign with experimental transitions
-        if (transitions_iteration[k].name == xr_lines_measured[k]){
+        if (transitions_iteration[k].name == xr_lines_measured[k]) {
           // convert to eV
           double transition_energy = dE / Physical::eV;
 
@@ -437,7 +440,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
         }
 
         // break MSE loop if c, t are invalid for any of the transitions_iteration
-        if (square_error >= 1){
+        if (square_error >= 1) {
           LOG(DEBUG) << "c,t doesnt fit\n";
           fermi_parameters_are_valid = false;
           break;
@@ -447,10 +450,10 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
       }
 
       // store the fermi parameters if valid (square_error < 1 for all transitions)
-      if (fermi_parameters_are_valid){
+      if (fermi_parameters_are_valid) {
         LOG(DEBUG) << "fermi parameters valid\n";
-        
-        //store the parameters in the datastructure 
+
+        //store the parameters in the datastructure
         fermi_parameter_iteration.rms_radius = rms_radius;
         fermi_parameter_iteration.theta = theta;
         mean_square_error = total_square_error / transitions_iteration.size();
@@ -461,7 +464,7 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
         valid_fermi_parameters.push_back(fermi_parameter_iteration);
 
         // check if current iteration is the best iteration so far
-        if (mean_square_error < optimal_fermi_parameter.mse){
+        if (mean_square_error < optimal_fermi_parameter.mse) {
 
           // store parameters and transitions of the current best iteration
           optimal_fermi_parameter = fermi_parameter_iteration;
@@ -472,11 +475,10 @@ void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vect
   }
 
   // if there are no valid fermi parameters
-  if (optimal_fermi_parameter.mse >= 1.0){
+  if (optimal_fermi_parameter.mse >= 1.0) {
     LOG(DEBUG) << "no valid fermi parameters found\n";
     exit(-1);
-  }
-  else {
+  } else {
     // end of loop want optimum c,t with MSE < 1
     // rms radius scanned from lowest to highest so front/back of valid parameters vector contain min/max valid rms radius values
     double max_valid_rms_radius = valid_fermi_parameters.back().rms_radius;
