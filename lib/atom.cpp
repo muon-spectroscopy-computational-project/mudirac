@@ -106,7 +106,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
 
   if (A > 0) {
     M = getIsotopeMass(Z, A);
-    if (reduced_mass){
+    if (reduced_mass) {
       mu = effectiveMass(m, M * Physical::amu);
     } else {
       mu = m;

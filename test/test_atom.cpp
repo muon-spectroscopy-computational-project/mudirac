@@ -14,8 +14,7 @@
 
 using namespace std;
 
-TEST_CASE("Transition Matrix", "[TransitionMatrix]")
-{
+TEST_CASE("Transition Matrix", "[TransitionMatrix]") {
 
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info,
                                       AixLog::Type::normal);
@@ -29,8 +28,7 @@ TEST_CASE("Transition Matrix", "[TransitionMatrix]")
   REQUIRE(tmat.T[0][0] == 0);
 }
 
-TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
-{
+TEST_CASE("Dirac Atom - basics", "[DiracAtom]") {
   double Z = 1;
   double m = 1;
   double A = 1;
@@ -43,8 +41,7 @@ TEST_CASE("Dirac Atom - basics", "[DiracAtom]")
   REQUIRE(da.getRestE() == da.getmu() * pow(Physical::c, 2));
 }
 
-TEST_CASE("Dirac Atom - full mass", "[DiracAtom]")
-{
+TEST_CASE("Dirac Atom - full mass", "[DiracAtom]") {
   double Z = 1;
   double m = 1;
   double A = 1;
@@ -52,8 +49,7 @@ TEST_CASE("Dirac Atom - full mass", "[DiracAtom]")
   REQUIRE (da.getmu() == m);
 }
 
-TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
-{
+TEST_CASE("Dirac Atom - grid", "[DiracAtom]") {
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info,
                                       AixLog::Type::normal);
   double Z = 92;
@@ -74,8 +70,7 @@ TEST_CASE("Dirac Atom - grid", "[DiracAtom]")
   REQUIRE_THROWS(da.gridLimits(E0, k));
 }
 
-TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
-{
+TEST_CASE("Dirac Atom - energy search", "[DiracAtom]") {
 
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info,
                                       AixLog::Type::normal);
@@ -114,8 +109,7 @@ TEST_CASE("Dirac Atom - energy search", "[DiracAtom]")
   REQUIRE(ds.E == Approx(Es2));
 }
 
-TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
-{
+TEST_CASE("Dirac Atom - transitions", "[DiracAtom]") {
   // Tests are carried out with an ideal hydrogen atom
   // Exact values are taken from NIST database
   DiracIdealAtom daH = DiracIdealAtom(1, 1, 1, NuclearRadiusModel::SPHERE);
@@ -142,7 +136,7 @@ TEST_CASE("Dirac Atom - transitions", "[DiracAtom]")
   // 3d3/2 => 3p1/2
   tmat = daFe.getTransitionProbabilities(3, 2, false, 3, 1, false);
   REQUIRE(
-      tmat.totalRate() * Physical::s ==
-      Approx(1.31e7).epsilon(
-          3e-2)); // Precision is not strong here... possibly needs improvement
+    tmat.totalRate() * Physical::s ==
+    Approx(1.31e7).epsilon(
+      3e-2)); // Precision is not strong here... possibly needs improvement
 }
