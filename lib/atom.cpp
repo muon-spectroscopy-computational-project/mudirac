@@ -85,13 +85,14 @@ double TransitionMatrix::totalRate() {
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
-           double radius, double fc, double dx) {
+           double radius, double fc, double dx, bool reduced_mass) {
   // Set the properties
   this->Z = Z;
   this->A = A;
   this->m = m;
   rmodel = radius_model;
 
+  this->reduced_mass = reduced_mass;
   // Sanity checks
   if (Z <= 0) {
     throw invalid_argument("Z must be positive");
@@ -105,7 +106,11 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
 
   if (A > 0) {
     M = getIsotopeMass(Z, A);
-    mu = effectiveMass(m, M * Physical::amu);
+    if (reduced_mass) {
+      mu = effectiveMass(m, M * Physical::amu);
+    } else {
+      mu = m;
+    }
   } else {
     mu = m;
   }
@@ -340,8 +345,8 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
-                     double radius, double fc, double dx, int ideal_minshell)
-  : Atom(Z, m, A, radius_model, radius, fc, dx) {
+                     double radius, double fc, double dx, int ideal_minshell, bool reduced_mass)
+  : Atom(Z, m, A, radius_model, radius, fc, dx, reduced_mass) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
