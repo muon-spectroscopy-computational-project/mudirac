@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 11)
 # Define the core files as static libraries
 add_subdirectory(lib)
 
+# add vendor libraries
+add_subdirectory(vendor)
+
 # Main executables
 add_subdirectory(src bin)
 
