@@ -75,6 +75,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
+  this->defineBoolNode("reduced_mass", InputNode<bool>(true, false)); // Use the reduced mass
 }
 
 DiracAtom MuDiracInputFile::makeAtom() {
@@ -85,6 +86,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   double c_param = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
+  bool reduced_mass = this->getBoolValue("reduced_mass");
 
   if (A == -1) {
     A = getElementMainIsotope(Z);
@@ -106,7 +108,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell, reduced_mass);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
