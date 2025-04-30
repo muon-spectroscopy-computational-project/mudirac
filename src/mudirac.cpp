@@ -13,6 +13,7 @@
 #include "mudirac.hpp"
 
 
+
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
@@ -152,7 +153,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Sort transitions by energy if requested
-  if (config.getBoolValue("sort_byE")) {
+  if (config.getBoolValue("sort_by_energy")) {
     sort(transitions.begin(), transitions.end(),
     [](TransitionData t1, TransitionData t2) {
       return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);

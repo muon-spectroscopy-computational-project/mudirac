@@ -95,6 +95,7 @@ class Atom {
   double m, M, mu;           // Mass of the orbiting particle (e.g. muon, electron), of the nucleus, and effective mass of the system
   double R;                  // Nuclear radius
   NuclearRadiusModel rmodel; // Nuclear model
+  bool reduced_mass;        // turn on reduced mass
 
   //Grid
   double rc = 1.0;   // Central radius
@@ -111,7 +112,7 @@ class Atom {
 
  public:
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-       double radius = -1, double fc = 1.0,double dx = 0.005);
+       double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
 
   // Basic getters
   double getZ() {
@@ -160,7 +161,8 @@ class Atom {
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
-  void setFermi2(double thickness = Physical::fermi2_T, double fermi2_potential = -1);
+  void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
+
   bool getUehling() {
     return use_uehling;
   };
@@ -188,7 +190,7 @@ class DiracAtom : public Atom {
   int min_n = 1000;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-            double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1);
+            double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
 
   double getRestE() {
     return restE;

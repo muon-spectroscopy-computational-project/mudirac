@@ -26,6 +26,10 @@ Simulations can be run simply with the command
 
 where the `.in` file can have any name one prefers. A full list of keywords employable in the `.in` file and their meaning can be found in `docs/Keywords.pdf`.
 
+## Mudirac on Galaxy
+Mudirac can be run without any installaiton in Galaxy.
+Mudirac is available as a Galaxy tool on [MaterialsGalaxy](https://materialsgalaxy.stfc.ac.uk/) in the `Other Muon Tools` section of the tool panel.
+
 ## Citing MuDirac
 
 For the theoretical background on the software and examples of its applications, see the published paper:

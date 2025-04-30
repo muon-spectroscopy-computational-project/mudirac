@@ -24,7 +24,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   // Boolean keywords
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false));        // Whether to use the Uehling potential correction
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));                // If true, write a simulated spectrum with the lines found
-  this->defineBoolNode("sort_byE", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
+  this->defineBoolNode("sort_by_energy", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
   this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, perform least squares optimisation using user-provided experimental energies for the fermi model
 
   // Double keywords
@@ -89,6 +89,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
+  this->defineBoolNode("reduced_mass", InputNode<bool>(true, false)); // Use the reduced mass
 }
 
 DiracAtom MuDiracInputFile::makeAtom() {
@@ -99,6 +100,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   double c_param = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
+  bool reduced_mass = this->getBoolValue("reduced_mass");
 
   if (A == -1) {
     A = getElementMainIsotope(Z);
@@ -120,7 +122,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell, reduced_mass);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
@@ -144,13 +146,16 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t != -1 || c_param != -1) {
-    if( t == -1) {
-      t = Physical::fermi2_thickenss;
-    }
-    da.setFermi2(t * Physical::fm,c_param * Physical::fm);
-    LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
+  if (t ==-1) {
+    t = Physical::fermi2_thickness;
   }
+
+  if (c_param == -1) {
+    da.setFermi2(t*Physical::fm);
+  } else {
+    da.setFermi2(t*Physical::fm, c_param*Physical::fm);
+  }
+  LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
 
   return da;
 }

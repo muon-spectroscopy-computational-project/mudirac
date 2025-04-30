@@ -14,6 +14,11 @@ Welcome to MuDirac's documentation
 
 MuDirac is a simulation software that integrates the Dirac equation for muonic atoms to compute their X-Ray transition energies; it is written in C++ and can be found on `GitHub <https://github.com/muon-spectroscopy-computational-project/mudirac>`_. The use and functioning of MuDirac 1.0 is extensively documented in the paper `S. Sturniolo, A. Hillier, "Mudirac: A Dirac equation solver for elemental analysis with muonic X-rays", X-Ray Spectrom. 2020;1–17 <https://onlinelibrary.wiley.com/doi/full/10.1002/xrs.3212>`_, which should be cited by any work using it. Here we will give a quick tutorial on how to start using it for simple cases.
 
+Mudirac on Galaxy
+-----------------
+Mudirac can be run without any installaiton in Galaxy.
+Mudirac is available as a Galaxy tool on `MaterialsGalaxy <https://materialsgalaxy.stfc.ac.uk/>`_ in the **Other Muon Tools**  section of the tool panel.
+
 Citing MuDirac
 ---------------
 For the theoretical background on the software and examples of its applications, see the published paper:
