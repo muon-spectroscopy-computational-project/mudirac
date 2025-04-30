@@ -136,13 +136,31 @@ int main(int argc, char *argv[]) {
       OptimisationData optimal_fermi_parameter;
       optimal_fermi_parameter.mse = 1.0;
       vector<OptimisationData> valid_fermi_parameters;
+      double MSE =0;
+      LOG(INFO) << "Starting test minimisation \n";
+      column_vector starting_point ={1, 1};
+      MSE = dlib::find_min_using_approximate_derivatives(
+      dlib::bfgs_search_strategy(),
+      dlib::objective_delta_stop_strategy(1e-7),
+      testFunction, starting_point, -1);
+      LOG(INFO) << "minimised test function with MSE: "<< MSE<< " and x: "<< starting_point <<" \n";
+
+      // define the atom minimizer object
+      LOG(INFO) << "Starting minimisation for fermi model \n";
+      column_vector initial_parameters = {config.getDoubleValue("rms_radius_min"), 0.1};
+      MSE = dlib::find_min_using_approximate_derivatives(
+        dlib::bfgs_search_strategy(),
+        dlib::objective_delta_stop_strategy(1e-4),
+        std::bind(&minimise_MSE, std::placeholders::_1, config,transqnums, xr_lines_measured, xr_energies, xr_errors), initial_parameters, -1);
+        LOG(INFO) << "minimised with MSE: "<< MSE<< " and polar fermi parameters: "<< initial_parameters <<" \n";
+
 
       // find the valid and optimal fermi parameters
-      optimiseFermiParameters(xr_lines_measured, xr_energies, xr_errors, transqnums, valid_fermi_parameters, optimal_fermi_parameter, transitions, config);
+      // optimiseFermiParameters(xr_lines_measured, xr_energies, xr_errors, transqnums, valid_fermi_parameters, optimal_fermi_parameter, transitions, config);
       // transitions updated by reference for output later
 
       // output file containing all valid fermi parameters and the associated MSE
-      writeFermiParameters(da, valid_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+      // writeFermiParameters(da, valid_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
   } else {
@@ -355,6 +373,61 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
   return transqnums;
 }
 
+double testFunction(const column_vector& m) {
+  const double a = m(0);
+  const double b = m(1);
+  double result = a*a + b*(b-1);
+  return result;
+}
+
+
+double minimise_MSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+  double rms_radius = m(0);
+  double theta = m(1);
+  double fermi_c, fermi_t;
+  tie(fermi_c, fermi_t) = fermiParameters(rms_radius, theta);
+  
+
+  // set new iteration of fermi parameters in config and get transitions
+  config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
+  config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
+  LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << ", " << fermi_t;
+  LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
+  DiracAtom opt_da = config.makeAtom();
+  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, opt_da);
+
+  LOG(DEBUG) << "MSE loop \n";
+  double MSE = 0;
+  for (int k = 0; k < transitions_iteration.size(); ++k) {
+
+    // calculate transition energy and rate
+    double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+    double tRate = transitions_iteration[k].tmat.totalRate();
+
+    // square error for each transitions calculated
+    double square_error = 0;
+
+    if (dE <= 0 || tRate <= 0)
+      continue; // Transition is invisible
+
+    // check transition allign with experimental transitions
+    if (transitions_iteration[k].name == xr_lines_measured[k]) {
+      // convert to eV
+      double transition_energy = dE / Physical::eV;
+
+      // calculate the square error of each transition
+      double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+      double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
+      square_error = square_deviation/valid_uncertainty;
+
+      // output square error to LOG
+      LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
+      MSE += square_error;
+    }
+
+  }
+  return MSE;
+}
 
 void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums,  vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config ) {
   double opt_fermi_c, opt_fermi_t;
