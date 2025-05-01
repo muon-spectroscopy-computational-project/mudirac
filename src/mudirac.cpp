@@ -150,25 +150,23 @@ int main(int argc, char *argv[]) {
       column_vector initial_parameters = {config.getDoubleValue("rms_radius_min"), 0.1};
       MSE = dlib::find_min_using_approximate_derivatives(
         dlib::bfgs_search_strategy(),
-        dlib::objective_delta_stop_strategy(1e-4),
-        std::bind(&minimise_MSE, std::placeholders::_1, config,transqnums, xr_lines_measured, xr_energies, xr_errors), initial_parameters, -1);
+        dlib::objective_delta_stop_strategy(1e-2),
+        std::bind(&minimise_MSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), initial_parameters, -1);
         LOG(INFO) << "minimised with MSE: "<< MSE<< " and polar fermi parameters: "<< initial_parameters <<" \n";
 
-
-      // find the valid and optimal fermi parameters
-      // optimiseFermiParameters(xr_lines_measured, xr_energies, xr_errors, transqnums, valid_fermi_parameters, optimal_fermi_parameter, transitions, config);
-      // transitions updated by reference for output later
+        configureNuclearModel(initial_parameters, config, da);
 
       // output file containing all valid fermi parameters and the associated MSE
       // writeFermiParameters(da, valid_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
-  } else {
-    // Default mudirac behaviour
-    // Wrapped the calculation of the states, their energies and the transition probabilities into here,
-    // so that we can easily loop over it for least squares optimisation
-    transitions = getAllTransitions(transqnums, da);
   }
+
+  // Default mudirac behaviour
+  // Wrapped the calculation of the states, their energies and the transition probabilities into here,
+  // so that we can easily loop over it for least squares optimisation
+  transitions = getAllTransitions(transqnums, da);
+  
 
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
@@ -380,21 +378,24 @@ double testFunction(const column_vector& m) {
   return result;
 }
 
-
-double minimise_MSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da){
   double rms_radius = m(0);
   double theta = m(1);
   double fermi_c, fermi_t;
   tie(fermi_c, fermi_t) = fermiParameters(rms_radius, theta);
-  
-
   // set new iteration of fermi parameters in config and get transitions
   config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
   config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
   LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << ", " << fermi_t;
   LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
-  DiracAtom opt_da = config.makeAtom();
-  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, opt_da);
+  da = config.makeAtom();
+
+}
+
+double minimise_MSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+  DiracAtom da;
+  configureNuclearModel(m, config, da);
+  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, da);
 
   LOG(DEBUG) << "MSE loop \n";
   double MSE = 0;
@@ -426,6 +427,7 @@ double minimise_MSE(const column_vector& m, MuDiracInputFile config, const vecto
     }
 
   }
+  MSE = MSE/transitions_iteration.size();
   return MSE;
 }
 
