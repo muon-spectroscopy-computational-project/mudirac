@@ -13,7 +13,6 @@
 #include "mudirac.hpp"
 
 
-
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
@@ -135,17 +134,8 @@ int main(int argc, char *argv[]) {
       OptimisationData best_fermi_parameters;
       double MSE =0;
 
-      // define the atom minimizer object
-      LOG(INFO) << "Starting minimisation for fermi model \n";
-      column_vector polar_parameters = {config.getDoubleValue("rms_radius_min"), 0.1};
-      MSE = dlib::find_min_using_approximate_derivatives(
-              dlib::bfgs_search_strategy(),
-              dlib::objective_delta_stop_strategy(1e-2),
-              std::bind(&minimiseMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), polar_parameters, -1);
-      LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
-
-      configureNuclearModel(polar_parameters, config, da, best_fermi_parameters);
-      best_fermi_parameters.mse = MSE;
+      // start the minimisation
+      optimizeFermiParameters(config, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
       // output file containing best fermi parameters and the associated MSE
       writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
@@ -156,7 +146,6 @@ int main(int argc, char *argv[]) {
   // Wrapped the calculation of the states, their energies and the transition probabilities into here,
   // so that we can easily loop over it for least squares optimisation
   transitions = getAllTransitions(transqnums, da);
-
 
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
@@ -297,7 +286,6 @@ vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, Dirac
 
   return transitions;
 
-
 }
 /** This takes in the input config and returns a vector of transitiondata
  */
@@ -379,7 +367,7 @@ void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, Dir
 
 }
 
-double minimiseMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
+double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
   DiracAtom da;
   OptimisationData iteration_parameters;
   configureNuclearModel(m, config, da, iteration_parameters);
@@ -417,4 +405,21 @@ double minimiseMSE(const column_vector& m, MuDiracInputFile config, const vector
   }
   MSE = MSE/transitions_iteration.size();
   return MSE;
+}
+
+void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
+  LOG(INFO) << "Starting minimisation for fermi model \n";
+  column_vector polar_parameters = {config.getDoubleValue("rms_radius_min"), 0.1};
+
+  // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
+  double MSE;
+  MSE = dlib::find_min_using_approximate_derivatives(
+          dlib::bfgs_search_strategy(),
+          dlib::objective_delta_stop_strategy(1e-2),
+          std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), polar_parameters, -1);
+  LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
+
+  // repeat the final configuration of the nuclear model
+  configureNuclearModel(polar_parameters, config, da, fermi_parameters);
+  fermi_parameters.mse = MSE;
 }
