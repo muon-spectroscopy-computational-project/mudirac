@@ -25,10 +25,10 @@
   * @param  fermi_parameters:         vector containing valid fermi parameter data to be output
   * @param  fname:      Filename
   * @param  output_precision: output decimal places
-  * 
+  *
   * @retval None
  */
-void writeFermiParameters(DiracAtom &da, const OptimisationData &fermi_parameters, string fname, int output_precision){
+void writeFermiParameters(DiracAtom &da, const OptimisationData &fermi_parameters, string fname, int output_precision) {
 
   // output file containing all valid fermi parameters and the associated MSE
   ofstream out(fname);
@@ -37,12 +37,12 @@ void writeFermiParameters(DiracAtom &da, const OptimisationData &fermi_parameter
   out << fixed;
   out << setprecision(output_precision);
 
-    // output fermi_c, fermi_c, rms radius, theta, MSE
-    out << fermi_parameters.fermi_c << '\t' << fermi_parameters.fermi_t << '\t';
-    out << fermi_parameters.rms_radius << '\t' << fermi_parameters.theta  << '\t';
-    out << fermi_parameters.mse << "\n";
+  // output fermi_c, fermi_c, rms radius, theta, MSE
+  out << fermi_parameters.fermi_c << '\t' << fermi_parameters.fermi_t << '\t';
+  out << fermi_parameters.rms_radius << '\t' << fermi_parameters.theta  << '\t';
+  out << fermi_parameters.mse << "\n";
 
-  
+
   out.close();
 }
 

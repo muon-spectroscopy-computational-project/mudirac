@@ -19,5 +19,5 @@ add_library(debugtasks STATIC debugtasks.cpp)
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE debugtasks config experiment output
                       atom boundary state potential
-                      econfigs hydrogenic transforms 
+                      econfigs hydrogenic transforms
                       wavefunction integrate elements input utils)
