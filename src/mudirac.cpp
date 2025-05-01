@@ -409,7 +409,7 @@ double calculateMSE(const column_vector& m, MuDiracInputFile config, const vecto
 
 void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
-  column_vector polar_parameters = {config.getDoubleValue("rms_radius_min"), 0.1};
+  column_vector polar_parameters = {config.getDoubleValue("rms_radius"), 0.1};
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
