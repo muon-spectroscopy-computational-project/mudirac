@@ -63,5 +63,5 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
 void optimiseFermiParameters(const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, const vector<TransLineSpec> &transqnums, vector<OptimisationData> &valid_fermi_parameters, OptimisationData &optimal_fermi_parameter,vector<TransitionData> &optimal_transitions, MuDiracInputFile &config);
 typedef dlib::matrix<double,0,1> column_vector;
 double testFunction(const column_vector& m);
-void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da);
+void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
 double minimise_MSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
