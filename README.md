@@ -4,6 +4,8 @@ A muonic atom Dirac equation solver.
 ## Contact
 leandro.liborio@stfc.ac.uk
 
+Philip.D.Jones@warwick.ac.uk
+
 ## Compiling
 
 To compile, create a directory called `build`; then, within that directory, execute the commands
