@@ -20,6 +20,4 @@ ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
   this->defineDoubleNode("xr_energy", InputNode<double>(vector<double> {0}, false)); // experimentally measured xray energies
   this->defineDoubleNode("xr_error", InputNode<double>(vector<double> {0}, false)); // energy uncertainty for the measured xrays
 
-  /* These keywords are reserved for developers and debugging */
-
 }
