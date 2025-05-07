@@ -14,7 +14,7 @@
 
 ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
   // Vector string keywords
-  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {"K1-L2"}, false)); // List of spectral lines experimentally measured
+  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {""}, false)); // List of spectral lines experimentally measured
 
   // Vector double keywords
   this->defineDoubleNode("xr_energy", InputNode<double>(vector<double> {0}, false)); // experimentally measured xray energies
