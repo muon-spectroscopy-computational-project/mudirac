@@ -6,8 +6,8 @@
  *
  * Functions and classes useful for interpreting experimental results files
  *
- * @author Simone Sturniolo
- * @version 1.0 20/03/2020
+ * @author Milan Kumar
+ * @version 1.0 09/05/2025
  */
 
 #include "experiment.hpp"
