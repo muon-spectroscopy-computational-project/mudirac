@@ -12,7 +12,6 @@
 
 #include "mudirac.hpp"
 
-
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
@@ -106,21 +105,99 @@ int main(int argc, char *argv[]) {
   // The idea is that we will calculate all transition energies and rates for many different pairs
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
-  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "fermi2") {
+  if (config.getBoolValue("optimise_fermi_parameters")) {
 
-    // In here, we will need to loop over the pairs of (c,t) values
-    // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
-    // This could be user specified, but we will probably need some reasonable defaults
+    // check the experimental results input file is provided
+    if (argc < 3) {
+      cout << "Experimental results input file missing\n";
+      cout << "When optimise_fermi_parameters is True, an additional experimental results file is expected\n";
+      cout << "Please use the program as `mudirac <input_file> <experimental_results_input_file>`\n";
+      cout << "If experimental results cannot be provided, optimise_fermi_parameters should be set to False \n";
+      cout << "Quitting...\n";
+      return -1;
+    }
 
-    // loop over c:
-    //   loop over t:
-    //     getAllTransitions
-    //
-    // least squares optimise
-    //
-    // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
-    // for the optimal pair of parameters?
+    // check the nuclear model is suitable for optimisation
+    if (config.getStringValue("nuclear_model") != "FERMI2") {
+      cout << "nuclear model parameters can only be optimised for the 2 parameter Fermi model\n";
+      cout << "Please add the line `nuclear_model: FERMI2` to your first input file\n";
+      cout << "Quitting...\n";
+      return -1;
+    }
 
+    // try to read the experimental results file
+    ExperimentalResultFile measurements;
+    bool xr_measurement_read_success = false;
+    try {
+      measurements.parseFile(argv[2]);
+
+      // read the measured transition lines
+      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+      for (auto transition: xr_lines_measured) {
+        LOG(DEBUG) << transition << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // read the measured transition energies
+      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+      LOG(DEBUG) << "Reading experimental Xray energies: ";
+      for (auto transition_energy: xr_energies) {
+        LOG(DEBUG) << transition_energy << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // read the measured transition errors
+      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+      for (auto transition_energy_error: xr_errors) {
+        LOG(DEBUG) << transition_energy_error << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // checking that the file has contents and not the default values
+      LOG(DEBUG) << "Validating experimental results input \n";
+      if (xr_lines_measured[0] == "") {
+        cout << "Experimental results input file is empty\n";
+        cout << "Please check the filename of the experimental results input file \n";
+        cout << "Quitting...\n";
+        return -1;
+      }
+
+      // check that the data provided is complete: all transitions measured have energies and errors
+      if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
+        xr_measurement_read_success = true;
+      } else {
+        cout << "Invalid experimental measurements file: Missing input values\n";
+        cout << "please check energies and errors are listed for each xray transition line \n";
+        cout << "Quitting...\n";
+        return -1;
+
+      }
+
+    } catch (runtime_error e) {
+      cout << "Invalid experimental measurements file:\n";
+      cout << e.what() << "\n";
+      return -1;
+    }
+
+    if (xr_measurement_read_success) {
+      LOG(DEBUG) << "Successfully read xray measurements input file \n";
+
+      // In here, we will need to loop over the pairs of (c,t) values
+      // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
+      // This could be user specified, but we will probably need some reasonable defaults
+
+      // loop over c:
+      //   loop over t:
+      //     getAllTransitions
+      //
+      // least squares optimise
+      //
+      // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
+      // for the optimal pair of parameters?
+
+    }
 
   } else {
     // Default mudirac behaviour
