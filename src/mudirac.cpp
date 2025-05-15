@@ -110,7 +110,9 @@ int main(int argc, char *argv[]) {
     // check the experimental results input file is provided
     if (argc < 3) {
       cout << "Experimental results input file missing\n";
+      cout << "When optimise_fermi_parameters is True, an additional experimental results file is expected\n";
       cout << "Please use the program as `mudirac <input_file> <experimental_results_input_file>`\n";
+      cout << "If experimental results cannot be provided, optimise_fermi_parameters should be set to False \n";
       cout << "Quitting...\n";
       return -1;
     }
