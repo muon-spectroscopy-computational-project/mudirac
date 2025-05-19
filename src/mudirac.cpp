@@ -132,54 +132,54 @@ int main(int argc, char *argv[]) {
     try {
       measurements.parseFile(argv[2]);
 
-      // read the measured transition lines
-      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
-      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
-      for (auto transition: xr_lines_measured) {
-        LOG(DEBUG) << transition << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // read the measured transition energies
-      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
-      LOG(DEBUG) << "Reading experimental Xray energies: ";
-      for (auto transition_energy: xr_energies) {
-        LOG(DEBUG) << transition_energy << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // read the measured transition errors
-      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
-      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
-      for (auto transition_energy_error: xr_errors) {
-        LOG(DEBUG) << transition_energy_error << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // checking that the file has contents and not the default values
-      LOG(DEBUG) << "Validating experimental results input \n";
-      if (xr_lines_measured[0] == "") {
-        cout << "Experimental results input file is empty\n";
-        cout << "Please check the filename of the experimental results input file \n";
-        cout << "Quitting...\n";
-        return -1;
-      }
-
-      // check that the data provided is complete: all transitions measured have energies and errors
-      if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
-        xr_measurement_read_success = true;
-      } else {
-        cout << "Invalid experimental measurements file: Missing input values\n";
-        cout << "please check energies and errors are listed for each xray transition line \n";
-        cout << "Quitting...\n";
-        return -1;
-
-      }
-
     } catch (runtime_error e) {
       cout << "Invalid experimental measurements file:\n";
       cout << e.what() << "\n";
       return -1;
+    }
+
+    // read the measured transition lines
+    vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+    LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+    for (auto transition: xr_lines_measured) {
+      LOG(DEBUG) << transition << ", ";
+    }
+    LOG(DEBUG) << "\n";
+
+    // read the measured transition energies
+    vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+    LOG(DEBUG) << "Reading experimental Xray energies: ";
+    for (auto transition_energy: xr_energies) {
+      LOG(DEBUG) << transition_energy << ", ";
+    }
+    LOG(DEBUG) << "\n";
+
+    // read the measured transition errors
+    vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+    LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+    for (auto transition_energy_error: xr_errors) {
+      LOG(DEBUG) << transition_energy_error << ", ";
+    }
+    LOG(DEBUG) << "\n";
+
+    // checking that the file has contents and not the default values
+    LOG(DEBUG) << "Validating experimental results input \n";
+    if (xr_lines_measured[0] == "") {
+      cout << "Experimental results input file is empty\n";
+      cout << "Please check the filename of the experimental results input file \n";
+      cout << "Quitting...\n";
+      return -1;
+    }
+
+    // check that the data provided is complete: all transitions measured have energies and errors
+    if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
+      xr_measurement_read_success = true;
+    } else {
+      cout << "Invalid experimental measurements file: Missing input values\n";
+      cout << "please check energies and errors are listed for each xray transition line \n";
+      cout << "Quitting...\n";
+      return -1;
+
     }
 
     if (xr_measurement_read_success) {
