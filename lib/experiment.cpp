@@ -7,21 +7,19 @@
  * Functions and classes useful for interpreting experimental results files
  * and fitting the 2 parameter fermi distribution to the data.
  *
- * @author Simone Sturniolo
- * @version 1.0 20/03/2020
+ * @author Milan Kumar
+ * @version 1.0 09/05/2025
  */
 
 #include "experiment.hpp"
 
 ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
   // Vector string keywords
-  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {"K1-L2"}, false)); // List of spectral lines experimentally measured
+  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {""}, false)); // List of spectral lines experimentally measured
 
   // Vector double keywords
   this->defineDoubleNode("xr_energy", InputNode<double>(vector<double> {0}, false)); // experimentally measured xray energies
   this->defineDoubleNode("xr_error", InputNode<double>(vector<double> {0}, false)); // energy uncertainty for the measured xrays
-
-  /* These keywords are reserved for developers and debugging */
 
 }
 

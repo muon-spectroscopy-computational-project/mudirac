@@ -12,7 +12,6 @@
 
 #include "mudirac.hpp"
 
-
 int main(int argc, char *argv[]) {
   string seed = "mudirac";
   MuDiracInputFile config;
@@ -105,23 +104,78 @@ int main(int argc, char *argv[]) {
   // The idea is that we will calculate all transition energies and rates for many different pairs
   // of the fermi parameters (c,t)
   // We can then use this to perform least squares optimisation and finally obtain the rms nuclear radius
-  if (config.getBoolValue("optimise_fermi_parameters") && config.getStringValue("nuclear_model") == "FERMI2") {
+  if (config.getBoolValue("optimise_fermi_parameters")) {
 
-    // variables to store experimental values passed by reference to readXrayMeasurements function
-    // experimental measurements input file object
+    // check the experimental results input file is provided
+    if (argc < 3) {
+      cout << "Experimental results input file missing\n";
+      cout << "When optimise_fermi_parameters is True, an additional experimental results file is expected\n";
+      cout << "Please use the program as `mudirac <input_file> <experimental_results_input_file>`\n";
+      cout << "If experimental results cannot be provided, optimise_fermi_parameters should be set to False \n";
+      cout << "Quitting...\n";
+      return -1;
+    }
+
+    // check the nuclear model is suitable for optimisation
+    if (config.getStringValue("nuclear_model") != "FERMI2") {
+      cout << "nuclear model parameters can only be optimised for the 2 parameter Fermi model\n";
+      cout << "Please add the line `nuclear_model: FERMI2` to your first input file\n";
+      cout << "Quitting...\n";
+      return -1;
+    }
+
+    // try to read the experimental results file
     ExperimentalResultFile measurements;
 
     // switch to continue with optimisation if read is successful
     bool xr_measurement_read_success = false;
-
-    // vectors to store the experimental data
-    vector<string> xr_lines_measured;
-    vector<double> xr_energies;
-    vector<double> xr_errors;
-
-    // read in experimental results file and populate the associated vectors
     try {
-      readXrayMeasurements(measurements, xr_measurement_read_success,  xr_lines_measured,  xr_energies, xr_errors, argv);
+      measurements.parseFile(argv[2]);
+
+      // read the measured transition lines
+      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+      for (auto transition: xr_lines_measured) {
+        LOG(DEBUG) << transition << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // read the measured transition energies
+      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+      LOG(DEBUG) << "Reading experimental Xray energies: ";
+      for (auto transition_energy: xr_energies) {
+        LOG(DEBUG) << transition_energy << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // read the measured transition errors
+      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+      for (auto transition_energy_error: xr_errors) {
+        LOG(DEBUG) << transition_energy_error << ", ";
+      }
+      LOG(DEBUG) << "\n";
+
+      // checking that the file has contents and not the default values
+      LOG(DEBUG) << "Validating experimental results input \n";
+      if (xr_lines_measured[0] == "") {
+        cout << "Experimental results input file is empty\n";
+        cout << "Please check the filename of the experimental results input file \n";
+        cout << "Quitting...\n";
+        return -1;
+      }
+
+      // check that the data provided is complete: all transitions measured have energies and errors
+      if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
+        xr_measurement_read_success = true;
+      } else {
+        cout << "Invalid experimental measurements file: Missing input values\n";
+        cout << "please check energies and errors are listed for each xray transition line \n";
+        cout << "Quitting...\n";
+        return -1;
+
+      }
+
     } catch (runtime_error e) {
       cout << "Invalid experimental measurements file:\n";
       cout << e.what() << "\n";
