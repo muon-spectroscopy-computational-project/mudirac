@@ -31,6 +31,7 @@ Boolean keywords
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
+* :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 
