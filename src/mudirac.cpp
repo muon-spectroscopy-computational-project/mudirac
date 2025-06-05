@@ -81,14 +81,6 @@ int main(int argc, char *argv[]) {
   // containing the quantum numbers for each state in each transition
   vector<TransLineSpec> transqnums = parseXRLines(config);
 
-  // We have to decide on how to obtain the experimental energies
-  // One suggestion I have is to define a new input file which will look something like:
-  //
-  // transition energy energy uncertainty
-  // i.e
-  // K1-L2 300000 1
-  // K1-L3 500000 10
-
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
 
@@ -407,19 +399,26 @@ void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, Dir
   double rms_radius = m(0);
   double theta = m(1);
   double fermi_c, fermi_t;
+
+  // calculate new c and t
   tie(fermi_c, fermi_t) = fermiParameters(rms_radius, theta);
+
+  // populate the fermi parameters structure
   fermi_parameters.rms_radius = rms_radius;
   fermi_parameters.theta = theta;
   fermi_parameters.fermi_c = fermi_c;
   fermi_parameters.fermi_t = fermi_t;
+
   // set new iteration of fermi parameters in config and get transitions
   config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
   config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
   LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << ", " << fermi_t;
   LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
-  da = config.makeAtom();
 
+  // make the new Dirac atom with the new configuration
+  da = config.makeAtom();
 }
+
 
 double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
   DiracAtom da;
@@ -475,7 +474,7 @@ void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vec
   double MSE;
   MSE = dlib::find_min_using_approximate_derivatives(
           dlib::bfgs_search_strategy(),
-          dlib::objective_delta_stop_strategy(1e-2),
+          dlib::objective_delta_stop_strategy(1e-2),  // gradient change < 0.01
           std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), polar_parameters, -1);
   LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
 
