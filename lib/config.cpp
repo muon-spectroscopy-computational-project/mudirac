@@ -74,9 +74,6 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
   this->defineDoubleNode("devel_EdEscan_minE", InputNode<double>(-INFINITY)); // Minimum binding energy for E->dE scan
   this->defineDoubleNode("devel_EdEscan_maxE", InputNode<double>(0));         // Maximum binding energy for E->dE scan
 
-  // rms radius estimate in search for optimal fermi parameters
-  this->defineDoubleNode("rms_radius", InputNode<double>(3));
-
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
   this->defineBoolNode("reduced_mass", InputNode<bool>(true, false)); // Use the reduced mass
