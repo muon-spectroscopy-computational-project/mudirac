@@ -460,6 +460,7 @@ double calculateMSE(const column_vector& m, MuDiracInputFile config, const vecto
   return MSE;
 }
 
+
 void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
