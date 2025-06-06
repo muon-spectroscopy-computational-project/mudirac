@@ -48,12 +48,18 @@ const double ellipse_const = (7*M_PI*M_PI)/(48*log(3)*log(3));
  * @note   A function which takes the polar coordinates rms_radius, theta and calculates the corresponding
  * parameters for the 2 parameter fermi distribution function.
  *
+ * @param rms_radius: root mean square radius polar fermi parameter used to calculate conventional fermi parameters c and t
+ * @param theta: polar fermi parameter angle used to calculate conventional fermi parameters c and t
  *
  * @retval a pair of doubles fermi_c and fermi_t
  */
 pair<double, double> fermiParameters(double rms_radius, double theta);
 
 
+/**
+ * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
+ * 
+ */
 struct OptimisationData {
   double rms_radius;
   double theta;
