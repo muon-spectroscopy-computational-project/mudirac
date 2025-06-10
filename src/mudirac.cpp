@@ -483,3 +483,86 @@ void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vec
   configureNuclearModel(polar_parameters, config, da, fermi_parameters);
   fermi_parameters.mse = MSE;
 }
+
+class opt_2pF_model
+{
+  /*!
+    This object is a "function model" which can be used with the
+    find_min_trust_region() routine.  
+  !*/
+
+  public:
+    typedef ::column_vector column_vector;
+    typedef dlib::matrix<double> general_matrix;
+    MuDiracInputFile config;
+    vector<TransLineSpec> transqnums;
+    vector<string> xr_lines_measured;
+    vector<double> xr_energies;
+    vector<double> xr_errors;
+
+    // constructor
+    opt_2pF_model(MuDiracInputFile cfg, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
+      config = cfg;
+      transqnums = tqn;
+      xr_lines_measured = xr_lines;
+      xr_energies = xr_e;
+      xr_errors = xr_er;
+    }
+
+    double operator() (
+      const column_vector& x
+    ) const {return calculateMSE(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
+
+    void get_derivative_and_hessian (
+      const column_vector& x,
+      column_vector& der,
+      general_matrix & hess
+    ) const
+    {
+      der = MSE_2pF_derivative(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+      hess = MSE_2pF_hessian(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    }
+};
+
+const column_vector MSE_2pF_derivative( const column_vector &m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors ) {
+
+  // compute gradient
+  // bind calculate mse as function of just polar fermi parameters column vector
+  auto MSE_2pF = std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+
+  // get the derivative by central differences
+  auto res_func = dlib::derivative(MSE_2pF, 1e-6);
+
+  // get the values of the derivative at m as a column vector?
+  auto res = res_func(m);
+  return res;
+}
+
+
+
+dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+  dlib::matrix<double> res(2,2);
+  
+  // choose derivative step size
+  double delta = 1e-6; 
+  column_vector delta_c = {delta, 0};
+  column_vector delta_t = {0, delta};
+
+  auto MSE_derivative = std::bind(&MSE_2pF_derivative, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors); 
+
+  auto hess_c_component = (MSE_derivative(m + delta_c) - MSE_derivative(m - delta_c));
+  auto hess_t_component = (MSE_derivative(m + delta_t) - MSE_derivative(m - delta_t));
+
+  // hessian df/dc^2 component
+  res(0,0) = hess_c_component(0,0)/(2*delta);
+
+  // hessian df/dt^2 component
+  res(1,1) = hess_t_component(0,1)/(2*delta);
+
+  // hessian df/dcdt components
+  res(0,1) = res (1,0) = (hess_c_component(0,1) + hess_t_component(0,0))/(4*delta);
+
+  // return the finite differenced matrix
+  return res;
+
+}
