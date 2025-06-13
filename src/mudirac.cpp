@@ -181,6 +181,9 @@ int main(int argc, char *argv[]) {
       double MSE =0;
 
       // start the minimisation
+      // opt_2pF_model opt_obj(config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+      
+      // optimizeFermiParameters(opt_obj, config, da, best_fermi_parameters);
       optimizeFermiParameters(config, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
       // output file containing best fermi parameters and the associated MSE
       writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
@@ -470,13 +473,18 @@ void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vec
   // use theta = 0.3 as a starting point for minimisation (could change to match intial config)
   // this depracates the rms_radius keyword in the config file
   column_vector polar_parameters = {rms_radius_estimate, 0.3};
+  column_vector lower_bound = {0.9*rms_radius_estimate, 0};
+  column_vector upper_bound = {1.1*rms_radius_estimate, 0.6};
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
-  MSE = dlib::find_min_using_approximate_derivatives(
+  MSE = dlib::find_min(
           dlib::bfgs_search_strategy(),
           dlib::objective_delta_stop_strategy(1e-2),  // gradient change < 0.01
-          std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), polar_parameters, -1);
+          std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
+          std::bind(&MSE_2pF_derivative, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
+          polar_parameters,
+          -1);
   LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
 
   // repeat the final configuration of the nuclear model
@@ -484,57 +492,45 @@ void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vec
   fermi_parameters.mse = MSE;
 }
 
-class opt_2pF_model
-{
-  /*!
-    This object is a "function model" which can be used with the
-    find_min_trust_region() routine.  
-  !*/
 
-  public:
-    typedef ::column_vector column_vector;
-    typedef dlib::matrix<double> general_matrix;
-    MuDiracInputFile config;
-    vector<TransLineSpec> transqnums;
-    vector<string> xr_lines_measured;
-    vector<double> xr_energies;
-    vector<double> xr_errors;
+void optimizeFermiParameters(opt_2pF_model &opt_obj, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters){
+  LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
-    // constructor
-    opt_2pF_model(MuDiracInputFile cfg, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
-      config = cfg;
-      transqnums = tqn;
-      xr_lines_measured = xr_lines;
-      xr_energies = xr_e;
-      xr_errors = xr_er;
-    }
+  // use the radius of the dirac atom from the initial config file for an rms radius starting point for minimisation.
+  float rms_radius_estimate = sqrt(3.0/5.0)*da.getR()/Physical::fm;
 
-    double operator() (
-      const column_vector& x
-    ) const {return calculateMSE(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
+  // use theta = 0.3 as a starting point for minimisation (could change to match intial config)
+  // this depracates the rms_radius keyword in the config file
+  column_vector polar_parameters = {rms_radius_estimate, 0.3};
 
-    void get_derivative_and_hessian (
-      const column_vector& x,
-      column_vector& der,
-      general_matrix & hess
-    ) const
-    {
-      der = MSE_2pF_derivative(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
-      hess = MSE_2pF_hessian(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
-    }
-};
+  // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
+  double MSE;
+
+  MSE = dlib::find_min_trust_region(dlib::objective_delta_stop_strategy(1e-2),
+                                    opt_obj,
+                                    polar_parameters,
+                                    0.1);
+  
+  LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
+  // repeat the final configuration of the nuclear model
+  configureNuclearModel(polar_parameters, config, da, fermi_parameters);
+  fermi_parameters.mse = MSE;
+}
+
 
 const column_vector MSE_2pF_derivative( const column_vector &m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors ) {
 
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
   auto MSE_2pF = std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  LOG(INFO) << "computing derivative at polar fermi parameters (" << m(0) << ", " << m(1) <<") \n";
 
   // get the derivative by central differences
-  auto res_func = dlib::derivative(MSE_2pF, 1e-6);
-
+  auto res_func = dlib::derivative(MSE_2pF, 1e-7);
+  //LOG(DEBUG) << " computing derivative, config fermi parameters: (" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   // get the values of the derivative at m as a column vector?
   auto res = res_func(m);
+  //LOG(DEBUG) << " derivative computed, config fermi parameters: (" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   return res;
 }
 
@@ -544,23 +540,26 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, MuDiracInputFile co
   dlib::matrix<double> res(2,2);
   
   // choose derivative step size
-  double delta = 1e-6; 
-  column_vector delta_c = {delta, 0};
-  column_vector delta_t = {0, delta};
-
+  double d_r = 1e-7;
+  double d_theta = 1e-7;
+  column_vector delta_r = {d_r, 0};
+  column_vector delta_theta = {0, d_theta};
+  LOG(INFO) << "computing hessian at polar fermi parameters (" << m(0) << ", " << m(1) <<") \n";
+  //LOG(DEBUG) << "computing hessian at config fermi parameters(" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   auto MSE_derivative = std::bind(&MSE_2pF_derivative, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors); 
 
-  auto hess_c_component = (MSE_derivative(m + delta_c) - MSE_derivative(m - delta_c));
-  auto hess_t_component = (MSE_derivative(m + delta_t) - MSE_derivative(m - delta_t));
-
+  auto hess_r_component = (MSE_derivative(m + delta_r) - MSE_derivative(m - delta_r));
+  auto hess_theta_component = (MSE_derivative(m + delta_theta) - MSE_derivative(m - delta_theta));
+  //LOG(DEBUG) << "computed hessian, config fermi parameters(" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   // hessian df/dc^2 component
-  res(0,0) = hess_c_component(0,0)/(2*delta);
+  res(0,0) = hess_r_component(0,0)/(2*d_r);
 
   // hessian df/dt^2 component
-  res(1,1) = hess_t_component(0,1)/(2*delta);
+  res(1,1) = hess_theta_component(0,1)/(2*d_theta);
 
   // hessian df/dcdt components
-  res(0,1) = res (1,0) = (hess_c_component(0,1) + hess_t_component(0,0))/(4*delta);
+  res(0,1) = hess_theta_component(0,0)/(2*d_theta);
+  res(1,0) = hess_r_component(0,1)/(2*d_r);
 
   // return the finite differenced matrix
   return res;
