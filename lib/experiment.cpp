@@ -33,3 +33,10 @@ pair<double, double> fermiParameters(double rms_radius, double theta) {
   pair<double, double> fermi_parameters = {common_constant*var_cos, common_constant*var_sin};
   return fermi_parameters;
 }
+
+double rmsRadius(double fermi_c, double fermi_t){
+    double t_const = (7.0*M_PI*M_PI)/(16.0*log(3.0)*log(3.0));
+    double r_sq = (3*fermi_c*fermi_c + t_const*fermi_t*fermi_t)*0.2;
+    double rms_radius = sqrt(r_sq);
+    return rms_radius;
+}

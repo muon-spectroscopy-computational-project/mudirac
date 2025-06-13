@@ -56,6 +56,8 @@ const double ellipse_const = (7*M_PI*M_PI)/(48*log(3)*log(3));
 pair<double, double> fermiParameters(double rms_radius, double theta);
 
 
+double rmsRadius(double fermi_c, double fermi_t);
+
 /**
  * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
  *

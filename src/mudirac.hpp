@@ -61,7 +61,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * @retval None
  *
  */
-void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
+void configureNuclearModel(const column_vector& m,const string coord_system, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
 
 
 /**
@@ -82,7 +82,7 @@ void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, Dir
  * @retval MSE: Mean Square error between transition energies calculated by MuDirac and measured experimentally.
  *
  */
-double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+double calculateMSE(const column_vector& m,const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 
 /**
@@ -105,14 +105,14 @@ double calculateMSE(const column_vector& m, MuDiracInputFile config, const vecto
  * @retval: None
  *
  */
-void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters);
+void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters);
 
 
 
 
-const column_vector MSE_2pF_derivative( const column_vector &m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+const column_vector MSE_2pF_derivative( const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
-dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 
 class opt_2pF_model
@@ -130,19 +130,21 @@ class opt_2pF_model
     vector<string> xr_lines_measured;
     vector<double> xr_energies;
     vector<double> xr_errors;
+    string coord_sys;
 
     // constructor
-    opt_2pF_model(MuDiracInputFile cfg, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
+    opt_2pF_model(MuDiracInputFile cfg,const string coord_system, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
       config = cfg;
       transqnums = tqn;
       xr_lines_measured = xr_lines;
       xr_energies = xr_e;
       xr_errors = xr_er;
+      coord_sys = coord_system;
     }
 
     double operator() (
       const column_vector& x
-    ) const {return calculateMSE(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
+    ) const {return calculateMSE(x, coord_sys, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
 
     void get_derivative_and_hessian (
       const column_vector& x,
@@ -150,8 +152,8 @@ class opt_2pF_model
       general_matrix & hess
     ) const
     {
-      der = MSE_2pF_derivative(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
-      hess = MSE_2pF_hessian(x, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+      der = MSE_2pF_derivative(x,coord_sys, config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
+      hess = MSE_2pF_hessian(x, coord_sys ,config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
     }
 };
 

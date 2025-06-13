@@ -179,6 +179,22 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
     return;
   }
 
+  
+  // First, define C for this radius
+  double c;
+  if (fermi2_potential  != -1) {
+    c = fermi2_potential;
+  } else if (A >= 5.0) {
+    c = sqrt(R * R -
+             7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
+  } else {
+    c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+  }
+
+  // set object attributes for fermi 2pf in fm
+  fermi_c = c/Physical::fm;
+  fermi_t = thickness/Physical::fm;
+
   V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi2_potential);
   reset();
 }

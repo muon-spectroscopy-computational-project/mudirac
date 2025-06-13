@@ -109,7 +109,8 @@ class Atom {
   UehlingSpherePotential V_uehling;
   bool use_econf = false;
   EConfPotential V_econf;
-
+  // fermi 2pF parameters
+  double fermi_c, fermi_t;
  public:
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
@@ -162,6 +163,10 @@ class Atom {
 
   // Additional potential terms get/setters
   void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
+
+  pair<double, double> getFermi2(){
+    return pair<double, double> (fermi_c, fermi_t);
+  }
 
   bool getUehling() {
     return use_uehling;
