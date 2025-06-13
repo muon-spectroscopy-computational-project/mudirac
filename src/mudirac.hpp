@@ -54,6 +54,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * the optimal fermi parameters in a minimisation process.
  *
  * @param m:    polar fermi parameters (rms_radius, theta)
+ * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
  * @param config:     config object for MuDirac
  * @param da:     previous dirac atom to be reconfigured
  * @param fermi_parameters:      data structure to contain the polar and conventional fermi parameters and the MSE when calcualted as part
@@ -73,6 +74,7 @@ void configureNuclearModel(const column_vector& m,const string coord_system, MuD
  * The Mean Square error is taken over all measured transitions provided.
  *
  * @param m:    polar fermi parameters (rms_radius, theta)
+ * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
  * @param config:     config object for MuDirac
  * @param transqnums:     transition quantum numbers required to index the transition energies
  * @param xr_lines_measured:      vector of measured muonic transitions
@@ -95,7 +97,8 @@ double calculateMSE(const column_vector& m,const string coord_system, MuDiracInp
  *
  *
  * @param config:     config object for MuDirac updated in every iteration
- * * @param da:     Dirac atom with 2pF model updated in every iteration
+ * @param coord_system: "ct" or "polar" coordinate system the optimisation routine optimises over to configure the nuclear model of each iteration.
+ * @param da:     Dirac atom with 2pF model updated in every iteration
  * @param transqnums:     transition quantum numbers required to index the transition energies
  * @param xr_lines_measured:      vector of measured muonic transitions
  * @param xr_energies:      vector of measured muonic transition energies
@@ -109,12 +112,53 @@ void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system,
 
 
 
-
+/**
+ *
+ *
+ * @brief  A function which finds the derivative with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions. 
+ * @note   This function uses the dlib derivative method to numerically calculate the derivate of the calculateMSE function. The derivative value is returned as a dlib column vector and can be used in minimisation routines.
+ *
+ * @param m: fermi parameters in ct or polar coordinates
+ * @param coord_system: "ct" or "polar" determines the coordinate system the derivative function will use.
+ * @param config:     config object for MuDirac updated in every iteration
+ * @param transqnums:     transition quantum numbers required to index the transition energies
+ * @param xr_lines_measured:      vector of measured muonic transitions
+ * @param xr_energies:      vector of measured muonic transition energies
+ * @param xr_errors:      vector of measured muonic transition energy errors
+*
+ *
+ * @retval derivative: dlib::column_vector (length 2)
+ *
+ */
 const column_vector MSE_2pF_derivative( const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
+
+/**
+ *
+ *
+ * @brief  A function which finds the hessian with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions. 
+ * @note   This function uses a central differences finite difference method on the MSE_2pF_derivative to find the hessian with respect to the fermi parameters.
+ * The Hessian is left un symmetrised as this yielded better optimisation results. 
+ *
+ * @param m: fermi parameters in ct or polar coordinates
+ * @param coord_system: "ct" or "polar" determines the coordinate system the hessian function will use.
+ * @param config:     config object for the initial dirac atom
+ * @param transqnums:     transition quantum numbers required to index the transition energies
+ * @param xr_lines_measured:      vector of measured muonic transitions
+ * @param xr_energies:      vector of measured muonic transition energies
+ * @param xr_errors:      vector of measured muonic transition energy errors
+*
+ *
+ * @retval hessian matrix: dlib::matrix (2x2)
+ *
+ */
 dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
-
+/**
+ * 
+ * @brief functor class which allows the means square error of the energies simulated by mudirac compared with experimental energies to be optimised with respect to the fermi parameters.
+ * @note This class uses a numerically defined derivative and hessian. This functor exists to be used in dlib::find_min_trust_function.
+ */
 class opt_2pF_model
 {
   /*!
@@ -123,6 +167,7 @@ class opt_2pF_model
   !*/
 
   public:
+    // common parameters for the objective, derivative and hessian functions
     typedef ::column_vector column_vector;
     typedef dlib::matrix<double> general_matrix;
     MuDiracInputFile config;
@@ -146,6 +191,7 @@ class opt_2pF_model
       const column_vector& x
     ) const {return calculateMSE(x, coord_sys, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
 
+    // function for the dlib minisation routine to get the derivative and hessian
     void get_derivative_and_hessian (
       const column_vector& x,
       column_vector& der,
@@ -157,4 +203,21 @@ class opt_2pF_model
     }
 };
 
-void optimizeFermiParameters(opt_2pF_model &opt_obj, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters);
+/**
+ *
+ *
+ * @brief  A function which finds the optimal 2pF parameters for given experimentally measured muonic xray transitions.
+ * @note   This function uses a dlib trust region optimization method to minimise the Mean Square Error between simulated energies
+ * calculated using 2pF paarameters and experimentally measured energies. In polar coordinates, the starting rms radius for each atom is taken from the
+ * default values for the Dirac atom. The starting theta value is set at 0.3 radians.
+ *@param opt_obj: object defined for dlib optmisation routines which has the experimental values as attributes already defined.
+ The operator function of this functor is the objective function for minimisation and the functor also has functions for the derivative and hessian.
+ * @param coord_system:   either "ct" or "polar" sets the coordinate system ised by the minisation algorithm.
+ * @param config:     config object for MuDirac updated in every iteration
+ * @param da:     Dirac atom with 2pF model updated in every iteration
+ * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
+ *
+ * @retval: None
+ *
+ */
+void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters);
