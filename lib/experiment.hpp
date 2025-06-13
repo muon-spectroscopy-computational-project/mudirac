@@ -55,7 +55,18 @@ const double ellipse_const = (7*M_PI*M_PI)/(48*log(3)*log(3));
  */
 pair<double, double> fermiParameters(double rms_radius, double theta);
 
-
+/**
+ *
+ *
+ * @brief  A function to calculate the rmsRadius of an atom from its fermi 2pF parameters
+ * @note   this function uses equations relating the 2pF c and t paramters to the equivalent uniform radius sphere model
+ * to calculate the rms_radius of the 2pF model.
+ *
+ * @param fermi_c: half density radius of the 2pF model in fm
+ * @param fermi_t: skin thickness of the 2pF model in fm
+ *
+ * @retval rms_radius: root mean square radius of the 2pF model in fm
+ */
 double rmsRadius(double fermi_c, double fermi_t);
 
 /**

@@ -164,6 +164,9 @@ class Atom {
   // Additional potential terms get/setters
   void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
 
+  /**
+   * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
+   */
   pair<double, double> getFermi2(){
     return pair<double, double> (fermi_c, fermi_t);
   }

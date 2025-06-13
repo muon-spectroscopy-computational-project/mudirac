@@ -167,7 +167,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
 /**
  * @brief Set parameters for the Fermi 2-term potential term (if used)
  * @note  Set the thickness parameter for the Fermi 2-term potential term (if used).
- * Calling this function resets all computed states.
+ * Calling this function resets all computed states. sets the new c and t values as object attributes in fm.
  *
  * @param  thickness:  The new thickness to set up
  * @retval None
