@@ -181,10 +181,10 @@ int main(int argc, char *argv[]) {
       double MSE =0;
 
       // start the minimisation
-      opt_2pF_model opt_obj(config, "ct", transqnums, xr_lines_measured, xr_energies, xr_errors);
+      // opt_2pF_model opt_obj(config, "ct", transqnums, xr_lines_measured, xr_energies, xr_errors);
       
-      optimizeFermiParameters(opt_obj, "ct", config, da, best_fermi_parameters);
-      // optimizeFermiParameters(config, "ct", da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+      // optimizeFermiParameters(opt_obj, "ct", config, da, best_fermi_parameters);
+      optimizeFermiParameters(config, "ct", da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
       // output file containing best fermi parameters and the associated MSE
       writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
@@ -577,7 +577,7 @@ const column_vector MSE_2pF_derivative( const column_vector &m, const string coo
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
   auto MSE_2pF = std::bind(&calculateMSE, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
-  LOG(LOG_DEBUG) << "computing derivative at " << coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
+  LOG(DEBUG) << "computing derivative at " << coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
 
   // get the derivative by central differences
   auto res_func = dlib::derivative(MSE_2pF, 1e-7);
