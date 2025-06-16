@@ -45,6 +45,24 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
 
 typedef dlib::matrix<double,0,1> column_vector;
 
+
+/**
+ *
+ *
+ * @brief  A function which finds the default c, t rms radius and theta of an atom as initial values for optimisation
+ * @note   This function determines initial values 2pF domain coordinates as a vector with either the ct or polar coordinates
+ * based on the coordinate system. The inital values are extracted from the dirac atom, which are either supplied by the user or from the default
+ * parameters taken from marinova tables.
+ *
+ *
+ * @param da:     previous dirac atom to be reconfigured
+ *  * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
+
+ * @retval initial fermi parameters: in coordinates defined by the coordinate system
+ *
+ */
+void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector & init_params);
+
 /**
  *
  *
@@ -221,3 +239,4 @@ class opt_2pF_model
  *
  */
 void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters);
+

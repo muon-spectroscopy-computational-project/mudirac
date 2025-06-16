@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
       // opt_2pF_model opt_obj(config, "ct", transqnums, xr_lines_measured, xr_energies, xr_errors);
       
       // optimizeFermiParameters(opt_obj, "ct", config, da, best_fermi_parameters);
-      optimizeFermiParameters(config, "ct", da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+      optimizeFermiParameters(config, "polar", da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
       // output file containing best fermi parameters and the associated MSE
       writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
@@ -398,6 +398,34 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
   return transqnums;
 }
 
+
+void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector & init_params){
+
+  double fermi_c_init, fermi_t_init;
+  // get c and t after it has either been defined by the user or default values by the marinova tables
+  LOG(DEBUG) << " getting initial fermi parameters \n";
+  tie(fermi_c_init, fermi_t_init) =  da.getFermi2();
+
+  // set starting optimisation paramters based on the coordinate system we optimize over.
+  if (coord_system == "ct"){
+    LOG(DEBUG) << " optimising fermi paramaters using c, t coordinate system \n";
+    LOG(DEBUG) << " initial fermi parameters: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
+    init_params = {fermi_c_init, fermi_t_init};
+  }
+  else if (coord_system == "polar"){
+    // get rms radius estimate from marinova tables
+    LOG(DEBUG) << " optimising fermi paramaters using polar coordinate system \n";
+    LOG(DEBUG) << " getting initial polar fermi parameters \n";
+    double rms_radius_estimate = rmsRadius(fermi_c_init, fermi_t_init);
+    double theta_estimate = atan(fermi_t_init/fermi_c_init);
+    LOG(DEBUG) << " initial polar fermi parameters: ("<< rms_radius_estimate <<", " << theta_estimate << ") \n";
+
+    init_params = {rms_radius_estimate, theta_estimate};
+  }
+}
+
+
+
 void configureNuclearModel(const column_vector& m, const string coord_system, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters) {
   double fermi_c, fermi_t, rms_radius, theta;
   if (coord_system == "polar"){
@@ -476,49 +504,24 @@ double calculateMSE(const column_vector& m, const string coord_system, MuDiracIn
   }
   MSE = MSE/transitions_iteration.size();
   // output MSE to LOG
-  LOG(DEBUG) << "MSE :"<< MSE << "\n";
+  LOG(DEBUG) << "MSE: "<< MSE << "\n";
   return MSE;
 }
 
 
-void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
+void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
+  // initialise starting parameters for optimisation based on the coordinate system
   column_vector init_params;
-
-  // set starting optimisation paramters based on the coordinate system we optimize over.
-  if (coord_system == "ct"){
-    double fermi_c_init, fermi_t_init;
-    LOG(DEBUG) << " optimising fermi paramaters using c, t coordinate system \n";
-    LOG(DEBUG) << " getting initial fermi parameters \n";
-
-    // get c and t after it has either been defined by the user or default values by the marinova tables
-    tie(fermi_c_init, fermi_t_init) =  da.getFermi2();
-    LOG(DEBUG) << " initial fermi parameters: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
-    column_vector init_2pF_params = {fermi_c_init, fermi_t_init};
-    init_params = init_2pF_params;
-  }
-  else if (coord_system == "polar"){
-    // get rms radius estimate from marinova tables
-    LOG(DEBUG) << " optimising fermi paramaters using polar coordinate system \n";
-    LOG(DEBUG) << " getting initial polar fermi parameters \n";
-    float rms_radius_estimate = sqrt(3.0/5.0)*da.getR()/Physical::fm;
-
-    LOG(DEBUG) << " initial polar fermi parameters: ("<< rms_radius_estimate <<", 0.3) \n";
-
-    // using a default theta as 0.3 radians arbitrary
-    column_vector polar_parameters = {rms_radius_estimate, 0.3};
-    init_params = polar_parameters;
-  }
-
-
+  init2pFModelParams(da, coord_system, init_params);
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
   MSE = dlib::find_min(
           dlib::bfgs_search_strategy(),
-          dlib::objective_delta_stop_strategy(1e-2),  // gradient change < 0.01
+          dlib::objective_delta_stop_strategy(1e-2).be_verbose(),  // gradient change < 0.01
           std::bind(&calculateMSE, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
           std::bind(&MSE_2pF_derivative, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
           init_params,
@@ -534,28 +537,9 @@ void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system,
 void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters){
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
+  // initialise starting parameters for optimisation based on the coordinate system
   column_vector init_params;
-
-  // set starting optimisation paramters based on the coordinate system we optimize over.
-  if (coord_system == "ct"){
-    double fermi_c_init, fermi_t_init;
-    LOG(DEBUG) << " optimising fermi paramaters using c, t coordinate system \n";
-    LOG(DEBUG) << " getting initial fermi parameters \n";
-
-    // get c and t after it has either been defined by the user or default values by the marinova tables
-    tie(fermi_c_init, fermi_t_init) =  da.getFermi2();
-    LOG(DEBUG) << " initial fermi parameters: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
-    column_vector init_2pF_params = {fermi_c_init, fermi_t_init};
-    init_params = init_2pF_params;
-  }
-  else if (coord_system == "polar"){
-    // get rms radius estimate from marinova tables
-    float rms_radius_estimate = sqrt(3.0/5.0)*da.getR()/Physical::fm;
-
-    // using a default theta as 0.3 radians arbitrary
-    column_vector polar_parameters = {rms_radius_estimate, 0.3};
-    init_params = polar_parameters;
-  }
+  init2pFModelParams(da, coord_system, init_params);
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
