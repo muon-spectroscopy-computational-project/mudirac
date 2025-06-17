@@ -180,11 +180,41 @@ int main(int argc, char *argv[]) {
       OptimisationData best_fermi_parameters;
       double MSE =0;
 
+      // get the 2pF optimsation coordinate system (dev)
+      const string coord_system_2pF = config.getStringValue("2pF_coords");
+      if (!((coord_system_2pF == "ct")||(coord_system_2pF == "polar"))){
+        cout << "Invalid 2pF coordinate system choice for minimsation\n";
+        cout << "please use \"ct\" or \"polar\" (default is \"polar\") \n";
+        cout << "You used: \""<<coord_system_2pF<<"\" \n";
+        cout << "Quitting...\n";
+        LOG(ERROR) << "Invalid 2pF coordinate system choice for minimsation\n";
+        return -1;
+
+      }
+
+      // implement the choice of minimisation algorithm
+      const string min_2pF_algo = config.getStringValue("min_2pF_algorithm");
+
+      if (min_2pF_algo == "bfgs"){
+        optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+      }
+      else if (min_2pF_algo =="trust"){
+        opt_2pF_model opt_obj(config, coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors);
+        optimizeFermiParameters(opt_obj, coord_system_2pF, config, da, best_fermi_parameters);
+      }
+      else {
+        cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
+        cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
+        cout << "You used: \""<<min_2pF_algo<<"\" \n";
+        cout << "Quitting...\n";
+        LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<min_2pF_algo<<"\"\n";
+        return -1;
+      }
       // start the minimisation
       // opt_2pF_model opt_obj(config, "ct", transqnums, xr_lines_measured, xr_energies, xr_errors);
       
       // optimizeFermiParameters(opt_obj, "ct", config, da, best_fermi_parameters);
-      optimizeFermiParameters(config, "polar", da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+      optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
       // output file containing best fermi parameters and the associated MSE
       writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }

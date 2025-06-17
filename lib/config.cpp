@@ -64,6 +64,9 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // String keywords
   this->defineStringNode("devel_debug_task", InputNode<string>("")); // Which debugging task to perform
+  this->defineStringNode("2pF_coords", InputNode<string>("polar", true)); // 2pF optimisation coordinate system
+  this->defineStringNode("min_2pF_algorithm", InputNode<string>("bfgs", true)); // 2pF optimisation coordinate system
+
 
   // Integer keywords
   this->defineIntNode("devel_EdEscan_k", InputNode<int>(-1));      // Value of quantum number k for E->dE scan

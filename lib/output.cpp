@@ -33,14 +33,14 @@ void writeFermiParameters(DiracAtom &da, const OptimisationData &fermi_parameter
   // output file containing all valid fermi parameters and the associated MSE
   ofstream out(fname);
   out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
-  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
+  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\titerations\ttime\n";
   out << fixed;
   out << setprecision(output_precision);
 
-  // output fermi_c, fermi_c, rms radius, theta, MSE
+  // output fermi_c, fermi_c, rms radius, theta, MSE, n iterations, optimisation time
   out << fermi_parameters.fermi_c << '\t' << fermi_parameters.fermi_t << '\t';
   out << fermi_parameters.rms_radius << '\t' << fermi_parameters.theta  << '\t';
-  out << fermi_parameters.mse << "\n";
+  out << fermi_parameters.mse <<"\n";
 
 
   out.close();
