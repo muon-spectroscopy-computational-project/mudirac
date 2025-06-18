@@ -194,13 +194,14 @@ int main(int argc, char *argv[]) {
 
       // implement the choice of minimisation algorithm
       const string min_2pF_algo = config.getStringValue("min_2pF_algorithm");
+      double opt_time = 0;
 
       if (min_2pF_algo == "bfgs"){
-        optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+        optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
       }
       else if (min_2pF_algo =="trust"){
         opt_2pF_model opt_obj(config, coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors);
-        optimizeFermiParameters(opt_obj, coord_system_2pF, config, da, best_fermi_parameters);
+        optimizeFermiParameters(opt_obj, coord_system_2pF, config, da, best_fermi_parameters, opt_time);
       }
       else {
         cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
@@ -210,13 +211,9 @@ int main(int argc, char *argv[]) {
         LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<min_2pF_algo<<"\"\n";
         return -1;
       }
-      // start the minimisation
-      // opt_2pF_model opt_obj(config, "ct", transqnums, xr_lines_measured, xr_energies, xr_errors);
-      
-      // optimizeFermiParameters(opt_obj, "ct", config, da, best_fermi_parameters);
-      optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+  
       // output file containing best fermi parameters and the associated MSE
-      writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+      writeFermiParameters(da, best_fermi_parameters,iteration_counter_2pF, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
   }
@@ -492,6 +489,8 @@ void configureNuclearModel(const column_vector& m, const string coord_system, Mu
 
 double calculateMSE(const column_vector& m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
   
+  // increment iteration counter
+  iteration_counter_2pF++;
   // create a new dirac atom
   DiracAtom da;
   OptimisationData iteration_parameters;
@@ -539,7 +538,7 @@ double calculateMSE(const column_vector& m, const string coord_system, MuDiracIn
 }
 
 
-void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
+void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -549,6 +548,9 @@ void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
+  chrono::high_resolution_clock::time_point opt_t0, opt_t1;
+  opt_t0 = chrono::high_resolution_clock::now();
+
   MSE = dlib::find_min(
           dlib::bfgs_search_strategy(),
           dlib::objective_delta_stop_strategy(1e-2).be_verbose(),  // gradient change < 0.01
@@ -556,7 +558,12 @@ void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system
           std::bind(&MSE_2pF_derivative, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
           init_params,
           -1);
+  
+  opt_t1 = chrono::high_resolution_clock::now();
   LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_system << " parameters: "<< init_params <<" \n";
+  opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
+  LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
+  LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
   configureNuclearModel(init_params, coord_system, config, da, fermi_parameters);
@@ -564,7 +571,7 @@ void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system
 }
 
 
-void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters){
+void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time){
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -574,12 +581,21 @@ void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
 
+  // start time of minimisation
+  chrono::high_resolution_clock::time_point opt_t0, opt_t1;
+  opt_t0 = chrono::high_resolution_clock::now();
+
   MSE = dlib::find_min_trust_region(dlib::objective_delta_stop_strategy(1e-2),
                                     opt_obj,
                                     init_params,
                                     0.1);
+
+  opt_t1 = chrono::high_resolution_clock::now();
   
   LOG(INFO) << "minimised with MSE: "<< MSE << " and "<< coord_system << "fermi parameters: "<< init_params <<" \n";
+  opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
+  LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
+  LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
   // repeat the final configuration of the nuclear model
   configureNuclearModel(init_params, coord_system, config, da, fermi_parameters);
   fermi_parameters.mse = MSE;

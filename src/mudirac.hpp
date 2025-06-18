@@ -45,6 +45,8 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
 
 typedef dlib::matrix<double,0,1> column_vector;
 
+int iteration_counter_2pF = 0;
+
 
 /**
  *
@@ -126,7 +128,7 @@ double calculateMSE(const column_vector& m,const string coord_system, MuDiracInp
  * @retval: None
  *
  */
-void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters);
+void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
 
 
 
@@ -148,7 +150,7 @@ void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system,
  * @retval derivative: dlib::column_vector (length 2)
  *
  */
-const column_vector MSE_2pF_derivative( const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+const column_vector MSE_2pF_derivative(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 
 /**
@@ -207,17 +209,17 @@ class opt_2pF_model
 
     double operator() (
       const column_vector& x
-    ) const {return calculateMSE(x, coord_sys, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
+    )  const {return calculateMSE(x, coord_sys, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
 
     // function for the dlib minisation routine to get the derivative and hessian
     void get_derivative_and_hessian (
       const column_vector& x,
       column_vector& der,
       general_matrix & hess
-    ) const
+    ) const 
     {
       der = MSE_2pF_derivative(x,coord_sys, config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
-      hess = MSE_2pF_hessian(x, coord_sys ,config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
+      hess = MSE_2pF_hessian(x, coord_sys, config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
     }
 };
 
@@ -238,5 +240,5 @@ class opt_2pF_model
  * @retval: None
  *
  */
-void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters);
+void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
