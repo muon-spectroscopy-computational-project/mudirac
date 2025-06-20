@@ -19,6 +19,7 @@
 #include <cmath>
 #include <chrono>
 #include <dlib/optimization.h>
+#include <dlib/global_optimization.h>
 #include "../lib/config.hpp"
 #include "../lib/experiment.hpp"
 #include "../lib/atom.hpp"
@@ -242,3 +243,4 @@ class opt_2pF_model
  */
 void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
+void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
