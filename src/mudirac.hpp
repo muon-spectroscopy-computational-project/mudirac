@@ -243,4 +243,26 @@ class opt_2pF_model
  */
 void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
+
+/**
+ *
+ *
+ * @brief  A function which finds the optimal 2pF parameters for given experimentally measured muonic xray transitions.
+ * @note   This function uses a dlib global optimization method to minimise the Mean Square Error between simulated energies
+ * calculated using 2pF paarameters and experimentally measured energies. The domain is bounded close the rms radius values near those
+ * given by default. The optimization is limited to 10 minutes.
+ *
+ *
+ * @param config:     config object for MuDirac updated in every iteration
+ * @param coord_system: "ct" or "polar" coordinate system the optimisation routine optimises over to configure the nuclear model of each iteration.
+ * @param da:     Dirac atom with 2pF model updated in every iteration
+ * @param transqnums:     transition quantum numbers required to index the transition energies
+ * @param xr_lines_measured:      vector of measured muonic transitions
+ * @param xr_energies:      vector of measured muonic transition energies
+ * @param xr_errors:      vector of measured muonic transition energy errors
+ * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
+ *
+ * @retval: None
+ *
+ */
 void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);

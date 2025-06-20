@@ -549,16 +549,22 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
+
+  // set bounds for rms radius and theta close to Marinova table values
   double rms_lower = 0.95*init_params(0);
   double rms_upper = 1.05*init_params(0);
   double theta_lower = 0;
   double theta_upper = M_PI*0.5;
+
+  // lambda function for MSE required for dlib find min global
   auto MSE_lambda = [&](double rms_radius, double theta){
     column_vector x = {rms_radius, theta};
 
     return calculateMSE(x,coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
   };
   
+  // global optimisation where result.x is opt rms radius and coords, result.y is MSE
+  // max run time 10 minutes can be changed
   auto result = dlib::find_min_global(
     MSE_lambda,
     {rms_lower, theta_lower},
@@ -568,6 +574,8 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   opt_t1 = chrono::high_resolution_clock::now();
   auto final_params = result.x;
   double MSE = result.y;
+
+  // update fermi_paramters structure
   fermi_parameters.mse = MSE;
   fermi_parameters.rms_radius = final_params(0);
   fermi_parameters.theta = final_params(1);
@@ -582,7 +590,6 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   // repeat the final configuration of the nuclear model
   configureNuclearModel(final_params, coord_system, config, da, fermi_parameters);
 }
-
 
 
 void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
