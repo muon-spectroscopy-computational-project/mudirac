@@ -180,8 +180,18 @@ int main(int argc, char *argv[]) {
       OptimisationData best_fermi_parameters;
       double MSE =0;
 
+      string coords;
       // get the 2pF optimsation coordinate system (dev)
-      const string coord_system_2pF = config.getStringValue("2pF_coords");
+      if (da.getA() < 5) {
+        LOG(INFO) << "using ct coordinate system as polar parameterisation no longer holds for A < 5 \n";
+        coords = "ct";
+      }
+      else {
+        coords = config.getStringValue("2pF_coords");
+      }
+      
+      const string coord_system_2pF = coords;
+    
       if (!((coord_system_2pF == "ct")||(coord_system_2pF == "polar"))){
         cout << "Invalid 2pF coordinate system choice for minimsation\n";
         cout << "please use \"ct\" or \"polar\" (default is \"polar\") \n";
@@ -191,7 +201,7 @@ int main(int argc, char *argv[]) {
         return -1;
 
       }
-
+      
       // implement the choice of minimisation algorithm
       const string min_2pF_algo = config.getStringValue("min_2pF_algorithm");
       double opt_time = 0;
