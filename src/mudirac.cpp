@@ -550,11 +550,24 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
 
-  // set bounds for rms radius and theta close to Marinova table values
-  double rms_lower = 0.95*init_params(0);
-  double rms_upper = 1.05*init_params(0);
-  double theta_lower = 0;
-  double theta_upper = M_PI*0.5;
+  column_vector bound_lower, bound_upper;
+  if (coord_system =="polar"){
+    // set bounds for rms radius and theta close to Marinova table values
+    double rms_lower = 0.95*init_params(0);
+    double rms_upper = 1.05*init_params(0);
+    double theta_lower = 0;
+    double theta_upper = M_PI*0.5;
+    bound_lower = {rms_lower, theta_lower};
+    bound_upper = {rms_upper, theta_upper};
+  }
+  else if (coord_system =="ct"){
+    double c_lower = 0.5*init_params(0);
+    double c_upper = 1.5*init_params(0);
+    double t_lower = 0.01;
+    double t_upper = 4;
+    bound_lower = {c_lower, t_lower};
+    bound_upper = {c_upper, t_upper};
+  }
 
   // lambda function for MSE required for dlib find min global
   auto MSE_lambda = [&](double rms_radius, double theta){
@@ -567,8 +580,8 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   // max run time 10 minutes can be changed
   auto result = dlib::find_min_global(
     MSE_lambda,
-    {rms_lower, theta_lower},
-    {rms_upper, theta_upper},
+    bound_lower,
+    bound_upper,
     std::chrono::milliseconds(60*1000*10));
 
   opt_t1 = chrono::high_resolution_clock::now();
@@ -577,10 +590,17 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
 
   // update fermi_paramters structure
   fermi_parameters.mse = MSE;
-  fermi_parameters.rms_radius = final_params(0);
-  fermi_parameters.theta = final_params(1);
-  
-  tie(fermi_parameters.fermi_c, fermi_parameters.fermi_t) = fermiParameters(fermi_parameters.rms_radius, fermi_parameters.theta);
+
+  if (coord_system =="polar"){
+    fermi_parameters.rms_radius = final_params(0);
+    fermi_parameters.theta = final_params(1);
+    tie(fermi_parameters.fermi_c, fermi_parameters.fermi_t) = fermiParameters(fermi_parameters.rms_radius, fermi_parameters.theta);
+  }
+  else if (coord_system=="ct"){
+    fermi_parameters.fermi_c =  final_params(0); 
+    fermi_parameters.fermi_t = final_params(1);
+    fermi_parameters.rms_radius = rmsRadius(final_params(0), final_params(1));
+  }
 
   LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_system << " parameters: "<< final_params <<" \n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
