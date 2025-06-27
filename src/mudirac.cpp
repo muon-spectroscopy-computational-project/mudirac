@@ -449,7 +449,7 @@ void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector
   // set starting optimisation paramters based on the coordinate system we optimize over.
   if (coord_system == "ct"){
     LOG(DEBUG) << " optimising fermi paramaters using c, t coordinate system \n";
-    LOG(DEBUG) << " initial fermi parameters: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
+    LOG(DEBUG) << " initial fermi parameters in fm: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
     init_params = {fermi_c_init, fermi_t_init};
   }
   else if (coord_system == "polar"){
@@ -458,7 +458,7 @@ void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector
     LOG(DEBUG) << " getting initial polar fermi parameters \n";
     double rms_radius_estimate = rmsRadius(fermi_c_init, fermi_t_init);
     double theta_estimate = atan(fermi_t_init/fermi_c_init);
-    LOG(DEBUG) << " initial polar fermi parameters: ("<< rms_radius_estimate <<", " << theta_estimate << ") \n";
+    LOG(DEBUG) << " initial polar fermi parameters: ("<< rms_radius_estimate <<" fm, " << theta_estimate << ") \n";
 
     init_params = {rms_radius_estimate, theta_estimate};
   }
@@ -492,8 +492,8 @@ void configureNuclearModel(const column_vector& m, const string coord_system, Mu
   // set new iteration of fermi parameters in config and get transitions
   config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
   config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
-  LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << ", " << fermi_t;
-  LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
+  LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << " fm, " << fermi_t << " fm\n";
+  LOG(DEBUG) << " RMS radius: " << rms_radius << " fm, theta: "<< theta << "\n";
 
   // make the new Dirac atom with the new configuration
   da = config.makeAtom();
