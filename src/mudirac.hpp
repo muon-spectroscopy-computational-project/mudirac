@@ -44,26 +44,6 @@ int iteration_counter_2pF = 0;
 /**
  *
  *
- * @brief  A function whichs updates 2pF parameters in a config object and creates a new dirac atom
- * @note   A function which takes polar fermi parameters and updates a config object by reference to generate a dirac atom
- * with a new 2pF model. The convetional and polar fermi parameters are also passed by reference into a structure to contain
- * the optimal fermi parameters in a minimisation process.
- *
- * @param m:    polar fermi parameters (rms_radius, theta)
- * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
- * @param config:     config object for MuDirac
- * @param da:     previous dirac atom to be reconfigured
- * @param fermi_parameters:      data structure to contain the polar and conventional fermi parameters and the MSE when calcualted as part
- * of optimisation
- * @retval None
- *
- */
-void configureNuclearModel(const column_vector& m,const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters);
-
-
-/**
- *
- *
  * @brief  A function which calculates the Mean Square Error between a MuDirac simulation with a 2pF model and experimental measurements.
  * @note   A function which calculates the non linear Mean Square Error between MuDirac simualted energies and energies experimentally measured.
  * This function configures a dirac atom with new fermi parameters and calculates the square error between mudirac and experimental values for each muonic xray transition.

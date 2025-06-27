@@ -199,11 +199,30 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   reset();
 }
 
+void Atom::setFermi2(const double coord_1, const double coord_2, const string coord_sys){
+  if (coord_sys == "polar"){
+    LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
+    if ( A < 5){
+      LOG(WARNING) << "attempting to use polar 2pF coordinates when A < 5  \n";
+    }
+    tie(fermi_c, fermi_t) = fermiParameters(coord_1, coord_2);
+    }
+  else if (coord_sys == "ct"){
+    LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
+    fermi_c = coord_1;
+    fermi_t = coord_2;
+  }
+  LOG(DEBUG) << "creating potential with " << coord_sys << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
+  LOG(DEBUG) << "fermi parameters: " << fermi_c << " fm, " << fermi_t << " fm \n"; 
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi_t*Physical::fm, fermi_c *Physical::fm);
+  reset();
+}
+
 /**
  * @brief gets parameters for the Fermi 2-term potential term in ct or polar coordinates(if used)
  * @note  gets the fermi2 parameters c and t, or the polar parameters rms radius and theta
  * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
- * @retval the 2pF domain coordinates.
+ * @retval vector<double> :the 2pF domain coordinates.
  */
 vector<double> Atom::getFermi2(const string coord_sys){
   if (rmodel != FERMI2) {

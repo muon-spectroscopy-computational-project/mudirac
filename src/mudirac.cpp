@@ -306,36 +306,6 @@ int main(int argc, char *argv[]) {
 }
 
 
-void configureNuclearModel(const column_vector& m, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters) {
-  double fermi_c, fermi_t, rms_radius, theta;
-  if (coord_system == "polar"){
-    LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
-    rms_radius = m(0);
-    theta = m(1);
-    // calculate new c and t
-    tie(fermi_c, fermi_t) = fermiParameters(rms_radius, theta);
-  }
-  else if(coord_system=="ct"){
-    LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
-    fermi_c = m(0);
-    fermi_t = m(1);
-    rms_radius=rmsRadius(fermi_c, fermi_t);
-    theta=0;
-  }
-
-  // populate the fermi parameters structure
-  fermi_parameters.rms_radius = rms_radius;
-  fermi_parameters.theta = theta;
-  fermi_parameters.fermi_c = fermi_c;
-  fermi_parameters.fermi_t = fermi_t;
-
-  // set new iteration of fermi parameters in config and get transitions
-  da.setFermi2(fermi_t * Physical::fm, fermi_c * Physical::fm);
-  LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << " fm, " << fermi_t << " fm\n";
-  LOG(DEBUG) << " RMS radius: " << rms_radius << " fm, theta: "<< theta << "\n";
-}
-
-
 double calculateMSE(const column_vector& m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
   
   // increment iteration counter
@@ -344,7 +314,7 @@ double calculateMSE(const column_vector& m, const string coord_system, DiracAtom
   OptimisationData iteration_parameters;
 
   // configure the dirac atom with the new fermi parameters in the given coordinate system
-  configureNuclearModel(m, coord_system, da, iteration_parameters);
+  da.setFermi2(m(0), m(1), coord_system);
 
   // calculate the energies of the transitions with the new fermi parameters.
   vector<TransitionData> transitions_iteration = da.getAllTransitions(transqnums);
@@ -454,7 +424,8 @@ void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, co
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(final_params, coord_system, da, fermi_parameters);
+  //configureNuclearModel(final_params, coord_system, da);
+  da.setFermi2(final_params(0), final_params(1), coord_system);
 }
 
 
@@ -496,7 +467,15 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da, const ve
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(init_params, coord_system, da, fermi_parameters);
+  // init_params have been updated by the minimisation to the optimising params
+  da.setFermi2(init_params(0), init_params(1), coord_system);
+
+  vector<double> ct_coords = da.getFermi2("ct");
+  vector<double> polar_coords = da.getFermi2("polar");
+  fermi_parameters.fermi_c = ct_coords.at(0);
+  fermi_parameters.fermi_t = ct_coords.at(1);
+  fermi_parameters.rms_radius = polar_coords.at(0);
+  fermi_parameters.theta = polar_coords.at(1);
   fermi_parameters.mse = MSE;
 }
 
@@ -527,8 +506,15 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_sy
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(init_params, coord_system, da, fermi_parameters);
+  // init_params have been updated by the minimisation to the optimising params
+  da.setFermi2(init_params(0), init_params(1), coord_system);
   fermi_parameters.mse = MSE;
+  vector<double> ct_coords = da.getFermi2("ct");
+  vector<double> polar_coords = da.getFermi2("polar");
+  fermi_parameters.fermi_c = ct_coords.at(0);
+  fermi_parameters.fermi_t = ct_coords.at(1);
+  fermi_parameters.rms_radius = polar_coords.at(0);
+  fermi_parameters.theta = polar_coords.at(1);
 }
 
 

@@ -171,6 +171,16 @@ class Atom {
   void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
 
   /**
+   * @brief sets the 2 parameter fermi model parameters of the atoms nuclear model.
+   * @note sets the 2pF parameters in ct or polar coordinates. units are in fm.
+   * @param coord_1: half density radius c or rms radius 
+   * @param coord_2: skin thickness t or theta
+   * @param coord_sys: coordinate system "ct" or "polar"
+   * @retval None 
+   */
+  void setFermi2(const double coord_1, const double coord_2, const string coord_sys);
+  
+  /**
    * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
    */
   vector<double> getFermi2(const string coord_sys);
