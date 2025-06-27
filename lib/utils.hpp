@@ -186,4 +186,33 @@ vector<T> vectorOperation(vector<T> v, T x, char op) {
   return ans;
 }
 
+// a constant in the ellipse equation containing fermi_c, fermi_t and uniform radius R
+const double ellipse_const = (7*M_PI*M_PI)/(48*log(3)*log(3));
+/**
+ *
+ *
+ * @brief  A function to transform a parameterisation from polar coordinates to fermi parameters
+ * @note   A function which takes the polar coordinates rms_radius, theta and calculates the corresponding
+ * parameters for the 2 parameter fermi distribution function.
+ *
+ * @param rms_radius: root mean square radius polar fermi parameter used to calculate conventional fermi parameters c and t
+ * @param theta: polar fermi parameter angle used to calculate conventional fermi parameters c and t
+ *
+ * @retval a pair of doubles fermi_c and fermi_t
+ */
+pair<double, double> fermiParameters(double rms_radius, double theta);
+
+/**
+ *
+ *
+ * @brief  A function to calculate the rmsRadius of an atom from its fermi 2pF parameters
+ * @note   this function uses equations relating the 2pF c and t paramters to the equivalent uniform radius sphere model
+ * to calculate the rms_radius of the 2pF model.
+ *
+ * @param fermi_c: half density radius of the 2pF model in fm
+ * @param fermi_t: skin thickness of the 2pF model in fm
+ *
+ * @retval rms_radius: root mean square radius of the 2pF model in fm
+ */
+double rmsRadius(double fermi_c, double fermi_t);
 #endif

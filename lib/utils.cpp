@@ -529,3 +529,20 @@ void writeTabulated2ColFile(vector<double> col1, vector<double> col2, string fna
 
   out.close();
 }
+
+pair<double, double> fermiParameters(double rms_radius, double theta) {
+  // reusing these calculated trig values
+  double var_cos = cos(theta);
+  double var_sin = sin(theta);
+  double uniform_sphere_radius = sqrt(5.0/3.0) * rms_radius;
+  double common_constant = uniform_sphere_radius/sqrt((var_cos*var_cos) + (ellipse_const*var_sin*var_sin));
+  pair<double, double> fermi_parameters = {common_constant*var_cos, common_constant*var_sin};
+  return fermi_parameters;
+}
+
+double rmsRadius(double fermi_c, double fermi_t){
+    double t_const = (7.0*M_PI*M_PI)/(16.0*log(3.0)*log(3.0));
+    double r_sq = (3*fermi_c*fermi_c + t_const*fermi_t*fermi_t)*0.2;
+    double rms_radius = sqrt(r_sq);
+    return rms_radius;
+}
