@@ -199,6 +199,12 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   reset();
 }
 
+/**
+ * @brief gets parameters for the Fermi 2-term potential term in ct or polar coordinates(if used)
+ * @note  gets the fermi2 parameters c and t, or the polar parameters rms radius and theta
+ * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
+ * @retval the 2pF domain coordinates.
+ */
 vector<double> Atom::getFermi2(const string coord_sys){
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
