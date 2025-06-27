@@ -44,23 +44,6 @@ int iteration_counter_2pF = 0;
 /**
  *
  *
- * @brief  A function which finds the default c, t rms radius and theta of an atom as initial values for optimisation
- * @note   This function determines initial values 2pF domain coordinates as a vector with either the ct or polar coordinates
- * based on the coordinate system. The inital values are extracted from the dirac atom, which are either supplied by the user or from the default
- * parameters taken from marinova tables.
- *
- *
- * @param da:     previous dirac atom to be reconfigured
- *  * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
-
- * @retval initial fermi parameters: in coordinates defined by the coordinate system
- *
- */
-void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector & init_params);
-
-/**
- *
- *
  * @brief  A function whichs updates 2pF parameters in a config object and creates a new dirac atom
  * @note   A function which takes polar fermi parameters and updates a config object by reference to generate a dirac atom
  * with a new 2pF model. The convetional and polar fermi parameters are also passed by reference into a structure to contain

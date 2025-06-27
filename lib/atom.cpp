@@ -199,6 +199,22 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   reset();
 }
 
+vector<double> Atom::getFermi2(const string coord_sys){
+  if (rmodel != FERMI2) {
+    LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
+                 << " not using a Fermi 2-term model\n";
+    return {0,0};
+  }
+  if (coord_sys == "ct"){
+    return {fermi_c, fermi_t};
+  }
+  else if (coord_sys == "polar"){
+    double rms_radius_estimate = rmsRadius(fermi_c, fermi_t);
+    double theta_estimate = atan(fermi_t/fermi_c);
+    return {rms_radius_estimate, theta_estimate};
+  }
+}
+
 /**
  * @brief  Set parameters for the Uehling potential term
  * @note   Set up the Uehling potential term, activating/deactivating

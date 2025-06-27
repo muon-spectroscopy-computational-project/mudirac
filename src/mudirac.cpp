@@ -306,32 +306,6 @@ int main(int argc, char *argv[]) {
 }
 
 
-void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector & init_params){
-
-  double fermi_c_init, fermi_t_init;
-  // get c and t after it has either been defined by the user or default values by the marinova tables
-  LOG(DEBUG) << " getting initial fermi parameters \n";
-  tie(fermi_c_init, fermi_t_init) =  da.getFermi2();
-
-  // set starting optimisation paramters based on the coordinate system we optimize over.
-  if (coord_system == "ct"){
-    LOG(DEBUG) << " optimising fermi paramaters using c, t coordinate system \n";
-    LOG(DEBUG) << " initial fermi parameters in fm: ("<< fermi_c_init <<", " << fermi_t_init <<  ") \n";
-    init_params = {fermi_c_init, fermi_t_init};
-  }
-  else if (coord_system == "polar"){
-    // get rms radius estimate from marinova tables
-    LOG(DEBUG) << " optimising fermi paramaters using polar coordinate system \n";
-    LOG(DEBUG) << " getting initial polar fermi parameters \n";
-    double rms_radius_estimate = rmsRadius(fermi_c_init, fermi_t_init);
-    double theta_estimate = atan(fermi_t_init/fermi_c_init);
-    LOG(DEBUG) << " initial polar fermi parameters: ("<< rms_radius_estimate <<" fm, " << theta_estimate << ") \n";
-
-    init_params = {rms_radius_estimate, theta_estimate};
-  }
-}
-
-
 void configureNuclearModel(const column_vector& m, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters) {
   double fermi_c, fermi_t, rms_radius, theta;
   if (coord_system == "polar"){
@@ -413,8 +387,9 @@ double calculateMSE(const column_vector& m, const string coord_system, DiracAtom
 
 void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
-  column_vector init_params;
-  init2pFModelParams(da, coord_system, init_params);
+  
+  vector<double> init_params = da.getFermi2(coord_system);
+
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
@@ -424,16 +399,16 @@ void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, co
   column_vector bound_lower, bound_upper;
   if (coord_system =="polar"){
     // set bounds for rms radius and theta close to Marinova table values
-    double rms_lower = 0.95*init_params(0);
-    double rms_upper = 1.05*init_params(0);
+    double rms_lower = 0.95*init_params.at(0);
+    double rms_upper = 1.05*init_params.at(0);
     double theta_lower = 0;
     double theta_upper = M_PI*0.5;
     bound_lower = {rms_lower, theta_lower};
     bound_upper = {rms_upper, theta_upper};
   }
   else if (coord_system =="ct"){
-    double c_lower = 0.5*init_params(0);
-    double c_upper = 1.5*init_params(0);
+    double c_lower = 0.5*init_params.at(0);
+    double c_upper = 1.5*init_params.at(0);
     double t_lower = 0.01;
     double t_upper = 4;
     bound_lower = {c_lower, t_lower};
@@ -487,8 +462,10 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da, const ve
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
   // initialise starting parameters for optimisation based on the coordinate system
-  column_vector init_params;
-  init2pFModelParams(da, coord_system, init_params);
+  
+  vector<double> fermi_coords = da.getFermi2(coord_system);
+  // change to dlib column vector type
+  column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
@@ -528,8 +505,8 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_sy
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
-  column_vector init_params;
-  init2pFModelParams(da, coord_system, init_params);
+  vector<double> fermi_coords = da.getFermi2(coord_system);
+  column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   double MSE;
