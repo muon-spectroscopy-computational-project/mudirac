@@ -332,7 +332,6 @@ void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector
 }
 
 
-
 void configureNuclearModel(const column_vector& m, const string coord_system, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters) {
   double fermi_c, fermi_t, rms_radius, theta;
   if (coord_system == "polar"){

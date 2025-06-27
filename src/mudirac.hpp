@@ -36,9 +36,6 @@
 using namespace std;
 
 
-vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da);
-
-
 typedef dlib::matrix<double,0,1> column_vector;
 
 int iteration_counter_2pF = 0;

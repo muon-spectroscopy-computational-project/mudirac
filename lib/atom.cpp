@@ -1070,6 +1070,15 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   return tmat;
 }
 
+
+/**
+ * @brief  gets energies and intensities of selected transitions
+ * @note   Returns the TransitionData for each transition line in a vector. The transition
+ * data contains the state names dirac states and transition matrix. 
+ *
+ * @param  transqnums: transition quantum numbers of the initial and final states of each transition
+ * @retval TransitionData
+ */
 vector<TransitionData> DiracAtom::getAllTransitions(vector<TransLineSpec> transqnums){
 
   vector<TransitionData> transitions;
