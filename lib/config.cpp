@@ -84,7 +84,7 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
 
 vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
-
+  LOG(DEBUG) << "parsing transition lines into quantum numbers for start and end states in transitions\n";
   // First we unravel the user specified string
   vector<string> xr_lines = getStringValues("xr_lines");
 
@@ -94,11 +94,14 @@ vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
 
   for (int i = 0; i < xr_lines.size(); ++i) {
     vector<string> ranges = splitString(xr_lines[i], "-");
-    vector<int> n1range, n2range, l1range, l2range;
-    vector<bool> s1range, s2range;
+
+    // initialise princial (n) orbital (l) and spin (s) quantum number ranges
+    vector<int> n1_range, n2_range, l1_range, l2_range;
+    vector<bool> s1_range, s2_range;
 
     LOG(TRACE) << "Parsing XR line specification " << xr_lines[i] << "\n";
 
+    // transitions can only be from 1 initial to 1 final state
     if (ranges.size() != 2) {
       LOG(ERROR) << SPECIAL << "Line " << xr_lines[i] << " can not be interpreted properly\n";
       throw invalid_argument("Invalid spectral line in input file");
@@ -108,26 +111,27 @@ vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
     vector<bool> sr;
 
     parseIupacRange(ranges[0], nr, lr, sr);
-    n1range.insert(n1range.end(), nr.begin(), nr.end());
-    l1range.insert(l1range.end(), lr.begin(), lr.end());
-    s1range.insert(s1range.end(), sr.begin(), sr.end());
+    n1_range.insert(n1_range.end(), nr.begin(), nr.end());
+    l1_range.insert(l1_range.end(), lr.begin(), lr.end());
+    s1_range.insert(s1_range.end(), sr.begin(), sr.end());
 
     parseIupacRange(ranges[1], nr, lr, sr);
-    n2range.insert(n2range.end(), nr.begin(), nr.end());
-    l2range.insert(l2range.end(), lr.begin(), lr.end());
-    s2range.insert(s2range.end(), sr.begin(), sr.end());
+    n2_range.insert(n2_range.end(), nr.begin(), nr.end());
+    l2_range.insert(l2_range.end(), lr.begin(), lr.end());
+    s2_range.insert(s2_range.end(), sr.begin(), sr.end());
 
-    for (int j = 0; j < n1range.size(); ++j) {
-      for (int k = 0; k < n2range.size(); ++k) {
+    for (int j = 0; j < n1_range.size(); ++j) {
+      for (int k = 0; k < n2_range.size(); ++k) {
         TransLineSpec tnums;
-        tnums.n1 = n1range[j];
-        tnums.l1 = l1range[j];
-        tnums.s1 = s1range[j];
+        tnums.n1 = n1_range[j];
+        tnums.l1 = l1_range[j];
+        tnums.s1 = s1_range[j];
 
-        tnums.n2 = n2range[k];
-        tnums.l2 = l2range[k];
-        tnums.s2 = s2range[k];
+        tnums.n2 = n2_range[k];
+        tnums.l2 = l2_range[k];
+        tnums.s2 = s2_range[k];
 
+        // validate transitions
         if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1) {
           continue;
         }
