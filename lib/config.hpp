@@ -25,6 +25,12 @@ using namespace std;
 #ifndef MUDIRAC_CONFIG
 #define MUDIRAC_CONFIG
 
+struct TransLineSpec {
+  int n1, n2;
+  int l1, l2;
+  bool s1, s2;
+};
+
 /**
  * @class MuDiracInputFile
  *
@@ -38,6 +44,7 @@ class MuDiracInputFile : public InputFile {
  public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
+  vector<TransLineSpec> parseXRLines();
 
  private:
   map<string, NuclearRadiusModel> nucmodelmap = {

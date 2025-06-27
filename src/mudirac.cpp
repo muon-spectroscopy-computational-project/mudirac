@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
   // Here we read in the user specific transition lines and return a vector
   // containing the quantum numbers for each state in each transition
-  vector<TransLineSpec> transqnums = parseXRLines(config);
+  vector<TransLineSpec> transqnums = config.parseXRLines();
 
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
@@ -375,67 +375,6 @@ vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, Dirac
 
   return transitions;
 
-}
-/** This takes in the input config and returns a vector of transitiondata
- */
-vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
-
-  // First we unravel the user specified string
-  vector<string> xr_lines = config.getStringValues("xr_lines");
-
-  // Convert the user specified strings into quantum numbers for the start
-  // and end states in the transition
-  vector<TransLineSpec> transqnums;
-
-  for (int i = 0; i < xr_lines.size(); ++i) {
-    vector<string> ranges = splitString(xr_lines[i], "-");
-    vector<int> n1range, n2range, l1range, l2range;
-    vector<bool> s1range, s2range;
-
-    LOG(TRACE) << "Parsing XR line specification " << xr_lines[i] << "\n";
-
-    if (ranges.size() != 2) {
-      LOG(ERROR) << SPECIAL << "Line " << xr_lines[i] << " can not be interpreted properly\n";
-      throw invalid_argument("Invalid spectral line in input file");
-    }
-
-    vector<int> nr, lr;
-    vector<bool> sr;
-
-    parseIupacRange(ranges[0], nr, lr, sr);
-    n1range.insert(n1range.end(), nr.begin(), nr.end());
-    l1range.insert(l1range.end(), lr.begin(), lr.end());
-    s1range.insert(s1range.end(), sr.begin(), sr.end());
-
-    parseIupacRange(ranges[1], nr, lr, sr);
-    n2range.insert(n2range.end(), nr.begin(), nr.end());
-    l2range.insert(l2range.end(), lr.begin(), lr.end());
-    s2range.insert(s2range.end(), sr.begin(), sr.end());
-
-    for (int j = 0; j < n1range.size(); ++j) {
-      for (int k = 0; k < n2range.size(); ++k) {
-        TransLineSpec tnums;
-        tnums.n1 = n1range[j];
-        tnums.l1 = l1range[j];
-        tnums.s1 = s1range[j];
-
-        tnums.n2 = n2range[k];
-        tnums.l2 = l2range[k];
-        tnums.s2 = s2range[k];
-
-        if (tnums.n2 < tnums.n1 || abs(tnums.l2 - tnums.l1) != 1) {
-          continue;
-        }
-
-        transqnums.push_back(tnums);
-
-        LOG(TRACE) << "Identified transition: " << tnums.n1 << ", " << tnums.l1 << ", " << tnums.s1 << "\t";
-        LOG(TRACE) << tnums.n2 << ", " << tnums.l2 << ", " << tnums.s2 << "\n";
-      }
-    }
-  }
-
-  return transqnums;
 }
 
 
