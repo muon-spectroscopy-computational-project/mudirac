@@ -1191,6 +1191,65 @@ vector<TransitionData> DiracAtom::getAllTransitions(vector<TransLineSpec> transq
 
 }
 
+/**
+ *
+ *
+ * @brief  A function which calculates the Mean Square Error between a MuDirac simulation with a 2pF model and experimental measurements.
+ * @note   A function which calculates the non linear Mean Square Error between MuDirac simualted energies and energies experimentally measured.
+ * This function configures a dirac atom with new fermi parameters and calculates the square error between mudirac and experimental values for each muonic xray transition.
+ * The Mean Square error is taken over all measured transitions provided.
+ *
+ * @param m:    polar fermi parameters (rms_radius, theta)
+ * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
+ * @param config:     config object for MuDirac
+ * @param transqnums:     transition quantum numbers required to index the transition energies
+ * @param xr_lines_measured:      vector of measured muonic transitions
+ * @param xr_energies:      vector of measured muonic transition energies
+ * @param xr_errors:      vector of measured muonic transition energy errors
+ *
+ * @retval MSE: Mean Square error between transition energies calculated by MuDirac and measured experimentally.
+ *
+ */
+double DiracAtom::calculateMSE(double coord_1, double coord_2, const string coord_system, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+  ++iteration_counter_2pF;
+  setFermi2(coord_1, coord_2, coord_system);
+  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums);
+  
+  LOG(DEBUG) << "MSE loop \n";
+  double MSE = 0;
+  for (int k = 0; k < transitions_iteration.size(); ++k) {
+    // calculate transition energy and rate
+    double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+    double tRate = transitions_iteration[k].tmat.totalRate();
+
+    // square error for each transitions calculated
+    double square_error = 0;
+
+    if (dE <= 0 || tRate <= 0)
+      continue; // Transition is invisible
+
+    // check transition allign with experimental transitions
+    if (transitions_iteration[k].name == xr_lines_measured[k]) {
+      // convert to eV
+      double transition_energy = dE / Physical::eV;
+
+      // calculate the square error of each transition
+      double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+      double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
+      square_error = square_deviation/valid_uncertainty;
+
+      // output square error to LOG
+      LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
+      MSE += square_error;
+    }
+
+  }
+  MSE = MSE/transitions_iteration.size();
+  // output MSE to LOG
+  LOG(DEBUG) << "MSE: "<< MSE << "\n";
+  return MSE;   
+}
+
 DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
                                double radius, double fc,double dx)
   : DiracAtom(Z, m, A, radius_model, radius, fc, dx, 1) {}

@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
       }
   
       // output file containing best fermi parameters and the associated MSE
-      writeFermiParameters(da, best_fermi_parameters,iteration_counter_2pF, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+      writeFermiParameters(da, best_fermi_parameters, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
     }
 
   }
@@ -306,55 +306,6 @@ int main(int argc, char *argv[]) {
 }
 
 
-double calculateMSE(const column_vector& m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
-  
-  // increment iteration counter
-  iteration_counter_2pF++;
-
-  OptimisationData iteration_parameters;
-
-  // configure the dirac atom with the new fermi parameters in the given coordinate system
-  da.setFermi2(m(0), m(1), coord_system);
-
-  // calculate the energies of the transitions with the new fermi parameters.
-  vector<TransitionData> transitions_iteration = da.getAllTransitions(transqnums);
-
-  LOG(DEBUG) << "MSE loop \n";
-  double MSE = 0;
-  for (int k = 0; k < transitions_iteration.size(); ++k) {
-
-    // calculate transition energy and rate
-    double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
-    double tRate = transitions_iteration[k].tmat.totalRate();
-
-    // square error for each transitions calculated
-    double square_error = 0;
-
-    if (dE <= 0 || tRate <= 0)
-      continue; // Transition is invisible
-
-    // check transition allign with experimental transitions
-    if (transitions_iteration[k].name == xr_lines_measured[k]) {
-      // convert to eV
-      double transition_energy = dE / Physical::eV;
-
-      // calculate the square error of each transition
-      double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
-      double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
-      square_error = square_deviation/valid_uncertainty;
-
-      // output square error to LOG
-      LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
-      MSE += square_error;
-    }
-
-  }
-  MSE = MSE/transitions_iteration.size();
-  // output MSE to LOG
-  LOG(DEBUG) << "MSE: "<< MSE << "\n";
-  return MSE;
-}
-
 void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
   
@@ -389,9 +340,9 @@ void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, co
   auto MSE_lambda = [&](double rms_radius, double theta){
     column_vector x = {rms_radius, theta};
 
-    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
   };
-  
+
   // global optimisation where result.x is opt rms radius and coords, result.y is MSE
   // max run time 10 minutes can be changed
   auto result = dlib::find_min_global(
@@ -418,10 +369,10 @@ void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, co
     fermi_parameters.rms_radius = rmsRadius(final_params(0), final_params(1));
   }
 
-  LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_system << " parameters: "<< final_params <<" \n";
+  LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_system << " parameters: "<< final_params(0)<<", " << final_params(1) <<" \n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
-  LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
   //configureNuclearModel(final_params, coord_system, da);
@@ -445,7 +396,7 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da, const ve
   opt_t0 = chrono::high_resolution_clock::now();
 
    auto MSE_lambda = [&](column_vector x){
-    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
   };
 
   auto der_lambda = [&](column_vector x){
@@ -464,7 +415,7 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da, const ve
   LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_system << " parameters: "<< init_params <<" \n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
-  LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
   // init_params have been updated by the minimisation to the optimising params
@@ -504,7 +455,7 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_sy
   LOG(INFO) << "minimised with MSE: "<< MSE << " and "<< coord_system << "fermi parameters: "<< init_params <<" \n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
-  LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
   // repeat the final configuration of the nuclear model
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_system);
@@ -523,7 +474,7 @@ column_vector MSE_2pF_derivative( const column_vector &m, const string coord_sys
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
   auto MSE_lambda = [&](column_vector x){
-    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
   };
   LOG(DEBUG) << "computing derivative at " << coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
 

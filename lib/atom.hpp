@@ -210,6 +210,7 @@ class DiracAtom : public Atom {
   double out_eps = 1e-5;
   double in_eps = 1e-5;
   int min_n = 1000;
+  int  iteration_counter_2pF =0;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
             double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
@@ -238,6 +239,9 @@ class DiracAtom : public Atom {
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
       int l2, bool s2, bool approx_j0 = false);
   vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums);
+
+  // optimisation
+  double calculateMSE(double coord_1, double coord_2, const string coord_system, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
