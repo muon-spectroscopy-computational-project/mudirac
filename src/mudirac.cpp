@@ -207,14 +207,14 @@ int main(int argc, char *argv[]) {
       double opt_time = 0;
 
       if (min_2pF_algo == "bfgs"){
-        optimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
+        optimizeFermiParameters( coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
       }
       else if (min_2pF_algo =="trust"){
         opt_2pF_model opt_obj(config, coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors);
-        optimizeFermiParameters(opt_obj, coord_system_2pF, config, da, best_fermi_parameters, opt_time);
+        optimizeFermiParameters(opt_obj, coord_system_2pF, da, best_fermi_parameters, opt_time);
       }
       else if (min_2pF_algo=="global"){
-        globalOptimizeFermiParameters(config, coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
+        globalOptimizeFermiParameters( coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
       }
       else {
         cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
@@ -332,7 +332,7 @@ void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector
 }
 
 
-void configureNuclearModel(const column_vector& m, const string coord_system, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters) {
+void configureNuclearModel(const column_vector& m, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters) {
   double fermi_c, fermi_t, rms_radius, theta;
   if (coord_system == "polar"){
     LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
@@ -356,26 +356,21 @@ void configureNuclearModel(const column_vector& m, const string coord_system, Mu
   fermi_parameters.fermi_t = fermi_t;
 
   // set new iteration of fermi parameters in config and get transitions
-  config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
-  config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
+  da.setFermi2(fermi_t * Physical::fm, fermi_c * Physical::fm);
   LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << " fm, " << fermi_t << " fm\n";
   LOG(DEBUG) << " RMS radius: " << rms_radius << " fm, theta: "<< theta << "\n";
-
-  // make the new Dirac atom with the new configuration
-  da = config.makeAtom();
 }
 
 
-double calculateMSE(const column_vector& m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
+double calculateMSE(const column_vector& m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
   
   // increment iteration counter
   iteration_counter_2pF++;
-  // create a new dirac atom
-  DiracAtom da;
+
   OptimisationData iteration_parameters;
 
-  // configure the new dirac atom with the new fermi parameters in the given coordinate system
-  configureNuclearModel(m, coord_system, config, da, iteration_parameters);
+  // configure the dirac atom with the new fermi parameters in the given coordinate system
+  configureNuclearModel(m, coord_system, da, iteration_parameters);
 
   // calculate the energies of the transitions with the new fermi parameters.
   vector<TransitionData> transitions_iteration = da.getAllTransitions(transqnums);
@@ -416,7 +411,7 @@ double calculateMSE(const column_vector& m, const string coord_system, MuDiracIn
   return MSE;
 }
 
-void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
+void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
   column_vector init_params;
   init2pFModelParams(da, coord_system, init_params);
@@ -449,7 +444,7 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   auto MSE_lambda = [&](double rms_radius, double theta){
     column_vector x = {rms_radius, theta};
 
-    return calculateMSE(x,coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
   };
   
   // global optimisation where result.x is opt rms radius and coords, result.y is MSE
@@ -484,11 +479,11 @@ void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(final_params, coord_system, config, da, fermi_parameters);
+  configureNuclearModel(final_params, coord_system, da, fermi_parameters);
 }
 
 
-void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
+void optimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -501,11 +496,19 @@ void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
 
+   auto MSE_lambda = [&](column_vector x){
+    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  };
+
+  auto der_lambda = [&](column_vector x){
+    return MSE_2pF_derivative(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  };
+
   MSE = dlib::find_min(
           dlib::bfgs_search_strategy(),
           dlib::objective_delta_stop_strategy(1e-2).be_verbose(),  // gradient change < 0.01
-          std::bind(&calculateMSE, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
-          std::bind(&MSE_2pF_derivative, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors),
+          MSE_lambda,
+          der_lambda,
           init_params,
           -1);
   
@@ -516,12 +519,12 @@ void optimizeFermiParameters(MuDiracInputFile &config, const string coord_system
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
 
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(init_params, coord_system, config, da, fermi_parameters);
+  configureNuclearModel(init_params, coord_system, da, fermi_parameters);
   fermi_parameters.mse = MSE;
 }
 
 
-void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time){
+void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time){
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -547,20 +550,22 @@ void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, 
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
   LOG(INFO) << "minimised using " << iteration_counter_2pF <<" iterations from MuDirac objective function \n";
   // repeat the final configuration of the nuclear model
-  configureNuclearModel(init_params, coord_system, config, da, fermi_parameters);
+  configureNuclearModel(init_params, coord_system, da, fermi_parameters);
   fermi_parameters.mse = MSE;
 }
 
 
-const column_vector MSE_2pF_derivative( const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors ) {
+column_vector MSE_2pF_derivative( const column_vector &m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors ) {
 
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
-  auto MSE_2pF = std::bind(&calculateMSE, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  auto MSE_lambda = [&](column_vector x){
+    return calculateMSE(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  };
   LOG(DEBUG) << "computing derivative at " << coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
 
   // get the derivative by central differences
-  auto res_func = dlib::derivative(MSE_2pF, 1e-7);
+  auto res_func = dlib::derivative(MSE_lambda, 1e-7);
   //LOG(DEBUG) << " computing derivative, config fermi parameters: (" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   // get the values of the derivative at m as a column vector?
   auto res = res_func(m);
@@ -570,7 +575,7 @@ const column_vector MSE_2pF_derivative( const column_vector &m, const string coo
 
 
 
-dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
   dlib::matrix<double> res(2,2);
   
   // choose derivative step size
@@ -578,12 +583,14 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, const string coord_
   double d_theta = 1e-7;
   column_vector delta_r = {d_r, 0};
   column_vector delta_theta = {0, d_theta};
-  LOG(DEBUG) << "computing hessian at" << coord_system << "fermi parameters (" << m(0) << ", " << m(1) <<") \n";
+  LOG(DEBUG) << "computing hessian at " << coord_system << " fermi parameters (" << m(0) << ", " << m(1) <<") \n";
   //LOG(DEBUG) << "computing hessian at config fermi parameters(" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
-  auto MSE_derivative = std::bind(&MSE_2pF_derivative, std::placeholders::_1, coord_system, config, transqnums, xr_lines_measured, xr_energies, xr_errors); 
+  auto der_lambda = [&](column_vector x){
+    return MSE_2pF_derivative(x,coord_system, da, transqnums, xr_lines_measured, xr_energies, xr_errors);
+  };
 
-  auto hess_r_component = (MSE_derivative(m + delta_r) - MSE_derivative(m - delta_r));
-  auto hess_theta_component = (MSE_derivative(m + delta_theta) - MSE_derivative(m - delta_theta));
+  auto hess_r_component = (der_lambda(m + delta_r) - der_lambda(m - delta_r));
+  auto hess_theta_component = (der_lambda(m + delta_theta) - der_lambda(m - delta_theta));
   //LOG(DEBUG) << "computed hessian, config fermi parameters(" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
   // hessian df/dc^2 component
   res(0,0) = hess_r_component(0,0)/(2*d_r);

@@ -75,7 +75,7 @@ void init2pFModelParams(DiracAtom & da, const string coord_system, column_vector
  * @retval None
  *
  */
-void configureNuclearModel(const column_vector& m,const string coord_system, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
+void configureNuclearModel(const column_vector& m,const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters);
 
 
 /**
@@ -97,7 +97,7 @@ void configureNuclearModel(const column_vector& m,const string coord_system, MuD
  * @retval MSE: Mean Square error between transition energies calculated by MuDirac and measured experimentally.
  *
  */
-double calculateMSE(const column_vector& m,const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+double calculateMSE(const column_vector& m,const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 
 /**
@@ -121,7 +121,7 @@ double calculateMSE(const column_vector& m,const string coord_system, MuDiracInp
  * @retval: None
  *
  */
-void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
 
 
 
@@ -143,7 +143,7 @@ void optimizeFermiParameters(MuDiracInputFile &config,const string coord_system,
  * @retval derivative: dlib::column_vector (length 2)
  *
  */
-const column_vector MSE_2pF_derivative(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+column_vector MSE_2pF_derivative(const column_vector &m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 
 /**
@@ -165,7 +165,7 @@ const column_vector MSE_2pF_derivative(const column_vector &m, const string coor
  * @retval hessian matrix: dlib::matrix (2x2)
  *
  */
-dlib::matrix<double> MSE_2pF_hessian(const column_vector &m, const string coord_system, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 
 /**
  * 
@@ -184,6 +184,7 @@ class opt_2pF_model
     typedef ::column_vector column_vector;
     typedef dlib::matrix<double> general_matrix;
     MuDiracInputFile config;
+    DiracAtom da;
     vector<TransLineSpec> transqnums;
     vector<string> xr_lines_measured;
     vector<double> xr_energies;
@@ -191,8 +192,9 @@ class opt_2pF_model
     string coord_sys;
 
     // constructor
-    opt_2pF_model(MuDiracInputFile cfg,const string coord_system, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
+    opt_2pF_model(MuDiracInputFile cfg, const string coord_system, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
       config = cfg;
+      da = config.makeAtom();
       transqnums = tqn;
       xr_lines_measured = xr_lines;
       xr_energies = xr_e;
@@ -202,17 +204,21 @@ class opt_2pF_model
 
     double operator() (
       const column_vector& x
-    )  const {return calculateMSE(x, coord_sys, config, transqnums, xr_lines_measured, xr_energies, xr_errors);}
+    ) const {
+      DiracAtom da_1 = da;
+      return calculateMSE(x,coord_sys, da_1, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    }
 
     // function for the dlib minisation routine to get the derivative and hessian
     void get_derivative_and_hessian (
       const column_vector& x,
       column_vector& der,
       general_matrix & hess
-    ) const 
+    ) const
     {
-      der = MSE_2pF_derivative(x,coord_sys, config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
-      hess = MSE_2pF_hessian(x, coord_sys, config,  transqnums, xr_lines_measured, xr_energies, xr_errors);
+      DiracAtom da_1 = da;
+      der = MSE_2pF_derivative(x,coord_sys, da_1, transqnums, xr_lines_measured, xr_energies, xr_errors);
+      hess = MSE_2pF_hessian(x, coord_sys, da_1,  transqnums, xr_lines_measured, xr_energies, xr_errors);
     }
 };
 
@@ -233,7 +239,7 @@ class opt_2pF_model
  * @retval: None
  *
  */
-void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, MuDiracInputFile & config, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
 
 /**
@@ -257,4 +263,4 @@ void optimizeFermiParameters(opt_2pF_model &opt_obj, const string coord_system, 
  * @retval: None
  *
  */
-void globalOptimizeFermiParameters(MuDiracInputFile &config, const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
+void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
