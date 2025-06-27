@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
   // Default mudirac behaviour
   // Wrapped the calculation of the states, their energies and the transition probabilities into here,
   // so that we can easily loop over it for least squares optimisation
-  transitions = getAllTransitions(transqnums, da);
+  transitions = da.getAllTransitions(transqnums);
 
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
@@ -303,78 +303,6 @@ int main(int argc, char *argv[]) {
   t1 = chrono::high_resolution_clock::now();
 
   LOG(INFO) << "Calculation completed in " << chrono::duration_cast<chrono::milliseconds>(t1 - t0).count() / 1.0e3 << " seconds\n";
-}
-
-// Calculate the states and transition probabilities
-vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da) {
-
-  vector<TransitionData> transitions;
-  vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
-  for (int i = 0; i < transqnums.size(); ++i) {
-    int n1, l1, n2, l2;
-    bool s1, s2;
-    bool success = true;
-    TransitionData tdata;
-
-    n1 = transqnums[i].n1;
-    l1 = transqnums[i].l1;
-    s1 = transqnums[i].s1;
-    n2 = transqnums[i].n2;
-    l2 = transqnums[i].l2;
-    s2 = transqnums[i].s2;
-
-    tdata.sname1 = printIupacState(n1, l1, s1);
-    tdata.sname2 = printIupacState(n2, l2, s2);
-    tdata.name = tdata.sname1 + "-" + tdata.sname2;
-
-    // Have these been tried before?
-    if (vectorContains(failconv_states, tdata.sname1)) {
-      LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname1 << " failed to converge before\n";
-      continue;
-    }
-    if (vectorContains(failconv_states, tdata.sname2)) {
-      LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname2 << " failed to converge before\n";
-      continue;
-    }
-
-    LOG(INFO) << "Computing transition " << tdata.name << "\n";
-
-    try {
-      LOG(INFO) << "Computing state " << tdata.sname1 << "\n";
-
-      // Here we actually solve for the first state
-      tdata.ds1 = da.getState(n1, l1, s1);
-      LOG(INFO) << "Computing state " << tdata.sname2 << "\n";
-
-      // Here we actually solve for the final state
-      tdata.ds2 = da.getState(n2, l2, s2);
-    } catch (AtomErrorCode aerr) {
-      LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << tdata.name << " failed with AtomErrorCode " << aerr << "\n";
-      success = false;
-    } catch (const exception &e) {
-      LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
-      success = false;
-    }
-    if (!success) {
-      LOG(INFO) << "Convergence of one state failed for line " << tdata.name << ", skipping\n";
-      if (!tdata.ds1.converged) {
-        failconv_states.push_back(tdata.sname1);
-      } else {
-        failconv_states.push_back(tdata.sname2);
-      }
-      continue;
-    }
-
-    // Compute transition probability
-    tdata.tmat = da.getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
-
-    LOG(INFO) << "Transition energy = " << (tdata.ds2.E - tdata.ds1.E) / (Physical::eV * 1000) << " kEv\n";
-
-    transitions.push_back(tdata);
-  }
-
-  return transitions;
-
 }
 
 
@@ -451,7 +379,7 @@ double calculateMSE(const column_vector& m, const string coord_system, MuDiracIn
   configureNuclearModel(m, coord_system, config, da, iteration_parameters);
 
   // calculate the energies of the transitions with the new fermi parameters.
-  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, da);
+  vector<TransitionData> transitions_iteration = da.getAllTransitions(transqnums);
 
   LOG(DEBUG) << "MSE loop \n";
   double MSE = 0;

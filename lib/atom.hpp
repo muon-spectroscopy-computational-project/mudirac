@@ -63,6 +63,12 @@ class TransitionMatrix {
   double totalRate();
 };
 
+struct TransLineSpec {
+  int n1, n2;
+  int l1, l2;
+  bool s1, s2;
+};
+
 struct TransitionData {
   string name;
   string sname1;
@@ -223,6 +229,7 @@ class DiracAtom : public Atom {
   DiracState getState(int n, int l, bool s);
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
       int l2, bool s2, bool approx_j0 = false);
+  vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
