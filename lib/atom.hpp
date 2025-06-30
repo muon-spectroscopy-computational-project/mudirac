@@ -264,11 +264,11 @@ class DiracAtom : public Atom {
 
   // Full energy calculation
 
-  vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums);
+  vector<TransitionData> getAllTransitions();
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<TransLineSpec> trans_q_n, const vector<string> xr_lines,const vector<double> xr_e,const vector<double> xr_err, OptimisationData fermi_ps,double  opt_t){
+  void setExpOptData(string coord_sys, const vector<TransLineSpec> trans_q_n, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err, OptimisationData fermi_ps, double  opt_t){
     iteration_counter_2pF =0;
     coord_system = coord_sys;
     transqnums = trans_q_n;
@@ -279,7 +279,7 @@ class DiracAtom : public Atom {
     opt_time = 0.0;
   }
 
-  double calculateMSE(double coord_1, double coord_2, const string coord_system, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+  double calculateMSE(double coord_1, double coord_2);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only

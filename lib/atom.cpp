@@ -1120,7 +1120,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
  * @param  transqnums: transition quantum numbers of the initial and final states of each transition
  * @retval TransitionData
  */
-vector<TransitionData> DiracAtom::getAllTransitions(vector<TransLineSpec> transqnums){
+vector<TransitionData> DiracAtom::getAllTransitions(){
 
   vector<TransitionData> transitions;
   vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
@@ -1210,10 +1210,10 @@ vector<TransitionData> DiracAtom::getAllTransitions(vector<TransLineSpec> transq
  * @retval MSE: Mean Square error between transition energies calculated by MuDirac and measured experimentally.
  *
  */
-double DiracAtom::calculateMSE(double coord_1, double coord_2, const string coord_system, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors){
+double DiracAtom::calculateMSE(double coord_1, double coord_2){
   ++iteration_counter_2pF;
   setFermi2(coord_1, coord_2, coord_system);
-  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums);
+  vector<TransitionData> transitions_iteration = getAllTransitions();
   
   LOG(DEBUG) << "MSE loop \n";
   double MSE = 0;

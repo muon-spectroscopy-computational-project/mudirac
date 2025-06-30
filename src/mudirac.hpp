@@ -144,7 +144,7 @@ class opt_2pF_model
       const column_vector& x
     ) const {
       DiracAtom da_1 = da;
-      return da_1.calculateMSE(x(0), x(1),coord_sys, transqnums, xr_lines_measured, xr_energies, xr_errors);
+      return da_1.calculateMSE(x(0), x(1));
     }
 
     // function for the dlib minisation routine to get the derivative and hessian

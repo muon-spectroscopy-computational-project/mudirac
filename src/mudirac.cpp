@@ -206,6 +206,10 @@ int main(int argc, char *argv[]) {
       const string min_2pF_algo = config.getStringValue("min_2pF_algorithm");
       double opt_time = 0;
 
+      // set all optimization values in Dirac Atom
+
+      da.setExpOptData(coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
+
       if (min_2pF_algo == "bfgs"){
         optimizeFermiParameters( coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
       }
@@ -234,7 +238,7 @@ int main(int argc, char *argv[]) {
   // Default mudirac behaviour
   // Wrapped the calculation of the states, their energies and the transition probabilities into here,
   // so that we can easily loop over it for least squares optimisation
-  transitions = da.getAllTransitions(transqnums);
+  transitions = da.getAllTransitions();
 
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
@@ -338,9 +342,7 @@ void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, co
 
   // lambda function for MSE required for dlib find min global
   auto MSE_lambda = [&](double rms_radius, double theta){
-    column_vector x = {rms_radius, theta};
-
-    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(rms_radius, theta);
   };
 
   // global optimisation where result.x is opt rms radius and coords, result.y is MSE
@@ -396,7 +398,7 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da, const ve
   opt_t0 = chrono::high_resolution_clock::now();
 
    auto MSE_lambda = [&](column_vector x){
-    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(x(0), x(1));
   };
 
   auto der_lambda = [&](column_vector x){
@@ -474,7 +476,7 @@ column_vector MSE_2pF_derivative( const column_vector &m, const string coord_sys
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
   auto MSE_lambda = [&](column_vector x){
-    return da.calculateMSE(x(0), x(1), coord_system, transqnums, xr_lines_measured, xr_energies, xr_errors);
+    return da.calculateMSE(x(0), x(1));
   };
   LOG(DEBUG) << "computing derivative at " << coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
 
