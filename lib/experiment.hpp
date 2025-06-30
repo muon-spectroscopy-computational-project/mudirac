@@ -37,16 +37,4 @@ class ExperimentalResultFile : public InputFile {
 };
 
 
-/**
- * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
- *
- */
-struct OptimisationData {
-  double rms_radius;
-  double theta;
-  double mse;
-  double fermi_c;
-  double fermi_t;
-};
-
 #endif

@@ -78,6 +78,20 @@ struct TransitionData {
   TransitionMatrix tmat;
 };
 
+
+/**
+ * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
+ *
+ */
+struct OptimisationData {
+  double rms_radius;
+  double theta;
+  double mse;
+  double fermi_c;
+  double fermi_t;
+};
+
+
 class Atom {
  public:
   // Tolerances and other details
@@ -210,7 +224,16 @@ class DiracAtom : public Atom {
   double out_eps = 1e-5;
   double in_eps = 1e-5;
   int min_n = 1000;
+
+  // 2pF optimisation attributes
   int  iteration_counter_2pF =0;
+  string coord_system;
+  vector<TransLineSpec> transqnums;
+  vector<string> xr_lines_measured;
+  vector<double> xr_energies;
+  vector<double> xr_errors;
+  OptimisationData fermi_parameters;
+  double  opt_time;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
             double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
@@ -238,9 +261,24 @@ class DiracAtom : public Atom {
   DiracState getState(int n, int l, bool s);
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
       int l2, bool s2, bool approx_j0 = false);
+
+  // Full energy calculation
+
   vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums);
 
   // optimisation
+
+  void setExpOptData(string coord_sys, const vector<TransLineSpec> trans_q_n, const vector<string> xr_lines,const vector<double> xr_e,const vector<double> xr_err, OptimisationData fermi_ps,double  opt_t){
+    iteration_counter_2pF =0;
+    coord_system = coord_sys;
+    transqnums = trans_q_n;
+    xr_lines_measured = xr_lines;
+    xr_energies = xr_e;
+    xr_errors = xr_err;
+    fermi_parameters = fermi_ps;
+    opt_time = 0.0;
+  }
+
   double calculateMSE(double coord_1, double coord_2, const string coord_system, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
 };
 
