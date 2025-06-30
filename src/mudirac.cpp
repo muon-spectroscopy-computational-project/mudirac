@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     ExperimentalResultFile measurements;
 
     // switch to continue with optimisation if read is successful
-    bool xr_measurement_read_success = false;
+    bool xr_read = false;
     try {
       measurements.parseFile(argv[2]);
 
@@ -131,51 +131,15 @@ int main(int argc, char *argv[]) {
     }
 
     // read the measured transition lines
-    vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
-    LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
-    for (auto transition: xr_lines_measured) {
-      LOG(DEBUG) << transition << ", ";
-    }
-    LOG(DEBUG) << "\n";
+    xr_read = measurements.validate();
 
-    // read the measured transition energies
-    vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
-    LOG(DEBUG) << "Reading experimental Xray energies: ";
-    for (auto transition_energy: xr_energies) {
-      LOG(DEBUG) << transition_energy << ", ";
-    }
-    LOG(DEBUG) << "\n";
-
-    // read the measured transition errors
-    vector<double> xr_errors = measurements.getDoubleValues("xr_error");
-    LOG(DEBUG) << "Reading experimental Xray energy errors: ";
-    for (auto transition_energy_error: xr_errors) {
-      LOG(DEBUG) << transition_energy_error << ", ";
-    }
-    LOG(DEBUG) << "\n";
-
-    // checking that the file has contents and not the default values
-    LOG(DEBUG) << "Validating experimental results input \n";
-    if (xr_lines_measured[0] == "") {
-      cout << "Experimental results input file is empty\n";
-      cout << "Please check the filename of the experimental results input file \n";
-      cout << "Quitting...\n";
-      return -1;
-    }
-
-    // check that the data provided is complete: all transitions measured have energies and errors
-    if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
-      xr_measurement_read_success = true;
-    } else {
-      cout << "Invalid experimental measurements file: Missing input values\n";
-      cout << "please check energies and errors are listed for each xray transition line \n";
-      cout << "Quitting...\n";
-      return -1;
-
-    }
-
-    if (xr_measurement_read_success) {
+    if (xr_read) {
+      
       LOG(INFO) << "Successfully read xray measurements input file \n";
+      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+      
       // data structure for storing best parameters.
       OptimisationData best_fermi_parameters;
       double MSE =0;
@@ -207,7 +171,6 @@ int main(int argc, char *argv[]) {
       double opt_time = 0;
 
       // set all optimization values in Dirac Atom
-
       da.setExpOptData(coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
 
       if (min_2pF_algo == "bfgs"){
