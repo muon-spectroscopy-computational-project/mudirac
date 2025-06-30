@@ -34,6 +34,13 @@ using namespace std;
 class ExperimentalResultFile : public InputFile {
  public:
   ExperimentalResultFile(void);
+
+  /**
+   * @brief: validates experminental xray input file
+   * @note: validates the XR input file for correct keywords, types and
+   * completeness. Exits the program if invalid.
+   * @retval: none
+   */
   void validate();
 };
 

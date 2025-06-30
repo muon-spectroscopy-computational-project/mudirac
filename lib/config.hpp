@@ -40,6 +40,18 @@ class MuDiracInputFile : public InputFile {
  public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
+
+  /**
+   * 
+   * @brief: Validates the input file for optimisations settings
+   * @note: validates the number of arguments passed to mudirac, the nuclear model,
+   * the choice of coordinate system and the optimisation algorithm.
+   * 
+   * @param args: argc the number of arguments passed to MuDirac
+   * @param coords: the coordinate system (corrected to default if invalid)
+   * @param min_2pF_algo: the minimisation algorithm (corrected to default if invalid)
+   * @retval: None
+   */
   void validateOptimisation(int args, string &coords, string &min_2pF_algo);
   
   /**
