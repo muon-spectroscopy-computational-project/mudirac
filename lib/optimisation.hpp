@@ -15,15 +15,9 @@ typedef dlib::matrix<double,0,1> column_vector;
  * default values for the Dirac atom. The starting theta value is set at 0.3 radians.
  *
  *
- * @param config:     config object for MuDirac updated in every iteration
- * @param coord_system: "ct" or "polar" coordinate system the optimisation routine optimises over to configure the nuclear model of each iteration.
  * @param da:     Dirac atom with 2pF model updated in every iteration
- * @param transqnums:     transition quantum numbers required to index the transition energies
- * @param xr_lines_measured:      vector of measured muonic transitions
- * @param xr_energies:      vector of measured muonic transition energies
- * @param xr_errors:      vector of measured muonic transition energy errors
  * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- *
+ * @param opt_time: time taken to complete the optimisation
  * @retval: None
  *
  */
@@ -55,14 +49,7 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da);
  * The Hessian is left un symmetrised as this yielded better optimisation results. 
  *
  * @param m: fermi parameters in ct or polar coordinates
- * @param coord_system: "ct" or "polar" determines the coordinate system the hessian function will use.
- * @param config:     config object for the initial dirac atom
- * @param transqnums:     transition quantum numbers required to index the transition energies
- * @param xr_lines_measured:      vector of measured muonic transitions
- * @param xr_energies:      vector of measured muonic transition energies
- * @param xr_errors:      vector of measured muonic transition energy errors
-*
- *
+ * @param da: Dirac atom used to calculate all the energies.
  * @retval hessian matrix: dlib::matrix (2x2)
  *
  */
@@ -120,11 +107,9 @@ class opt_2pF_model
  * default values for the Dirac atom. The starting theta value is set at 0.3 radians.
  *@param opt_obj: object defined for dlib optmisation routines which has the experimental values as attributes already defined.
  The operator function of this functor is the objective function for minimisation and the functor also has functions for the derivative and hessian.
- * @param coord_system:   either "ct" or "polar" sets the coordinate system ised by the minisation algorithm.
- * @param config:     config object for MuDirac updated in every iteration
  * @param da:     Dirac atom with 2pF model updated in every iteration
  * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- *
+ * @param opt_time: time taken to complete the optimisation
  * @retval: None
  *
  */
@@ -140,18 +125,22 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
  * given by default. The optimization is limited to 10 minutes.
  *
  *
- * @param config:     config object for MuDirac updated in every iteration
- * @param coord_system: "ct" or "polar" coordinate system the optimisation routine optimises over to configure the nuclear model of each iteration.
  * @param da:     Dirac atom with 2pF model updated in every iteration
  * @param transqnums:     transition quantum numbers required to index the transition energies
- * @param xr_lines_measured:      vector of measured muonic transitions
- * @param xr_energies:      vector of measured muonic transition energies
- * @param xr_errors:      vector of measured muonic transition energy errors
  * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- *
+ * @param opt_time: time taken to complete the optimisation
  * @retval: None
  *
  */
 void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
+
+/**
+ * @brief: Function which wraps the other 2pF optimisation functions and validates the algorithm choice
+ * 
+ * @param da: dirac atom used for the minimisation calculations
+ * @param algo: the selected minimisation algorithm
+ * @param best_fermi_parameters: stores the values of c, t, rms radius, theta and MSE of the optimal fermi parameters.
+ * @param opt_time: time taken to complete the optimisation.
+ */
 void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time);
