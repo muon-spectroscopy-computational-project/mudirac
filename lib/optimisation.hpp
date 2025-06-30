@@ -27,7 +27,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * @retval: None
  *
  */
-void optimizeFermiParameters(const string coord_system, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
 
 
@@ -38,18 +38,13 @@ void optimizeFermiParameters(const string coord_system, DiracAtom & da,const vec
  * @note   This function uses the dlib derivative method to numerically calculate the derivate of the calculateMSE function. The derivative value is returned as a dlib column vector and can be used in minimisation routines.
  *
  * @param m: fermi parameters in ct or polar coordinates
- * @param coord_system: "ct" or "polar" determines the coordinate system the derivative function will use.
- * @param config:     config object for MuDirac updated in every iteration
- * @param transqnums:     transition quantum numbers required to index the transition energies
- * @param xr_lines_measured:      vector of measured muonic transitions
- * @param xr_energies:      vector of measured muonic transition energies
- * @param xr_errors:      vector of measured muonic transition energy errors
+* @param da: Dirac atom used to calculate all the energies.
 *
  *
  * @retval derivative: dlib::column_vector (length 2)
  *
  */
-column_vector MSE_2pF_derivative(const column_vector &m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da);
 
 
 /**
@@ -71,7 +66,7 @@ column_vector MSE_2pF_derivative(const column_vector &m, const string coord_syst
  * @retval hessian matrix: dlib::matrix (2x2)
  *
  */
-dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, const string coord_system, DiracAtom & da, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da);
 
 /**
  * 
@@ -90,20 +85,10 @@ class opt_2pF_model
     typedef ::column_vector column_vector;
     typedef dlib::matrix<double> general_matrix;
     DiracAtom da;
-    vector<TransLineSpec> transqnums;
-    vector<string> xr_lines_measured;
-    vector<double> xr_energies;
-    vector<double> xr_errors;
-    string coord_sys;
 
     // constructor
-    opt_2pF_model(DiracAtom d_a, const string coord_system, const vector<TransLineSpec> tqn, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_er){
+    opt_2pF_model(DiracAtom d_a){
       da = d_a;
-      transqnums = tqn;
-      xr_lines_measured = xr_lines;
-      xr_energies = xr_e;
-      xr_errors = xr_er;
-      coord_sys = coord_system;
     }
 
     double operator() (
@@ -121,8 +106,8 @@ class opt_2pF_model
     ) const
     {
       DiracAtom da_1 = da;
-      der = MSE_2pF_derivative(x,coord_sys, da_1, transqnums, xr_lines_measured, xr_energies, xr_errors);
-      hess = MSE_2pF_hessian(x, coord_sys, da_1,  transqnums, xr_lines_measured, xr_energies, xr_errors);
+      der = MSE_2pF_derivative(x, da_1);
+      hess = MSE_2pF_hessian(x, da_1);
     }
 };
 
@@ -143,7 +128,7 @@ class opt_2pF_model
  * @retval: None
  *
  */
-void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_system, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
 
 
 /**
@@ -167,4 +152,4 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, const string coord_sy
  * @retval: None
  *
  */
-void globalOptimizeFermiParameters(const string coord_system, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters, double & opt_time);
+void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);

@@ -211,14 +211,14 @@ int main(int argc, char *argv[]) {
       da.setExpOptData(coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
 
       if (min_2pF_algo == "bfgs"){
-        optimizeFermiParameters( coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
+        optimizeFermiParameters(da, best_fermi_parameters, opt_time);
       }
       else if (min_2pF_algo =="trust"){
-        opt_2pF_model opt_obj(da, coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors);
-        optimizeFermiParameters(opt_obj, coord_system_2pF, da, best_fermi_parameters, opt_time);
+        opt_2pF_model opt_obj(da);
+        optimizeFermiParameters(opt_obj, da, best_fermi_parameters, opt_time);
       }
       else if (min_2pF_algo=="global"){
-        globalOptimizeFermiParameters( coord_system_2pF, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
+        globalOptimizeFermiParameters(da, best_fermi_parameters, opt_time);
       }
       else {
         cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
