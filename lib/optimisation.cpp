@@ -1,3 +1,15 @@
+/**
+ * MuDirac - A muonic atom Dirac equation solver
+ * by Simone Sturniolo (2019-2020)
+ *
+ * optimisation.cpp
+ *
+ * Functions for optimising the dirac atom nuclear model parameters.
+ *
+ * @author Milan Kumar
+ * @version 1.0 30/06/2025
+ */
+
 
 #include "optimisation.hpp"
 
