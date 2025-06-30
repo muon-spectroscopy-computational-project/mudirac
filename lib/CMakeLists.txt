@@ -14,10 +14,14 @@ add_library(wavefunction STATIC wavefunction.cpp)
 add_library(config STATIC config.cpp)
 add_library(experiment STATIC experiment.cpp)
 add_library(debugtasks STATIC debugtasks.cpp)
+add_library(optimisation STATIC optimisation.cpp)
+target_link_libraries(optimisation dlib::dlib)
+
+
 
 # Define interface library
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE debugtasks config experiment output
                       atom boundary state potential
                       econfigs hydrogenic transforms
-                      wavefunction integrate elements input utils)
+                      wavefunction integrate elements input utils optimisation)

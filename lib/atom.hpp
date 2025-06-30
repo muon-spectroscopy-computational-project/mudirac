@@ -290,4 +290,5 @@ class DiracIdealAtom : public DiracAtom {
                  double radius = -1, double fc = 1.0, double dx = 0.005);
 };
 
+
 #endif

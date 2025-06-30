@@ -1253,3 +1253,5 @@ double DiracAtom::calculateMSE(double coord_1, double coord_2){
 DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
                                double radius, double fc,double dx)
   : DiracAtom(Z, m, A, radius_model, radius, fc, dx, 1) {}
+
+
