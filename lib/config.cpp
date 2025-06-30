@@ -214,3 +214,58 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   return da;
 }
+
+void MuDiracInputFile::validateOptimisation(int args, string &coords, string &min_2pF_algo){
+  // check the experimental results input file is provided
+  if (args < 3) {
+    LOG(ERROR) << "Experimental results input file missing\n";
+    LOG(ERROR) << "When optimise_fermi_parameters is True, an additional experimental results file is expected\n";
+    LOG(ERROR) << "Please use the program as `mudirac <input_file> <experimental_results_input_file>`\n";
+    LOG(ERROR) << "If experimental results cannot be provided, optimise_fermi_parameters should be set to False \n";
+    LOG(ERROR) << "Quitting...\n";
+    exit(0);
+  }
+  LOG(DEBUG) << "Minimum file arguments for 2pF optimisation provided \n";
+
+  // check the nuclear model is suitable for optimisation
+  if(getStringValue("nuclear_model") != "FERMI2") {
+    LOG(ERROR) << "nuclear model parameters can only be optimised for the 2 parameter Fermi model\n";
+    LOG(ERROR) << "Please add the line `nuclear_model: FERMI2` to your first input file\n";
+    LOG(ERROR) << "Quitting...\n";
+    exit(0);
+  }
+  LOG(DEBUG) << "nuclear model correctly set to \"FERMI2\" \n";
+
+  // check the coordinate system is valid
+  coords = this->getStringValue("2pF_coords");
+
+  // get the 2pF optimsation coordinate system (dev)
+
+
+  if (!((coords == "ct")||(coords == "polar"))){
+    LOG(WARNING)<< "Invalid 2pF coordinate system choice for minimsation\n";
+    LOG(WARNING)<< "please use \"ct\" or \"polar\" (default is \"polar\") \n";
+    LOG(WARNING)<< "You used: \""<<coords <<"\" \n";
+    LOG(INFO) << "Using default polar coordinate system\n";
+    coords = "polar";
+  }
+  
+  if (this->getIntValue("isotope") < 5) {
+    LOG(INFO) << "using ct coordinate system as polar parameterisation no longer holds for A < 5 \n";
+    coords = "ct";
+  }
+
+  LOG(DEBUG) << "optimisation coordinate system valid\n";
+
+  // check the algorithm is valid
+  min_2pF_algo = this->getStringValue("min_2pF_algorithm");
+  
+  if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust"))){
+    LOG(WARNING)<< "Invalid 2pF algorithm for minimsation\n";
+    LOG(WARNING)<< "please use \"bfgs\" or \"global\" (default is \"trust\") \n";
+    LOG(WARNING)<< "You used: \""<<min_2pF_algo<<"\" \n";
+    LOG(INFO) << "Using default optimisation algorithm bfgs\n";
+    min_2pF_algo = "bfgs";
+  }
+  LOG(DEBUG) << "Settings for optimisation are valid\n";
+}

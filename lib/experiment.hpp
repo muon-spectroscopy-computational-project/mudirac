@@ -34,7 +34,7 @@ using namespace std;
 class ExperimentalResultFile : public InputFile {
  public:
   ExperimentalResultFile(void);
-  bool validate();
+  void validate();
 };
 
 

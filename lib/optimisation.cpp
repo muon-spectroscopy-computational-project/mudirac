@@ -214,3 +214,23 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da){
   return res;
 
 }
+
+void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time){
+    if (algo == "bfgs"){
+        optimizeFermiParameters(da, best_fermi_parameters, opt_time);
+        }
+    else if (algo == "trust"){
+        opt_2pF_model opt_obj(da);
+        optimizeFermiParameters(opt_obj, da, best_fermi_parameters, opt_time);
+    }
+    else if (algo=="global"){
+        globalOptimizeFermiParameters(da, best_fermi_parameters, opt_time);
+    }
+    else {
+        cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
+        cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
+        cout << "You used: \""<<algo<<"\" \n";
+        cout << "Quitting...\n";
+        LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
+    }
+}

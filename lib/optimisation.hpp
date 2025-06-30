@@ -153,3 +153,5 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
  *
  */
 void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+
+void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time);

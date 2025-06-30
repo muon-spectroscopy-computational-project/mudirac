@@ -40,6 +40,7 @@ class MuDiracInputFile : public InputFile {
  public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
+  void validateOptimisation(int args, string &coords, string &min_2pF_algo);
   
   /**
    * @brief A function which parses the input xray transition lines and returns the

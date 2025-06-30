@@ -23,7 +23,7 @@ ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
 
 }
 
-bool ExperimentalResultFile::validate() {
+void ExperimentalResultFile::validate() {
   // read the measured transition lines
   vector<string> xr_lines_measured = getStringValues("xr_lines");
   LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
@@ -54,18 +54,16 @@ bool ExperimentalResultFile::validate() {
     cout << "Experimental results input file is empty\n";
     cout << "Please check the filename of the experimental results input file \n";
     cout << "Quitting...\n";
-    return -1;
+    exit(0);
   }
 
   // check that the data provided is complete: all transitions measured have energies and errors
   if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
     LOG(DEBUG) << "Experimental results valid \n";
-    return true;
   } else {
     cout << "Invalid experimental measurements file: Missing input values\n";
     cout << "please check energies and errors are listed for each xray transition line \n";
     cout << "Quitting...\n";
-    return -1;
-
+    exit(0);
   }
 }
