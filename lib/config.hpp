@@ -25,6 +25,17 @@ using namespace std;
 #ifndef MUDIRAC_CONFIG
 #define MUDIRAC_CONFIG
 
+
+/**
+ * @class BaseInputFile
+ *
+ * @brief  A specialised InputFile class for the input files in MuDirac
+ * @note   This class initialises only the "xr_lines" keyword and defines a method
+ * to parse these lines into transition quantum numbers. These are both required for the
+ * dependent classes MuDiracInputFile and ExperimentalResultFile.
+ *
+ * @retval None
+ */
 class BaseInputFile : public InputFile {
   public:
     BaseInputFile(void);
@@ -46,8 +57,8 @@ class BaseInputFile : public InputFile {
 /**
  * @class MuDiracInputFile
  *
- * @brief  A specialised InputFile class for the config input file in mudirac
- * @note   A specialised InputFile class for the config input file in mudirac.
+ * @brief  A specialised BaseInputFile class for the config input file in mudirac
+ * @note   A specialised BaseInputFile class for the config input file in mudirac.
  * Initialises all the relevant keywords.
  *
  * @retval None
@@ -69,10 +80,6 @@ class MuDiracInputFile : public BaseInputFile {
    * @retval: None
    */
   void validateOptimisation(int args, string &coords, string &min_2pF_algo);
-  
-
-
-
 
  private:
   map<string, NuclearRadiusModel> nucmodelmap = {

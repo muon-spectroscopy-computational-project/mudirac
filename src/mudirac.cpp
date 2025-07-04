@@ -78,8 +78,10 @@ int main(int argc, char *argv[]) {
   }
 
 
-  // Here we construct the atom and pass the transition data
+  // Here we construct the atom
   DiracAtom da = config.makeAtom();
+
+  // data structure to contain transition quantum numbers
   vector<TransLineSpec> transqnums;
 
   // Print out potential at high levels of verbosity
@@ -100,11 +102,13 @@ int main(int argc, char *argv[]) {
     config.validateOptimisation(argc, coord_system_2pF, min_2pF_algo);
     double opt_time = 0;
 
-    // try to read the experimental results file
+    // initialise experimental results file object
     ExperimentalResultFile measurements;
 
     // switch to continue with optimisation if read is successful
     bool xr_read = false;
+
+    // try to read the experimental results file
     try {
       measurements.parseFile(argv[2]);
 
@@ -114,13 +118,14 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    // read the measured transition lines
+    // read the measured transition lines and check they are valid
     measurements.validate(); 
     vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
     vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
     vector<double> xr_errors = measurements.getDoubleValues("xr_error");
     LOG(INFO) << "Successfully read xray measurements input file \n";
 
+    // get transition quantum numbers for measured transitions
     transqnums = measurements.parseXRLines();
     // data structure for storing best parameters.
     OptimisationData best_fermi_parameters;
@@ -129,7 +134,7 @@ int main(int argc, char *argv[]) {
     // set all optimization values in Dirac Atom
     da.setExpOptData(coord_system_2pF, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters, opt_time);
 
-    // perform the optimisation routine
+    // perform the 2pF nuclear charge model optimisation routine
     optFermi2(da, min_2pF_algo, best_fermi_parameters, opt_time);
 
     // output file containing best fermi parameters and the associated MSE
@@ -139,12 +144,13 @@ int main(int argc, char *argv[]) {
 
   // Default mudirac behaviour
 
-  //reset the transition quantum numbers to those from the config file
-  // Here we read in the user specific transition lines and store a vector
-  // containing the quantum numbers for each state in each transition
-  
+  //reset the transition quantum numbers to those from the first config file
   transqnums = config.parseXRLines();
+
+  // set the new transitions quantum numbers in the dirac atom
   da.transqnums = transqnums;
+
+  // get the final transition data calculated by mudirac
   transitions = da.getAllTransitions();
 
   // Sort transitions by energy if requested

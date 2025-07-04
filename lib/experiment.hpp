@@ -25,8 +25,8 @@ using namespace std;
 /**
  * @class ExperimentalResultFile
  *
- * @brief  A specialised InputFile class for the experimental results input file in mudirac
- * @note   A specialised InputFile class for the experimental results input file in mudirac.
+ * @brief  A specialised BaseInputFile class for the experimental results input file in mudirac
+ * @note   A specialised BaseInputFile class for the experimental results input file in mudirac.
  * Initialises all the relevant keywords.
  *
  * @retval None
