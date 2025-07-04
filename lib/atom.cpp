@@ -195,7 +195,7 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   fermi_c = c/Physical::fm;
   fermi_t = thickness/Physical::fm;
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi2_potential);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, c);
   reset();
 }
 
@@ -1121,7 +1121,7 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
  * @retval TransitionData
  */
 vector<TransitionData> DiracAtom::getAllTransitions(){
-
+  LOG(DEBUG) << "calculating selected transitions\n";
   vector<TransitionData> transitions;
   vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
   for (int i = 0; i < transqnums.size(); ++i) {

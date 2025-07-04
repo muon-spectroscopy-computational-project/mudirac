@@ -12,7 +12,14 @@
 
 #include "config.hpp"
 
-MuDiracInputFile::MuDiracInputFile() : InputFile() {
+
+BaseInputFile::BaseInputFile() : InputFile () {
+  // String keywords
+  this->defineStringNode("xr_lines", InputNode<string>(vector<string> {"K1-L2"}, false)); // List of spectral lines to compute
+
+}
+
+MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
   // Definition of all input keywords that can be used
 
   // String keywords
@@ -83,10 +90,11 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 }
 
 
-vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
+vector<TransLineSpec> BaseInputFile::parseXRLines(){
   LOG(DEBUG) << "parsing transition lines into quantum numbers for start and end states in transitions\n";
   // First we unravel the user specified string
   vector<string> xr_lines = getStringValues("xr_lines");
+  LOG(DEBUG) << "xr Lines: " << xr_lines.size() << "\n";
 
   // Convert the user specified strings into quantum numbers for the start
   // and end states in the transition
@@ -99,7 +107,7 @@ vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
     vector<int> n1_range, n2_range, l1_range, l2_range;
     vector<bool> s1_range, s2_range;
 
-    LOG(TRACE) << "Parsing XR line specification " << xr_lines[i] << "\n";
+    LOG(DEBUG) << "Parsing XR line specification " << xr_lines[i] << "\n";
 
     // transitions can only be from 1 initial to 1 final state
     if (ranges.size() != 2) {
@@ -143,7 +151,6 @@ vector<TransLineSpec> MuDiracInputFile::parseXRLines(){
       }
     }
   }
-
   return transqnums;
 }
 
@@ -210,7 +217,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   } else {
     da.setFermi2(t*Physical::fm, c_param*Physical::fm);
   }
-  LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
+  LOG(INFO) << "t = " << da.fermi_t << "and c = " << da.fermi_c <<  "\n";
 
   return da;
 }

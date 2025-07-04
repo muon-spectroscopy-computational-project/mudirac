@@ -13,7 +13,7 @@
 
 #include "experiment.hpp"
 
-ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
+ExperimentalResultFile::ExperimentalResultFile() : BaseInputFile() {
   // Vector string keywords
   this->defineStringNode("xr_lines", InputNode<string>(vector<string> {""}, false)); // List of spectral lines experimentally measured
 

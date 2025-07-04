@@ -77,12 +77,10 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  // Here we read in the user specific transition lines and return a vector
-  // containing the quantum numbers for each state in each transition
-  vector<TransLineSpec> transqnums = config.parseXRLines();
 
-  // Here we construct the atom
+  // Here we construct the atom and pass the transition data
   DiracAtom da = config.makeAtom();
+  vector<TransLineSpec> transqnums;
 
   // Print out potential at high levels of verbosity
   if (output_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC)) {
@@ -123,6 +121,7 @@ int main(int argc, char *argv[]) {
     vector<double> xr_errors = measurements.getDoubleValues("xr_error");
     LOG(INFO) << "Successfully read xray measurements input file \n";
 
+    transqnums = measurements.parseXRLines();
     // data structure for storing best parameters.
     OptimisationData best_fermi_parameters;
     double MSE =0;
@@ -139,8 +138,13 @@ int main(int argc, char *argv[]) {
   }
 
   // Default mudirac behaviour
-  // Wrapped the calculation of the states, their energies and the transition probabilities into here,
-  // so that we can easily loop over it for least squares optimisation
+
+  //reset the transition quantum numbers to those from the config file
+  // Here we read in the user specific transition lines and store a vector
+  // containing the quantum numbers for each state in each transition
+  
+  transqnums = config.parseXRLines();
+  da.transqnums = transqnums;
   transitions = da.getAllTransitions();
 
   // Sort transitions by energy if requested

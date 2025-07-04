@@ -31,7 +31,7 @@ using namespace std;
  *
  * @retval None
  */
-class ExperimentalResultFile : public InputFile {
+class ExperimentalResultFile : public BaseInputFile {
  public:
   ExperimentalResultFile(void);
 

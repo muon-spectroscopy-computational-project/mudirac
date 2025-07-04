@@ -129,9 +129,11 @@ class Atom {
   UehlingSpherePotential V_uehling;
   bool use_econf = false;
   EConfPotential V_econf;
-  // fermi 2pF parameters
-  double fermi_c=0, fermi_t=0;
+
  public:
+   // fermi 2pF parameters
+  double fermi_c=0, fermi_t=0;
+
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
 
