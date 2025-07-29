@@ -204,3 +204,16 @@ void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, stri
 
   out.close();
 }
+
+// main output functions 
+
+void printInitLogMessage(){
+  LOG(INFO) << "MuDirac, a muonic atomic solver\n";
+  LOG(INFO) << "by Simone Sturniolo\n";
+  LOG(INFO) << "Released under the MIT License (2019)\n";
+  LOG(INFO) << " \n";
+  LOG(INFO) << "Please cite the following paper:\n";
+  LOG(INFO) << "Sturniolo, S, Hillier, A., \"Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays.\"\n";
+  LOG(INFO) << "X‐Ray Spectrom. 2020; 1– 17. https://doi.org/10.1002/xrs.3212\n";
+  LOG(INFO) << " \n";
+}

@@ -59,14 +59,7 @@ int main(int argc, char *argv[]) {
   AixLog::Log::init({ make_shared<AixLog::SinkFile>(log_verbosity, AixLog::Type::normal, seed + ".log"),
                       make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err") });
 
-  LOG(INFO) << "MuDirac, a muonic atomic solver\n";
-  LOG(INFO) << "by Simone Sturniolo\n";
-  LOG(INFO) << "Released under the MIT License (2019)\n";
-  LOG(INFO) << " \n";
-  LOG(INFO) << "Please cite the following paper:\n";
-  LOG(INFO) << "Sturniolo, S, Hillier, A., \"Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays.\"\n";
-  LOG(INFO) << "X‐Ray Spectrom. 2020; 1– 17. https://doi.org/10.1002/xrs.3212\n";
-  LOG(INFO) << " \n";
+  printInitLogMessage();
 
   // Are we running any debug tasks?
   string debugtask = config.getStringValue("devel_debug_task");
@@ -145,10 +138,10 @@ int main(int argc, char *argv[]) {
   // Default mudirac behaviour
 
   //reset the transition quantum numbers to those from the first config file
-  transqnums = config.parseXRLines();
+  //transqnums = 
 
   // set the new transitions quantum numbers in the dirac atom
-  da.transqnums = transqnums;
+  da.transqnums = config.parseXRLines();
 
   // get the final transition data calculated by mudirac
   transitions = da.getAllTransitions();
@@ -184,6 +177,7 @@ int main(int argc, char *argv[]) {
       out << "\t\t" << tRate * Physical::s << '\n';
     }
 
+    // could be a config method in output.hpp?
     if (config.getBoolValue("write_spec")) {
       // Write a spectrum
       writeSimSpec(transitions, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
