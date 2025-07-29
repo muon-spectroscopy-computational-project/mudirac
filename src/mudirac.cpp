@@ -87,7 +87,6 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   string coord_system_2pF;
   string min_2pF_algo;
   config.validateOptimisation(argc, coord_system_2pF, min_2pF_algo);
-  double opt_time = 0;
 
   // initialise experimental results file object, read xr input file and validate
   ExperimentalResultFile measurements;
@@ -96,16 +95,17 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
 
   // get transition quantum numbers for measured transitions
   da.transqnums = measurements.parseXRLines();
-  // data structure for storing best parameters.
-  OptimisationData best_fermi_parameters;
 
   // set all optimization values in Dirac Atom
-  da.setExpOptData(coord_system_2pF, measurements.getStringValues("xr_lines"), measurements.getDoubleValues("xr_energy"), measurements.getDoubleValues("xr_error"), best_fermi_parameters);
+  da.setExpOptData(coord_system_2pF, measurements.getStringValues("xr_lines"), measurements.getDoubleValues("xr_energy"), measurements.getDoubleValues("xr_error"));
+
+  // data structure for storing best parameters.
+  OptimisationData best_fermi_parameters;
+  double opt_time = 0;
 
   // perform the 2pF nuclear charge model optimisation routine
   optFermi2(da, min_2pF_algo, best_fermi_parameters, opt_time);
 
   // output file containing best fermi parameters and the associated MSE
   writeFermiParameters(da, best_fermi_parameters, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
-
 }

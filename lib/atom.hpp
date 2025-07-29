@@ -234,7 +234,6 @@ class DiracAtom : public Atom {
   vector<string> xr_lines_measured;
   vector<double> xr_energies;
   vector<double> xr_errors;
-  OptimisationData fermi_parameters;
   double  opt_time;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
@@ -270,13 +269,12 @@ class DiracAtom : public Atom {
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err, OptimisationData fermi_ps){
+  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err){
     iteration_counter_2pF =0;
     coord_system = coord_sys;
     xr_lines_measured = xr_lines;
     xr_energies = xr_e;
     xr_errors = xr_err;
-    fermi_parameters = fermi_ps;
     opt_time = 0.0;
   }
 
