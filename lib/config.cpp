@@ -222,6 +222,24 @@ DiracAtom MuDiracInputFile::makeAtom() {
   return da;
 }
 
+void MuDiracInputFile::validate(int argc, char *argv[], string & seed){
+  if (argc < 2) {
+    cout << "Input file missing\n";
+    cout << "Please use the program as `mudirac <input_file>`\n";
+    cout << "Quitting...\n";
+    exit(-1);
+  }
+
+  seed = splitString(argv[1], ".")[0];
+  try {
+    this->parseFile(argv[1]);
+  } catch (runtime_error e) {
+    cout << "Invalid configuration file:\n";
+    cout << e.what() << "\n";
+    exit(-1);
+  }
+}
+
 void MuDiracInputFile::validateOptimisation(int args, string &coords, string &min_2pF_algo){
   // check the experimental results input file is provided
   if (args < 3) {

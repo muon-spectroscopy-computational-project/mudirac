@@ -67,6 +67,7 @@ class MuDiracInputFile : public BaseInputFile {
  public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
+  void validate(int argc, char *argv[], string & seed);
 
   /**
    * 
