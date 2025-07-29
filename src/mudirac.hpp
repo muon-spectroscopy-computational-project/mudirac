@@ -35,3 +35,5 @@
 using namespace std;
 
 void setupLogging(MuDiracInputFile & config, const string & seed);
+
+void debugTasks(MuDiracInputFile & config);

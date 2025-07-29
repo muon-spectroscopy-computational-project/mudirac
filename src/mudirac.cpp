@@ -24,12 +24,7 @@ int main(int argc, char *argv[]) {
   setupLogging(config, seed);
 
   // Are we running any debug tasks?
-  string debugtask = config.getStringValue("devel_debug_task");
-  if (debugtask == "EdEscan") {
-    LOG(INFO) << "Running debug task: E=>dE scan\n";
-    runEdEscan(config);
-    return 0;
-  }
+  debugTasks(config);
 
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
@@ -133,4 +128,14 @@ void setupLogging(MuDiracInputFile & config, const string & seed){
                       make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err") });
 
   printInitLogMessage();
+}
+
+
+void debugTasks(MuDiracInputFile & config){
+  string debugtask = config.getStringValue("devel_debug_task");
+  if (debugtask == "EdEscan") {
+    LOG(INFO) << "Running debug task: E=>dE scan\n";
+    runEdEscan(config);
+    exit(0);
+  }
 }
