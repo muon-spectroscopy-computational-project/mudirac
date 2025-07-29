@@ -32,6 +32,7 @@ void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, doub
 
 // outputs refactored from main loop
 void printInitLogMessage();
+void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions);
 // Debug tasks
 void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, string fname="EdEscan.dat");
 
