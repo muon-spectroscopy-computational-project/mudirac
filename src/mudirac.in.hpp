@@ -18,6 +18,7 @@
 #include <string>
 #include <cmath>
 #include <chrono>
+#include <dlib/optimization.h>
 #include "../lib/config.hpp"
 #include "../lib/experiment.hpp"
 #include "../lib/atom.hpp"
@@ -41,3 +42,8 @@ struct TransLineSpec {
 
 vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da);
 vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
+
+typedef dlib::matrix<double,0,1> column_vector;
+void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
+double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
+void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters);

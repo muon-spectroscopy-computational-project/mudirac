@@ -81,15 +81,6 @@ int main(int argc, char *argv[]) {
   // containing the quantum numbers for each state in each transition
   vector<TransLineSpec> transqnums = parseXRLines(config);
 
-  // We have to decide on how to obtain the experimental energies
-  // One suggestion I have is to define a new input file which will look something like:
-  //
-  // transition energy energy uncertainty
-  // i.e
-  // K1-L2 300000 1
-  // K1-L3 500000 10
-  //
-
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
 
@@ -127,53 +118,11 @@ int main(int argc, char *argv[]) {
 
     // try to read the experimental results file
     ExperimentalResultFile measurements;
+
+    // switch to continue with optimisation if read is successful
     bool xr_measurement_read_success = false;
     try {
       measurements.parseFile(argv[2]);
-
-      // read the measured transition lines
-      vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
-      LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
-      for (auto transition: xr_lines_measured) {
-        LOG(DEBUG) << transition << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // read the measured transition energies
-      vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
-      LOG(DEBUG) << "Reading experimental Xray energies: ";
-      for (auto transition_energy: xr_energies) {
-        LOG(DEBUG) << transition_energy << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // read the measured transition errors
-      vector<double> xr_errors = measurements.getDoubleValues("xr_error");
-      LOG(DEBUG) << "Reading experimental Xray energy errors: ";
-      for (auto transition_energy_error: xr_errors) {
-        LOG(DEBUG) << transition_energy_error << ", ";
-      }
-      LOG(DEBUG) << "\n";
-
-      // checking that the file has contents and not the default values
-      LOG(DEBUG) << "Validating experimental results input \n";
-      if (xr_lines_measured[0] == "") {
-        cout << "Experimental results input file is empty\n";
-        cout << "Please check the filename of the experimental results input file \n";
-        cout << "Quitting...\n";
-        return -1;
-      }
-
-      // check that the data provided is complete: all transitions measured have energies and errors
-      if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
-        xr_measurement_read_success = true;
-      } else {
-        cout << "Invalid experimental measurements file: Missing input values\n";
-        cout << "please check energies and errors are listed for each xray transition line \n";
-        cout << "Quitting...\n";
-        return -1;
-
-      }
 
     } catch (runtime_error e) {
       cout << "Invalid experimental measurements file:\n";
@@ -181,30 +130,68 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    if (xr_measurement_read_success) {
-      LOG(DEBUG) << "Successfully read xray measurements input file \n";
+    // read the measured transition lines
+    vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
+    LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+    for (auto transition: xr_lines_measured) {
+      LOG(DEBUG) << transition << ", ";
+    }
+    LOG(DEBUG) << "\n";
 
-      // In here, we will need to loop over the pairs of (c,t) values
-      // An appropriate (c,t) grid resolution will need to be chosen, as well as an appropriate range
-      // This could be user specified, but we will probably need some reasonable defaults
+    // read the measured transition energies
+    vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
+    LOG(DEBUG) << "Reading experimental Xray energies: ";
+    for (auto transition_energy: xr_energies) {
+      LOG(DEBUG) << transition_energy << ", ";
+    }
+    LOG(DEBUG) << "\n";
 
-      // loop over c:
-      //   loop over t:
-      //     getAllTransitions
-      //
-      // least squares optimise
-      //
-      // We also need to decide on what happens after this optimisation. Do we print out the energies and rates
-      // for the optimal pair of parameters?
+    // read the measured transition errors
+    vector<double> xr_errors = measurements.getDoubleValues("xr_error");
+    LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+    for (auto transition_energy_error: xr_errors) {
+      LOG(DEBUG) << transition_energy_error << ", ";
+    }
+    LOG(DEBUG) << "\n";
+
+    // checking that the file has contents and not the default values
+    LOG(DEBUG) << "Validating experimental results input \n";
+    if (xr_lines_measured[0] == "") {
+      cout << "Experimental results input file is empty\n";
+      cout << "Please check the filename of the experimental results input file \n";
+      cout << "Quitting...\n";
+      return -1;
+    }
+
+    // check that the data provided is complete: all transitions measured have energies and errors
+    if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
+      xr_measurement_read_success = true;
+    } else {
+      cout << "Invalid experimental measurements file: Missing input values\n";
+      cout << "please check energies and errors are listed for each xray transition line \n";
+      cout << "Quitting...\n";
+      return -1;
 
     }
 
-  } else {
-    // Default mudirac behaviour
-    // Wrapped the calculation of the states, their energies and the transition probabilities into here,
-    // so that we can easily loop over it for least squares optimisation
-    transitions = getAllTransitions(transqnums, da);
+    if (xr_measurement_read_success) {
+      LOG(INFO) << "Successfully read xray measurements input file \n";
+      // data structure for storing best parameters.
+      OptimisationData best_fermi_parameters;
+      double MSE =0;
+
+      // start the minimisation
+      optimizeFermiParameters(config, da, transqnums, xr_lines_measured, xr_energies, xr_errors, best_fermi_parameters);
+      // output file containing best fermi parameters and the associated MSE
+      writeFermiParameters(da, best_fermi_parameters, seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+    }
+
   }
+
+  // Default mudirac behaviour
+  // Wrapped the calculation of the states, their energies and the transition probabilities into here,
+  // so that we can easily loop over it for least squares optimisation
+  transitions = getAllTransitions(transqnums, da);
 
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
@@ -218,7 +205,6 @@ int main(int argc, char *argv[]) {
   if (output_verbosity >= 1) {
     // Save a file for all lines
     ofstream out(seed + ".xr.out");
-
     out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
     out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
     out << fixed;
@@ -346,7 +332,6 @@ vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, Dirac
 
   return transitions;
 
-
 }
 /** This takes in the input config and returns a vector of transitiondata
  */
@@ -408,4 +393,93 @@ vector<TransLineSpec> parseXRLines(MuDiracInputFile config) {
   }
 
   return transqnums;
+}
+
+void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters) {
+  double rms_radius = m(0);
+  double theta = m(1);
+  double fermi_c, fermi_t;
+
+  // calculate new c and t
+  tie(fermi_c, fermi_t) = fermiParameters(rms_radius, theta);
+
+  // populate the fermi parameters structure
+  fermi_parameters.rms_radius = rms_radius;
+  fermi_parameters.theta = theta;
+  fermi_parameters.fermi_c = fermi_c;
+  fermi_parameters.fermi_t = fermi_t;
+
+  // set new iteration of fermi parameters in config and get transitions
+  config.defineDoubleNode("fermi_t", InputNode<double>(fermi_t));
+  config.defineDoubleNode("fermi_c", InputNode<double>(fermi_c));
+  LOG(DEBUG) << "creating atom with fermi parameters: " << fermi_c << ", " << fermi_t;
+  LOG(DEBUG) << " RMS radius: " << rms_radius << " theta: "<< theta << "\n";
+
+  // make the new Dirac atom with the new configuration
+  da = config.makeAtom();
+}
+
+
+double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors) {
+  DiracAtom da;
+  OptimisationData iteration_parameters;
+  configureNuclearModel(m, config, da, iteration_parameters);
+  vector<TransitionData> transitions_iteration = getAllTransitions(transqnums, da);
+
+  LOG(DEBUG) << "MSE loop \n";
+  double MSE = 0;
+  for (int k = 0; k < transitions_iteration.size(); ++k) {
+
+    // calculate transition energy and rate
+    double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+    double tRate = transitions_iteration[k].tmat.totalRate();
+
+    // square error for each transitions calculated
+    double square_error = 0;
+
+    if (dE <= 0 || tRate <= 0)
+      continue; // Transition is invisible
+
+    // check transition allign with experimental transitions
+    if (transitions_iteration[k].name == xr_lines_measured[k]) {
+      // convert to eV
+      double transition_energy = dE / Physical::eV;
+
+      // calculate the square error of each transition
+      double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+      double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
+      square_error = square_deviation/valid_uncertainty;
+
+      // output square error to LOG
+      LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
+      MSE += square_error;
+    }
+
+  }
+  MSE = MSE/transitions_iteration.size();
+  return MSE;
+}
+
+
+void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da, const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters) {
+  LOG(INFO) << "Starting minimisation for fermi model \n";
+
+  // use the radius of the dirac atom from the initial config file for an rms radius starting point for minimisation.
+  float rms_radius_estimate = sqrt(3.0/5.0)*da.getR()/Physical::fm;
+
+  // use theta = 0.3 as a starting point for minimisation (could change to match intial config)
+  // this depracates the rms_radius keyword in the config file
+  column_vector polar_parameters = {rms_radius_estimate, 0.3};
+
+  // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
+  double MSE;
+  MSE = dlib::find_min_using_approximate_derivatives(
+          dlib::bfgs_search_strategy(),
+          dlib::objective_delta_stop_strategy(1e-2),  // gradient change < 0.01
+          std::bind(&calculateMSE, std::placeholders::_1, config, transqnums, xr_lines_measured, xr_energies, xr_errors), polar_parameters, -1);
+  LOG(INFO) << "minimised with MSE: "<< MSE << " and polar fermi parameters: "<< polar_parameters <<" \n";
+
+  // repeat the final configuration of the nuclear model
+  configureNuclearModel(polar_parameters, config, da, fermi_parameters);
+  fermi_parameters.mse = MSE;
 }
