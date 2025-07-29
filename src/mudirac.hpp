@@ -33,3 +33,5 @@
 #define PROJECT_VERSION "1.0.1"
 
 using namespace std;
+
+void setupLogging(MuDiracInputFile & config, const string & seed);

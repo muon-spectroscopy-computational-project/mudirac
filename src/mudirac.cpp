@@ -20,39 +20,16 @@ int main(int argc, char *argv[]) {
   MuDiracInputFile config;
   config.validate(argc, argv, seed);
   int output_verbosity = config.getIntValue("output");
-  // Set up logging
-  AixLog::Severity log_verbosity;
-  switch (config.getIntValue("verbosity")) {
-    case 1:
-      log_verbosity = AixLog::Severity::info;
-      break;
-    case 2:
-      log_verbosity = AixLog::Severity::debug;
-      break;
-    case 3:
-      log_verbosity = AixLog::Severity::trace;
-      break;
-    default:
-      log_verbosity = AixLog::Severity::info;
-      break;
-  }
-
-  // Sets up logging to the .log file according to user specified verbosity,
-  // and writes errors out to the .err file
-  AixLog::Log::init({ make_shared<AixLog::SinkFile>(log_verbosity, AixLog::Type::normal, seed + ".log"),
-                      make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err") });
-
-  printInitLogMessage();
+  
+  setupLogging(config, seed);
 
   // Are we running any debug tasks?
   string debugtask = config.getStringValue("devel_debug_task");
-
   if (debugtask == "EdEscan") {
     LOG(INFO) << "Running debug task: E=>dE scan\n";
     runEdEscan(config);
     return 0;
   }
-
 
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
@@ -133,4 +110,27 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Calculation completed in " << chrono::duration_cast<chrono::milliseconds>(t1 - t0).count() / 1.0e3 << " seconds\n";
 }
 
+void setupLogging(MuDiracInputFile & config, const string & seed){
+  AixLog::Severity log_verbosity;
+  switch (config.getIntValue("verbosity")) {
+    case 1:
+      log_verbosity = AixLog::Severity::info;
+      break;
+    case 2:
+      log_verbosity = AixLog::Severity::debug;
+      break;
+    case 3:
+      log_verbosity = AixLog::Severity::trace;
+      break;
+    default:
+      log_verbosity = AixLog::Severity::info;
+      break;
+  }
 
+  // Sets up logging to the .log file according to user specified verbosity,
+  // and writes errors out to the .err file
+  AixLog::Log::init({ make_shared<AixLog::SinkFile>(log_verbosity, AixLog::Type::normal, seed + ".log"),
+                      make_shared<AixLog::SinkFile>(AixLog::Severity::warning, AixLog::Type::special, seed + ".err") });
+
+  printInitLogMessage();
+}
