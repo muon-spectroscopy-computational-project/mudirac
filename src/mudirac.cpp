@@ -77,6 +77,7 @@ void debugTasks(MuDiracInputFile & config){
   }
 }
 
+
 void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity){
   if (out_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC)) {
     writeEConfPotential(da.getPotentialElectronic(), seed + ".epot.dat");
