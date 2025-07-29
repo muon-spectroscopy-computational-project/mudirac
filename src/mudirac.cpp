@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   MuDiracInputFile config;
 
   config.validate(argc, argv, seed);
-  setupLogging(config, seed);
+  setupLogging(config.getIntValue("verbosity"), seed);
   debugTasks(config);   // runs debug tasks if configured
   DiracAtom da = config.makeAtom();   // construct the atom
 
@@ -43,9 +43,9 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Calculation completed in " << t_tot / 1.0e3 << " seconds\n";
 }
 
-void setupLogging(MuDiracInputFile & config, const string & seed){
+void setupLogging(const int verbosity, const string & seed){
   AixLog::Severity log_verbosity;
-  switch (config.getIntValue("verbosity")) {
+  switch (verbosity) {
     case 1:
       log_verbosity = AixLog::Severity::info;
       break;

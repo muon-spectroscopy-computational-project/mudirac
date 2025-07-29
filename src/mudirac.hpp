@@ -34,7 +34,17 @@
 
 using namespace std;
 
-void setupLogging(MuDiracInputFile & config, const string & seed);
+/**
+ * @brief  Sets up aixlog logging 
+ * @note    sets up aixlogging with the provided verbosity level.
+ * Logs are saved to a file name based on the seed. The initial log message is
+ *  also output to the file.
+ *
+ * @param  verbosity:  verbosity level from the config file
+ * @param  seed:       seed of the output log file name.
+ * @retval None
+ */
+void setupLogging(const int verbosity, const string & seed);
 
 void debugTasks(MuDiracInputFile & config);
 
