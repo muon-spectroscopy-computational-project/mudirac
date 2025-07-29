@@ -39,3 +39,5 @@ void setupLogging(MuDiracInputFile & config, const string & seed);
 void debugTasks(MuDiracInputFile & config);
 
 void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity);
+
+void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed);

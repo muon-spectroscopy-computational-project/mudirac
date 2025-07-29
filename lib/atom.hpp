@@ -270,10 +270,9 @@ class DiracAtom : public Atom {
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<TransLineSpec> trans_q_n, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err, OptimisationData fermi_ps, double  opt_t){
+  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err, OptimisationData fermi_ps){
     iteration_counter_2pF =0;
     coord_system = coord_sys;
-    transqnums = trans_q_n;
     xr_lines_measured = xr_lines;
     xr_energies = xr_e;
     xr_errors = xr_err;
