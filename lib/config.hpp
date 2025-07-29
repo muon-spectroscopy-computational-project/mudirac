@@ -67,6 +67,17 @@ class MuDiracInputFile : public BaseInputFile {
  public:
   MuDiracInputFile(void);
   DiracAtom makeAtom();
+  /**
+  * @brief  validates the input config file to mudirac
+   * @note  checks the number of arguments passed to mudirac and parses the
+   * first argument as a config file. the filename also provides the seed
+   * which is used for outputfiles in MuDirac.
+   *
+   * @param  argc: number of arguments to run mudirac
+   * @param argv: list of the arguments.
+   * @param seed: seed updated by reference
+   * @retval None
+   */
   void validate(int argc, char *argv[], string & seed);
 
   /**
