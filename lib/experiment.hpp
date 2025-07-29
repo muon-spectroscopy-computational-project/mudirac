@@ -39,6 +39,7 @@ class ExperimentalResultFile : public BaseInputFile {
    * @brief: validates experminental xray input file
    * @note: validates the XR input file for correct keywords, types and
    * completeness. Exits the program if invalid.
+   * @param xr_infile: name of the file containing the experimental results
    * @retval: none
    */
   void validate(const string xr_infile);
