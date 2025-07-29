@@ -29,13 +29,11 @@ int main(int argc, char *argv[]) {
   // Here we construct the atom
   DiracAtom da = config.makeAtom();
 
+  // Print out potential at high levels of verbosity
+  writeEConfV(da, seed, output_verbosity);
+
   // data structure to contain transition quantum numbers
   vector<TransLineSpec> transqnums;
-
-  // Print out potential at high levels of verbosity
-  if (output_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC)) {
-    writeEConfPotential(da.getPotentialElectronic(), seed + ".epot.dat");
-  }
 
   // This contains both state names, the actual dirac states, and the transition matrix
   vector<TransitionData> transitions;
@@ -137,5 +135,11 @@ void debugTasks(MuDiracInputFile & config){
     LOG(INFO) << "Running debug task: E=>dE scan\n";
     runEdEscan(config);
     exit(0);
+  }
+}
+
+void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity){
+  if (out_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC)) {
+    writeEConfPotential(da.getPotentialElectronic(), seed + ".epot.dat");
   }
 }

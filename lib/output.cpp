@@ -125,6 +125,7 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname) {
  * @retval None
  */
 void writeEConfPotential(EConfPotential epot, string fname) {
+  LOG(INFO) << "Writing electronic configuration potential\n";
   ofstream out(fname);
 
   int i0 = epot.getGridLimits().first;

@@ -37,3 +37,5 @@ using namespace std;
 void setupLogging(MuDiracInputFile & config, const string & seed);
 
 void debugTasks(MuDiracInputFile & config);
+
+void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity);
