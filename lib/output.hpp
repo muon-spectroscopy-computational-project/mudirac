@@ -31,7 +31,24 @@ void writeEConfPotential(EConfPotential epot, string fname);
 void writeSimSpec(vector<TransitionData> transitions, double dE, double lw, double expd, string fname);
 
 // outputs refactored from main loop
+
+/**
+ * @brief  Prints initial log message
+ * @retval None
+ */
 void printInitLogMessage();
+
+/**
+ * @brief  Writes final output files of default MuDirac calculation
+ * @note   Writes output files for the transitions, energies and intensities
+ *  with options to sort by energy and output full transition matrices defined
+ * in the config.
+ * @param seed: seed for the output file
+ * @param  config:  config object used to make a dirac atom and run an EdEscan
+ * @param da: dirac atom containing data about the atom
+ * @param transitions: calculated transitions which need to be output
+ * @retval None
+ */
 void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions);
 // Debug tasks
 void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, string fname="EdEscan.dat");
