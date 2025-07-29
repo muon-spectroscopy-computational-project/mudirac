@@ -54,18 +54,8 @@ int main(int argc, char *argv[]) {
     // switch to continue with optimisation if read is successful
     bool xr_read = false;
 
-    // try to read the experimental results file
-    try {
-      measurements.parseFile(argv[2]);
-
-    } catch (runtime_error e) {
-      cout << "Invalid experimental measurements file:\n";
-      cout << e.what() << "\n";
-      return -1;
-    }
-
     // read the measured transition lines and check they are valid
-    measurements.validate(); 
+    measurements.validate(argv[2]); 
     vector<string> xr_lines_measured = measurements.getStringValues("xr_lines");
     vector<double> xr_energies = measurements.getDoubleValues("xr_energy");
     vector<double> xr_errors = measurements.getDoubleValues("xr_error");

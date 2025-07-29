@@ -23,7 +23,18 @@ ExperimentalResultFile::ExperimentalResultFile() : BaseInputFile() {
 
 }
 
-void ExperimentalResultFile::validate() {
+void ExperimentalResultFile::validate(const string xr_infile) {
+  // try to read the experimental results file
+  LOG(INFO) << "reading experimental results file\n";
+  try {
+    this->parseFile(xr_infile);
+
+  } catch (runtime_error e) {
+    cout << "Invalid experimental measurements file:\n";
+    cout << e.what() << "\n";
+    LOG(ERROR) << "Invalid experimental measurements file:\n";
+    exit(-1);
+  }
   // read the measured transition lines
   vector<string> xr_lines_measured = getStringValues("xr_lines");
   LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
@@ -54,7 +65,7 @@ void ExperimentalResultFile::validate() {
     cout << "Experimental results input file is empty\n";
     cout << "Please check the filename of the experimental results input file \n";
     cout << "Quitting...\n";
-    exit(0);
+    exit(-1);
   }
 
   // check that the data provided is complete: all transitions measured have energies and errors
@@ -64,6 +75,6 @@ void ExperimentalResultFile::validate() {
     cout << "Invalid experimental measurements file: Missing input values\n";
     cout << "please check energies and errors are listed for each xray transition line \n";
     cout << "Quitting...\n";
-    exit(0);
+    exit(-1);
   }
 }

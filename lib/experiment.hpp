@@ -41,7 +41,7 @@ class ExperimentalResultFile : public BaseInputFile {
    * completeness. Exits the program if invalid.
    * @retval: none
    */
-  void validate();
+  void validate(const string xr_infile);
 };
 
 
