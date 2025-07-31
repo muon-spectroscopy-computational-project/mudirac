@@ -19,8 +19,6 @@
 #include "config.hpp"
 using namespace std;
 
-#ifndef OPT_DATA
-#define OPT_DATA
 
 /**
  * @class ExperimentalResultFile
@@ -46,4 +44,4 @@ class ExperimentalResultFile : public BaseInputFile {
 };
 
 
-#endif
+

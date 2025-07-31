@@ -19,8 +19,8 @@
 #include <cmath>
 #include <chrono>
 #include <dlib/optimization.h>
+#include "../lib/optimisation.hpp"
 #include "../lib/config.hpp"
-#include "../lib/experiment.hpp"
 #include "../lib/atom.hpp"
 #include "../lib/output.hpp"
 #include "../lib/utils.hpp"
@@ -69,19 +69,3 @@ void debugTasks(MuDiracInputFile & config);
  */
 void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity);
 
-/**
- * @brief  Highest level function which runs 2pF optimisation
- * @note   validates both mudirac input files and parses them to get the
- * experimental transition lines and energies. This function then uses other
- * lower level functions to run the optimisation with algorithm and coordinate
- * choices defined in the config file. Finally the outputs are written to file
- * with a name based on the seed.
- *
- * @param  config: object containing parameters which allow optimisation
- * @param argc: number of arguments passed with mudirac for validation
- * @param argv: arguments passed to mudirac including config filenames
- * @param da: the pre configured dirac atom
- * @param seed: seed name for the output file.
- * @retval None
- */
-void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed);

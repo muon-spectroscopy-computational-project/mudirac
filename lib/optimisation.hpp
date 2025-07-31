@@ -13,6 +13,9 @@
 #include <dlib/optimization.h>
 #include <dlib/global_optimization.h>
 #include "atom.hpp"
+#include "config.hpp"
+#include "experiment.hpp"
+#include "output.hpp"
 
 
 typedef dlib::matrix<double,0,1> column_vector;
@@ -155,3 +158,21 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
  * @param opt_time: time taken to complete the optimisation.
  */
 void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time);
+
+
+/**
+ * @brief  Highest level function which runs 2pF optimisation
+ * @note   validates both mudirac input files and parses them to get the
+ * experimental transition lines and energies. This function then uses other
+ * lower level functions to run the optimisation with algorithm and coordinate
+ * choices defined in the config file. Finally the outputs are written to file
+ * with a name based on the seed.
+ *
+ * @param  config: object containing parameters which allow optimisation
+ * @param argc: number of arguments passed with mudirac for validation
+ * @param argv: arguments passed to mudirac including config filenames
+ * @param da: the pre configured dirac atom
+ * @param seed: seed name for the output file.
+ * @retval None
+ */
+void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed);
