@@ -24,23 +24,20 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
 
-  column_vector bound_lower, bound_upper;
+  double c1_lower_coef, c1_upper_coef, c2_lower_coef, c2_upper_coef;
   if (coord_sys =="polar"){
     // set bounds for rms radius and theta close to Marinova table values
-    double rms_lower = 0.95*init_params.at(0);
-    double rms_upper = 1.05*init_params.at(0);
-    double theta_lower = 0;
-    double theta_upper = M_PI*0.5;
-    bound_lower = {rms_lower, theta_lower};
-    bound_upper = {rms_upper, theta_upper};
+    c1_lower_coef = 0.95;
+    c1_upper_coef = 1.05;
+    c2_lower_coef = 0;
+    c2_upper_coef = M_PI*0.5;
   }
   else if (coord_sys =="ct"){
-    double c_lower = 0.5*init_params.at(0);
-    double c_upper = 1.5*init_params.at(0);
-    double t_lower = 0.01;
-    double t_upper = 4;
-    bound_lower = {c_lower, t_lower};
-    bound_upper = {c_upper, t_upper};
+    // set bounds for c and t within reasonable range of original values
+    c1_lower_coef = 0.5;
+    c1_upper_coef = 1.5;
+    c2_lower_coef = 0.01;
+    c2_upper_coef = 4;
   }
 
   // lambda function for MSE required for dlib find min global
@@ -52,8 +49,8 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
   // max run time 10 minutes can be changed
   auto result = dlib::find_min_global(
     MSE_lambda,
-    bound_lower,
-    bound_upper,
+    {c1_lower_coef*init_params[0], c2_lower_coef*init_params[1]}, //lower bounds
+    {c1_upper_coef*init_params[0], c2_upper_coef*init_params[1]}, //upper bounds
     std::chrono::milliseconds(60*1000*10));
 
   opt_t1 = chrono::high_resolution_clock::now();
@@ -72,6 +69,7 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
     fermi_parameters.fermi_c =  final_params(0); 
     fermi_parameters.fermi_t = final_params(1);
     fermi_parameters.rms_radius = rmsRadius(final_params(0), final_params(1));
+    fermi_parameters.theta =  atan(final_params(1)/final_params(1));
   }
 
   LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_sys << " parameters: "<< final_params(0)<<", " << final_params(1) <<" \n";
@@ -126,12 +124,10 @@ void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters,
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
 
-  array<double,2> ct_coords = da.getFermi2("ct");
-  array<double,2> polar_coords = da.getFermi2("polar");
-  fermi_parameters.fermi_c = ct_coords.at(0);
-  fermi_parameters.fermi_t = ct_coords.at(1);
-  fermi_parameters.rms_radius = polar_coords.at(0);
-  fermi_parameters.theta = polar_coords.at(1);
+  fermi_parameters.fermi_c = da.getFermi2("ct")[0];
+  fermi_parameters.fermi_t = da.getFermi2("ct")[1];
+  fermi_parameters.rms_radius = da.getFermi2("polar")[0];
+  fermi_parameters.theta = da.getFermi2("polar")[1];
   fermi_parameters.mse = MSE;
 }
 
