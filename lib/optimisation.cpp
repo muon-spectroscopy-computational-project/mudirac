@@ -16,7 +16,7 @@
 void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
   const string coord_sys = da.coord_system;
-  vector<double> init_params = da.getFermi2(coord_sys);
+  array<double,2> init_params = da.getFermi2(coord_sys);
 
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
@@ -90,7 +90,7 @@ void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters,
 
   // initialise starting parameters for optimisation based on the coordinate system
   const string coord_sys = da.coord_system;
-  vector<double> fermi_coords = da.getFermi2(coord_sys);
+  array<double, 2> fermi_coords = da.getFermi2(coord_sys);
   // change to dlib column vector type
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
@@ -126,8 +126,8 @@ void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters,
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
 
-  vector<double> ct_coords = da.getFermi2("ct");
-  vector<double> polar_coords = da.getFermi2("polar");
+  array<double,2> ct_coords = da.getFermi2("ct");
+  array<double,2> polar_coords = da.getFermi2("polar");
   fermi_parameters.fermi_c = ct_coords.at(0);
   fermi_parameters.fermi_t = ct_coords.at(1);
   fermi_parameters.rms_radius = polar_coords.at(0);
@@ -141,7 +141,7 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
 
   // initialise starting parameters for optimisation based on the coordinate system
   const string coord_sys = da.coord_system;
-  vector<double> fermi_coords = da.getFermi2(coord_sys);
+  array<double, 2> fermi_coords = da.getFermi2(coord_sys);
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
@@ -166,8 +166,8 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
   fermi_parameters.mse = MSE;
-  vector<double> ct_coords = da.getFermi2("ct");
-  vector<double> polar_coords = da.getFermi2("polar");
+  array<double, 2> ct_coords = da.getFermi2("ct");
+  array<double, 2> polar_coords = da.getFermi2("polar");
   fermi_parameters.fermi_c = ct_coords.at(0);
   fermi_parameters.fermi_t = ct_coords.at(1);
   fermi_parameters.rms_radius = polar_coords.at(0);

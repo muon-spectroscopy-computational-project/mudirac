@@ -26,6 +26,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <array>
 
 using namespace std;
 
@@ -199,7 +200,7 @@ class Atom {
   /**
    * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
    */
-  vector<double> getFermi2(const string coord_sys);
+  array<double, 2> getFermi2(const string coord_sys);
 
   bool getUehling() {
     return use_uehling;

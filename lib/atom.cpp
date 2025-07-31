@@ -222,22 +222,26 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
  * @brief gets parameters for the Fermi 2-term potential term in ct or polar coordinates(if used)
  * @note  gets the fermi2 parameters c and t, or the polar parameters rms radius and theta
  * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
- * @retval vector<double> :the 2pF domain coordinates.
+ * @retval array<double, 2> :the 2pF domain coordinates.
  */
-vector<double> Atom::getFermi2(const string coord_sys){
+array<double, 2> Atom::getFermi2(const string coord_sys){
+  array<double, 2> f2 {0,0};
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
                  << " not using a Fermi 2-term model\n";
-    return {0,0};
+    
+    return f2;
   }
   if (coord_sys == "ct"){
-    return {fermi_c, fermi_t};
+    f2 = {fermi_c, fermi_t};
   }
   else if (coord_sys == "polar"){
     double rms_radius_estimate = rmsRadius(fermi_c, fermi_t);
     double theta_estimate = atan(fermi_t/fermi_c);
-    return {rms_radius_estimate, theta_estimate};
+    f2 = {rms_radius_estimate, theta_estimate};
+    
   }
+  return f2;
 }
 
 /**
