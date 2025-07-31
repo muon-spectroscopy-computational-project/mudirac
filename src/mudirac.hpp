@@ -18,6 +18,7 @@
 #include <string>
 #include <cmath>
 #include <chrono>
+#include <dlib/optimization.h>
 #include "../lib/config.hpp"
 #include "../lib/experiment.hpp"
 #include "../lib/atom.hpp"
@@ -26,13 +27,13 @@
 #include "../lib/elements.hpp"
 #include "../lib/constants.hpp"
 #include "../lib/debugtasks.hpp"
-#include "../lib/optimisation.hpp"
 
 #include "../vendor/aixlog/aixlog.hpp"
 
 #define PROJECT_VERSION "1.0.1"
 
 using namespace std;
+
 
 /**
  * @brief  Sets up aixlog logging 
