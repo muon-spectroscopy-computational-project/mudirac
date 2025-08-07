@@ -20,6 +20,17 @@
 
 typedef dlib::matrix<double,0,1> column_vector;
 
+/**
+ * @brief a function which outputs optimisation results to LOG and sets finalised optimisation data values in a dirac atom.
+ * @note This function outputs the fermi parameters in the selected coordinate system to log along with the optimisation time
+ * and the MSE. The fermi parameters in the other coordinate system are them also stored in the fermi2 datastructure of the Dirac atom.
+ * @param da: Dirac atom after optimisation
+ * @param coord_sys: the selected coordinate system of the optimisation
+ * @param final_fermi_params: the optimised fermi parameters
+ * @param opt_time: the time taken to perform just the optimisation algorithm
+ * @param MSE: the mean square error of new xray energies calculated using the optimised parameters
+ *  with respect to the experimental energies.
+ */
 void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE);
 
 /**

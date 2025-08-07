@@ -123,11 +123,16 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
 }
 
 void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE){
+  
+  // output final optimisation values to LOG
   LOG(INFO) << "minimised with MSE: "<< MSE << " and "<< coord_sys << "fermi parameters: "<< final_fermi_params <<" \n";
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
   LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
   
+  // ensure final fermi parameters are set
   da.setFermi2(final_fermi_params(0), final_fermi_params(1), coord_sys);
+
+  //set all the optimisation parameter values
   array<double, 2> ct_coords = da.getFermi2("ct");
   array<double, 2> polar_coords = da.getFermi2("polar");
   da.fermi2.c = ct_coords.at(0);
