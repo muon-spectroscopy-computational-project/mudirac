@@ -104,13 +104,9 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
     throw invalid_argument("Invalid grid parameters passed to Atom");
   }
 
-  if (A > 0) {
+  if ((A > 0) && (reduced_mass) ) {
     M = getIsotopeMass(Z, A);
-    if (reduced_mass) {
-      mu = effectiveMass(m, M * Physical::amu);
-    } else {
-      mu = m;
-    }
+    mu = effectiveMass(m, M * Physical::amu);
   } else {
     mu = m;
   }
@@ -172,14 +168,14 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
  * @param  thickness:  The new thickness to set up
  * @retval None
  */
-void Atom::setFermi2(double thickness, double fermi2_potential) {
+void Atom::setFermi2(double thickness, double fermi_c) {
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to set up nuclear skin thickness or fermi2-potential for an atom"
                  << " not using a Fermi 2-term model\n";
     return;
   }
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi2_potential);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
   reset();
 }
 
