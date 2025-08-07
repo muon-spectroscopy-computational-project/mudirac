@@ -104,18 +104,15 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
   array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
-  // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
-  double MSE;
-
   // start time of minimisation
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
 
-  MSE = dlib::find_min_trust_region(dlib::objective_delta_stop_strategy(1e-2),
+  double MSE = dlib::find_min_trust_region(dlib::objective_delta_stop_strategy(1e-2),
                                     opt_obj,
                                     init_params,
                                     0.1);
-
+  da.iteration_counter_2pF = opt_obj.opt_iterations;
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);

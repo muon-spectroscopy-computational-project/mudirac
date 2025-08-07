@@ -97,16 +97,17 @@ class opt_2pF_model {
   typedef ::column_vector column_vector;
   typedef dlib::matrix<double> general_matrix;
   DiracAtom da;
+  mutable int opt_iterations = 0;
 
   // constructor
   opt_2pF_model(DiracAtom d_a) {
     da = d_a;
   }
-
   double operator() (
     const column_vector& x
   ) const {
     DiracAtom da_1 = da;
+    opt_iterations++;
     return da_1.calculateMSE(x(0), x(1));
   }
 
@@ -119,6 +120,7 @@ class opt_2pF_model {
     DiracAtom da_1 = da;
     der = MSE_2pF_derivative(x, da_1);
     hess = MSE_2pF_hessian(x, da_1);
+    opt_iterations +=20;
   }
 };
 
