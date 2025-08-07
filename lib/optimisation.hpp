@@ -120,7 +120,7 @@ class opt_2pF_model {
     DiracAtom da_1 = da;
     der = MSE_2pF_derivative(x, da_1);
     hess = MSE_2pF_hessian(x, da_1);
-    opt_iterations +=20;
+    opt_iterations +=20;  // 4 iterations per derivative, 4 derivatives per hessian = 4+16
   }
 };
 

@@ -153,7 +153,6 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da) {
 }
 
 
-
 dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da) {
   dlib::matrix<double> res(2,2);
 
