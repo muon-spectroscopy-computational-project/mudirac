@@ -132,12 +132,7 @@ void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_
   da.setFermi2(final_fermi_params(0), final_fermi_params(1), coord_sys);
 
   //set all the optimisation parameter values
-  array<double, 2> ct_coords = da.getFermi2("ct");
   array<double, 2> polar_coords = da.getFermi2("polar");
-  da.fermi2.c = ct_coords.at(0);
-  da.fermi2.t = ct_coords.at(1);
-  da.fermi2.rms_radius = polar_coords.at(0);
-  da.fermi2.theta = polar_coords.at(1);
   da.fermi2.mse = MSE;
 }
 
