@@ -35,7 +35,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * @retval: None
  *
  */
-void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 
 
@@ -127,7 +127,7 @@ class opt_2pF_model
  * @retval: None
  *
  */
-void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time);
 
 
 /**
@@ -146,7 +146,7 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
  * @retval: None
  *
  */
-void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time);
+void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 
 /**
@@ -157,7 +157,7 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
  * @param best_fermi_parameters: stores the values of c, t, rms radius, theta and MSE of the optimal fermi parameters.
  * @param opt_time: time taken to complete the optimisation.
  */
-void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time);
+void optFermi2(DiracAtom & da, const string algo, double & opt_time);
 
 
 /**

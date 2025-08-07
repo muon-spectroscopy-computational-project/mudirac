@@ -228,7 +228,7 @@ array<double, 2> Atom::getFermi2(const string coord_sys){
   array<double, 2> f2 {0,0};
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
-                 << " not using a Fermi 2-term model\n";
+                 << " without using a Fermi 2-term model\n";
     
     return f2;
   }

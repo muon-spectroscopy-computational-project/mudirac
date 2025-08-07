@@ -13,7 +13,7 @@
 
 #include "optimisation.hpp"
 
-void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time) {
+void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
   const string coord_sys = da.coord_system;
   array<double,2> init_params = da.getFermi2(coord_sys);
@@ -58,18 +58,18 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
   double MSE = result.y;
 
   // update fermi_paramters structure
-  fermi_parameters.mse = MSE;
+  da.fermi2.mse = MSE;
 
   if (coord_sys =="polar"){
-    fermi_parameters.rms_radius = final_params(0);
-    fermi_parameters.theta = final_params(1);
-    tie(fermi_parameters.c, fermi_parameters.t) = fermiParameters(fermi_parameters.rms_radius, fermi_parameters.theta);
+    da.fermi2.rms_radius = final_params(0);
+    da.fermi2.theta = final_params(1);
+    tie(da.fermi2.c, da.fermi2.t) = fermiParameters(da.fermi2.rms_radius, da.fermi2.theta);
   }
   else if (coord_sys=="ct"){
-    fermi_parameters.c =  final_params(0); 
-    fermi_parameters.t = final_params(1);
-    fermi_parameters.rms_radius = rmsRadius(final_params(0), final_params(1));
-    fermi_parameters.theta =  atan(final_params(1)/final_params(1));
+    da.fermi2.c =  final_params(0); 
+    da.fermi2.t = final_params(1);
+    da.fermi2.rms_radius = rmsRadius(final_params(0), final_params(1));
+    da.fermi2.theta =  atan(final_params(1)/final_params(1));
   }
 
   LOG(INFO) << "minimised with MSE: "<< MSE << " and fermi " << coord_sys << " parameters: "<< final_params(0)<<", " << final_params(1) <<" \n";
@@ -83,7 +83,7 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
 }
 
 
-void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time) {
+void optimizeFermiParameters(DiracAtom & da, double & opt_time) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -124,15 +124,15 @@ void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters,
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
 
-  fermi_parameters.c = da.getFermi2("ct")[0];
-  fermi_parameters.t = da.getFermi2("ct")[1];
-  fermi_parameters.rms_radius = da.getFermi2("polar")[0];
-  fermi_parameters.theta = da.getFermi2("polar")[1];
-  fermi_parameters.mse = MSE;
+  da.fermi2.c = da.getFermi2("ct")[0];
+  da.fermi2.t = da.getFermi2("ct")[1];
+  da.fermi2.rms_radius = da.getFermi2("polar")[0];
+  da.fermi2.theta = da.getFermi2("polar")[1];
+  da.fermi2.mse = MSE;
 }
 
 
-void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, OptimisationData &fermi_parameters, double & opt_time){
+void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time){
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -161,13 +161,13 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
   // repeat the final configuration of the nuclear model
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
-  fermi_parameters.mse = MSE;
+  da.fermi2.mse = MSE;
   array<double, 2> ct_coords = da.getFermi2("ct");
   array<double, 2> polar_coords = da.getFermi2("polar");
-  fermi_parameters.c = ct_coords.at(0);
-  fermi_parameters.t = ct_coords.at(1);
-  fermi_parameters.rms_radius = polar_coords.at(0);
-  fermi_parameters.theta = polar_coords.at(1);
+  da.fermi2.c = ct_coords.at(0);
+  da.fermi2.t = ct_coords.at(1);
+  da.fermi2.rms_radius = polar_coords.at(0);
+  da.fermi2.theta = polar_coords.at(1);
 }
 
 
@@ -223,16 +223,16 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da){
 
 }
 
-void optFermi2(DiracAtom & da, const string algo, OptimisationData & best_fermi_parameters, double & opt_time){
+void optFermi2(DiracAtom & da, const string algo, double & opt_time){
   if (algo == "bfgs"){
-      optimizeFermiParameters(da, best_fermi_parameters, opt_time);
+      optimizeFermiParameters(da, opt_time);
       }
   else if (algo == "trust"){
       opt_2pF_model opt_obj(da);
-      optimizeFermiParameters(opt_obj, da, best_fermi_parameters, opt_time);
+      optimizeFermiParameters(opt_obj, da, opt_time);
   }
   else if (algo=="global"){
-      globalOptimizeFermiParameters(da, best_fermi_parameters, opt_time);
+      globalOptimizeFermiParameters(da, opt_time);
   }
   else {
       cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
@@ -260,13 +260,11 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   // set all optimization values in Dirac Atom
   da.setExpOptData(coord_system_2pF, measurements.getStringValues("xr_lines"), measurements.getDoubleValues("xr_energy"), measurements.getDoubleValues("xr_error"));
 
-  // data structure for storing best parameters.
-  OptimisationData best_fermi_parameters;
   double opt_time = 0;
 
   // perform the 2pF nuclear charge model optimisation routine
-  optFermi2(da, min_2pF_algo, best_fermi_parameters, opt_time);
+  optFermi2(da, min_2pF_algo, opt_time);
 
   // output file containing best fermi parameters and the associated MSE
-  writeFermiParameters(da, best_fermi_parameters, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+  writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
