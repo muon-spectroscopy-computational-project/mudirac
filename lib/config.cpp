@@ -217,7 +217,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   } else {
     da.setFermi2(t*Physical::fm, c_param*Physical::fm);
   }
-  LOG(INFO) << "t = " << da.fermi_t << "and c = " << da.fermi_c <<  "\n";
+  LOG(INFO) << "t = " << da.fermi2.t << "and c = " << da.fermi2.c <<  "\n";
 
   return da;
 }

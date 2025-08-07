@@ -63,11 +63,11 @@ void globalOptimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_param
   if (coord_sys =="polar"){
     fermi_parameters.rms_radius = final_params(0);
     fermi_parameters.theta = final_params(1);
-    tie(fermi_parameters.fermi_c, fermi_parameters.fermi_t) = fermiParameters(fermi_parameters.rms_radius, fermi_parameters.theta);
+    tie(fermi_parameters.c, fermi_parameters.t) = fermiParameters(fermi_parameters.rms_radius, fermi_parameters.theta);
   }
   else if (coord_sys=="ct"){
-    fermi_parameters.fermi_c =  final_params(0); 
-    fermi_parameters.fermi_t = final_params(1);
+    fermi_parameters.c =  final_params(0); 
+    fermi_parameters.t = final_params(1);
     fermi_parameters.rms_radius = rmsRadius(final_params(0), final_params(1));
     fermi_parameters.theta =  atan(final_params(1)/final_params(1));
   }
@@ -124,8 +124,8 @@ void optimizeFermiParameters(DiracAtom & da, OptimisationData &fermi_parameters,
   // init_params have been updated by the minimisation to the optimising params
   da.setFermi2(init_params(0), init_params(1), coord_sys);
 
-  fermi_parameters.fermi_c = da.getFermi2("ct")[0];
-  fermi_parameters.fermi_t = da.getFermi2("ct")[1];
+  fermi_parameters.c = da.getFermi2("ct")[0];
+  fermi_parameters.t = da.getFermi2("ct")[1];
   fermi_parameters.rms_radius = da.getFermi2("polar")[0];
   fermi_parameters.theta = da.getFermi2("polar")[1];
   fermi_parameters.mse = MSE;
@@ -164,8 +164,8 @@ void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, Optim
   fermi_parameters.mse = MSE;
   array<double, 2> ct_coords = da.getFermi2("ct");
   array<double, 2> polar_coords = da.getFermi2("polar");
-  fermi_parameters.fermi_c = ct_coords.at(0);
-  fermi_parameters.fermi_t = ct_coords.at(1);
+  fermi_parameters.c = ct_coords.at(0);
+  fermi_parameters.t = ct_coords.at(1);
   fermi_parameters.rms_radius = polar_coords.at(0);
   fermi_parameters.theta = polar_coords.at(1);
 }

@@ -88,8 +88,8 @@ struct OptimisationData {
   double rms_radius;
   double theta;
   double mse;
-  double fermi_c;
-  double fermi_t;
+  double c;
+  double t;
 };
 
 
@@ -133,7 +133,8 @@ class Atom {
 
  public:
    // fermi 2pF parameters
-  double fermi_c=0, fermi_t=0;
+  // double fermi_c=0, fermi_t=0;
+  OptimisationData fermi2;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);

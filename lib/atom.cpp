@@ -192,8 +192,8 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   }
 
   // set object attributes for fermi 2pf in fm
-  fermi_c = c/Physical::fm;
-  fermi_t = thickness/Physical::fm;
+  fermi2.c = c/Physical::fm;
+  fermi2.t = thickness/Physical::fm;
 
   V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, c);
   reset();
@@ -205,16 +205,16 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
     if ( A < 5){
       LOG(WARNING) << "attempting to use polar 2pF coordinates when A < 5  \n";
     }
-    tie(fermi_c, fermi_t) = fermiParameters(coord_1, coord_2);
+    tie(fermi2.c, fermi2.t) = fermiParameters(coord_1, coord_2);
     }
   else if (coord_sys == "ct"){
     LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
-    fermi_c = coord_1;
-    fermi_t = coord_2;
+    fermi2.c = coord_1;
+    fermi2.t = coord_2;
   }
   LOG(DEBUG) << "creating potential with " << coord_sys << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
-  LOG(DEBUG) << "fermi parameters: " << fermi_c << " fm, " << fermi_t << " fm \n"; 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi_t*Physical::fm, fermi_c *Physical::fm);
+  LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n"; 
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
   reset();
 }
 
@@ -233,11 +233,11 @@ array<double, 2> Atom::getFermi2(const string coord_sys){
     return f2;
   }
   if (coord_sys == "ct"){
-    f2 = {fermi_c, fermi_t};
+    f2 = {fermi2.c, fermi2.t};
   }
   else if (coord_sys == "polar"){
-    double rms_radius_estimate = rmsRadius(fermi_c, fermi_t);
-    double theta_estimate = atan(fermi_t/fermi_c);
+    double rms_radius_estimate = rmsRadius(fermi2.c, fermi2.t);
+    double theta_estimate = atan(fermi2.t/fermi2.c);
     f2 = {rms_radius_estimate, theta_estimate};
     
   }
