@@ -81,8 +81,8 @@ DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
   double radius = this->getDoubleValue("radius");
-  double t = this->getDoubleValue("fermi_t");
-  double c_param = this->getDoubleValue("fermi_c");
+  double fermi_t = this->getDoubleValue("fermi_t");
+  double fermi_c = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
   bool reduced_mass = this->getBoolValue("reduced_mass");
@@ -131,16 +131,16 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t ==-1) {
-    t = Physical::fermi2_thickness;
+  if (fermi_t ==-1) {
+    fermi_t = Physical::fermi2_thickness;
   }
 
-  if (c_param == -1) {
-    da.setFermi2(t*Physical::fm);
+  if (fermi_c == -1) {
+    da.setFermi2(fermi_t*Physical::fm);
   } else {
-    da.setFermi2(t*Physical::fm, c_param*Physical::fm);
+    da.setFermi2(fermi_t*Physical::fm, fermi_c*Physical::fm);
   }
-  LOG(INFO) << "t = " << t << "and c = " << c_param <<  "\n";
+  LOG(INFO) << "fermi_t = " << fermi_t << "and c = " << fermi_c <<  "\n";
 
   return da;
 }
