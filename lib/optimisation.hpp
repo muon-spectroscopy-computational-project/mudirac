@@ -20,6 +20,8 @@
 
 typedef dlib::matrix<double,0,1> column_vector;
 
+void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE);
+
 /**
  *
  *
@@ -35,7 +37,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * @retval: None
  *
  */
-void optimizeFermiParameters(DiracAtom & da, double & opt_time);
+void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 
 
@@ -127,7 +129,7 @@ class opt_2pF_model
  * @retval: None
  *
  */
-void optimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time);
+void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time);
 
 
 /**
