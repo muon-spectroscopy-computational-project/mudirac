@@ -206,9 +206,9 @@ void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, stri
   out.close();
 }
 
-// main output functions 
+// main output functions
 
-void printInitLogMessage(){
+void printInitLogMessage() {
   LOG(INFO) << "MuDirac, a muonic atomic solver\n";
   LOG(INFO) << "by Simone Sturniolo\n";
   LOG(INFO) << "Released under the MIT License (2019)\n";
@@ -219,8 +219,8 @@ void printInitLogMessage(){
   LOG(INFO) << " \n";
 }
 
-void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions){
-  
+void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions) {
+
   // Sort transitions by energy if requested
   if (config.getBoolValue("sort_by_energy")) {
     LOG(DEBUG) << "sorting transitions by energy \n";

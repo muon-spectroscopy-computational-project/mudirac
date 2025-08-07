@@ -36,7 +36,7 @@ using namespace std;
 
 
 /**
- * @brief  Sets up aixlog logging 
+ * @brief  Sets up aixlog logging
  * @note    sets up aixlogging with the provided verbosity level.
  * Logs are saved to a file name based on the seed. The initial log message is
  *  also output to the file.

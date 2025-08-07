@@ -23,11 +23,11 @@ int main(int argc, char *argv[]) {
   debugTasks(config);   // runs debug tasks if configured
   DiracAtom da = config.makeAtom();   // construct the atom
 
-  // Print out electronic potential if high levels of verbosity are chosen 
+  // Print out electronic potential if high levels of verbosity are chosen
   writeEConfV(da, seed, config.getIntValue("output"));
 
   // contains both state names, actual dirac states, transition matrix
-  vector<TransitionData> transitions;     
+  vector<TransitionData> transitions;
 
   // performs least squares optimisation of 2pF parameters and find rms radius
   if (config.getBoolValue("optimise_fermi_parameters")) {
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Calculation completed in " << t_tot / 1.0e3 << " seconds\n";
 }
 
-void setupLogging(const int verbosity, const string & seed){
+void setupLogging(const int verbosity, const string & seed) {
   AixLog::Severity log_verbosity;
   switch (verbosity) {
     case 1:
@@ -68,7 +68,7 @@ void setupLogging(const int verbosity, const string & seed){
   printInitLogMessage();
 }
 
-void debugTasks(MuDiracInputFile & config){
+void debugTasks(MuDiracInputFile & config) {
   string debugtask = config.getStringValue("devel_debug_task");
   if (debugtask == "EdEscan") {
     LOG(INFO) << "Running debug task: E=>dE scan\n";
@@ -78,7 +78,7 @@ void debugTasks(MuDiracInputFile & config){
 }
 
 
-void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity){
+void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity) {
   if (out_verbosity >= 2 && (da.getPotentialFlags() && da.HAS_ELECTRONIC)) {
     writeEConfPotential(da.getPotentialElectronic(), seed + ".epot.dat");
   }

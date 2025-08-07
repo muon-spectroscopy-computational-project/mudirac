@@ -90,7 +90,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
 }
 
 
-vector<TransLineSpec> BaseInputFile::parseXRLines(){
+vector<TransLineSpec> BaseInputFile::parseXRLines() {
   LOG(DEBUG) << "parsing transition lines into quantum numbers for start and end states in transitions\n";
   // First we unravel the user specified string
   vector<string> xr_lines = getStringValues("xr_lines");
@@ -222,7 +222,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
   return da;
 }
 
-void MuDiracInputFile::validate(int argc, char *argv[], string & seed){
+void MuDiracInputFile::validate(int argc, char *argv[], string & seed) {
   if (argc < 2) {
     cout << "Input file missing\n";
     cout << "Please use the program as `mudirac <input_file>`\n";
@@ -240,7 +240,7 @@ void MuDiracInputFile::validate(int argc, char *argv[], string & seed){
   }
 }
 
-void MuDiracInputFile::validateOptimisation(int args, string &coords, string &min_2pF_algo){
+void MuDiracInputFile::validateOptimisation(int args, string &coords, string &min_2pF_algo) {
   // check the experimental results input file is provided
   if (args < 3) {
     LOG(ERROR) << "Experimental results input file missing\n";
@@ -267,14 +267,14 @@ void MuDiracInputFile::validateOptimisation(int args, string &coords, string &mi
   // get the 2pF optimsation coordinate system (dev)
 
 
-  if (!((coords == "ct")||(coords == "polar"))){
+  if (!((coords == "ct")||(coords == "polar"))) {
     LOG(WARNING)<< "Invalid 2pF coordinate system choice for minimsation\n";
     LOG(WARNING)<< "please use \"ct\" or \"polar\" (default is \"polar\") \n";
     LOG(WARNING)<< "You used: \""<<coords <<"\" \n";
     LOG(INFO) << "Using default polar coordinate system\n";
     coords = "polar";
   }
-  
+
   if (this->getIntValue("isotope") < 5) {
     LOG(INFO) << "using ct coordinate system as polar parameterisation no longer holds for A < 5 \n";
     coords = "ct";
@@ -284,8 +284,8 @@ void MuDiracInputFile::validateOptimisation(int args, string &coords, string &mi
 
   // check the algorithm is valid
   min_2pF_algo = this->getStringValue("min_2pF_algorithm");
-  
-  if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust"))){
+
+  if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust"))) {
     LOG(WARNING)<< "Invalid 2pF algorithm for minimsation\n";
     LOG(WARNING)<< "please use \"bfgs\" or \"global\" (default is \"trust\") \n";
     LOG(WARNING)<< "You used: \""<<min_2pF_algo<<"\" \n";

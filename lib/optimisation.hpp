@@ -51,11 +51,10 @@ void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_
 void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 
-
 /**
  *
  *
- * @brief  A function which finds the derivative with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions. 
+ * @brief  A function which finds the derivative with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions.
  * @note   This function uses the dlib derivative method to numerically calculate the derivate of the calculateMSE function. The derivative value is returned as a dlib column vector and can be used in minimisation routines.
  *
  * @param m: fermi parameters in ct or polar coordinates
@@ -71,9 +70,9 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da);
 /**
  *
  *
- * @brief  A function which finds the hessian with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions. 
+ * @brief  A function which finds the hessian with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions.
  * @note   This function uses a central differences finite difference method on the MSE_2pF_derivative to find the hessian with respect to the fermi parameters.
- * The Hessian is left un symmetrised as this yielded better optimisation results. 
+ * The Hessian is left un symmetrised as this yielded better optimisation results.
  *
  * @param m: fermi parameters in ct or polar coordinates
  * @param da: Dirac atom used to calculate all the energies.
@@ -83,46 +82,44 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da);
 dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da);
 
 /**
- * 
+ *
  * @brief functor class which allows the means square error of the energies simulated by mudirac compared with experimental energies to be optimised with respect to the fermi parameters.
  * @note This class uses a numerically defined derivative and hessian. This functor exists to be used in dlib::find_min_trust_function.
  */
-class opt_2pF_model
-{
+class opt_2pF_model {
   /*!
     This object is a "function model" which can be used with the
-    find_min_trust_region() routine.  
+    find_min_trust_region() routine.
   !*/
 
-  public:
-    // common parameters for the objective, derivative and hessian functions
-    typedef ::column_vector column_vector;
-    typedef dlib::matrix<double> general_matrix;
-    DiracAtom da;
+ public:
+  // common parameters for the objective, derivative and hessian functions
+  typedef ::column_vector column_vector;
+  typedef dlib::matrix<double> general_matrix;
+  DiracAtom da;
 
-    // constructor
-    opt_2pF_model(DiracAtom d_a){
-      da = d_a;
-    }
+  // constructor
+  opt_2pF_model(DiracAtom d_a) {
+    da = d_a;
+  }
 
-    double operator() (
-      const column_vector& x
-    ) const {
-      DiracAtom da_1 = da;
-      return da_1.calculateMSE(x(0), x(1));
-    }
+  double operator() (
+    const column_vector& x
+  ) const {
+    DiracAtom da_1 = da;
+    return da_1.calculateMSE(x(0), x(1));
+  }
 
-    // function for the dlib minisation routine to get the derivative and hessian
-    void get_derivative_and_hessian (
-      const column_vector& x,
-      column_vector& der,
-      general_matrix & hess
-    ) const
-    {
-      DiracAtom da_1 = da;
-      der = MSE_2pF_derivative(x, da_1);
-      hess = MSE_2pF_hessian(x, da_1);
-    }
+  // function for the dlib minisation routine to get the derivative and hessian
+  void get_derivative_and_hessian (
+    const column_vector& x,
+    column_vector& der,
+    general_matrix & hess
+  ) const {
+    DiracAtom da_1 = da;
+    der = MSE_2pF_derivative(x, da_1);
+    hess = MSE_2pF_hessian(x, da_1);
+  }
 };
 
 /**
@@ -164,7 +161,7 @@ void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 /**
  * @brief: Function which wraps the other 2pF optimisation functions and validates the algorithm choice
- * 
+ *
  * @param da: dirac atom used for the minimisation calculations
  * @param algo: the selected minimisation algorithm
  * @param best_fermi_parameters: stores the values of c, t, rms radius, theta and MSE of the optimal fermi parameters.

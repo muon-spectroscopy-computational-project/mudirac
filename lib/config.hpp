@@ -37,20 +37,20 @@ using namespace std;
  * @retval None
  */
 class BaseInputFile : public InputFile {
-  public:
-    BaseInputFile(void);
-  
+ public:
+  BaseInputFile(void);
+
   /**
    * @brief A function which parses the input xray transition lines and returns the
    * related quantum numbers
    * @note converts the IUPAC notation for the transition lines to find the quantum numbers for
    * the levels in each transition. The transitions are validated so invalid transitions are skipped.
-   * 
+   *
    * @returns a vector of TransLineSpec which stores n l and s quantum numbers
    * for the initial and final state for each transition.
    */
-    vector<TransLineSpec> parseXRLines();
-    
+  vector<TransLineSpec> parseXRLines();
+
 };
 
 
@@ -81,11 +81,11 @@ class MuDiracInputFile : public BaseInputFile {
   void validate(int argc, char *argv[], string & seed);
 
   /**
-   * 
+   *
    * @brief: Validates the input file for optimisations settings
    * @note: validates the number of arguments passed to mudirac, the nuclear model,
    * the choice of coordinate system and the optimisation algorithm.
-   * 
+   *
    * @param args: argc the number of arguments passed to MuDirac
    * @param coords: the coordinate system (corrected to default if invalid)
    * @param min_2pF_algo: the minimisation algorithm (corrected to default if invalid)

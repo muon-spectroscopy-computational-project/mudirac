@@ -23,14 +23,13 @@ void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   opt_t0 = chrono::high_resolution_clock::now();
 
   double c1_lower_coef, c1_upper_coef, c2_lower_coef, c2_upper_coef;
-  if (da.coord_system =="polar"){
+  if (da.coord_system =="polar") {
     // set bounds for rms radius and theta close to Marinova table values
     c1_lower_coef = 0.95;
     c1_upper_coef = 1.05;
     c2_lower_coef = 0;
     c2_upper_coef = M_PI*0.5;
-  }
-  else if (da.coord_system =="ct"){
+  } else if (da.coord_system =="ct") {
     // set bounds for c and t within reasonable range of original values
     c1_lower_coef = 0.5;
     c1_upper_coef = 1.5;
@@ -39,17 +38,17 @@ void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   }
 
   // lambda function for MSE required for dlib find min global
-  auto MSE_lambda = [&](double rms_radius, double theta){
+  auto MSE_lambda = [&](double rms_radius, double theta) {
     return da.calculateMSE(rms_radius, theta);
   };
 
   // global optimisation where result.x is opt rms radius and coords, result.y is MSE
   // max run time 10 minutes can be changed
   auto result = dlib::find_min_global(
-    MSE_lambda,
-    {c1_lower_coef*init_params[0], c2_lower_coef*init_params[1]}, //lower bounds
-    {c1_upper_coef*init_params[0], c2_upper_coef*init_params[1]}, //upper bounds
-    std::chrono::milliseconds(60*1000*10));
+                  MSE_lambda,
+  {c1_lower_coef*init_params[0], c2_lower_coef*init_params[1]}, //lower bounds
+  {c1_upper_coef*init_params[0], c2_upper_coef*init_params[1]}, //upper bounds
+  std::chrono::milliseconds(60*1000*10));
 
   opt_t1 = chrono::high_resolution_clock::now();
   auto final_params = result.x;
@@ -76,11 +75,11 @@ void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
   opt_t0 = chrono::high_resolution_clock::now();
 
-   auto MSE_lambda = [&](column_vector x){
+  auto MSE_lambda = [&](column_vector x) {
     return da.calculateMSE(x(0), x(1));
   };
 
-  auto der_lambda = [&](column_vector x){
+  auto der_lambda = [&](column_vector x) {
     return MSE_2pF_derivative(x, da);
   };
 
@@ -91,14 +90,14 @@ void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
           der_lambda,
           init_params,
           -1);
-  
+
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
 }
 
 
-void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time){
+void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time) {
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
@@ -122,13 +121,13 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
   finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
 }
 
-void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE){
-  
+void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE) {
+
   // output final optimisation values to LOG
   LOG(INFO) << "minimised with MSE: "<< MSE << " and "<< coord_sys << "fermi parameters: "<< final_fermi_params <<" \n";
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
   LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
-  
+
   // ensure final fermi parameters are set
   da.setFermi2(final_fermi_params(0), final_fermi_params(1), coord_sys);
 
@@ -147,7 +146,7 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da) {
 
   // compute gradient
   // bind calculate mse as function of just polar fermi parameters column vector
-  auto MSE_lambda = [&](column_vector x){
+  auto MSE_lambda = [&](column_vector x) {
     return da.calculateMSE(x(0), x(1));
   };
   LOG(DEBUG) << "computing derivative at " << da.coord_system <<" fermi parameters (" << m(0) << ", " << m(1) <<") \n";
@@ -163,9 +162,9 @@ column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da) {
 
 
 
-dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da){
+dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da) {
   dlib::matrix<double> res(2,2);
-  
+
   // choose derivative step size
   double d_r = 1e-7;
   double d_theta = 1e-7;
@@ -173,7 +172,7 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da){
   column_vector delta_theta = {0, d_theta};
   LOG(DEBUG) << "computing hessian at " << da.coord_system << " fermi parameters (" << m(0) << ", " << m(1) <<") \n";
   //LOG(DEBUG) << "computing hessian at config fermi parameters(" << config.getDoubleValue["fermi_c"] << ", " << config.getDoubleValue["fermi_t"] <<") \n";
-  auto der_lambda = [&](column_vector x){
+  auto der_lambda = [&](column_vector x) {
     return MSE_2pF_derivative(x, da);
   };
 
@@ -195,28 +194,25 @@ dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da){
 
 }
 
-void optFermi2(DiracAtom & da, const string algo, double & opt_time){
-  if (algo == "bfgs"){
-      bfgsOptimizeFermiParameters(da, opt_time);
-      }
-  else if (algo == "trust"){
-      opt_2pF_model opt_obj(da);
-      trustOptimizeFermiParameters(opt_obj, da, opt_time);
-  }
-  else if (algo=="global"){
-      globalOptimizeFermiParameters(da, opt_time);
-  }
-  else {
-      cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
-      cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
-      cout << "You used: \""<<algo<<"\" \n";
-      cout << "Quitting...\n";
-      LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
+void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
+  if (algo == "bfgs") {
+    bfgsOptimizeFermiParameters(da, opt_time);
+  } else if (algo == "trust") {
+    opt_2pF_model opt_obj(da);
+    trustOptimizeFermiParameters(opt_obj, da, opt_time);
+  } else if (algo=="global") {
+    globalOptimizeFermiParameters(da, opt_time);
+  } else {
+    cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
+    cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
+    cout << "You used: \""<<algo<<"\" \n";
+    cout << "Quitting...\n";
+    LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
   }
 }
 
 
-void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed){
+void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed) {
   string coord_system_2pF;
   string min_2pF_algo;
   config.validateOptimisation(argc, coord_system_2pF, min_2pF_algo);

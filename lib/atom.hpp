@@ -132,9 +132,9 @@ class Atom {
   EConfPotential V_econf;
 
  public:
-   // fermi 2pF parameters
-  // double fermi_c=0, fermi_t=0;
+  // fermi 2pF parameters
   OptimisationData fermi2;
+  string coord_system;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
@@ -191,13 +191,13 @@ class Atom {
   /**
    * @brief sets the 2 parameter fermi model parameters of the atoms nuclear model.
    * @note sets the 2pF parameters in ct or polar coordinates. units are in fm.
-   * @param coord_1: half density radius c or rms radius 
+   * @param coord_1: half density radius c or rms radius
    * @param coord_2: skin thickness t or theta
    * @param coord_sys: coordinate system "ct" or "polar"
-   * @retval None 
+   * @retval None
    */
   void setFermi2(const double coord_1, const double coord_2, const string coord_sys);
-  
+
   /**
    * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
    */
@@ -231,7 +231,6 @@ class DiracAtom : public Atom {
 
   // 2pF optimisation attributes
   int  iteration_counter_2pF =0;
-  string coord_system;
   vector<TransLineSpec> transqnums;
   vector<string> xr_lines_measured;
   vector<double> xr_energies;
@@ -271,7 +270,7 @@ class DiracAtom : public Atom {
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err){
+  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
     iteration_counter_2pF =0;
     coord_system = coord_sys;
     xr_lines_measured = xr_lines;
