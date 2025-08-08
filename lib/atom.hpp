@@ -26,6 +26,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <array>
 
 using namespace std;
 
@@ -63,6 +64,12 @@ class TransitionMatrix {
   double totalRate();
 };
 
+struct TransLineSpec {
+  int n1, n2;
+  int l1, l2;
+  bool s1, s2;
+};
+
 struct TransitionData {
   string name;
   string sname1;
@@ -71,6 +78,20 @@ struct TransitionData {
   DiracState ds2;
   TransitionMatrix tmat;
 };
+
+
+/**
+ * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
+ *
+ */
+struct OptimisationData {
+  double rms_radius;
+  double theta;
+  double mse;
+  double c;
+  double t;
+};
+
 
 class Atom {
  public:
@@ -111,6 +132,10 @@ class Atom {
   EConfPotential V_econf;
 
  public:
+  // fermi 2pF parameters
+  OptimisationData fermi2;
+  string coord_system;
+
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
 
@@ -163,6 +188,21 @@ class Atom {
   // Additional potential terms get/setters
   void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
 
+  /**
+   * @brief sets the 2 parameter fermi model parameters of the atoms nuclear model.
+   * @note sets the 2pF parameters in ct or polar coordinates. units are in fm.
+   * @param coord_1: half density radius c or rms radius
+   * @param coord_2: skin thickness t or theta
+   * @param coord_sys: coordinate system "ct" or "polar"
+   * @retval None
+   */
+  void setFermi2(const double coord_1, const double coord_2, const string coord_sys);
+
+  /**
+   * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
+   */
+  array<double, 2> getFermi2(const string coord_sys);
+
   bool getUehling() {
     return use_uehling;
   };
@@ -188,6 +228,14 @@ class DiracAtom : public Atom {
   double out_eps = 1e-5;
   double in_eps = 1e-5;
   int min_n = 1000;
+
+  // 2pF optimisation attributes
+  int  iteration_counter_2pF =0;
+  vector<TransLineSpec> transqnums;
+  vector<string> xr_lines_measured;
+  vector<double> xr_energies;
+  vector<double> xr_errors;
+  double  opt_time;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
             double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
@@ -215,6 +263,23 @@ class DiracAtom : public Atom {
   DiracState getState(int n, int l, bool s);
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
       int l2, bool s2, bool approx_j0 = false);
+
+  // Full energy calculation
+
+  vector<TransitionData> getAllTransitions();
+
+  // optimisation
+
+  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
+    iteration_counter_2pF =0;
+    coord_system = coord_sys;
+    xr_lines_measured = xr_lines;
+    xr_energies = xr_e;
+    xr_errors = xr_err;
+    opt_time = 0.0;
+  }
+
+  double calculateMSE(double coord_1, double coord_2);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
@@ -224,5 +289,6 @@ class DiracIdealAtom : public DiracAtom {
   DiracIdealAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
                  double radius = -1, double fc = 1.0, double dx = 0.005);
 };
+
 
 #endif

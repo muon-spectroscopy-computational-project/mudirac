@@ -28,19 +28,19 @@
   *
   * @retval None
  */
-void writeFermiParameters(DiracAtom &da, const OptimisationData &fermi_parameters, string fname, int output_precision) {
+void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, int output_precision) {
 
   // output file containing all valid fermi parameters and the associated MSE
   ofstream out(fname);
   out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
-  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\n";
+  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\titerations\ttime\n";
   out << fixed;
   out << setprecision(output_precision);
 
-  // output fermi_c, fermi_c, rms radius, theta, MSE
-  out << fermi_parameters.fermi_c << '\t' << fermi_parameters.fermi_t << '\t';
-  out << fermi_parameters.rms_radius << '\t' << fermi_parameters.theta  << '\t';
-  out << fermi_parameters.mse << "\n";
+  // output fermi_c, fermi_c, rms radius, theta, MSE, n iterations, optimisation time
+  out << da.fermi2.c << '\t' << da.fermi2.t << '\t';
+  out << da.fermi2.rms_radius << '\t' << da.fermi2.theta  << '\t';
+  out << da.fermi2.mse <<'\t' << da.iteration_counter_2pF << '\t' << opt_time << '\n';
 
 
   out.close();
@@ -125,6 +125,7 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname) {
  * @retval None
  */
 void writeEConfPotential(EConfPotential epot, string fname) {
+  LOG(INFO) << "Writing electronic configuration potential\n";
   ofstream out(fname);
 
   int i0 = epot.getGridLimits().first;
@@ -203,4 +204,88 @@ void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, stri
   }
 
   out.close();
+}
+
+// main output functions
+
+void printInitLogMessage() {
+  LOG(INFO) << "MuDirac, a muonic atomic solver\n";
+  LOG(INFO) << "by Simone Sturniolo\n";
+  LOG(INFO) << "Released under the MIT License (2019)\n";
+  LOG(INFO) << " \n";
+  LOG(INFO) << "Please cite the following paper:\n";
+  LOG(INFO) << "Sturniolo, S, Hillier, A., \"Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays.\"\n";
+  LOG(INFO) << "X‐Ray Spectrom. 2020; 1– 17. https://doi.org/10.1002/xrs.3212\n";
+  LOG(INFO) << " \n";
+}
+
+void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions) {
+
+  // Sort transitions by energy if requested
+  if (config.getBoolValue("sort_by_energy")) {
+    LOG(DEBUG) << "sorting transitions by energy \n";
+    sort(transitions.begin(), transitions.end(),
+    [](TransitionData t1, TransitionData t2) {
+      return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
+    });
+  }
+
+  // Now create output files
+  int output_verbosity = config.getIntValue("output");
+  if (output_verbosity >= 1) {
+    // Save a file for all lines
+    LOG(DEBUG) << "writing xray transitions output file \n";
+    ofstream out(seed + ".xr.out");
+    out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+    out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
+    out << fixed;
+
+    if (config.getIntValue("xr_print_precision") > -1) {
+      out << setprecision(config.getIntValue("xr_print_precision"));
+    } else {
+      out << setprecision(15); //Setting the maximum precision
+    }
+
+    for (int i = 0; i < transitions.size(); ++i) {
+      double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
+      double tRate = transitions[i].tmat.totalRate();
+      if (dE <= 0 || tRate <= 0)
+        continue; // Transition is invisible
+      out << transitions[i].name << '\t' << dE / Physical::eV;
+      out << "\t\t" << tRate * Physical::s << '\n';
+    }
+
+    // could be a config method in output.hpp?
+    if (config.getBoolValue("write_spec")) {
+      // Write a spectrum
+      writeSimSpec(transitions, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
+                   seed + ".spec.dat");
+    }
+
+    out.close();
+  }
+
+  if (output_verbosity >= 2) {
+    vector<string> saved_states;
+    // Save each individual state
+    for (int i = 0; i < transitions.size(); ++i) {
+      for (int j = 0; j < 2; ++j) {
+        DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
+        string sname = ds.name();
+        string fname = seed + "." + sname + ".out";
+
+        if (vectorContains(saved_states, sname)) {
+          continue;
+        }
+
+        LOG(DEBUG) << "Printing out state file for state " << sname << "\n";
+
+        writeDiracState(ds, fname, config.getIntValue("state_print_precision"));
+
+        saved_states.push_back(sname);
+      }
+      string fname = seed + "." + transitions[i].name + ".tmat.out";
+      writeTransitionMatrix(transitions[i].tmat, fname);
+    }
+  }
 }

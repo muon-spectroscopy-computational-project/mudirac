@@ -167,7 +167,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
 /**
  * @brief Set parameters for the Fermi 2-term potential term (if used)
  * @note  Set the thickness parameter for the Fermi 2-term potential term (if used).
- * Calling this function resets all computed states.
+ * Calling this function resets all computed states. sets the new c and t values as object attributes in fm.
  *
  * @param  thickness:  The new thickness to set up
  * @retval None
@@ -179,8 +179,69 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
     return;
   }
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi2_potential);
+
+  // First, define C for this radius
+  double c;
+  if (fermi2_potential  != -1) {
+    c = fermi2_potential;
+  } else if (A >= 5.0) {
+    c = sqrt(R * R -
+             7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
+  } else {
+    c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+  }
+
+  // set object attributes for fermi 2pf in fm
+  fermi2.c = c/Physical::fm;
+  fermi2.t = thickness/Physical::fm;
+
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, c);
   reset();
+}
+
+void Atom::setFermi2(const double coord_1, const double coord_2, const string coord_sys) {
+  if (coord_sys == "polar") {
+    LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
+    if ( A < 5) {
+      LOG(WARNING) << "attempting to use polar 2pF coordinates when A < 5  \n";
+    }
+    tie(fermi2.c, fermi2.t) = fermiParameters(coord_1, coord_2);
+    fermi2.rms_radius = coord_1;
+    fermi2.theta = coord_2;
+  } else if (coord_sys == "ct") {
+    LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
+    fermi2.c = coord_1;
+    fermi2.t = coord_2;
+  }
+  LOG(DEBUG) << "creating potential with " << coord_sys << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
+  LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
+  reset();
+}
+
+/**
+ * @brief gets parameters for the Fermi 2-term potential term in ct or polar coordinates(if used)
+ * @note  gets the fermi2 parameters c and t, or the polar parameters rms radius and theta
+ * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
+ * @retval array<double, 2> :the 2pF domain coordinates.
+ */
+array<double, 2> Atom::getFermi2(const string coord_sys) {
+  array<double, 2> f2 {0,0};
+  if (rmodel != FERMI2) {
+    LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
+                 << " without using a Fermi 2-term model\n";
+
+    return f2;
+  }
+  if (coord_sys == "ct") {
+    f2 = {fermi2.c, fermi2.t};
+  } else if (coord_sys == "polar") {
+    fermi2.rms_radius= rmsRadius(fermi2.c, fermi2.t);
+    fermi2.theta = atan(fermi2.t/fermi2.c);
+    f2 = {fermi2.rms_radius, fermi2.theta};
+
+  }
+  return f2;
 }
 
 /**
@@ -1054,6 +1115,147 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   return tmat;
 }
 
+
+/**
+ * @brief  gets energies and intensities of selected transitions
+ * @note   Returns the TransitionData for each transition line in a vector. The transition
+ * data contains the state names dirac states and transition matrix.
+ *
+ * @param  transqnums: transition quantum numbers of the initial and final states of each transition
+ * @retval TransitionData
+ */
+vector<TransitionData> DiracAtom::getAllTransitions() {
+  LOG(DEBUG) << "calculating selected transitions\n";
+  vector<TransitionData> transitions;
+  vector<string> failconv_states; // Store states whose convergence has failed already, so we don't bother any more
+  for (int i = 0; i < transqnums.size(); ++i) {
+    int n1, l1, n2, l2;
+    bool s1, s2;
+    bool success = true;
+    TransitionData tdata;
+
+    n1 = transqnums[i].n1;
+    l1 = transqnums[i].l1;
+    s1 = transqnums[i].s1;
+    n2 = transqnums[i].n2;
+    l2 = transqnums[i].l2;
+    s2 = transqnums[i].s2;
+
+    tdata.sname1 = printIupacState(n1, l1, s1);
+    tdata.sname2 = printIupacState(n2, l2, s2);
+    tdata.name = tdata.sname1 + "-" + tdata.sname2;
+
+    // Have these been tried before?
+    if (vectorContains(failconv_states, tdata.sname1)) {
+      LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname1 << " failed to converge before\n";
+      continue;
+    }
+    if (vectorContains(failconv_states, tdata.sname2)) {
+      LOG(INFO) << "Skipping line " << tdata.name << " because " << tdata.sname2 << " failed to converge before\n";
+      continue;
+    }
+
+    LOG(INFO) << "Computing transition " << tdata.name << "\n";
+
+    try {
+      LOG(INFO) << "Computing state " << tdata.sname1 << "\n";
+
+      // Here we actually solve for the first state
+      tdata.ds1 = getState(n1, l1, s1);
+      LOG(INFO) << "Computing state " << tdata.sname2 << "\n";
+
+      // Here we actually solve for the final state
+      tdata.ds2 = getState(n2, l2, s2);
+    } catch (AtomErrorCode aerr) {
+      LOG(ERROR) << SPECIAL << "Transition energy calculation for line " << tdata.name << " failed with AtomErrorCode " << aerr << "\n";
+      success = false;
+    } catch (const exception &e) {
+      LOG(ERROR) << SPECIAL << "Unknown error: " << e.what() << "\n";
+      success = false;
+    }
+    if (!success) {
+      LOG(INFO) << "Convergence of one state failed for line " << tdata.name << ", skipping\n";
+      if (!tdata.ds1.converged) {
+        failconv_states.push_back(tdata.sname1);
+      } else {
+        failconv_states.push_back(tdata.sname2);
+      }
+      continue;
+    }
+
+    // Compute transition probability
+    tdata.tmat = getTransitionProbabilities(n2, l2, s2, n1, l1, s1);
+
+    LOG(INFO) << "Transition energy = " << (tdata.ds2.E - tdata.ds1.E) / (Physical::eV * 1000) << " kEv\n";
+
+    transitions.push_back(tdata);
+  }
+
+  return transitions;
+
+}
+
+/**
+ *
+ *
+ * @brief  A function which calculates the Mean Square Error between a MuDirac simulation with a 2pF model and experimental measurements.
+ * @note   A function which calculates the non linear Mean Square Error between MuDirac simualted energies and energies experimentally measured.
+ * This function configures a dirac atom with new fermi parameters and calculates the square error between mudirac and experimental values for each muonic xray transition.
+ * The Mean Square error is taken over all measured transitions provided.
+ *
+ * @param m:    polar fermi parameters (rms_radius, theta)
+ * @param coord_system: "ct" or "polar" coordinate system used to configure the nuclear model
+ * @param config:     config object for MuDirac
+ * @param transqnums:     transition quantum numbers required to index the transition energies
+ * @param xr_lines_measured:      vector of measured muonic transitions
+ * @param xr_energies:      vector of measured muonic transition energies
+ * @param xr_errors:      vector of measured muonic transition energy errors
+ *
+ * @retval MSE: Mean Square error between transition energies calculated by MuDirac and measured experimentally.
+ *
+ */
+double DiracAtom::calculateMSE(double coord_1, double coord_2) {
+  ++iteration_counter_2pF;
+  setFermi2(coord_1, coord_2, coord_system);
+  vector<TransitionData> transitions_iteration = getAllTransitions();
+
+  LOG(DEBUG) << "MSE loop \n";
+  double MSE = 0;
+  for (int k = 0; k < transitions_iteration.size(); ++k) {
+    // calculate transition energy and rate
+    double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+    double tRate = transitions_iteration[k].tmat.totalRate();
+
+    // square error for each transitions calculated
+    double square_error = 0;
+
+    if (dE <= 0 || tRate <= 0)
+      continue; // Transition is invisible
+
+    // check transition allign with experimental transitions
+    if (transitions_iteration[k].name == xr_lines_measured[k]) {
+      // convert to eV
+      double transition_energy = dE / Physical::eV;
+
+      // calculate the square error of each transition
+      double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+      double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
+      square_error = square_deviation/valid_uncertainty;
+
+      // output square error to LOG
+      LOG(DEBUG) << transitions_iteration[k].name << " SE: "<< square_error << "\n";
+      MSE += square_error;
+    }
+
+  }
+  MSE = MSE/transitions_iteration.size();
+  // output MSE to LOG
+  LOG(DEBUG) << "MSE: "<< MSE << "\n";
+  return MSE;
+}
+
 DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
                                double radius, double fc,double dx)
   : DiracAtom(Z, m, A, radius_model, radius, fc, dx, 1) {}
+
+

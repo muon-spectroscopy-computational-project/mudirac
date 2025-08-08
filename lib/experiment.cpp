@@ -13,7 +13,7 @@
 
 #include "experiment.hpp"
 
-ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
+ExperimentalResultFile::ExperimentalResultFile() : BaseInputFile() {
   // Vector string keywords
   this->defineStringNode("xr_lines", InputNode<string>(vector<string> {""}, false)); // List of spectral lines experimentally measured
 
@@ -23,13 +23,58 @@ ExperimentalResultFile::ExperimentalResultFile() : InputFile() {
 
 }
 
+void ExperimentalResultFile::validate(const string xr_infile) {
+  // try to read the experimental results file
+  LOG(INFO) << "reading experimental results file\n";
+  try {
+    this->parseFile(xr_infile);
 
-pair<double, double> fermiParameters(double rms_radius, double theta) {
-  // reusing these calculated trig values
-  double var_cos = cos(theta);
-  double var_sin = sin(theta);
-  double uniform_sphere_radius = sqrt(5.0/3.0) * rms_radius;
-  double common_constant = uniform_sphere_radius/sqrt((var_cos*var_cos) + (ellipse_const*var_sin*var_sin));
-  pair<double, double> fermi_parameters = {common_constant*var_cos, common_constant*var_sin};
-  return fermi_parameters;
+  } catch (runtime_error e) {
+    cout << "Invalid experimental measurements file:\n";
+    cout << e.what() << "\n";
+    LOG(ERROR) << "Invalid experimental measurements file:\n";
+    exit(-1);
+  }
+  // read the measured transition lines
+  vector<string> xr_lines_measured = getStringValues("xr_lines");
+  LOG(DEBUG) << "Reading experimental Xray measurments for transitions: ";
+  for (auto transition: xr_lines_measured) {
+    LOG(DEBUG) << transition << ", ";
+  }
+  LOG(DEBUG) << "\n";
+
+  // read the measured transition energies
+  vector<double> xr_energies = getDoubleValues("xr_energy");
+  LOG(DEBUG) << "Reading experimental Xray energies: ";
+  for (auto transition_energy: xr_energies) {
+    LOG(DEBUG) << transition_energy << ", ";
+  }
+  LOG(DEBUG) << "\n";
+
+  // read the measured transition errors
+  vector<double> xr_errors = getDoubleValues("xr_error");
+  LOG(DEBUG) << "Reading experimental Xray energy errors: ";
+  for (auto transition_energy_error: xr_errors) {
+    LOG(DEBUG) << transition_energy_error << ", ";
+  }
+  LOG(DEBUG) << "\n";
+
+  // checking that the file has contents and not the default values
+  LOG(DEBUG) << "Validating experimental results input \n";
+  if (xr_lines_measured[0] == "") {
+    cout << "Experimental results input file is empty\n";
+    cout << "Please check the filename of the experimental results input file \n";
+    cout << "Quitting...\n";
+    exit(-1);
+  }
+
+  // check that the data provided is complete: all transitions measured have energies and errors
+  if (xr_lines_measured.size() == xr_energies.size() && xr_energies.size() == xr_errors.size()) {
+    LOG(DEBUG) << "Experimental results valid \n";
+  } else {
+    cout << "Invalid experimental measurements file: Missing input values\n";
+    cout << "please check energies and errors are listed for each xray transition line \n";
+    cout << "Quitting...\n";
+    exit(-1);
+  }
 }
