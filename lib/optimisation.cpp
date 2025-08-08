@@ -109,9 +109,9 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
   opt_t0 = chrono::high_resolution_clock::now();
 
   double MSE = dlib::find_min_trust_region(dlib::objective_delta_stop_strategy(1e-2),
-                                    opt_obj,
-                                    init_params,
-                                    0.1);
+               opt_obj,
+               init_params,
+               0.1);
   da.iteration_counter_2pF = opt_obj.opt_iterations;
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;

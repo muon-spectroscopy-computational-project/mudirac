@@ -236,9 +236,9 @@ array<double, 2> Atom::getFermi2(const string coord_sys) {
   if (coord_sys == "ct") {
     f2 = {fermi2.c, fermi2.t};
   } else if (coord_sys == "polar") {
-     fermi2.rms_radius= rmsRadius(fermi2.c, fermi2.t);
-     fermi2.theta = atan(fermi2.t/fermi2.c);
-     f2 = {fermi2.rms_radius, fermi2.theta};
+    fermi2.rms_radius= rmsRadius(fermi2.c, fermi2.t);
+    fermi2.theta = atan(fermi2.t/fermi2.c);
+    f2 = {fermi2.rms_radius, fermi2.theta};
 
   }
   return f2;
