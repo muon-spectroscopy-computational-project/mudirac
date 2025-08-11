@@ -53,10 +53,11 @@ double CoulombSpherePotential::V(double r) {
  * @param  A:         Atomic mass
  * @param  csteps:    Steps used to integrate numerically the potential
  * @param  thickness: Thickness parameter of the 'skin' of the nucleus
+ * @param  fermi_c:   Fermi parameter c for the model.
  * @retval
  */
 CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
-    double thickness, int csteps): CoulombSpherePotential(Z, R) {
+    double thickness, double fermi_c, int csteps): CoulombSpherePotential(Z, R) {
 
   vector<double> rho;
 
@@ -68,7 +69,9 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   }
 
   // First, define C for this radius
-  if (A >= 5.0) {
+  if (fermi_c  != -1) {
+    c = fermi_c;
+  } else if (A >= 5.0) {
     c = sqrt(R * R -
              7.0 / 3.0 * pow(M_PI * T / (4 * log(3.0)), 2));
   } else {
@@ -80,6 +83,13 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   // Then find the grid
   grid = logGrid(1e-8, 1e-2, csteps);
   // And define the density over it
+
+  //Check the value of fermi_c
+  if (c < grid[1][0]) {
+    LOG(ERROR) << "Value of Fermi-2 potential c = " << c << "is less than r = " << grid[1][0] << "\n";
+  }
+
+
   for (int i = 0; i < csteps; ++i) {
     rho.push_back(
       4.0 * M_PI * pow(grid[1][i], 2.0) /

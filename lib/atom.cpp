@@ -77,20 +77,23 @@ double TransitionMatrix::totalRate() {
  * @param  m: Mass of the orbiting particle (e.g. electron)
  * @param  A: Atomic mass (amus, ignored if -1)
  * @param  radius_model: Which NuclearRadiusModel to use
+ * @param  radius: Solid sphere equivalent radius (fm, ignored if -1)
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
  * radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
+ * @param  reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
-Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
-           double dx) {
+Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
+           double radius, double fc, double dx, bool reduced_mass) {
   // Set the properties
   this->Z = Z;
   this->A = A;
   this->m = m;
   rmodel = radius_model;
 
+  this->reduced_mass = reduced_mass;
   // Sanity checks
   if (Z <= 0) {
     throw invalid_argument("Z must be positive");
@@ -102,7 +105,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
     throw invalid_argument("Invalid grid parameters passed to Atom");
   }
 
-  if (A > 0) {
+  if ((A > 0) && (reduced_mass) ) {
     M = getIsotopeMass(Z, A);
     mu = effectiveMass(m, M * Physical::amu);
   } else {
@@ -112,19 +115,31 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
   // Define radius
   if (A == -1) {
     R = -1;
-  } else {
+  } else if (radius == -1) {
     switch (radius_model) {
       case POINT:
         R = -1;
         break;
       case SPHERE:
+        R = sphereNuclearModel(Z, A);
+        LOG(INFO) << "SPHERE: R extracted as " << R << "\n";
+        break;
       case FERMI2:
         R = sphereNuclearModel(Z, A);
+        LOG(INFO) << "FERMI2: R extracted as " << R << "\n";
         break;
       default:
         R = -1;
         break;
     }
+  } else {
+    R = radius * Physical::fm;
+  }
+
+  if (radius_model==POINT) {
+    R = -1;
+  } else {
+    LOG(INFO) << "R = " << radius << " fm\n";
   }
 
   if (radius_model == FERMI2) {
@@ -152,16 +167,17 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model, double fc,
  * Calling this function resets all computed states.
  *
  * @param  thickness:  The new thickness to set up
+ * @param  fermi_c:   The new Fermi parameter c to set up
  * @retval None
  */
-void Atom::setFermi2(double thickness) {
+void Atom::setFermi2(double thickness, double fermi_c) {
   if (rmodel != FERMI2) {
-    LOG(WARNING) << "Trying to set up nuclear skin thickness for an atom"
+    LOG(WARNING) << "Trying to set up nuclear skin thickness or fermi2-potential for an atom"
                  << " not using a Fermi 2-term model\n";
     return;
   }
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
   reset();
 }
 
@@ -316,6 +332,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param  m: Mass of the orbiting particle (e.g. electron)
  * @param  A: Atomic mass (amus, ignored if -1)
  * @param  radius_model: Which NuclearRadiusModel to use
+ * @param  radius: Solid sphere equivalent radius (fm, ignored if -1)
  * @param  fc:   Central point of the grid (corresponding to i = 0), as a
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
  * radius, depending on which one is bigger (default = 1)
@@ -323,11 +340,12 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param ideal_minshell:   Shell from which the atom will just use the ideal
  * Dirac hydrogen-like solution as an approximation. Never used if negative
  * (default = -1)
+ * @param reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
-                     double fc, double dx, int ideal_minshell)
-  : Atom(Z, m, A, radius_model, fc, dx) {
+                     double radius, double fc, double dx, int ideal_minshell, bool reduced_mass)
+  : Atom(Z, m, A, radius_model, radius, fc, dx, reduced_mass) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
@@ -1035,7 +1053,6 @@ TransitionMatrix DiracAtom::getTransitionProbabilities(int n1, int l1, bool s1,
   return tmat;
 }
 
-DiracIdealAtom::DiracIdealAtom(int Z, double m, int A,
-                               NuclearRadiusModel radius_model, double fc,
-                               double dx)
-  : DiracAtom(Z, m, A, radius_model, fc, dx, 1) {}
+DiracIdealAtom::DiracIdealAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
+                               double radius, double fc,double dx)
+  : DiracAtom(Z, m, A, radius_model, radius, fc, dx, 1) {}

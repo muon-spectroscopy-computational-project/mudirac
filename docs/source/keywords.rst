@@ -31,6 +31,7 @@ Boolean keywords
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
+* :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 
@@ -40,7 +41,10 @@ Floating point keywords
 ~~~~~~~~~~~~~~~~~~~~~~~~
 These keywords accept a non-integer number. It can be written normally (e.g. 105.3) or in scientific notation (e.g. 1.053E2).
 
-* :literal:`mass`:  mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
+* :literal:`mass`: mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
+* :literal:`radius`: Solid sphere equivalent radius. (rms radius * sqrt(5/3)). By default it's set to values from Angeli and Marinova (2013).
+* :literal:`fermi_t`: Skin thickness for a Fermi model nucleus. By default it's 2.3 fm.
+* :literal:`fermi_c`: Fermi parameter c. By default :math:`c = \sqrt{R^2 - \frac{7.0}{3.0} \left( \frac{\pi T}{4 \ln(3.0)} \right)^2}` for :math:`A\geq5` or :math:`c = 2.2291 \times 10^{-5} \cdot A^{\frac{1}{3}} - 0.90676 \times 10^{-5}` for :math:`A<5`
 * :literal:`energy_tol`: absolute tolerance for energy convergence when searching for eigenvalues. Iterations will stop once the energy change is smaller than this number, in atomic units. Default is 1E-7.
 * :literal:`energy_damp`: a damping parameter used in steepest descent energy search to ease convergence. Used to multiply the suggested step :math:`\delta E` and make it smaller. Helps avoiding overshooting; fine-tuning it might help to converge difficult calculations, while making it bigger might make convergence faster in simple ones. Default is 0.5.
 * :literal:`max_dE_ratio`: maximum ratio between energy step, :math:`\delta E`, and current energy :math:`E` in convergence search. If the suggested step exceeds this ratio times the guessed energy, it will be rescaled. This also serves as a measure to avoid overshooting and can be tweaked to get around cases of bad convergence. Default is 0.1.

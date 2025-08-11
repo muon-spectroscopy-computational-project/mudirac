@@ -28,6 +28,9 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
+  this->defineDoubleNode("radius", InputNode<double>(-1));                // Solid sphere equivalent radius
+  this->defineDoubleNode("fermi_t", InputNode<double>(-1));               // Skin thickness for Fermi model
+  this->defineDoubleNode("fermi_c", InputNode<double>(-1));               // Half radius parameter c for Fermi-2 distribution
   this->defineDoubleNode("energy_tol", InputNode<double>(1e-7));          // Tolerance for electronic convergence
   this->defineDoubleNode("energy_damp", InputNode<double>(0.5));          // "Damping" used in steepest descent energy search
   this->defineDoubleNode("max_dE_ratio", InputNode<double>(0.1));         // Maximum |dE|/E ratio in energy search
@@ -71,13 +74,19 @@ MuDiracInputFile::MuDiracInputFile() : InputFile() {
 
   // Boolean keywords
   this->defineBoolNode("devel_EdEscan_log", InputNode<bool>(false, false)); // Make the energy scan logarithmic
+  this->defineBoolNode("reduced_mass", InputNode<bool>(true, false)); // Use the reduced mass
 }
 
 DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
+  double radius = this->getDoubleValue("radius");
+  double fermi_t = this->getDoubleValue("fermi_t");
+  double fermi_c = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
+  bool reduced_mass = this->getBoolValue("reduced_mass");
+
   if (A == -1) {
     A = getElementMainIsotope(Z);
   }
@@ -98,7 +107,7 @@ DiracAtom MuDiracInputFile::makeAtom() {
 
   // Prepare the DiracAtom
   DiracAtom da;
-  da = DiracAtom(Z, m, A, nucmodel, fc, dx, idshell);
+  da = DiracAtom(Z, m, A, nucmodel, radius, fc, dx, idshell, reduced_mass);
   da.Etol = this->getDoubleValue("energy_tol");
   da.Edamp = this->getDoubleValue("energy_damp");
   da.max_dE_ratio = this->getDoubleValue("max_dE_ratio");
@@ -121,6 +130,17 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rin_max"),
                          this->getDoubleValue("econf_rout_min"));
   }
+
+  if (fermi_t ==-1) {
+    fermi_t = Physical::fermi2_thickness;
+  }
+
+  if (fermi_c == -1) {
+    da.setFermi2(fermi_t*Physical::fm);
+  } else {
+    da.setFermi2(fermi_t*Physical::fm, fermi_c*Physical::fm);
+  }
+  LOG(INFO) << "fermi_t = " << fermi_t << "and c = " << fermi_c <<  "\n";
 
   return da;
 }
