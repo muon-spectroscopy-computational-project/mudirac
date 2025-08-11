@@ -82,6 +82,7 @@ double TransitionMatrix::totalRate() {
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
  * radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
+ * @param  reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
@@ -166,6 +167,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
  * Calling this function resets all computed states.
  *
  * @param  thickness:  The new thickness to set up
+ * @param  fermi_c:   The new Fermi parameter c to set up
  * @retval None
  */
 void Atom::setFermi2(double thickness, double fermi_c) {
@@ -338,6 +340,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param ideal_minshell:   Shell from which the atom will just use the ideal
  * Dirac hydrogen-like solution as an approximation. Never used if negative
  * (default = -1)
+ * @param reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,

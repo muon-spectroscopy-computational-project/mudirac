@@ -53,6 +53,7 @@ double CoulombSpherePotential::V(double r) {
  * @param  A:         Atomic mass
  * @param  csteps:    Steps used to integrate numerically the potential
  * @param  thickness: Thickness parameter of the 'skin' of the nucleus
+ * @param  fermi_c:   Fermi parameter c for the model.
  * @retval
  */
 CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
