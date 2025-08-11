@@ -130,6 +130,27 @@ K1-L3<span class="w">   </span><span class="m">5</span>.76294e+06<span class="w"
 <li><p>try adding a range of lines; this can be written as K1:M5-K1:M5. It will compute all transitions within the given ranges that obey the selection rules to be allowed;</p></li>
 <li><p>try plotting the spectra in the <code class="docutils literal notranslate"><span class="pre">.spec.dat</span> <span class="pre">files</span></code>, using Gnuplot or importing them in software like Excel or Origin.</p></li>
 </ol>
+<p>You can also vary the size and shape of the nucleus using the radius and fermi_t keywords. For example, you can evaluate what happens if you increase the radius by 1%, or change the skin thickness parameter in the Fermi model to 2.1 fm (rather than the conventional 2.3 fm). Increasing the radius and decreasing the skin thickness should both reduce the transition energies.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>element:<span class="w"> </span>Au
+isotope:<span class="w"> </span><span class="m">197</span>
+xr_lines:<span class="w"> </span>K1-L2,K1-L3
+write_spec:<span class="w"> </span>T
+nuclear_model:<span class="w"> </span>FERMI2
+uehling_correction:<span class="w"> </span>T
+electronic_config:<span class="w"> </span>Au
+radius:<span class="w"> </span><span class="m">7</span>.09
+fermi_t:<span class="w"> </span><span class="m">2</span>.5
+</pre></div>
+</div>
+<p>Which changes the output to the following</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Z = 79, A = 197 amu, m = 206.768 au</span>
+Line<span class="w">    </span>DeltaE<span class="w"> </span><span class="o">(</span>eV<span class="o">)</span><span class="w">     </span>W_12<span class="w"> </span><span class="o">(</span>s^-1<span class="o">)</span>
+K1-L2<span class="w">   </span><span class="m">5</span>.54813e+06<span class="w">             </span><span class="m">1</span>.60217e+18
+K1-L3<span class="w">   </span><span class="m">5</span>.71535e+06<span class="w">             </span><span class="m">1</span>.74712e+18
+<span class="c1"># Z = 79, A = 197 amu, m = 206.768 au</span>
+</pre></div>
+</div>
+<p>The transition energies have indeed shifted down. Even such a minor change has induced a 45 keV shift.</p>
 </section>
 
 
