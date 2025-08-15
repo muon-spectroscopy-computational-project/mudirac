@@ -7,7 +7,7 @@
  * Main binary of the program (header)
  *
  * @author Simone Sturniolo
- * @version 1.0.1 20/03/2020
+ * @version 1.2.1 20/03/2020
  */
 
 #include <exception>
@@ -28,7 +28,7 @@
 
 #include "../vendor/aixlog/aixlog.hpp"
 
-#define PROJECT_VERSION "1.0.1"
+#define PROJECT_VERSION "1.2.1"
 
 using namespace std;
 
