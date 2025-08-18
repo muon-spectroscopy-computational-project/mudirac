@@ -9,13 +9,15 @@
  * @author Milan Kumar
  * @version 1.0 30/06/2025
  */
-
+#include "ceres/ceres.h"
+#undef LOG
 #include <dlib/optimization.h>
 #include <dlib/global_optimization.h>
 #include "atom.hpp"
 #include "config.hpp"
 #include "experiment.hpp"
 #include "output.hpp"
+
 
 
 typedef dlib::matrix<double,0,1> column_vector;
@@ -188,3 +190,18 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time);
  * @retval None
  */
 void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed);
+
+// Ceres optimisation problem things
+struct CostFunctor {
+  mutable DiracAtom ma;
+
+  CostFunctor(DiracAtom &da_in) : ma(da_in) {}
+
+  template <typename T>
+  bool operator() (const T* const c1, const T* const c2, T* residual) const {
+    residual[0] = ma.calculateMSE(c1[0], c2[0]);
+    return true;
+  }
+};
+
+void lmOptimizeFermiParameters(DiracAtom & da, double & opt_time);

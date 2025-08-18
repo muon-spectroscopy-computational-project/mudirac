@@ -193,9 +193,12 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
     trustOptimizeFermiParameters(opt_obj, da, opt_time);
   } else if (algo=="global") {
     globalOptimizeFermiParameters(da, opt_time);
-  } else {
+  } else if (algo=="lm") {
+    lmOptimizeFermiParameters(da, opt_time);
+  } 
+  else {
     cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
-    cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
+    cout << "please use \"bfgs\", \"trust\", or \"lm\" (default is \"bfgs\") \n";
     cout << "You used: \""<<algo<<"\" \n";
     cout << "Quitting...\n";
     LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
@@ -228,3 +231,37 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
+void lmOptimizeFermiParameters(DiracAtom & da, double & opt_time){
+
+  LOG(INFO) << "optimizing fermi parameters using the ceres lm algorithm" ;
+  // Get initial guess
+  array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
+  double c1 = fermi_coords[0];
+  double c2 = fermi_coords[1];
+
+  // start time of minimisation
+  chrono::high_resolution_clock::time_point opt_t0, opt_t1;
+  opt_t0 = chrono::high_resolution_clock::now();
+
+  // define the cost function
+  ceres::Problem problem;
+  ceres::CostFunction * cost_function =
+    new ceres::NumericDiffCostFunction<CostFunctor, ceres::CENTRAL, 1, 1, 1>(new CostFunctor(da));
+  problem.AddResidualBlock(cost_function, nullptr, &c1, &c2);
+
+  // set options and solve minimisation
+  ceres::Solver::Options options;
+  options.gradient_tolerance =0.01;
+  options.parameter_tolerance = 1e-5;
+  options.function_tolerance = 1e-2;
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+
+  // the final cost is calcuated as the least square of the residual. ie 1/2 (.)**2
+  // could rewrite so calculate MSE is not required/ all handled by ceres
+  opt_t1 = chrono::high_resolution_clock::now();
+  std::cout << summary.BriefReport() << "\n";
+  opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
+  finaliseFermi2(da, da.coord_system, {c1, c2}, opt_time, sqrt(2*summary.final_cost));
+
+}

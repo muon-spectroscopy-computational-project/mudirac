@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(MuDirac VERSION 1.0.1)
 
 # The standard is C++ 11

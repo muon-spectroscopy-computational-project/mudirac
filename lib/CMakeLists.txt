@@ -15,7 +15,8 @@ add_library(config STATIC config.cpp)
 add_library(experiment STATIC experiment.cpp)
 add_library(debugtasks STATIC debugtasks.cpp)
 add_library(optimisation STATIC optimisation.cpp)
-target_link_libraries(optimisation dlib::dlib experiment)
+find_package(Ceres)
+target_link_libraries(optimisation dlib::dlib Ceres::ceres experiment)
 
 
 
