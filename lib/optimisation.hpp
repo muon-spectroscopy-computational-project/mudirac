@@ -204,4 +204,4 @@ struct CostFunctor {
   }
 };
 
-void lmOptimizeFermiParameters(DiracAtom & da, double & opt_time);
+void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time,const  string & algo);

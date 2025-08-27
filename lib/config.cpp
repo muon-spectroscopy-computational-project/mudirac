@@ -285,7 +285,7 @@ void MuDiracInputFile::validateOptimisation(int args, string &coords, string &mi
   // check the algorithm is valid
   min_2pF_algo = this->getStringValue("min_2pF_algorithm");
 
-  if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust")||(min_2pF_algo == "lm") )) {
+  if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust")||(min_2pF_algo == "lm") ||(min_2pF_algo == "ls"))) {
     LOG(WARNING)<< "Invalid 2pF algorithm for minimsation\n";
     LOG(WARNING)<< "please use \"bfgs\" or \"global\" (default is \"trust\") \n";
     LOG(WARNING)<< "You used: \""<<min_2pF_algo<<"\" \n";

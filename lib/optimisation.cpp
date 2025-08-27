@@ -193,8 +193,8 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
     trustOptimizeFermiParameters(opt_obj, da, opt_time);
   } else if (algo=="global") {
     globalOptimizeFermiParameters(da, opt_time);
-  } else if (algo=="lm") {
-    lmOptimizeFermiParameters(da, opt_time);
+  } else if ((algo=="lm")|| (algo=="ls")){
+    ceresOptimizeFermiParameters(da, opt_time, algo);
   } 
   else {
     cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
@@ -231,13 +231,23 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
-void lmOptimizeFermiParameters(DiracAtom & da, double & opt_time){
+void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo){
 
-  LOG(INFO) << "optimizing fermi parameters using the ceres lm algorithm" ;
+  LOG(INFO) << "optimizing fermi parameters using the ceres software" ;
   // Get initial guess
   array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
   double c1 = fermi_coords[0];
   double c2 = fermi_coords[1];
+
+  // set minimisation algorithm 
+  ceres::MinimizerType minimizer;
+  if (algo == "lm"){    // levenberg marquardt
+    minimizer = ceres::TRUST_REGION;
+    LOG(INFO) << "optimizing fermi parameters using the levenberg marquardt algorithm" ;
+  } else if (algo == "ls"){   // bfgs
+    minimizer = ceres::LINE_SEARCH;
+    LOG(INFO) << "optimizing fermi parameters using the bfgs algorithm" ;
+  }
 
   // start time of minimisation
   chrono::high_resolution_clock::time_point opt_t0, opt_t1;
@@ -251,6 +261,7 @@ void lmOptimizeFermiParameters(DiracAtom & da, double & opt_time){
 
   // set options and solve minimisation
   ceres::Solver::Options options;
+  options.minimizer_type = minimizer;
   options.gradient_tolerance =0.01;
   options.parameter_tolerance = 1e-5;
   options.function_tolerance = 1e-2;
