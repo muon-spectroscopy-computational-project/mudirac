@@ -264,7 +264,15 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   options.minimizer_type = minimizer;
   options.gradient_tolerance =1e-5;
   options.parameter_tolerance = 1e-5;
-  options.function_tolerance = 1e-5;
+  // options.function_tolerance = 1e-5;
+
+  options.line_search_interpolation_type = ceres::QUADRATIC;
+  options.max_num_line_search_step_size_iterations = 100;
+  options.line_search_sufficient_function_decrease = 1e-6;
+  options.min_line_search_step_size = 1e-5;
+
+  // options.initial_trust_region_radius = 10;
+  options.minimizer_progress_to_stdout = true;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
