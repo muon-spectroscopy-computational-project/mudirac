@@ -262,9 +262,9 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   // set options and solve minimisation
   ceres::Solver::Options options;
   options.minimizer_type = minimizer;
-  options.gradient_tolerance =0.01;
+  options.gradient_tolerance =1e-5;
   options.parameter_tolerance = 1e-5;
-  options.function_tolerance = 1e-2;
+  options.function_tolerance = 1e-5;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
