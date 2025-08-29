@@ -236,8 +236,7 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   LOG(INFO) << "optimizing fermi parameters using the ceres software" ;
   // Get initial guess
   array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
-  double c1 = fermi_coords[0];
-  double c2 = fermi_coords[1];
+  double  c1 = fermi_coords[0], c2 = fermi_coords[1];
 
   // set minimisation algorithm 
   ceres::MinimizerType minimizer;
@@ -254,9 +253,10 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   opt_t0 = chrono::high_resolution_clock::now();
 
   // define the cost function
+  int num_residuals = da.xr_energies.size();
   ceres::Problem problem;
-  ceres::CostFunction * cost_function =
-    new ceres::NumericDiffCostFunction<CostFunctor, ceres::CENTRAL, 1, 1, 1>(new CostFunctor(da));
+  auto * cost_function =
+    new ceres::NumericDiffCostFunction<CostFunctor, ceres::CENTRAL, ceres::DYNAMIC, 1, 1>(new CostFunctor(da),ceres::TAKE_OWNERSHIP ,num_residuals);
   problem.AddResidualBlock(cost_function, nullptr, &c1, &c2);
 
   // set options and solve minimisation
@@ -264,23 +264,16 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   options.minimizer_type = minimizer;
   options.gradient_tolerance =1e-5;
   options.parameter_tolerance = 1e-5;
-  // options.function_tolerance = 1e-5;
+  options.min_relative_decrease = 1e-2;
+  options.linear_solver_type = ceres::DENSE_QR;
 
-  options.line_search_interpolation_type = ceres::QUADRATIC;
-  options.max_num_line_search_step_size_iterations = 100;
-  options.line_search_sufficient_function_decrease = 1e-6;
-  options.min_line_search_step_size = 1e-5;
-
-  // options.initial_trust_region_radius = 10;
   options.minimizer_progress_to_stdout = true;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
-  // the final cost is calcuated as the least square of the residual. ie 1/2 (.)**2
-  // could rewrite so calculate MSE is not required/ all handled by ceres
   opt_t1 = chrono::high_resolution_clock::now();
-  std::cout << summary.BriefReport() << "\n";
+  std::cout << summary.FullReport() << "\n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
-  finaliseFermi2(da, da.coord_system, {c1, c2}, opt_time, sqrt(2*summary.final_cost));
+  finaliseFermi2(da, da.coord_system, {c1, c2}, opt_time, summary.final_cost*2.0/double(num_residuals));
 
 }

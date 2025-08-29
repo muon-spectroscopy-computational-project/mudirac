@@ -197,9 +197,32 @@ struct CostFunctor {
 
   CostFunctor(DiracAtom &da_in) : ma(da_in) {}
 
-  template <typename T>
-  bool operator() (const T* const c1, const T* const c2, T* residual) const {
-    residual[0] = ma.calculateMSE(c1[0], c2[0]);
+
+  bool operator() (const double* const c1, const double* const c2, double* residual) const {
+    ma.setFermi2(c1[0], c2[0], ma.coord_system);
+    vector<TransitionData> transitions_iteration = ma.getAllTransitions();
+
+    for (int k = 0; k < transitions_iteration.size(); ++k) {
+      // calculate transition energy and rate
+      double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
+      double tRate = transitions_iteration[k].tmat.totalRate();
+
+
+      if (dE <= 0 || tRate <= 0)
+        continue; // Transition is invisible
+
+      // check transition allign with experimental transitions
+      if (transitions_iteration[k].name == ma.xr_lines_measured[k]) {
+        // convert to eV
+        double transition_energy = dE / Physical::eV;
+
+        // calculate the square error of each transition
+        //double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
+        //double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
+        //square_error = square_deviation/valid_uncertainty;
+        residual[k] = (transition_energy - ma.xr_energies[k])/ma.xr_errors[k];
+      }
+    }
     return true;
   }
 };
