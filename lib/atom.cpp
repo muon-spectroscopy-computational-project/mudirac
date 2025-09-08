@@ -82,6 +82,7 @@ double TransitionMatrix::totalRate() {
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
  * radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
+ * @param  reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
@@ -104,13 +105,9 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
     throw invalid_argument("Invalid grid parameters passed to Atom");
   }
 
-  if (A > 0) {
+  if ((A > 0) && (reduced_mass) ) {
     M = getIsotopeMass(Z, A);
-    if (reduced_mass) {
-      mu = effectiveMass(m, M * Physical::amu);
-    } else {
-      mu = m;
-    }
+    mu = effectiveMass(m, M * Physical::amu);
   } else {
     mu = m;
   }
@@ -170,32 +167,31 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
  * Calling this function resets all computed states. sets the new c and t values as object attributes in fm.
  *
  * @param  thickness:  The new thickness to set up
+ * @param  fermi_c:   The new Fermi parameter c to set up
  * @retval None
  */
-void Atom::setFermi2(double thickness, double fermi2_potential) {
+void Atom::setFermi2(double thickness, double fermi_c) {
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to set up nuclear skin thickness or fermi2-potential for an atom"
                  << " not using a Fermi 2-term model\n";
     return;
   }
 
+  if (fermi_c  == -1) {
 
-  // First, define C for this radius
-  double c;
-  if (fermi2_potential  != -1) {
-    c = fermi2_potential;
-  } else if (A >= 5.0) {
-    c = sqrt(R * R -
-             7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
-  } else {
-    c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+    if (A >= 5.0) {
+      fermi_c = sqrt(R * R -
+              7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
+    } else {
+      fermi_c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+    }
   }
 
   // set object attributes for fermi 2pf in fm
-  fermi2.c = c/Physical::fm;
+  fermi2.c = fermi_c/Physical::fm;
   fermi2.t = thickness/Physical::fm;
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, c);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
   reset();
 }
 
@@ -406,6 +402,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param ideal_minshell:   Shell from which the atom will just use the ideal
  * Dirac hydrogen-like solution as an approximation. Never used if negative
  * (default = -1)
+ * @param reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,

@@ -191,7 +191,7 @@ class Atom {
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
-  void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
+  void setFermi2(double thickness = Physical::fermi2_t, double fermi_c = -1);
 
   /**
    * @brief sets the 2 parameter fermi model parameters of the atoms nuclear model.
