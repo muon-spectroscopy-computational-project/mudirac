@@ -199,8 +199,10 @@ void Atom::setFermi2(double thickness, double fermi2_potential) {
   reset();
 }
 
-void Atom::setFermi2(const double coord_1, const double coord_2, const string coord_sys) {
-  if (coord_sys == "polar") {
+void Atom::setFermi2(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys) {
+  string coordinate_system_state;
+  if (coord_sys == POLAR) {
+    coordinate_system_state = "(rms radius, theta)";
     LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
     if ( A < 5) {
       LOG(WARNING) << "attempting to use polar 2pF coordinates when A < 5  \n";
@@ -208,12 +210,13 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
     tie(fermi2.c, fermi2.t) = fermiParameters(coord_1, coord_2);
     fermi2.rms_radius = coord_1;
     fermi2.theta = coord_2;
-  } else if (coord_sys == "ct") {
+  } else if (coord_sys == CT) {
+    coordinate_system_state = "(c, t)";
     LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
     fermi2.c = coord_1;
     fermi2.t = coord_2;
   }
-  LOG(DEBUG) << "creating potential with " << coord_sys << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
+  LOG(DEBUG) << "creating potential with " << coordinate_system_state << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
   V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
   reset();
@@ -225,7 +228,7 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
  * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
  * @retval array<double, 2> :the 2pF domain coordinates.
  */
-array<double, 2> Atom::getFermi2(const string coord_sys) {
+array<double, 2> Atom::getFermi2(Fermi2CoordinateSystem coord_sys) {
   array<double, 2> f2 {0,0};
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
@@ -233,9 +236,9 @@ array<double, 2> Atom::getFermi2(const string coord_sys) {
 
     return f2;
   }
-  if (coord_sys == "ct") {
+  if (coord_sys == CT) {
     f2 = {fermi2.c, fermi2.t};
-  } else if (coord_sys == "polar") {
+  } else if (coord_sys == POLAR) {
     fermi2.rms_radius= rmsRadius(fermi2.c, fermi2.t);
     fermi2.theta = atan(fermi2.t/fermi2.c);
     f2 = {fermi2.rms_radius, fermi2.theta};

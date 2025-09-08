@@ -23,13 +23,13 @@ void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   opt_t0 = chrono::high_resolution_clock::now();
 
   double c1_lower_coef, c1_upper_coef, c2_lower_coef, c2_upper_coef;
-  if (da.coord_system =="polar") {
+  if (da.coord_system == POLAR) {
     // set bounds for rms radius and theta close to Marinova table values
     c1_lower_coef = 0.95;
     c1_upper_coef = 1.05;
     c2_lower_coef = 0;
     c2_upper_coef = M_PI*0.5;
-  } else if (da.coord_system =="ct") {
+  } else if (da.coord_system == CT) {
     // set bounds for c and t within reasonable range of original values
     c1_lower_coef = 0.5;
     c1_upper_coef = 1.5;
@@ -118,19 +118,21 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
   finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
 }
 
-void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE) {
-
-  // output final optimisation values to LOG
-  LOG(INFO) << "minimised with MSE: "<< MSE << " and "<< coord_sys << "fermi parameters: "<< final_fermi_params <<" \n";
-  LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
-  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vector final_fermi_params, double opt_time, double MSE) {
 
   // ensure final fermi parameters are set
   da.setFermi2(final_fermi_params(0), final_fermi_params(1), coord_sys);
-
   //set all the optimisation parameter values
-  array<double, 2> polar_coords = da.getFermi2("polar");
   da.fermi2.mse = MSE;
+  // output final optimisation values to LOG
+  array<double, 2> final_ct_params = da.getFermi2(CT);
+  array<double, 2> final_polar_params = da.getFermi2(POLAR);
+  LOG(INFO) << "minimised with MSE: "<< MSE << "\n";
+  LOG(INFO) << "(c , t) fermi parameters: "<< final_ct_params[0] << ", " << final_ct_params[1] <<" \n";
+  LOG(INFO) << "(rms_radius, theta) fermi parameters: "<< final_polar_params[0] << ", " << final_polar_params[1] <<" \n";
+  LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
+  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+
 }
 
 
@@ -204,8 +206,9 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
 
 
 void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char * argv[], DiracAtom &da, const string & seed) {
-  string coord_system_2pF;
+
   string min_2pF_algo;
+  Fermi2CoordinateSystem coord_system_2pF;
   config.validateOptimisation(argc, coord_system_2pF, min_2pF_algo);
 
   // initialise experimental results file object, read xr input file and validate

@@ -48,6 +48,11 @@ enum NuclearRadiusModel {
   FERMI2
 };
 
+enum Fermi2CoordinateSystem {
+  CT,
+  POLAR
+};
+
 // Main classes
 class TransitionMatrix {
  public:
@@ -134,7 +139,7 @@ class Atom {
  public:
   // fermi 2pF parameters
   Fermi2ParametersData fermi2;
-  string coord_system;
+  Fermi2CoordinateSystem coord_system;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
@@ -196,12 +201,12 @@ class Atom {
    * @param coord_sys: coordinate system "ct" or "polar"
    * @retval None
    */
-  void setFermi2(const double coord_1, const double coord_2, const string coord_sys);
+  void setFermi2(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
 
   /**
    * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
    */
-  array<double, 2> getFermi2(const string coord_sys);
+  array<double, 2> getFermi2(Fermi2CoordinateSystem coord_sys);
 
   bool getUehling() {
     return use_uehling;
@@ -270,7 +275,7 @@ class DiracAtom : public Atom {
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
+  void setExpOptData(Fermi2CoordinateSystem coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
     iteration_counter_2pF =0;
     coord_system = coord_sys;
     xr_lines_measured = xr_lines;

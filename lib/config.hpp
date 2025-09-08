@@ -87,15 +87,17 @@ class MuDiracInputFile : public BaseInputFile {
    * the choice of coordinate system and the optimisation algorithm.
    *
    * @param args: argc the number of arguments passed to MuDirac
-   * @param coords: the coordinate system (corrected to default if invalid)
    * @param min_2pF_algo: the minimisation algorithm (corrected to default if invalid)
    * @retval: None
    */
-  void validateOptimisation(int args, string &coords, string &min_2pF_algo);
+  void validateOptimisation(int args,  Fermi2CoordinateSystem & coord_sys, string &min_2pF_algo);
 
  private:
   map<string, NuclearRadiusModel> nucmodelmap = {
     {"POINT", POINT}, {"SPHERE", SPHERE}, {"FERMI2", FERMI2}
+  };
+  map<string, Fermi2CoordinateSystem> fermi2coordmap = {
+    {"CT", CT}, {"POLAR", POLAR}
   };
 };
 
