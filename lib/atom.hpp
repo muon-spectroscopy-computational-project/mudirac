@@ -84,7 +84,7 @@ struct TransitionData {
  * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
  *
  */
-struct OptimisationData {
+struct Fermi2ParametersData {
   double rms_radius;
   double theta;
   double mse;
@@ -133,7 +133,7 @@ class Atom {
 
  public:
   // fermi 2pF parameters
-  OptimisationData fermi2;
+  Fermi2ParametersData fermi2;
   string coord_system;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
