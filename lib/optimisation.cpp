@@ -15,7 +15,7 @@
 
 void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
-  array<double,2> init_params = da.getFermi2(da.coord_system);
+  array<double,2> init_params = da.getFermi2Femto(da.coord_system);
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
@@ -65,7 +65,7 @@ void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   LOG(INFO) << "Starting minimisation for fermi model \n";
 
   // initialise starting parameters for optimisation based on the coordinate system
-  array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
+  array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
   // change to dlib column vector type
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
@@ -101,7 +101,7 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
   LOG(INFO) << "Starting minimisation for fermi model using trust region method\n";
 
   // initialise starting parameters for optimisation based on the coordinate system
-  array<double, 2> fermi_coords = da.getFermi2(da.coord_system);
+  array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
   // start time of minimisation
@@ -121,12 +121,12 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
 void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vector final_fermi_params, double opt_time, double MSE) {
 
   // ensure final fermi parameters are set
-  da.setFermi2(final_fermi_params(0), final_fermi_params(1), coord_sys);
+  da.setFermi2Femto(final_fermi_params(0), final_fermi_params(1), coord_sys);
   //set all the optimisation parameter values
   da.fermi2.mse = MSE;
   // output final optimisation values to LOG
-  array<double, 2> final_ct_params = da.getFermi2(CT);
-  array<double, 2> final_polar_params = da.getFermi2(POLAR);
+  array<double, 2> final_ct_params = da.getFermi2Femto(CT);
+  array<double, 2> final_polar_params = da.getFermi2Femto(POLAR);
   LOG(INFO) << "minimised with MSE: "<< MSE << "\n";
   LOG(INFO) << "(c , t) fermi parameters: "<< final_ct_params[0] << ", " << final_ct_params[1] <<" \n";
   LOG(INFO) << "(rms_radius, theta) fermi parameters: "<< final_polar_params[0] << ", " << final_polar_params[1] <<" \n";

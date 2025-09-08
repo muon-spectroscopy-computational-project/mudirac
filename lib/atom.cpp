@@ -195,7 +195,7 @@ void Atom::setFermi2(double thickness, double fermi_c) {
   reset();
 }
 
-void Atom::setFermi2(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys) {
+void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys) {
   string coordinate_system_state;
   if (coord_sys == POLAR) {
     coordinate_system_state = "(rms radius, theta)";
@@ -224,7 +224,7 @@ void Atom::setFermi2(const double coord_1, const double coord_2, Fermi2Coordinat
  * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
  * @retval array<double, 2> :the 2pF domain coordinates.
  */
-array<double, 2> Atom::getFermi2(Fermi2CoordinateSystem coord_sys) {
+array<double, 2> Atom::getFermi2Femto(Fermi2CoordinateSystem coord_sys) {
   array<double, 2> f2 {0,0};
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
@@ -1216,7 +1216,7 @@ vector<TransitionData> DiracAtom::getAllTransitions() {
  */
 double DiracAtom::calculateMSE(double coord_1, double coord_2) {
   ++iteration_counter_2pF;
-  setFermi2(coord_1, coord_2, coord_system);
+  setFermi2Femto(coord_1, coord_2, coord_system);
   vector<TransitionData> transitions_iteration = getAllTransitions();
 
   LOG(DEBUG) << "MSE loop \n";

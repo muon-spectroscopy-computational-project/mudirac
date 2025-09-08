@@ -201,12 +201,12 @@ class Atom {
    * @param coord_sys: coordinate system "ct" or "polar"
    * @retval None
    */
-  void setFermi2(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
+  void setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
 
   /**
    * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
    */
-  array<double, 2> getFermi2(Fermi2CoordinateSystem coord_sys);
+  array<double, 2> getFermi2Femto(Fermi2CoordinateSystem coord_sys);
 
   bool getUehling() {
     return use_uehling;
