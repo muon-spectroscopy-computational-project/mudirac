@@ -181,7 +181,7 @@ void Atom::setFermi2(double thickness, double fermi_c) {
 
     if (A >= 5.0) {
       fermi_c = sqrt(R * R -
-              7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
+                     7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
     } else {
       fermi_c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
     }
