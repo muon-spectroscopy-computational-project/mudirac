@@ -10,6 +10,7 @@
  * @version 1.0 30/06/2025
  */
 #include "ceres/ceres.h"
+#include <ceres/covariance.h>
 #undef LOG
 #include <dlib/optimization.h>
 #include <dlib/global_optimization.h>

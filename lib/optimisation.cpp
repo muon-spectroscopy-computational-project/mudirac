@@ -291,6 +291,31 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
+  // estimate covariance
+  ceres::Covariance::Options cov_options;
+  ceres::Covariance covariance(cov_options);
+
+  std::vector<std::pair<const double*, const double*>> covariance_blocks;
+  covariance_blocks.emplace_back(&c1, &c1);
+  covariance_blocks.emplace_back(&c2, &c2);
+  covariance_blocks.emplace_back(&c1, &c2);
+
+  if (covariance.Compute(covariance_blocks, &problem)) {
+    double covariance_c1_c1[1], covariance_c2_c2[1], covariance_c1_c2[1] ;
+    covariance.GetCovarianceBlock(&c1, &c1, covariance_c1_c1);
+    double sigma_c1 = std::sqrt(covariance_c1_c1[0]);
+    covariance.GetCovarianceBlock(&c2, &c2, covariance_c2_c2);
+    double sigma_c2 = std::sqrt(covariance_c2_c2[0]);
+    covariance.GetCovarianceBlock(&c1, &c2, covariance_c1_c2);
+    double cov_c1_c2 = covariance_c1_c2[0];
+
+    LOG(INFO) << "Uncertainty in c1: " << sigma_c1 << std::endl;
+    LOG(INFO) << "Uncertainty in c2: " << sigma_c2 << std::endl;
+    LOG(INFO) << "Covariance c1-c2: " << cov_c1_c2 << std::endl;
+  } else {
+    LOG(WARNING) << "Covariance computation failed." << std::endl;
+  }
+
   opt_t1 = chrono::high_resolution_clock::now();
   std::cout << summary.FullReport() << "\n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
