@@ -205,7 +205,9 @@ class Atom {
   void setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
 
   /**
-   * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
+   * @brief gets the 2 parameter fermi model parameters in femtometres of the atoms nuclear model.
+   * @param coord_sys: coordinate system for the returned parameter (CT or POLAR).
+   * @retval array<double,2>: fermi parameters in CT or POLAR coordinates.
    */
   array<double, 2> getFermi2Femto(Fermi2CoordinateSystem coord_sys);
 
@@ -276,6 +278,14 @@ class DiracAtom : public Atom {
 
   // optimisation
 
+  /**
+   * @brief sets values for experimental data input and the coordinate system for the optimisation
+   * @param coord_sys: coordinate system to be used in optimising the Fermi nuclear model parameters(CT or POLAR).
+   * @param xr_lines: measured transition lines in xray notation.
+   * @param xr_e: energies of the the measured transition lines.
+   * @param xr_err: energy uncertainties of the measured transition lines.
+   * @retval None.
+   */
   void setExpOptData(Fermi2CoordinateSystem coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
     iteration_counter_2pF =0;
     coord_system = coord_sys;
