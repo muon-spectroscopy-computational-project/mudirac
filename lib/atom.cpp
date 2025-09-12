@@ -1216,7 +1216,20 @@ vector<TransitionData> DiracAtom::getAllTransitions() {
  */
 double DiracAtom::calculateMSE(double coord_1, double coord_2) {
   setFermi2Femto(coord_1, coord_2, coord_system);
-  vector<TransitionData> transitions_iteration = getAllTransitions();
+  vector<TransitionData> transitions_iteration;
+  try{
+    transitions_iteration = getAllTransitions();
+
+    if (transitions_iteration.size() < xr_lines_measured.size()){
+      throw (xr_lines_measured.size()-transitions_iteration.size());
+    }
+  }
+  catch (int failed_lines){
+    LOG(ERROR) << failed_lines << " transition lines failed to converge\n";
+    LOG(ERROR) << "cannot calculate square errors \n";
+    LOG(ERROR) << "exiting\n";
+    exit(-1);
+  }
 
   LOG(DEBUG) << "MSE loop \n";
   double MSE = 0;
