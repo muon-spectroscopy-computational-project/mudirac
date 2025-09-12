@@ -1215,7 +1215,6 @@ vector<TransitionData> DiracAtom::getAllTransitions() {
  *
  */
 double DiracAtom::calculateMSE(double coord_1, double coord_2) {
-  ++iteration_counter_2pF;
   setFermi2Femto(coord_1, coord_2, coord_system);
   vector<TransitionData> transitions_iteration = getAllTransitions();
 

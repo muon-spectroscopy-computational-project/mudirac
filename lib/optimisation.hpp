@@ -96,7 +96,7 @@ class opt_2pF_model {
   // common parameters for the objective, derivative and hessian functions
   typedef ::column_vector column_vector;
   typedef dlib::matrix<double> general_matrix;
-  DiracAtom da;
+  mutable DiracAtom da;
   mutable int opt_iterations = 0;
 
   // constructor
@@ -106,9 +106,9 @@ class opt_2pF_model {
   double operator() (
     const column_vector& x
   ) const {
-    DiracAtom da_1 = da;
+    // DiracAtom da_1 = da;
     opt_iterations++;
-    return da_1.calculateMSE(x(0), x(1));
+    return da.calculateMSE(x(0), x(1));
   }
 
   // function for the dlib minisation routine to get the derivative and hessian
@@ -117,9 +117,9 @@ class opt_2pF_model {
     column_vector& der,
     general_matrix & hess
   ) const {
-    DiracAtom da_1 = da;
-    der = MSE_2pF_derivative(x, da_1);
-    hess = MSE_2pF_hessian(x, da_1);
+    da;
+    der = MSE_2pF_derivative(x, da);
+    hess = MSE_2pF_hessian(x, da);
     opt_iterations +=20;  // 4 iterations per derivative, 4 derivatives per hessian = 4+16
   }
 };

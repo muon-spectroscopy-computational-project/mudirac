@@ -112,7 +112,6 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
                opt_obj,
                init_params,
                0.1);
-  da.iteration_counter_2pF = opt_obj.opt_iterations;
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
@@ -131,7 +130,7 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vec
   LOG(INFO) << "(c , t) fermi parameters: "<< final_ct_params[0] << ", " << final_ct_params[1] <<" \n";
   LOG(INFO) << "(rms_radius, theta) fermi parameters: "<< final_polar_params[0] << ", " << final_polar_params[1] <<" \n";
   LOG(INFO) << "2pF optimisation completed in " << opt_time << " seconds\n";
-  LOG(INFO) << "minimised using " << da.iteration_counter_2pF <<" iterations from MuDirac objective function \n";
+
 
 }
 
