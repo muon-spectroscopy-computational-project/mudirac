@@ -19,8 +19,8 @@
 #include <cmath>
 #include <chrono>
 #include <dlib/optimization.h>
+#include "../lib/optimisation.hpp"
 #include "../lib/config.hpp"
-#include "../lib/experiment.hpp"
 #include "../lib/atom.hpp"
 #include "../lib/output.hpp"
 #include "../lib/utils.hpp"
@@ -34,16 +34,38 @@
 
 using namespace std;
 
-struct TransLineSpec {
-  int n1, n2;
-  int l1, l2;
-  bool s1, s2;
-};
 
-vector<TransitionData> getAllTransitions(vector<TransLineSpec> transqnums, DiracAtom da);
-vector<TransLineSpec> parseXRLines(MuDiracInputFile config);
+/**
+ * @brief  Sets up aixlog logging
+ * @note    sets up aixlogging with the provided verbosity level.
+ * Logs are saved to a file name based on the seed. The initial log message is
+ *  also output to the file.
+ *
+ * @param  verbosity:  verbosity level from the config file
+ * @param  seed:       seed of the output log file name.
+ * @retval None
+ */
+void setupLogging(const int verbosity, const string & seed);
 
-typedef dlib::matrix<double,0,1> column_vector;
-void configureNuclearModel(const column_vector& m, MuDiracInputFile &config, DiracAtom & da, OptimisationData &fermi_parameters);
-double calculateMSE(const column_vector& m, MuDiracInputFile config, const vector<TransLineSpec> transqnums, const vector<string> xr_lines_measured, const vector<double> xr_energies, const vector<double> xr_errors);
-void optimizeFermiParameters(MuDiracInputFile &config, DiracAtom & da,const vector<TransLineSpec> &transqnums, const vector<string> &xr_lines_measured, const vector<double> &xr_energies, const vector<double> &xr_errors, OptimisationData &fermi_parameters);
+/**
+ * @brief  Runs debug tasks if requested
+ * @note   runs debug tasks when present in input config file.
+ *
+ * @param  config:  config object used to make a dirac atom and run an EdEscan
+ * @retval None
+ */
+void debugTasks(MuDiracInputFile & config);
+
+/**
+ * @brief  Writes the potential from electronic cofiguration to file.
+ * @note   finds the electric potential in a Dirac atom caused by the
+ * electronic configuration. The result is output to a file name based
+ * on the seed with verbosity, out_verbosity.
+ *
+ * @param  da:  dirac atom containing the electronic potential.
+ * @param seed: seed name for the output file.
+ * @param out_verbosity: verbosity level for the output file.
+ * @retval None
+ */
+void writeEConfV(DiracAtom & da, const string & seed, const int & out_verbosity);
+
