@@ -71,7 +71,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
 
   // String keywords
   this->defineStringNode("devel_debug_task", InputNode<string>("")); // Which debugging task to perform
-  this->defineStringNode("2pF_coords", InputNode<string>("polar", true)); // 2pF optimisation coordinate system
+  this->defineStringNode("2pF_coords", InputNode<string>("POLAR", false)); // 2pF optimisation coordinate system
   this->defineStringNode("min_2pF_algorithm", InputNode<string>("bfgs", true)); // 2pF optimisation coordinate system
 
 
@@ -158,8 +158,8 @@ DiracAtom MuDiracInputFile::makeAtom() {
   // Now extract the relevant parameters
   int Z = getElementZ(this->getStringValue("element"));
   double radius = this->getDoubleValue("radius");
-  double t = this->getDoubleValue("fermi_t");
-  double c_param = this->getDoubleValue("fermi_c");
+  double fermi_t = this->getDoubleValue("fermi_t");
+  double fermi_c = this->getDoubleValue("fermi_c");
   double m = this->getDoubleValue("mass");
   int A = this->getIntValue("isotope");
   bool reduced_mass = this->getBoolValue("reduced_mass");
@@ -208,14 +208,14 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rout_min"));
   }
 
-  if (t ==-1) {
-    t = Physical::fermi2_thickness;
+  if (fermi_t ==-1) {
+    fermi_t = Physical::fermi2_thickness;
   }
 
-  if (c_param == -1) {
-    da.setFermi2(t*Physical::fm);
+  if (fermi_c == -1) {
+    da.setFermi2(fermi_t*Physical::fm);
   } else {
-    da.setFermi2(t*Physical::fm, c_param*Physical::fm);
+    da.setFermi2(fermi_t*Physical::fm, fermi_c*Physical::fm);
   }
   LOG(INFO) << "t = " << da.fermi2.t << "and c = " << da.fermi2.c <<  "\n";
 
@@ -240,7 +240,7 @@ void MuDiracInputFile::validate(int argc, char *argv[], string & seed) {
   }
 }
 
-void MuDiracInputFile::validateOptimisation(int args, string &coords, string &min_2pF_algo) {
+void MuDiracInputFile::validateOptimisation(int args, Fermi2CoordinateSystem & coord_sys, string &min_2pF_algo) {
   // check the experimental results input file is provided
   if (args < 3) {
     LOG(ERROR) << "Experimental results input file missing\n";
@@ -262,24 +262,24 @@ void MuDiracInputFile::validateOptimisation(int args, string &coords, string &mi
   LOG(DEBUG) << "nuclear model correctly set to \"FERMI2\" \n";
 
   // check the coordinate system is valid
-  coords = this->getStringValue("2pF_coords");
+  string coords = this->getStringValue("2pF_coords");
 
   // get the 2pF optimsation coordinate system (dev)
 
 
-  if (!((coords == "ct")||(coords == "polar"))) {
+  if (!((coords == "CT")||(coords == "POLAR"))) {
     LOG(WARNING)<< "Invalid 2pF coordinate system choice for minimsation\n";
-    LOG(WARNING)<< "please use \"ct\" or \"polar\" (default is \"polar\") \n";
+    LOG(WARNING)<< "please use \"CT\" or \"POLAR\" (default is \"POLAR\") \n";
     LOG(WARNING)<< "You used: \""<<coords <<"\" \n";
-    LOG(INFO) << "Using default polar coordinate system\n";
-    coords = "polar";
+    LOG(INFO) << "Using default POLAR coordinate system\n";
+    coords = "POLAR";
   }
 
   if (this->getIntValue("isotope") < 5) {
     LOG(INFO) << "using ct coordinate system as polar parameterisation no longer holds for A < 5 \n";
-    coords = "ct";
+    coords = "CT";
   }
-
+  coord_sys = fermi2coordmap[coords];
   LOG(DEBUG) << "optimisation coordinate system valid\n";
 
   // check the algorithm is valid
