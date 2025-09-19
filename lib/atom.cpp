@@ -82,6 +82,7 @@ double TransitionMatrix::totalRate() {
  * fraction of 1/(Z*mu), the 1s orbital radius for this atom, or of the nuclear
  * radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
+ * @param  reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
@@ -104,13 +105,9 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
     throw invalid_argument("Invalid grid parameters passed to Atom");
   }
 
-  if (A > 0) {
+  if ((A > 0) && (reduced_mass) ) {
     M = getIsotopeMass(Z, A);
-    if (reduced_mass) {
-      mu = effectiveMass(m, M * Physical::amu);
-    } else {
-      mu = m;
-    }
+    mu = effectiveMass(m, M * Physical::amu);
   } else {
     mu = m;
   }
@@ -170,37 +167,38 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
  * Calling this function resets all computed states. sets the new c and t values as object attributes in fm.
  *
  * @param  thickness:  The new thickness to set up
+ * @param  fermi_c:   The new Fermi parameter c to set up
  * @retval None
  */
-void Atom::setFermi2(double thickness, double fermi2_potential) {
+void Atom::setFermi2(double thickness, double fermi_c) {
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to set up nuclear skin thickness or fermi2-potential for an atom"
                  << " not using a Fermi 2-term model\n";
     return;
   }
 
+  if (fermi_c  == -1) {
 
-  // First, define C for this radius
-  double c;
-  if (fermi2_potential  != -1) {
-    c = fermi2_potential;
-  } else if (A >= 5.0) {
-    c = sqrt(R * R -
-             7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
-  } else {
-    c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+    if (A >= 5.0) {
+      fermi_c = sqrt(R * R -
+                     7.0 / 3.0 * pow(M_PI * thickness / (4 * log(3.0)), 2));
+    } else {
+      fermi_c = 2.2291e-5 * pow(A, 1.0 / 3.0) - 0.90676e-5;
+    }
   }
 
   // set object attributes for fermi 2pf in fm
-  fermi2.c = c/Physical::fm;
+  fermi2.c = fermi_c/Physical::fm;
   fermi2.t = thickness/Physical::fm;
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, c);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
   reset();
 }
 
-void Atom::setFermi2(const double coord_1, const double coord_2, const string coord_sys) {
-  if (coord_sys == "polar") {
+void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys) {
+  string coordinate_system_state;
+  if (coord_sys == POLAR) {
+    coordinate_system_state = "(rms radius, theta)";
     LOG(DEBUG) << " configuring dirac atom using polar coordinate system \n";
     if ( A < 5) {
       LOG(WARNING) << "attempting to use polar 2pF coordinates when A < 5  \n";
@@ -208,12 +206,13 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
     tie(fermi2.c, fermi2.t) = fermiParameters(coord_1, coord_2);
     fermi2.rms_radius = coord_1;
     fermi2.theta = coord_2;
-  } else if (coord_sys == "ct") {
+  } else if (coord_sys == CT) {
+    coordinate_system_state = "(c, t)";
     LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
     fermi2.c = coord_1;
     fermi2.t = coord_2;
   }
-  LOG(DEBUG) << "creating potential with " << coord_sys << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
+  LOG(DEBUG) << "creating potential with " << coordinate_system_state << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
   V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
   reset();
@@ -225,7 +224,7 @@ void Atom::setFermi2(const double coord_1, const double coord_2, const string co
  * @param  coord_sys:  The coordinate system either 'ct' or 'polar'
  * @retval array<double, 2> :the 2pF domain coordinates.
  */
-array<double, 2> Atom::getFermi2(const string coord_sys) {
+array<double, 2> Atom::getFermi2Femto(Fermi2CoordinateSystem coord_sys) {
   array<double, 2> f2 {0,0};
   if (rmodel != FERMI2) {
     LOG(WARNING) << "Trying to get fermi 2 parameters for an atom"
@@ -233,9 +232,9 @@ array<double, 2> Atom::getFermi2(const string coord_sys) {
 
     return f2;
   }
-  if (coord_sys == "ct") {
+  if (coord_sys == CT) {
     f2 = {fermi2.c, fermi2.t};
-  } else if (coord_sys == "polar") {
+  } else if (coord_sys == POLAR) {
     fermi2.rms_radius= rmsRadius(fermi2.c, fermi2.t);
     fermi2.theta = atan(fermi2.t/fermi2.c);
     f2 = {fermi2.rms_radius, fermi2.theta};
@@ -403,6 +402,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * @param ideal_minshell:   Shell from which the atom will just use the ideal
  * Dirac hydrogen-like solution as an approximation. Never used if negative
  * (default = -1)
+ * @param reduced_mass: Whether to use reduced mass (default = true)
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
@@ -1215,9 +1215,20 @@ vector<TransitionData> DiracAtom::getAllTransitions() {
  *
  */
 double DiracAtom::calculateMSE(double coord_1, double coord_2) {
-  ++iteration_counter_2pF;
-  setFermi2(coord_1, coord_2, coord_system);
-  vector<TransitionData> transitions_iteration = getAllTransitions();
+  setFermi2Femto(coord_1, coord_2, coord_system);
+  vector<TransitionData> transitions_iteration;
+  try {
+    transitions_iteration = getAllTransitions();
+
+    if (transitions_iteration.size() < xr_lines_measured.size()) {
+      throw (xr_lines_measured.size()-transitions_iteration.size());
+    }
+  } catch (int failed_lines) {
+    LOG(ERROR) << failed_lines << " transition lines failed to converge\n";
+    LOG(ERROR) << "cannot calculate square errors \n";
+    LOG(ERROR) << "exiting\n";
+    exit(-1);
+  }
 
   LOG(DEBUG) << "MSE loop \n";
   double MSE = 0;

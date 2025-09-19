@@ -48,6 +48,11 @@ enum NuclearRadiusModel {
   FERMI2
 };
 
+enum Fermi2CoordinateSystem {
+  CT,
+  POLAR
+};
+
 // Main classes
 class TransitionMatrix {
  public:
@@ -84,7 +89,7 @@ struct TransitionData {
  * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
  *
  */
-struct OptimisationData {
+struct Fermi2ParametersData {
   double rms_radius;
   double theta;
   double mse;
@@ -133,8 +138,8 @@ class Atom {
 
  public:
   // fermi 2pF parameters
-  OptimisationData fermi2;
-  string coord_system;
+  Fermi2ParametersData fermi2;
+  Fermi2CoordinateSystem coord_system;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
@@ -186,22 +191,25 @@ class Atom {
   void setgrid(double rc, double dx);
 
   // Additional potential terms get/setters
-  void setFermi2(double thickness = Physical::fermi2_t, double fermi2_potential = -1);
+  void setFermi2(double thickness = Physical::fermi2_t, double fermi_c = -1);
 
   /**
-   * @brief sets the 2 parameter fermi model parameters of the atoms nuclear model.
-   * @note sets the 2pF parameters in ct or polar coordinates. units are in fm.
+   * @brief sets the 2 parameter fermi nuclear model parameters of the atom in units of fm.
+   * @note sets the 2pF parameters in ct or polar coordinates,
+   * depending on the choice of coordinate system. Units are in fm.
    * @param coord_1: half density radius c or rms radius
    * @param coord_2: skin thickness t or theta
    * @param coord_sys: coordinate system "ct" or "polar"
    * @retval None
    */
-  void setFermi2(const double coord_1, const double coord_2, const string coord_sys);
+  void setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
 
   /**
-   * @brief gets the 2 parameter fermi model parameters of the atoms nuclear model.
+   * @brief gets the 2 parameter fermi model parameters in femtometres of the atoms nuclear model.
+   * @param coord_sys: coordinate system for the returned parameter (CT or POLAR).
+   * @retval array<double,2>: fermi parameters in CT or POLAR coordinates.
    */
-  array<double, 2> getFermi2(const string coord_sys);
+  array<double, 2> getFermi2Femto(Fermi2CoordinateSystem coord_sys);
 
   bool getUehling() {
     return use_uehling;
@@ -270,7 +278,15 @@ class DiracAtom : public Atom {
 
   // optimisation
 
-  void setExpOptData(string coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
+  /**
+   * @brief sets values for experimental data input and the coordinate system for the optimisation
+   * @param coord_sys: coordinate system to be used in optimising the Fermi nuclear model parameters(CT or POLAR).
+   * @param xr_lines: measured transition lines in xray notation.
+   * @param xr_e: energies of the the measured transition lines.
+   * @param xr_err: energy uncertainties of the measured transition lines.
+   * @retval None.
+   */
+  void setExpOptData(Fermi2CoordinateSystem coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
     iteration_counter_2pF =0;
     coord_system = coord_sys;
     xr_lines_measured = xr_lines;

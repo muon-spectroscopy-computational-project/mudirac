@@ -34,7 +34,7 @@ typedef dlib::matrix<double,0,1> column_vector;
  * @param MSE: the mean square error of new xray energies calculated using the optimised parameters
  *  with respect to the experimental energies.
  */
-void finaliseFermi2(DiracAtom & da, const string coord_sys, column_vector final_fermi_params, double opt_time, double MSE);
+void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vector final_fermi_params, double opt_time, double MSE);
 
 /**
  *
@@ -99,7 +99,7 @@ class opt_2pF_model {
   // common parameters for the objective, derivative and hessian functions
   typedef ::column_vector column_vector;
   typedef dlib::matrix<double> general_matrix;
-  DiracAtom da;
+  mutable DiracAtom da;
   mutable int opt_iterations = 0;
 
   // constructor
@@ -109,9 +109,9 @@ class opt_2pF_model {
   double operator() (
     const column_vector& x
   ) const {
-    DiracAtom da_1 = da;
+    // DiracAtom da_1 = da;
     opt_iterations++;
-    return da_1.calculateMSE(x(0), x(1));
+    return da.calculateMSE(x(0), x(1));
   }
 
   // function for the dlib minisation routine to get the derivative and hessian
@@ -120,9 +120,9 @@ class opt_2pF_model {
     column_vector& der,
     general_matrix & hess
   ) const {
-    DiracAtom da_1 = da;
-    der = MSE_2pF_derivative(x, da_1);
-    hess = MSE_2pF_hessian(x, da_1);
+    da;
+    der = MSE_2pF_derivative(x, da);
+    hess = MSE_2pF_hessian(x, da);
     opt_iterations +=20;  // 4 iterations per derivative, 4 derivatives per hessian = 4+16
   }
 };
@@ -200,7 +200,7 @@ struct CostFunctor {
 
 
   bool operator() (const double* const c1, const double* const c2, double* residual) const {
-    ma.setFermi2(c1[0], c2[0], ma.coord_system);
+    ma.setFermi2Femto(c1[0], c2[0], ma.coord_system);
     vector<TransitionData> transitions_iteration = ma.getAllTransitions();
 
     for (int k = 0; k < transitions_iteration.size(); ++k) {
