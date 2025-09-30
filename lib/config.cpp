@@ -287,10 +287,10 @@ void MuDiracInputFile::validateOptimisation(int args, Fermi2CoordinateSystem & c
 
   if (!((min_2pF_algo == "bfgs")||(min_2pF_algo == "global")||(min_2pF_algo == "trust")||(min_2pF_algo == "lm") ||(min_2pF_algo == "ls"))) {
     LOG(WARNING)<< "Invalid 2pF algorithm for minimsation\n";
-    LOG(WARNING)<< "please use \"bfgs\" or \"global\" (default is \"trust\") \n";
+    LOG(WARNING)<< "please use \"lm\", \"ls\", \"bfgs\" or \"global\" (default is \"lm\") \n";
     LOG(WARNING)<< "You used: \""<<min_2pF_algo<<"\" \n";
-    LOG(INFO) << "Using default optimisation algorithm bfgs\n";
-    min_2pF_algo = "bfgs";
+    LOG(INFO) << "Using default optimisation algorithm lm\n";
+    min_2pF_algo = "lm";
   }
   LOG(DEBUG) << "Settings for optimisation are valid\n";
 }

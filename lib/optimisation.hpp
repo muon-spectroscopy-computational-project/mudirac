@@ -20,7 +20,7 @@
 
 
 
-typedef dlib::matrix<double,0,1> column_vector;
+typedef dlib::matrix<double,2,1> column_vector;
 
 /**
  * @brief a function which outputs optimisation results to LOG and sets finalised optimisation data values in a dirac atom.

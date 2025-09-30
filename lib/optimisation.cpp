@@ -198,7 +198,7 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
     ceresOptimizeFermiParameters(da, opt_time, algo);
   } else {
     cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
-    cout << "please use \"bfgs\", \"trust\", or \"lm\" (default is \"bfgs\") \n";
+    cout << "please use \"lm\", \"ls\", \"bfgs\", or \"trust\", or (default is \"lm\") \n";
     cout << "You used: \""<<algo<<"\" \n";
     cout << "Quitting...\n";
     LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
@@ -234,7 +234,7 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
 
 void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo) {
 
-  LOG(INFO) << "optimizing fermi parameters using the ceres software" ;
+  LOG(INFO) << "optimizing fermi parameters using the ceres software \n" ;
   // Get initial guess
   array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
   double  c1 = fermi_coords[0], c2 = fermi_coords[1];
