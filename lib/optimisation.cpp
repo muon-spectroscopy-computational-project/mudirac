@@ -194,9 +194,11 @@ void optFermi2(DiracAtom & da, const string algo, double & opt_time) {
     trustOptimizeFermiParameters(opt_obj, da, opt_time);
   } else if (algo=="global") {
     globalOptimizeFermiParameters(da, opt_time);
+  } else if ((algo=="lm")|| (algo=="ls")) {
+    ceresOptimizeFermiParameters(da, opt_time, algo);
   } else {
     cout << "Invalid 2pF optimisation algorithm choice for minimsation\n";
-    cout << "please use \"bfgs\" or \"trust\" (default is \"bfgs\") \n";
+    cout << "please use \"lm\", \"ls\", \"bfgs\", or \"trust\", or (default is \"lm\") \n";
     cout << "You used: \""<<algo<<"\" \n";
     cout << "Quitting...\n";
     LOG(ERROR) << "Invalid 2pF optimisation algorithm choice for minimsation: \""<<algo<<"\"\n";
@@ -230,3 +232,68 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
+void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo) {
+
+  LOG(INFO) << "optimizing fermi parameters using the ceres software \n" ;
+  // Get initial guess
+  array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
+  double  c1 = fermi_coords[0], c2 = fermi_coords[1];
+  double c2_upper_bound;
+  if (da.coord_system == CT) {
+    c2_upper_bound = 3;
+  } else {
+    c2_upper_bound = M_PI / 4.0;
+  }
+
+  // define the cost function
+  int num_residuals = da.xr_energies.size();
+  ceres::Problem problem;
+  auto * cost_function =
+    new ceres::NumericDiffCostFunction<CostFunctor, ceres::CENTRAL, ceres::DYNAMIC, 1, 1>(new CostFunctor(da),ceres::TAKE_OWNERSHIP,num_residuals);
+  problem.AddResidualBlock(cost_function, nullptr, &c1, &c2);
+
+  // set minimisation algorithm
+  ceres::MinimizerType minimizer;
+  if (algo == "lm") {   // levenberg marquardt
+    minimizer = ceres::TRUST_REGION;
+
+    // set bounds for problem
+    problem.SetParameterLowerBound(&c1,0,0);
+    problem.SetParameterLowerBound(&c2,0,0);
+    problem.SetParameterUpperBound(&c1,0, 7);
+    problem.SetParameterUpperBound(&c2,0,c2_upper_bound);
+    LOG(INFO) << "optimizing fermi parameters using the levenberg marquardt algorithm" ;
+  } else if (algo == "ls") {  // bfgs
+    minimizer = ceres::LINE_SEARCH;
+    LOG(INFO) << "optimizing fermi parameters using the bfgs algorithm" ;
+  }
+
+  // start time of minimisation
+  chrono::high_resolution_clock::time_point opt_t0, opt_t1;
+  opt_t0 = chrono::high_resolution_clock::now();
+
+
+  // set options and solve minimisation
+  ceres::Solver::Options options;
+  options.minimizer_type = minimizer;
+  options.gradient_tolerance =1e-5;
+  options.parameter_tolerance = 1e-5;
+  options.min_relative_decrease = 1e-2;
+  options.linear_solver_type = ceres::DENSE_QR;
+
+  options.minimizer_progress_to_stdout = true;
+
+  options.line_search_interpolation_type = ceres::QUADRATIC;
+  options.max_num_line_search_step_size_iterations = 10;
+  options.line_search_sufficient_curvature_decrease = 0.90;
+  options.max_line_search_step_contraction = 0.1;
+  options.min_line_search_step_contraction = 0.5;
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+
+  opt_t1 = chrono::high_resolution_clock::now();
+  std::cout << summary.FullReport() << "\n";
+  opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
+  finaliseFermi2(da, da.coord_system, {c1, c2}, opt_time, summary.final_cost*2.0/double(num_residuals));
+
+}
