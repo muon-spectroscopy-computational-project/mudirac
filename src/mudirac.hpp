@@ -18,7 +18,6 @@
 #include <string>
 #include <cmath>
 #include <chrono>
-#include <dlib/optimization.h>
 #include "../lib/optimisation.hpp"
 #include "../lib/config.hpp"
 #include "../lib/atom.hpp"
