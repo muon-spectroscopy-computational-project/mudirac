@@ -100,7 +100,7 @@ struct CostFunctor {
 
 /**
  * @brief uses the ceres optimisation library to perform the optimisation of the 2pF parameters
- * @note This funciton uses the ceres solver to minimize the Mean Square Error (MSE) between simulated energies 
+ * @note This funciton uses the ceres solver to minimize the Mean Square Error (MSE) between simulated energies
  * calculated using 2pf parameters and experimental xray transition energies
  * @param da: dirac atom with 2pf model to be optimised
  * @param opt_time: time taken to complete the optimisation.
