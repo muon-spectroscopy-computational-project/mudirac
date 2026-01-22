@@ -10,6 +10,16 @@
  * @version 1.0 30/06/2025
  */
 
+#define INFO CERES_MINILOG_INFO
+#define WARNING CERES_MINILOG_WARNING
+#define ERROR CERES_MINILOG_ERROR
+#define FATAL CERES_MINILOG_FATAL
+#include "ceres/ceres.h"
+#undef INFO
+#undef WARNING
+#undef ERROR
+#undef FATAL
+#undef LOG
 
 #include "optimisation.hpp"
 

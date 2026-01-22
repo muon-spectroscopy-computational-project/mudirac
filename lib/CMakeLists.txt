@@ -29,6 +29,7 @@ if (NOT Ceres_FOUND)
     set(CXSPARSE OFF CACHE BOOL "" FORCE) # Disable CXSparse
     set(ACCELERATESPARSE OFF CACHE BOOL "" FORCE) # Disable AccelerateSparses
     set(BUILD_TESTING OFF CACHE BOOL "" FORCE) # Disable building tests
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # Disable building examples
     # Fetch Eigen
     FetchContent_Declare(
         Eigen
@@ -48,6 +49,7 @@ if (NOT Ceres_FOUND)
         GIT_TAG 2.1.0
         GIT_SHALLOW TRUE
     )
+    set(PROVIDE_UNINSTALL_TARGET OFF CACHE BOOL "" FORCE) # Disable uninstall target
     FetchContent_MakeAvailable(Ceres)
 
     message(STATUS "Ceres library fetched and intalled")

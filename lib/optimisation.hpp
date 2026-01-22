@@ -9,8 +9,6 @@
  * @author Milan Kumar
  * @version 1.0 30/06/2025
  */
-#include "ceres/ceres.h"
-#undef LOG
 #include "atom.hpp"
 #include "config.hpp"
 #include "experiment.hpp"
