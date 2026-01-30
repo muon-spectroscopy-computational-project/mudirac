@@ -31,12 +31,12 @@ isotope: {isotope}
 nuclear_model: FERMI2
 uehling_correction: TRUE
 reduced_mass: TRUE
-electronic_confg: {element}
+electronic_config: {element}
 optimise_fermi_parameters: TRUE
 xr_lines: {xr_lines}
 verbosity: 1
 output: 1
-2pF_coords: TRUE
+2pF_coords: CT
 min_2pF_algorithm: lm
 """
     config_path = os.path.join(path, "mudirac.in")
