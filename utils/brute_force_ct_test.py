@@ -50,8 +50,8 @@ def write_experimentl_config(path, transitions,energies):
     xr_errors = ", ".join([f"{energies[t][1]:.6f}" for t in transitions])
     config = f""" Experimental mesure for optimpistaion brute force
 xr_lines: {xr_lines}
-xr_energies: {xr_energies}
-xr_errors: {xr_errors}
+xr_energy: {xr_energies}
+xr_error: {xr_errors}
 """
     config_path = os.path.join(path, "experimental.in")
     with open(config_path, "w") as f:
@@ -124,15 +124,15 @@ def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None):
     for i, energy_combo in enumerate(all_combinations):
         
         energies = {
-        name: (energy_combo, transition_errors[name])
+        name: (energy, transition_errors[name])
         for name, energy in zip(transition_names, energy_combo)
         }
 
-        print
+        print(f"\nRun {i+1}/{total_runs}")
 
         with tempfile.TemporaryDirectory() as temp_dir:
             write_main_config(temp_dir, element, isotope, transitions)
-            write_experimentl_config(temp_dir, transition_names, energy_samples)
+            write_experimentl_config(temp_dir, transition_names, energies)
 
             result =  run_mudirac(mudirac_cmd, temp_dir)
             if result:
