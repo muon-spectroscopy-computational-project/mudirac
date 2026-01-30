@@ -48,7 +48,7 @@ def write_experimentl_config(path, transitions,energies):
     xr_lines = ", ".join(transitions)
     xr_energies = ", ".join([f"{energies[t][0]:.6f}" for t in transitions])
     xr_errors = ", ".join([f"{energies[t][1]:.6f}" for t in transitions])
-    config = f""" Experimental mesure for optimpistaion brute force
+    config = f""" # Experimental mesure for optimpistaion brute force
 xr_lines: {xr_lines}
 xr_energy: {xr_energies}
 xr_error: {xr_errors}
