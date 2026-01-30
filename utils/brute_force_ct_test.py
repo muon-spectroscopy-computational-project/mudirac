@@ -118,7 +118,7 @@ def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None, samplin
     transition_centrals = {t[0]: t[1] for t in transitions}
     
     if sampling =="monte_carlo":
-        print("Monte Carlo sampling: {num_points} random_samples.")
+        print(f"Monte Carlo sampling: {num_points} random_samples.")
         all_combinations = []
         for _ in range(num_points):
             combo = tuple(
@@ -126,7 +126,7 @@ def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None, samplin
                 for name in transition_names
             )
             all_combinations.append(combo)
-        print("Generated {num_points} random sample combinations.")
+        print(f"Generated {num_points} random sample combinations.")
         for name in transition_names:
             energies= [combo[transition_names.index(name)] for combo in all_combinations]
             print(f" {name}: mean={np.mean(energies):.2f}, std={np.std(energies):.2f}")
