@@ -11,9 +11,9 @@ EXPERIMENTAL_DATA = {
     "element": "C",
     "isotope": 12,
     "transitions": [
-        ("K1-L2", 75248.0, 15000.0),
-        ("K1-L3", 89212.0, 15000.0),
-        ("K1-N2", 94025.0, 15000.0),
+        ("K1-L2", 75248.0, 1500.0),
+        ("K1-L3", 89212.0, 1500.0),
+        ("K1-N2", 94025.0, 1500.0),
     ]
 }
 
@@ -48,11 +48,12 @@ def write_experimentl_config(path, transitions,energies):
     xr_lines = ", ".join(transitions)
     xr_energies = ", ".join([f"{energies[t][0]:.6f}" for t in transitions])
     xr_errors = ", ".join([f"{energies[t][1]:.6f}" for t in transitions])
-    config = f""" # Experimental mesure for optimpistaion brute force
+    config = f""" #Experimental mesure for optimpistaion brute force
 xr_lines: {xr_lines}
 xr_energy: {xr_energies}
 xr_error: {xr_errors}
 """
+    # print("Experimental config:\n"+config)
     config_path = os.path.join(path, "experimental.in")
     with open(config_path, "w") as f:
         f.write(config)
@@ -80,8 +81,11 @@ def run_mudirac(command, work_dir):
         for line in lines:
             if line.startswith("#") or line.strip() == "":
                 continue
+            if line.startswith("fermi_c"):
+                continue
             parts = line.strip().split()
             if len(parts) >= 5:
+                print(parts)
                 return {
                     "fermi_c": float(parts[0]),
                     "fermi_t": float(parts[1]),
@@ -104,11 +108,10 @@ def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None):
     isotope = exp_data['isotope']
 
     energy_samples = {}
-
+    print(f"Generated {num_points} sample points for each transition.")
     for name , central, error in transitions:
         energy_samples[name] = generate_energy_samples(central, error, num_points)
-    print(f"Generated {num_points} sample points for each transition.")
-    print(f" Samples: {energy_samples[name]}")
+        print(f" Samples: {name} - {energy_samples[name]}")
 
     #create combinations
     transition_names = [t[0] for t in transitions]
