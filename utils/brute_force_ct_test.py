@@ -107,21 +107,37 @@ def run_mudirac(command, work_dir):
         return None
     
 
-def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None):
+def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None, sampling="grid"):
     transitions = exp_data['transitions']
     element = exp_data['element']
     isotope = exp_data['isotope']
 
-    energy_samples = {}
-    print(f"Generated {num_points} sample points for each transition.")
-    for name , central, error in transitions:
-        energy_samples[name] = generate_energy_samples(central, error, num_points)
-        print(f" Samples: {name} - {energy_samples[name]}")
-
-    #create combinations
+        #create combinations
     transition_names = [t[0] for t in transitions]
     transition_errors = {t[0]: t[2] for t in transitions}
-    all_combinations =list(itertools.product(*[energy_samples[name] for name in transition_names]))
+    transition_centrals = {t[0]: t[1] for t in transitions}
+    
+    if sampling =="monte_carlo":
+        print("Monte Carlo sampling: {num_points} random_samples.")
+        all_combinations = []
+        for _ in range(num_points):
+            combo = tuple(
+                np.random.normal(transition_centrals[name], transition_errors[name])
+                for name in transition_names
+            )
+            all_combinations.append(combo)
+        print("Generated {num_points} random sample combinations.")
+        for name in transition_names:
+            energies= [combo[transition_names.index(name)] for combo in all_combinations]
+            print(f" {name}: mean={np.mean(energies):.2f}, std={np.std(energies):.2f}")
+    else:
+        energy_samples = {}
+        print(f"Generated {num_points} sample points for each transition.")
+        for name , central, error in transitions:
+            energy_samples[name] = generate_energy_samples(central, error, num_points)
+            print(f" Samples: {name} - {energy_samples[name]}")
+        all_combinations =list(itertools.product(*[energy_samples[name] for name in transition_names]))
+
 
     total_runs = len(all_combinations)
     print(f"Total combinations to test: {total_runs}")
@@ -221,6 +237,8 @@ def main():
     parser.add_argument("--mudirac", "-m", required=True, default="mudirac", help="Path to the Mudirac executable.")
     parser.add_argument("--points", "-n", type=int, default=NUM_SAMPLE_POINTS, help="Number of sample points per transition.")
     parser.add_argument("--output", "-o", default="brute_force_mudirac_results.csv", help="Output CSV file to save results.")
+    parser.add_argument("--sampling", "-s", choices=["grid", "monte_carlo"], default="grid", help="Sampling method: 'grid' or 'monte_carlo'.")
+    parser.add_argument("--random-seed", type=int, default=None, help="Random seed for Monte Carlo sampling.")
     args = parser.parse_args()
 
     print("="*50)
@@ -228,6 +246,10 @@ def main():
     print("="*50)
     print(f"\n Element:", EXPERIMENTAL_DATA['element']+"-"+str(EXPERIMENTAL_DATA['isotope']))
     print(f"Transitionss: {len(EXPERIMENTAL_DATA['transitions'])}")
+    print(f" Sampling method: {args.sampling}")
+    if args.sampling == "monte_carlo" and args.random_seed is not None:
+        np.random.seed(args.random_seed)
+        print(f" Random seed: {args.random_seed}")
     print(f" Sample points per transition: {args.points}")
     print(f" Total combinations to test: {args.points ** len(EXPERIMENTAL_DATA['transitions'])}")
     print("="*50 + "\n")    
@@ -236,7 +258,8 @@ def main():
         mudirac_cmd=args.mudirac,
         exp_data=EXPERIMENTAL_DATA,
         num_points=args.points,
-        output_file=args.output
+        output_file=args.output,
+        sampling=args.sampling
     )
     return 0 if results else 1
 
