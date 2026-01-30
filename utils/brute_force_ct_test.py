@@ -8,12 +8,13 @@ import numpy as np
 from pathlib import Path
 
 EXPERIMENTAL_DATA = {
-    "element": "C",
-    "isotope": 12,
+    "element": "Au",
+    "isotope": 197,
     "transitions": [
-        ("K1-L2", 75248.0, 1500.0),
-        ("K1-L3", 89212.0, 1500.0),
-        ("K1-N2", 94025.0, 1500.0),
+        ("K1-L2", 5592800.0, 5000.0),
+        ("K1-L3", 5762500, 5000.0),
+        ("L2-M4", 2474400, 2000.0),
+        ("L3-M5", 2343100, 2000.0),
     ]
 }
 
@@ -36,9 +37,13 @@ optimise_fermi_parameters: TRUE
 xr_lines: {xr_lines}
 verbosity: 1
 output: 1
-2pF_coords: CT
+fermi_c: 6.5
+fermi_t: 2.0
+rms_radius_decimals: 4
 min_2pF_algorithm: lm
+2pF_coords: polar
 """
+    print("main config:\n"+config)
     config_path = os.path.join(path, "mudirac.in")
     with open(config_path, "w") as f:
         f.write(config)
@@ -53,7 +58,7 @@ xr_lines: {xr_lines}
 xr_energy: {xr_energies}
 xr_error: {xr_errors}
 """
-    # print("Experimental config:\n"+config)
+    print("Experimental config:\n"+config)
     config_path = os.path.join(path, "experimental.in")
     with open(config_path, "w") as f:
         f.write(config)
