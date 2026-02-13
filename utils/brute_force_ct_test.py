@@ -3,8 +3,10 @@ import argparse
 import tempfile
 import subprocess
 import itertools
+import re
 import sys
 import numpy as np
+import yaml
 from pathlib import Path
 
 EXPERIMENTAL_DATA = {
@@ -230,38 +232,85 @@ def save_results(results, transitions, output_file):
                     f"{res['rms_radius']:.6f}",
                     f"{res['mse']:.6f}"
                 ])
-                f.write(",".join(row) + "\n")   
+                f.write(",".join(row) + "\n")  
+
+def parse_experimental_input(file_name):
+    with open(file_name, 'r') as f:
+        data = yaml.safe_load(f)
+    basename = os.path.basename(file_name)
+    # Use regex to match number + element pattern
+    match = re.match(r'(\d+)([A-Za-z]+)', basename)
+    if match:
+        isotope = int(match.group(1))
+        element = match.group(2)
+    else:
+        print("Refer file name example 12.C.xr.in")
+    transition_names = [t.strip() for t in data['xr_lines'].split(',')]
+    energies = [float(e.strip()) for e in data['xr_energy'].split(',')]
+    errors = [float(e.strip()) for e in data['xr_error'].split(',')]
+
+    #Validate all the list have smae length
+
+    if not(len(transition_names) == len(energies)== len(errors)):
+        raise ValueError(f"Mismatched data lengths: {len(transition_names)} transitions, {len(energies)} energies, {len(errors)} errors")
+    
+    
+    experimental_data = {
+        "element": element,
+        "isotope": isotope,
+        "transitions": [
+            (name, energy, error) 
+            for name, energy, error in zip(transition_names, energies, errors)
+        ]
+    }
+    return experimental_data
+
+def find_experimental_files(directory="."):
+    files = []
+    pattern = re.compile(r'^\d+[A-Za-z]+\.xr\.in$')
+    for filename in os.listdir(directory):
+        if pattern.match(filename):
+            full_path = os.path.join(directory, filename)
+            files.append(full_path)
+    
+    return files
+ 
     
 def main():
     parser = argparse.ArgumentParser(description="Brute-force optimization of Fermi parameters using Mudirac.")
     parser.add_argument("--mudirac", "-m", required=True, default="mudirac", help="Path to the Mudirac executable.")
     parser.add_argument("--points", "-n", type=int, default=NUM_SAMPLE_POINTS, help="Number of sample points per transition.")
-    parser.add_argument("--output", "-o", default="brute_force_mudirac_results.csv", help="Output CSV file to save results.")
+    # parser.add_argument("--output", "-o", default="brute_force_mudirac_results.csv", help="Output CSV file to save results.")
     parser.add_argument("--sampling", "-s", choices=["grid", "monte_carlo"], default="grid", help="Sampling method: 'grid' or 'monte_carlo'.")
     parser.add_argument("--random-seed", type=int, default=None, help="Random seed for Monte Carlo sampling.")
+    parser.add_argument("--input_directory", "-i", default=".", help="Directory for experimental file")
     args = parser.parse_args()
 
-    print("="*50)
-    print("Mudirac Brute-Force Fermi Parameter Optimization test")
-    print("="*50)
-    print(f"\n Element:", EXPERIMENTAL_DATA['element']+"-"+str(EXPERIMENTAL_DATA['isotope']))
-    print(f"Transitionss: {len(EXPERIMENTAL_DATA['transitions'])}")
-    print(f" Sampling method: {args.sampling}")
-    if args.sampling == "monte_carlo" and args.random_seed is not None:
-        np.random.seed(args.random_seed)
-        print(f" Random seed: {args.random_seed}")
-    print(f" Sample points per transition: {args.points}")
-    print(f" Total combinations to test: {args.points ** len(EXPERIMENTAL_DATA['transitions'])}")
-    print("="*50 + "\n")    
+    experimental_files = find_experimental_files(args.input_directory)
+    for experimental_file in experimental_files:
+        EXPERIMENTAL_DATA = parse_experimental_input(experimental_file)
+        output_file = f"mudirac_bruteforce_test_{EXPERIMENTAL_DATA['element']}_{EXPERIMENTAL_DATA['isotope']}_{args.sampling}_{args.points}.csv"
+        print("="*50)
+        print("Mudirac Brute-Force Fermi Parameter Optimization test")
+        print("="*50)
+        print(f"\n Element:", EXPERIMENTAL_DATA['element']+"-"+str(EXPERIMENTAL_DATA['isotope']))
+        print(f"Transitionss: {len(EXPERIMENTAL_DATA['transitions'])}")
+        print(f" Sampling method: {args.sampling}")
+        if args.sampling == "monte_carlo" and args.random_seed is not None:
+            np.random.seed(args.random_seed)
+            print(f" Random seed: {args.random_seed}")
+        print(f" Sample points per transition: {args.points}")
+        print(f" Total combinations to test: {args.points ** len(EXPERIMENTAL_DATA['transitions'])}")
+        print("="*50 + "\n")    
 
-    results = run_brute_force(
-        mudirac_cmd=args.mudirac,
-        exp_data=EXPERIMENTAL_DATA,
-        num_points=args.points,
-        output_file=args.output,
-        sampling=args.sampling
-    )
-    return 0 if results else 1
+        results = run_brute_force(
+            mudirac_cmd=args.mudirac,
+            exp_data=EXPERIMENTAL_DATA,
+            num_points=args.points,
+            output_file=output_file,
+            sampling=args.sampling
+        )
+        return 0 if results else 1
 
 if __name__ == "__main__":
     sys.exit(main())
