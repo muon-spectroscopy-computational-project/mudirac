@@ -9,16 +9,16 @@ import numpy as np
 import yaml
 from pathlib import Path
 
-EXPERIMENTAL_DATA = {
-    "element": "Au",
-    "isotope": 197,
-    "transitions": [
-        ("K1-L2", 5592800.0, 5000.0),
-        ("K1-L3", 5762500, 5000.0),
-        ("L2-M4", 2474400, 2000.0),
-        ("L3-M5", 2343100, 2000.0),
-    ]
-}
+# EXPERIMENTAL_DATA = {
+#     "element": "Au",
+#     "isotope": 197,
+#     "transitions": [
+#         ("K1-L2", 5592800.0, 5000.0),
+#         ("K1-L3", 5762500, 5000.0),
+#         ("L2-M4", 2474400, 2000.0),
+#         ("L3-M5", 2343100, 2000.0),
+#     ]
+# }
 
 NUM_SAMPLE_POINTS = 3
 
@@ -34,7 +34,7 @@ isotope: {isotope}
 nuclear_model: FERMI2
 uehling_correction: TRUE
 reduced_mass: TRUE
-electronic_config: {element}
+electronic_config: [{element}]
 optimise_fermi_parameters: TRUE
 xr_lines: {xr_lines}
 verbosity: 1
@@ -287,6 +287,7 @@ def main():
     args = parser.parse_args()
 
     experimental_files = find_experimental_files(args.input_directory)
+    print(f"Found {len(experimental_files)}\n")
     for experimental_file in experimental_files:
         EXPERIMENTAL_DATA = parse_experimental_input(experimental_file)
         output_file = f"mudirac_bruteforce_test_{EXPERIMENTAL_DATA['element']}_{EXPERIMENTAL_DATA['isotope']}_{args.sampling}_{args.points}.csv"
