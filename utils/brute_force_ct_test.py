@@ -181,30 +181,35 @@ def run_brute_force(mudirac_cmd, exp_data, num_points, output_file=None, samplin
         rms_values = [r['rms_radius'] for r in results]
         mse_values = [r['mse'] for r in results]
 
-        print(f"|\n Successful runs: {len(results)} / {total_runs}")
-        print(f"\n Fermu c parameter:")
-        print(f" Range : {min(c_values):.6f} - {max(c_values):.6f} fm")
-        print(f" Mean  : {np.mean(c_values):.6f} fm")
-        print(f" Std   : {np.std(c_values):.6f} fm")    
+        output_summary= (
 
-        print(f"\n Fermi t parameter:")
-        print(f" Range : {min(t_values):.6f} - {max(t_values):.6f} fm")
-        print(f" Mean  : {np.mean(t_values):.6f} fm")
-        print(f" Std   : {np.std(t_values):.6f} fm")    
+        f"|\n Successful runs: {len(results)} / {total_runs}"
+        f"\n Fermu c parameter:"
+        f" Range : {min(c_values):.6f} - {max(c_values):.6f} fm"
+        f" Mean  : {np.mean(c_values):.6f} fm"
+        f" Std   : {np.std(c_values):.6f} fm"   
 
-        print(f"\n RMS radius parameter:")
-        print(f" Range : {min(rms_values):.6f} - {max(rms_values):.6f} fm")
-        print(f" Mean  : {np.mean(rms_values):.6f} fm")
-        print(f" Std   : {np.std(rms_values):.6f} fm")    
+        f"\n Fermi t parameter:"
+        f" Range : {min(t_values):.6f} - {max(t_values):.6f} fm"
+        f" Mean  : {np.mean(t_values):.6f} fm"
+        f" Std   : {np.std(t_values):.6f} fm"   
 
-        print(f"\n MSE parameter:")
-        print(f" Range : {min(mse_values):.6f} - {max(mse_values):.6f}")
-        print(f" Mean  : {np.mean(mse_values):.6f}")
-        print(f" Std   : {np.std(mse_values):.6f}")    
+        f"\n RMS radius parameter:"
+        f" Range : {min(rms_values):.6f} - {max(rms_values):.6f} fm"
+        f" Mean  : {np.mean(rms_values):.6f} fm"
+        f" Std   : {np.std(rms_values):.6f} fm"   
 
+        f"\n MSE parameter:"
+        f" Range : {min(mse_values):.6f} - {max(mse_values):.6f}"
+        f" Mean  : {np.mean(mse_values):.6f}"
+        f" Std   : {np.std(mse_values):.6f}"
+        )
+    print(output_summary)
     if output_file:
         save_results(results, transitions, output_file)
-        print(f"\nResults saved to {output_file}")
+        print(f"\nResults saved to {output_file}\n")
+        with open("summary"+output_file,"w") as f:
+            f.write(output_summary)
 
     return results
 
@@ -287,7 +292,8 @@ def main():
     args = parser.parse_args()
 
     experimental_files = find_experimental_files(args.input_directory)
-    print(f"Found {len(experimental_files)}\n")
+    print(f"Found {len(experimental_files)}\n experiment files")
+    success = 0
     for experimental_file in experimental_files:
         EXPERIMENTAL_DATA = parse_experimental_input(experimental_file)
         output_file = f"mudirac_bruteforce_test_{EXPERIMENTAL_DATA['element']}_{EXPERIMENTAL_DATA['isotope']}_{args.sampling}_{args.points}.csv"
@@ -311,7 +317,10 @@ def main():
             output_file=output_file,
             sampling=args.sampling
         )
-        return 0 if results else 1
+        if results:
+            success += 1
+        
+    print(f"{success}/{len(experimental_files)} runs successfull")
 
 if __name__ == "__main__":
     sys.exit(main())
