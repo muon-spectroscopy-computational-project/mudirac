@@ -42,7 +42,7 @@ void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, in
   out << da.fermi2.rms_radius << '\t' << da.fermi2.theta  << '\t';
   out << da.fermi2.mse <<'\t' << opt_time << '\t';
   out << da.fermi2.sigma_c << '\t' << da.fermi2.sigma_t << '\t' << da.fermi2.sigma_rms_radius << '\n';
-  
+  out << scientific;
 
 
   out.close();
