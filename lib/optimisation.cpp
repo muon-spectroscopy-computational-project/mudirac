@@ -38,7 +38,7 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double fin
     da.fermi2.cov_c_t = cov_c1_c2;
 
     if (da.fermi2.rms_radius > 0){
-      double pifactor = M_PI * (4.0 * log(3.0));
+      double pifactor = M_PI / (4.0 * log(3.0));
       double drms_dc = (3.0/5.0) * da.fermi2.c / da.fermi2.rms_radius;
       double drms_dt = (7.0/3.0) * pow(pifactor, 2) * da.fermi2.t / da.fermi2.rms_radius;
       double var_rms_radius = pow(drms_dc, 2) * pow(sigma_c1, 2) + pow(drms_dt, 2) * pow(sigma_c2, 2)
