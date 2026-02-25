@@ -95,6 +95,11 @@ struct Fermi2ParametersData {
   double mse;
   double c;
   double t;
+
+  double sigma_c;
+  double sigma_t;
+  double sigma_rms_radius;
+  double cov_c_t;
 };
 
 
