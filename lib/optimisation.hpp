@@ -28,7 +28,7 @@
  * @param MSE: the mean square error of new xray energies calculated using the optimised parameters
  *  with respect to the experimental energies.
  */
-void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double final_c1, double final_c2, double opt_time, double MSE);
+void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double final_c1, double final_c2, double opt_time, double MSE, double sigma_c1=0.0, double sigma_c2=0.0, double cov_c1_c2=0.0);
 
 
 

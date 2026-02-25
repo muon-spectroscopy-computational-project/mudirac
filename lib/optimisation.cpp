@@ -40,7 +40,7 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double fin
     if (da.fermi2.rms_radius > 0){
       double pifactor = M_PI / (4.0 * log(3.0));
       double drms_dc = (3.0/5.0) * da.fermi2.c / da.fermi2.rms_radius;
-      double drms_dt = (7.0/3.0) * pow(pifactor, 2) * da.fermi2.t / da.fermi2.rms_radius;
+      double drms_dt = (7.0/5.0) * pow(pifactor, 2) * da.fermi2.t / da.fermi2.rms_radius;
       double var_rms_radius = pow(drms_dc, 2) * pow(sigma_c1, 2) + pow(drms_dt, 2) * pow(sigma_c2, 2)
        + 2 * drms_dc * drms_dt * cov_c1_c2;
       da.fermi2.sigma_rms_radius = sqrt(max(var_rms_radius, 0.0)); //max with 0 to avoid numerical issues with negative variance
@@ -67,7 +67,7 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double fin
 
     double var_c = pow(dc_drms, 2) * var_rms + pow(dc_dtheta, 2) * var_theta + 2 * dc_drms * dc_dtheta * cov_rms_theta;
     double var_t = pow(dt_drms, 2) * var_rms + pow(dt_dtheta, 2) * var_theta + 2 * dt_drms * dt_dtheta * cov_rms_theta;
-    double cov_c_t = dc_drms * dt_drms * var_rms + pow(dc_dtheta,2) * var_theta +
+    double cov_c_t = dc_drms * dt_drms * var_rms + dc_dtheta * dt_dtheta * var_theta +
       (dc_drms * dt_dtheta + dt_drms * dc_dtheta) * cov_rms_theta;
 
     da.fermi2.sigma_c = sqrt(max(var_c, 0.0));
