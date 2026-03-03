@@ -211,6 +211,7 @@ void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2Coor
     LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
     fermi2.c = coord_1;
     fermi2.t = coord_2;
+    fermi2.rms_radius = rmsRadius(fermi2.c, fermi2.t);
   }
   LOG(DEBUG) << "creating potential with " << coordinate_system_state << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";

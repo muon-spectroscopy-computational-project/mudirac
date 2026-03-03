@@ -37,10 +37,11 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double fin
     da.fermi2.sigma_t = sigma_c2;
     da.fermi2.cov_c_t = cov_c1_c2;
 
+    double rms_radius = da.fermi2.rms_radius;
     if (da.fermi2.rms_radius > 0){
       double pifactor = M_PI / (4.0 * log(3.0));
-      double drms_dc = (3.0/5.0) * da.fermi2.c / da.fermi2.rms_radius;
-      double drms_dt = (7.0/5.0) * pow(pifactor, 2) * da.fermi2.t / da.fermi2.rms_radius;
+      double drms_dc = (3.0/5.0) * da.fermi2.c /rms_radius;
+      double drms_dt = (7.0/5.0) * pow(pifactor, 2) * da.fermi2.t / rms_radius;
       double var_rms_radius = pow(drms_dc, 2) * pow(sigma_c1, 2) + pow(drms_dt, 2) * pow(sigma_c2, 2)
        + 2 * drms_dc * drms_dt * cov_c1_c2;
       da.fermi2.sigma_rms_radius = sqrt(max(var_rms_radius, 0.0)); //max with 0 to avoid numerical issues with negative variance
@@ -202,7 +203,7 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
     covariance_blocks.push_back(std::make_pair(&c1, &c2));
     
     if (covariance.Compute(covariance_blocks, &problem)) {
-      double cov_c1c1, cov_c2c2, cov_c1c2_val;
+      double cov_c1c1 = 0.0, cov_c2c2 = 0.0, cov_c1c2_val = 0.0;
       covariance.GetCovarianceBlock(&c1, &c1, &cov_c1c1);
       covariance.GetCovarianceBlock(&c2, &c2, &cov_c2c2);
       covariance.GetCovarianceBlock(&c1, &c2, &cov_c1c2_val);
