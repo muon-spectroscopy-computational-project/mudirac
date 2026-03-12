@@ -91,10 +91,17 @@ struct TransitionData {
  */
 struct Fermi2ParametersData {
   double rms_radius;
+  double sigma_rms_r;
   double theta;
+  double sigma_theta;
+  double sigma_rms_r_theta;
   double mse;
+  double sigma_mse;
   double c;
+  double sigma_c;
   double t;
+  double sigma_t;
+  double sigma_c_t;
 };
 
 
@@ -203,6 +210,8 @@ class Atom {
    * @retval None
    */
   void setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
+
+  void setFermi2Data(Fermi2ParametersData new_2pF_data, Fermi2CoordinateSystem coord_sys);
 
   /**
    * @brief gets the 2 parameter fermi model parameters in femtometres of the atoms nuclear model.

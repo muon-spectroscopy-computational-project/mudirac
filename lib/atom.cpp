@@ -211,11 +211,22 @@ void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2Coor
     LOG(DEBUG) << " configuring dirac atom using c, t coordinate system \n";
     fermi2.c = coord_1;
     fermi2.t = coord_2;
+    fermi2.rms_radius = rmsRadius(fermi2.c, fermi2.t);
   }
   LOG(DEBUG) << "creating potential with " << coordinate_system_state << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
   V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
   reset();
+}
+
+void Atom::setFermi2Data(Fermi2ParametersData new_2pF_data, Fermi2CoordinateSystem coord_sys){
+  fermi2 = new_2pF_data;
+  if (coord_sys == POLAR){
+    setFermi2Femto(fermi2.rms_radius, fermi2.theta, POLAR);
+  }
+  else if (coord_sys == CT){
+    setFermi2Femto(fermi2.c, fermi2.t, CT);
+  }
 }
 
 /**

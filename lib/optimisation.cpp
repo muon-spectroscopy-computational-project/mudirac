@@ -16,6 +16,7 @@
 void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   // initialise starting parameters for optimisation based on the coordinate system
   array<double,2> init_params = da.getFermi2Femto(da.coord_system);
+  Fermi2ParametersData final_2pF_params =da.fermi2;
 
   // dlib functions for minimisation only finds minimum, no bayesian uncertainty  analysis.
   LOG(INFO) << "Minimising the MSE over the fermi parameters using the bgfs search strategy \n";
@@ -51,13 +52,21 @@ void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
   std::chrono::milliseconds(60*1000*10));
 
   opt_t1 = chrono::high_resolution_clock::now();
-  auto final_params = result.x;
   double MSE = result.y;
+
+  if (da.coord_system==CT){
+    final_2pF_params.c = result.x(0);
+    final_2pF_params.t = result.x(1);
+  }
+  else if (da.coord_system==POLAR){
+    final_2pF_params.rms_radius = result.x(0);
+    final_2pF_params.theta = result.x(1);
+  }
 
   // update fermi_paramters structure
   da.fermi2.mse = MSE;
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
-  finaliseFermi2(da, da.coord_system, final_params, opt_time, MSE);
+  finaliseFermi2(da, da.coord_system, final_2pF_params, opt_time, MSE);
 }
 
 
@@ -66,6 +75,7 @@ void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
 
   // initialise starting parameters for optimisation based on the coordinate system
   array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
+  Fermi2ParametersData final_2pF_params =da.fermi2;
   // change to dlib column vector type
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
@@ -93,7 +103,16 @@ void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time) {
 
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
-  finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
+
+  if (da.coord_system==CT){
+    final_2pF_params.c = init_params(0);
+    final_2pF_params.t = init_params(1);
+  }
+  else if (da.coord_system==POLAR){
+    final_2pF_params.rms_radius = init_params(0);
+    final_2pF_params.theta = init_params(1);
+  }
+  finaliseFermi2(da, da.coord_system, final_2pF_params, opt_time, MSE);
 }
 
 
@@ -102,6 +121,7 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
 
   // initialise starting parameters for optimisation based on the coordinate system
   array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
+  Fermi2ParametersData final_2pF_params = da.fermi2; 
   column_vector init_params = {fermi_coords.at(0), fermi_coords.at(1)};
 
   // start time of minimisation
@@ -114,13 +134,24 @@ void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, 
                0.1);
   opt_t1 = chrono::high_resolution_clock::now();
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
-  finaliseFermi2(da, da.coord_system, init_params, opt_time, MSE);
+  
+  if (da.coord_system==CT){
+    final_2pF_params.c = init_params(0);
+    final_2pF_params.t = init_params(1);
+  }
+  else if (da.coord_system==POLAR){
+    final_2pF_params.rms_radius = init_params(0);
+    final_2pF_params.theta = init_params(1);
+  }
+
+
+  finaliseFermi2(da, da.coord_system, final_2pF_params, opt_time, MSE);
 }
 
-void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vector final_fermi_params, double opt_time, double MSE) {
+void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, Fermi2ParametersData final_fermi_params, double opt_time, double MSE) {
 
   // ensure final fermi parameters are set
-  da.setFermi2Femto(final_fermi_params(0), final_fermi_params(1), coord_sys);
+  da.setFermi2Data(final_fermi_params, coord_sys);
   //set all the optimisation parameter values
   da.fermi2.mse = MSE;
   // output final optimisation values to LOG
@@ -230,12 +261,16 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   optFermi2(da, min_2pF_algo, opt_time);
 
   // output file containing best fermi parameters and the associated MSE
-  writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+  writeFermiParameters(da, opt_time,  seed + "_fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
 void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo){
 
-  LOG(INFO) << "optimizing fermi parameters using the ceres software" ;
+  LOG(INFO) << "optimizing fermi parameters using the ceres software";
+
+  // data structure for final parameters
+  Fermi2ParametersData final_2pF_params;
+
   // Get initial guess
   array<double, 2> fermi_coords = da.getFermi2Femto(da.coord_system);
   double  c1 = fermi_coords[0], c2 = fermi_coords[1];
@@ -301,15 +336,17 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   covariance_blocks.emplace_back(&c1, &c1);
   covariance_blocks.emplace_back(&c2, &c2);
   covariance_blocks.emplace_back(&c1, &c2);
-
+  double sigma_c1;
+  double sigma_c2;
+  double cov_c1_c2;
   if (covariance.Compute(covariance_blocks, &problem)) {
     double covariance_c1_c1[1], covariance_c2_c2[1], covariance_c1_c2[1] ;
     covariance.GetCovarianceBlock(&c1, &c1, covariance_c1_c1);
-    double sigma_c1 = std::sqrt(covariance_c1_c1[0]);
+    sigma_c1 = std::sqrt(covariance_c1_c1[0]);
     covariance.GetCovarianceBlock(&c2, &c2, covariance_c2_c2);
-    double sigma_c2 = std::sqrt(covariance_c2_c2[0]);
+    sigma_c2 = std::sqrt(covariance_c2_c2[0]);
     covariance.GetCovarianceBlock(&c1, &c2, covariance_c1_c2);
-    double cov_c1_c2 = covariance_c1_c2[0];
+    cov_c1_c2 = covariance_c1_c2[0];
 
     LOG(INFO) << "Uncertainty in c1: " << sigma_c1 << std::endl;
     LOG(INFO) << "Uncertainty in c2: " << sigma_c2 << std::endl;
@@ -318,9 +355,24 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
     LOG(WARNING) << "Covariance computation failed." << std::endl;
   }
 
+  if (da.coord_system==CT){
+    final_2pF_params.c = c1;
+    final_2pF_params.sigma_c = sigma_c1;
+    final_2pF_params.t = c2;
+    final_2pF_params.sigma_t = sigma_c2;
+    final_2pF_params.sigma_c_t = cov_c1_c2;
+  }
+  else if (da.coord_system==POLAR){
+    final_2pF_params.rms_radius = c1;
+    final_2pF_params.sigma_rms_r = sigma_c1;
+    final_2pF_params.theta = c2;
+    final_2pF_params.sigma_theta = sigma_c2;
+    final_2pF_params.sigma_rms_r_theta = cov_c1_c2;
+  }
+  
   opt_t1 = chrono::high_resolution_clock::now();
   std::cout << summary.FullReport() << "\n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
-  finaliseFermi2(da, da.coord_system, {c1, c2}, opt_time, summary.final_cost*2.0/double(num_residuals));
+  finaliseFermi2(da, da.coord_system, final_2pF_params , opt_time, summary.final_cost*2.0/double(num_residuals));
 
 }
