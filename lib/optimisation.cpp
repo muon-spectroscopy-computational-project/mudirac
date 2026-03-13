@@ -78,7 +78,7 @@ void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double fin
   // output final optimisation values to LOG
   array<double, 2> final_ct_params = da.getFermi2Femto(CT);
   array<double, 2> final_polar_params = da.getFermi2Femto(POLAR);
-  LOG(INFO) << "minimised with MSE: "<< MSE << "\n";
+  LOG(INFO) << "minimised with reduced_chi2: "<< MSE << "\n";
   LOG(INFO) << "(c , t) fermi parameters: "<< final_ct_params[0] << "+/-" << da.fermi2.sigma_c << ", " << final_ct_params[1] << "+/-" << da.fermi2.sigma_t <<" \n";
   LOG(INFO) << "cov(c, t) = " << da.fermi2.cov_c_t << "\n";
   LOG(INFO) << "(rms_radius, theta) fermi parameters: "<< final_polar_params[0] << "+/-" << da.fermi2.sigma_rms_radius << ", " << final_polar_params[1] <<" \n";
