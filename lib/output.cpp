@@ -33,7 +33,7 @@ void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, in
   // output file containing all valid fermi parameters and the associated MSE
   ofstream out(fname);
   out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
-  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\ttime\tsigma_c\tsigma_t\tsigma_rms_radius\n";
+  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_sq_error\ttime\tsigma_c\tsigma_t\tsigma_rms_radius\tcov_c_t\n";
   out << fixed;
   out << setprecision(output_precision);
 
@@ -42,7 +42,7 @@ void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, in
   out << da.fermi2.rms_radius << '\t' << da.fermi2.theta  << '\t';
   out << scientific;
   out << da.fermi2.mse <<'\t' << opt_time << '\t';
-  out << da.fermi2.sigma_c << '\t' << da.fermi2.sigma_t << '\t' << da.fermi2.sigma_rms_radius << '\n';
+  out << da.fermi2.sigma_c << '\t' << da.fermi2.sigma_t << '\t' << da.fermi2.sigma_rms_radius << '\t' << da.fermi2.cov_c_t << '\n';
 
   out.close();
 }
