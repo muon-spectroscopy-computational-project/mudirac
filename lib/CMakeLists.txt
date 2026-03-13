@@ -53,12 +53,11 @@ if (NOT Ceres_FOUND)
     FetchContent_MakeAvailable(Ceres)
 
     message(STATUS "Ceres library fetched and intalled")
-else(
+else()
     message(STATUS "Found system installed ceres solver")
-)
 endif()
 
-    target_link_libraries(optimisation Ceres::ceres experiment)
+target_link_libraries(optimisation Ceres::ceres experiment)
 
 
 # Define interface library
