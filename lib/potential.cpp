@@ -415,8 +415,8 @@ EConfPotential::EConfPotential(ElectronicConfiguration econf, double rc,
   i0 = 0;
   i1 = 0;
 
-  max_r0 = max_r0 < 0 ? 2 * rc : max_r0;
-  min_r1 = min_r1 < 0 ? rc / 2 : min_r1;
+  max_r0 = max_r0 < 0 ? rc / 2 : max_r0;
+  min_r1 = min_r1 < 0 ? 2 * rc : min_r1;
 
   while (abs(rho.front()) > rho_eps || r > max_r0) {
     i0--;
