@@ -177,7 +177,7 @@ void Atom::setFermi2(double thickness, double fermi_c) {
     return;
   }
 
-  if (fermi_c  == -1) {
+  if (fermi_c < 0) {
 
     if (A >= 5.0) {
       fermi_c = sqrt(R * R -
