@@ -11,8 +11,6 @@
  */
 #include "ceres/ceres.h"
 #undef LOG
-#include <dlib/optimization.h>
-#include <dlib/global_optimization.h>
 #include "atom.hpp"
 #include "config.hpp"
 #include "experiment.hpp"
@@ -20,147 +18,20 @@
 
 
 
-typedef dlib::matrix<double,2,1> column_vector;
-
 /**
  * @brief a function which outputs optimisation results to LOG and sets finalised optimisation data values in a dirac atom.
  * @note This function outputs the fermi parameters in the selected coordinate system to log along with the optimisation time
  * and the MSE. The fermi parameters in the other coordinate system are them also stored in the fermi2 datastructure of the Dirac atom.
  * @param da: Dirac atom after optimisation
  * @param coord_sys: the selected coordinate system of the optimisation
- * @param final_fermi_params: the optimised fermi parameters
+ * @param final_c1: the optimised first fermi parameters
+ * @param final_c2: the optimised second fermi parameters
  * @param opt_time: the time taken to perform just the optimisation algorithm
  * @param MSE: the mean square error of new xray energies calculated using the optimised parameters
  *  with respect to the experimental energies.
  */
-void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, column_vector final_fermi_params, double opt_time, double MSE);
+void finaliseFermi2(DiracAtom & da, Fermi2CoordinateSystem coord_sys, double final_c1, double final_c2, double opt_time, double MSE);
 
-/**
- *
- *
- * @brief  A function which finds the optimal 2pF parameters for given experimentally measured muonic xray transitions.
- * @note   This function uses a dlib bgfs optimization method to minimise the Mean Square Error between simulated energies
- * calculated using 2pF paarameters and experimentally measured energies. The starting rms radius for each atom is taken from the
- * default values for the Dirac atom. The starting theta value is set at 0.3 radians.
- *
- *
- * @param da:     Dirac atom with 2pF model updated in every iteration
- * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- * @param opt_time: time taken to complete the optimisation
- * @retval: None
- *
- */
-void bfgsOptimizeFermiParameters(DiracAtom & da, double & opt_time);
-
-
-/**
- *
- *
- * @brief  A function which finds the derivative with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions.
- * @note   This function uses the dlib derivative method to numerically calculate the derivate of the calculateMSE function. The derivative value is returned as a dlib column vector and can be used in minimisation routines.
- *
- * @param m: fermi parameters in ct or polar coordinates
-* @param da: Dirac atom used to calculate all the energies.
-*
- *
- * @retval derivative: dlib::column_vector (length 2)
- *
- */
-column_vector MSE_2pF_derivative(const column_vector &m, DiracAtom & da);
-
-
-/**
- *
- *
- * @brief  A function which finds the hessian with respect to the fermi parameters of the mean square error of MuDirac energies compared to experimental energies for selecte transitions.
- * @note   This function uses a central differences finite difference method on the MSE_2pF_derivative to find the hessian with respect to the fermi parameters.
- * The Hessian is left un symmetrised as this yielded better optimisation results.
- *
- * @param m: fermi parameters in ct or polar coordinates
- * @param da: Dirac atom used to calculate all the energies.
- * @retval hessian matrix: dlib::matrix (2x2)
- *
- */
-dlib::matrix<double> MSE_2pF_hessian(const column_vector & m, DiracAtom & da);
-
-/**
- *
- * @brief functor class which allows the means square error of the energies simulated by mudirac compared with experimental energies to be optimised with respect to the fermi parameters.
- * @note This class uses a numerically defined derivative and hessian. This functor exists to be used in dlib::find_min_trust_function.
- */
-class opt_2pF_model {
-  /*!
-    This object is a "function model" which can be used with the
-    find_min_trust_region() routine.
-  !*/
-
- public:
-  // common parameters for the objective, derivative and hessian functions
-  typedef ::column_vector column_vector;
-  typedef dlib::matrix<double> general_matrix;
-  mutable DiracAtom da;
-  mutable int opt_iterations = 0;
-
-  // constructor
-  opt_2pF_model(DiracAtom d_a) {
-    da = d_a;
-  }
-  double operator() (
-    const column_vector& x
-  ) const {
-    // DiracAtom da_1 = da;
-    opt_iterations++;
-    return da.calculateMSE(x(0), x(1));
-  }
-
-  // function for the dlib minisation routine to get the derivative and hessian
-  void get_derivative_and_hessian (
-    const column_vector& x,
-    column_vector& der,
-    general_matrix & hess
-  ) const {
-    da;
-    der = MSE_2pF_derivative(x, da);
-    hess = MSE_2pF_hessian(x, da);
-    opt_iterations +=20;  // 4 iterations per derivative, 4 derivatives per hessian = 4+16
-  }
-};
-
-/**
- *
- *
- * @brief  A function which finds the optimal 2pF parameters for given experimentally measured muonic xray transitions.
- * @note   This function uses a dlib trust region optimization method to minimise the Mean Square Error between simulated energies
- * calculated using 2pF paarameters and experimentally measured energies. In polar coordinates, the starting rms radius for each atom is taken from the
- * default values for the Dirac atom. The starting theta value is set at 0.3 radians.
- *@param opt_obj: object defined for dlib optmisation routines which has the experimental values as attributes already defined.
- The operator function of this functor is the objective function for minimisation and the functor also has functions for the derivative and hessian.
- * @param da:     Dirac atom with 2pF model updated in every iteration
- * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- * @param opt_time: time taken to complete the optimisation
- * @retval: None
- *
- */
-void trustOptimizeFermiParameters(const opt_2pF_model &opt_obj, DiracAtom & da, double & opt_time);
-
-
-/**
- *
- *
- * @brief  A function which finds the optimal 2pF parameters for given experimentally measured muonic xray transitions.
- * @note   This function uses a dlib global optimization method to minimise the Mean Square Error between simulated energies
- * calculated using 2pF paarameters and experimentally measured energies. The domain is bounded close the rms radius values near those
- * given by default. The optimization is limited to 10 minutes.
- *
- *
- * @param da:     Dirac atom with 2pF model updated in every iteration
- * @param transqnums:     transition quantum numbers required to index the transition energies
- * @param fermi_parameters: structure to contain the optimal conventional and polar fermi parameters as well as the minimised MSE.
- * @param opt_time: time taken to complete the optimisation
- * @retval: None
- *
- */
-void globalOptimizeFermiParameters(DiracAtom & da, double & opt_time);
 
 
 /**
@@ -227,4 +98,12 @@ struct CostFunctor {
   }
 };
 
+/**
+ * @brief uses the ceres optimisation library to perform the optimisation of the 2pF parameters
+ * @note This funciton uses the ceres solver to minimize the Mean Square Error (MSE) between simulated energies
+ * calculated using 2pf parameters and experimental xray transition energies
+ * @param da: dirac atom with 2pf model to be optimised
+ * @param opt_time: time taken to complete the optimisation.
+ * @param algo: the selected minimisation algorithm
+ */
 void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time,const  string & algo);
