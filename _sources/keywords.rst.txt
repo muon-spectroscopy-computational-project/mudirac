@@ -34,6 +34,7 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 * :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+* :literal:`optimise_fermi_parameters`: if true, it optimises the *c* and *t* from the 2pF model. If false, no optimisation is performed and the *c* and *t* from the 2pF model can be manually modified. 
 
 .. _floating_point_keywords:
 
@@ -59,7 +60,10 @@ These keywords accept a non-integer number. It can be written normally (e.g. 105
 * :literal:`spec_step`: energy step for the simulated spectrum, in eV. Only has effect if :literal:`write\_spec = TRUE`. Default is 1E2 eV.
 * :literal:`spec_linewidth`: Gaussian broadening width for the simulated spectrum, in eV. Only has effect if :literal:`write\_spec = TRUE`. Default is 1E3 eV.
 * :literal:`spec_expdec`: exponential decay parameter :math:`E_{\text{dec}}` for a sensitivity function for the simulated spectrum, in eV. Multiplies the entire spectrum by a function :math:`\exp(-E/E_{\text{dec}})`. Only has effect if :literal:`write\_spec = TRUE`. Default is -1 (no decay).
-
+* :literal:`fermi_t`: thickness *t* of the 'skin' of the uniformly charged spherical nucleus in the 2pF model. Dependign on the value of * :literal:`optimise_fermi_parameters`,  *t* could be an initial value to optimise or a chosen *t* value. 
+* :literal:`fermi_c`: radius of the uniformly charged spherical nucleus in the 2pF model. Dependign on the value of * :literal:`optimise_fermi_parameters`, *c* could be an initial value to optimise or a chosen *c* value. 
+* :literal:`rms_radius_decimals`: controls the print precision of the optimised *c*, *t* and *rms* values.
+        
 Integer keywords
 ~~~~~~~~~~~~~~~~~
 Keywords that take an integer number as value.

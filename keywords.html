@@ -8,15 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Input keywords &mdash; MuDirac documentation November 16, 2020 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=663b5c8f"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -108,6 +108,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">reduced_mass</span></code>: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">write_spec</span></code>:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other <a class="reference internal" href="#floating-point-keywords"><span class="std std-ref">Floating point keywords</span></a> starting with <code class="docutils literal notranslate"><span class="pre">spec_</span></code> can then be specified. Default is FALSE.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sort_byE</span></code>: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimise_fermi_parameters</span></code>: if true, it optimises the <em>c</em> and <em>t</em> from the 2pF model. If false, no optimisation is performed and the <em>c</em> and <em>t</em> from the 2pF model can be manually modified.</p></li>
 </ul>
 </section>
 <section id="floating-point-keywords">
@@ -132,6 +133,9 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">spec_step</span></code>: energy step for the simulated spectrum, in eV. Only has effect if <code class="docutils literal notranslate"><span class="pre">write_spec</span> <span class="pre">=</span> <span class="pre">TRUE</span></code>. Default is 1E2 eV.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">spec_linewidth</span></code>: Gaussian broadening width for the simulated spectrum, in eV. Only has effect if <code class="docutils literal notranslate"><span class="pre">write_spec</span> <span class="pre">=</span> <span class="pre">TRUE</span></code>. Default is 1E3 eV.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">spec_expdec</span></code>: exponential decay parameter <span class="math notranslate nohighlight">\(E_{\text{dec}}\)</span> for a sensitivity function for the simulated spectrum, in eV. Multiplies the entire spectrum by a function <span class="math notranslate nohighlight">\(\exp(-E/E_{\text{dec}})\)</span>. Only has effect if <code class="docutils literal notranslate"><span class="pre">write_spec</span> <span class="pre">=</span> <span class="pre">TRUE</span></code>. Default is -1 (no decay).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fermi_t</span></code>: thickness <em>t</em> of the ‘skin’ of the uniformly charged spherical nucleus in the 2pF model. Dependign on the value of * <code class="docutils literal notranslate"><span class="pre">optimise_fermi_parameters</span></code>,  <em>t</em> could be an initial value to optimise or a chosen <em>t</em> value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fermi_c</span></code>: radius of the uniformly charged spherical nucleus in the 2pF model. Dependign on the value of * <code class="docutils literal notranslate"><span class="pre">optimise_fermi_parameters</span></code>, <em>c</em> could be an initial value to optimise or a chosen <em>c</em> value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rms_radius_decimals</span></code>: controls the print precision of the optimised <em>c</em>, <em>t</em> and <em>rms</em> values.</p></li>
 </ul>
 </section>
 <section id="integer-keywords">
@@ -170,7 +174,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Simone Sturniolo.</p>
+    <p>&#169; Copyright 2024, Simone Sturniolo, Leandro Liborio.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

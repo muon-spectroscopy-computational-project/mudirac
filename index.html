@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to MuDirac’s documentation &mdash; MuDirac documentation November 16, 2020 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=663b5c8f"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -79,12 +79,13 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation of MuDirac</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#install-mudriac-using-conda">Install MuDriac using conda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#install-mudirac-using-conda">Install MuDirac using conda</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#usage">Usage</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="theory.html#prediction-of-frequencies-and-probabilities-of-transition-between-energy-levels-of-muonic-atoms">Prediction of frequencies and probabilities of transition between energy levels of muonic atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#modelling-ground-state-nuclear-properties-using-muonic-x-ray-measurements">Modelling ground state nuclear properties using muonic x-ray measurements</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">Input keywords</a><ul>
@@ -94,20 +95,34 @@
 <li class="toctree-l2"><a class="reference internal" href="keywords.html#integer-keywords">Integer keywords</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">Example of MuDirac Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example of MuDirac Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="example.html#modelling-of-frequencies-and-probabilities-of-transition-between-energy-levels-of-muonic-atoms">Modelling of frequencies and probabilities of transition between energy levels of muonic atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#modelling-ground-state-nuclear-properties-using-muonic-x-ray-measurements">Modelling ground state nuclear properties using muonic x-ray measurements</a></li>
+</ul>
+</li>
 </ul>
 </div>
-<p>MuDirac is a simulation software that integrates the Dirac equation for muonic atoms to compute their X-Ray transition energies; it is written in C++ and can be found on <a class="reference external" href="https://github.com/muon-spectroscopy-computational-project/mudirac">GitHub</a>. The use and functioning of MuDirac 1.0 is extensively documented in the paper <a class="reference external" href="https://onlinelibrary.wiley.com/doi/full/10.1002/xrs.3212">S. Sturniolo, A. Hillier, “Mudirac: A Dirac equation solver for elemental analysis with muonic X-rays”, X-Ray Spectrom. 2020;1–17</a>, which should be cited by any work using it. Here we will give a quick tutorial on how to start using it for simple cases.</p>
+<p>MuDirac is a simulation software that integrates the Dirac equation for muonic atoms to compute their X-Ray transition energies;
+it is written in C++ and can be found on <a class="reference external" href="https://github.com/muon-spectroscopy-computational-project/mudirac">GitHub</a>.
+The use and functioning of MuDirac is extensively documented in the  publications mentioned below,
+which should be cited by any work using it. In this documentation we will provide information on MuDirac’s parameters, plus tutorials on
+how to start using it for simple cases.</p>
 <section id="mudirac-on-galaxy">
 <h2>Mudirac on Galaxy<a class="headerlink" href="#mudirac-on-galaxy" title="Link to this heading"></a></h2>
 <p>Mudirac can be run without any installaiton in Galaxy.
-Mudirac is available as a Galaxy tool on <a class="reference external" href="https://materialsgalaxy.stfc.ac.uk/">MaterialsGalaxy</a> in the <strong>Other Muon Tools</strong>  section of the tool panel.</p>
+Mudirac is available as a Galaxy tool on <a class="reference external" href="https://materialsgalaxy.stfc.ac.uk/">MaterialsGalaxy</a>
+in the <strong>Other Muon Tools</strong>  section of the tool panel.</p>
 </section>
 <section id="citing-mudirac">
 <h2>Citing MuDirac<a class="headerlink" href="#citing-mudirac" title="Link to this heading"></a></h2>
-<p>For the theoretical background on the software and examples of its applications, see the published paper:</p>
-<p>Sturniolo, S, Hillier, A. Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays. X‐Ray Spectrom. 2020; 1– 17. <a class="reference external" href="https://doi.org/10.1002/xrs.3212">https://doi.org/10.1002/xrs.3212</a></p>
-<p>Cite the above paper if you make use of the software in your work too.</p>
+<p>For the theoretical background on the software and examples of its applications, see:</p>
+<ul class="simple">
+<li><p>Sturniolo, S, Hillier, A. Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays. X‐Ray Spectrom. 2020; 1– 17.
+<a class="reference external" href="https://doi.org/10.1002/xrs.3212">https://doi.org/10.1002/xrs.3212</a></p></li>
+<li><p>L. Liborio <em>et. al.</em>, MuDirac 1.3.0: A Sustainable Software Tool for Calculating Ground State Nuclear Properties Using Muonic X-Ray
+Measurements. <a class="reference external" href="https://arxiv.org/abs/2605.00554">https://arxiv.org/abs/2605.00554</a></p></li>
+</ul>
+<p><strong>Please cite the above publications if you make use of the software in your work.</strong></p>
 </section>
 <section id="contact">
 <h2>Contact<a class="headerlink" href="#contact" title="Link to this heading"></a></h2>
@@ -129,7 +144,7 @@ Mudirac is available as a Galaxy tool on <a class="reference external" href="htt
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Simone Sturniolo.</p>
+    <p>&#169; Copyright 2024, Simone Sturniolo, Leandro Liborio.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

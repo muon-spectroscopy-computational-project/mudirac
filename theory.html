@@ -8,14 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Theory &mdash; MuDirac documentation November 16, 2020 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=663b5c8f"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#x-ray-spectroscopy-with-negative-muons">X-Ray Spectroscopy with negative muons</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#modelling-ground-state-nuclear-properties-using-muonic-x-ray-measurements">Modelling ground state nuclear properties using muonic x-ray measurements</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">Input keywords</a></li>
@@ -86,18 +88,86 @@
 <h2>Prediction of frequencies and probabilities of transition between energy levels of muonic atoms<a class="headerlink" href="#prediction-of-frequencies-and-probabilities-of-transition-between-energy-levels-of-muonic-atoms" title="Link to this heading"></a></h2>
 <section id="x-ray-spectroscopy-with-negative-muons">
 <h3>X-Ray Spectroscopy with negative muons<a class="headerlink" href="#x-ray-spectroscopy-with-negative-muons" title="Link to this heading"></a></h3>
-<p>While positive muons can be used as magnetic probes acting as if they were light protons, negative muons have wholly different uses due to behaving in matter more as if they were heavy electrons. Negative muons possess the same charge and spin as electrons, and so will form bound states with nuclei that are known as muonic atoms. These atoms possess peculiar properties due to the heavier mass of the muon:</p>
+<p>While positive muons can be used as magnetic probes acting as if they were light protons, negative muons have wholly different uses due to
+behaving in matter more as if they were heavy electrons. Negative muons possess the same charge and spin as electrons, and so will form
+bound states with nuclei that are known as muonic atoms. These atoms possess peculiar properties due to the heavier mass of the muon:</p>
 <ol class="arabic simple">
-<li><p>the muon orbitals around the nucleus are much smaller and denser than the electronic ones, meaning that the muon tends to be rather insensitive to the presence of electrons - as it is closer to the nucleus than any of them (See Figure 1);</p></li>
-<li><p>for the same reason, the muon orbitals can overlap significantly with the atomic nucleus, and their energy is affected by the shape of its charge distribution;</p></li>
-<li><p>the muon orbitals have much higher binding energies, which means they can also be treated only with a relativistic theory. In classical terms, you could say the muons are ‘orbiting’ the nucleus at speeds close to that of light.</p></li>
+<li><p>the muon orbitals around the nucleus are much smaller and denser than the electronic ones, meaning that the muon tends to be rather
+insensitive to the presence of electrons - as it is closer to the nucleus than any of them (See Figure 1);</p></li>
+<li><p>for the same reason, the muon orbitals can overlap significantly with the atomic nucleus, and their energy is affected by the shape
+of its charge distribution;</p></li>
+<li><p>the muon orbitals have much higher binding energies, which means they can also be treated only with a relativistic theory. In
+classical terms, you could say the muons are ‘orbiting’ the nucleus at speeds close to that of light.</p></li>
 </ol>
 <figure class="align-default">
 <img alt="Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal." src="_images/Figure-MuDirac.jpg" />
 </figure>
-<p>Figure 1: Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal. Side feeding and electron refilling, via radiative decay or electronic Auger decay, fill the electron holes. It is assumed that the number of 4s electrons is a constant during the cascade because of rapid N-shell side feeding. Figure taken from T. Okumura et. al. PHYSICAL REVIEW LETTERS 127, 053001 (2021).</p>
-<p>The consequence of these facts is that when cascading on a nucleus to form a muonic atom, muons will shed their energy in the form of highly energetic X-Ray photons, and the specific energies of these photons will be tied to the transitions between levels that are unique for each element. For this reason, <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S0026265X1500301X?via%3Dihub">muons can be an excellent probe for non-destructive elemental analysis</a>. The exact characteristic energies for each element can be tabulated by experimental calibration, but they can also be modelled from first principles, by solving the quantum equations to find the orbitals and their energies. However, this is not as simple as applying the usual Schrödinger equation, because the muons orbit the nucleus at relativistic energies and the Dirac equation is necessary; plus, at these energies, the electrostatic potential itself stops being perfectly Coulombic. For these reasons, we have provided a software that easily allows one to perform these calculations by including all necessary details to achieve precision sufficient for the interpretation of experiments.</p>
+<p>Figure 1: Schematic drawing of the muon cascade process and the electron configuration evolution in a muonic iron atom within Fe metal.
+Side feeding and electron refilling, via radiative decay or electronic Auger decay, fill the electron holes. It is assumed that the number
+of 4s electrons is a constant during the cascade because of rapid N-shell side feeding. Figure taken from T. Okumura et. al.
+PHYSICAL REVIEW LETTERS 127, 053001 (2021).</p>
+<p>The consequence of these facts is that when cascading on a nucleus to form a muonic atom, muons will shed their energy in the form of
+highly energetic X-Ray photons, and the specific energies of these photons will be tied to the transitions between levels that are
+unique for each element. For this reason,
+<a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S0026265X1500301X?via%3Dihub">muons can be an excellent probe for non-destructive elemental analysis</a>.
+The exact characteristic energies for each element can be tabulated by experimental calibration, but they can also be modelled from first
+principles, by solving the quantum equations to find the orbitals and their energies. However, this is not as simple as applying the usual
+Schrödinger equation, because the muons orbit the nucleus at relativistic energies and the Dirac equation is necessary; plus, at these
+energies, the electrostatic potential itself stops being perfectly Coulombic. For these reasons, we have provided a software that easily
+allows one to perform these calculations by including all necessary details to achieve precision sufficient for the interpretation of
+experiments.</p>
 </section>
+</section>
+<section id="modelling-ground-state-nuclear-properties-using-muonic-x-ray-measurements">
+<h2>Modelling ground state nuclear properties using muonic x-ray measurements<a class="headerlink" href="#modelling-ground-state-nuclear-properties-using-muonic-x-ray-measurements" title="Link to this heading"></a></h2>
+<p>The nuclear charge radius is a fundamental property of the atomic nucleus, and
+its value depends on features of the nuclear structure, such as a nuclear deformation
+and nuclear charge distribution. What is considered the nuclear charge radius is the
+root mean square (rms) radius, which is defined using the nuclear charge distribution
+<span class="math notranslate nohighlight">\(\rho\)</span> as:</p>
+<div class="math notranslate nohighlight">
+\[R_{\textrm{rms}}=\sqrt{{\overline{r^{2}}}}= \left[ \frac{ \int r^{2}\rho(r)dr }{\int \rho(r)dr} \right]^\frac{1}{2}\]</div>
+<p>The nuclear charge radius has been systematically measured for almost all stable nuclei, and
+the process involves measuring the x-ray transition energies of corresponding muonic atom.
+The binding energy of the muonic atom is sensitive to the charge distribution of the
+nucleus and, in principle, the nuclear charge radius can be determined by using the
+muonic x-ray measurements. There is a complex relationship between the muonic
+x-ray transition energies and the nuclear charge distribution <span class="math notranslate nohighlight">\(\rho\)</span>. A possible way of
+treating this problem is assuming a functional form for <span class="math notranslate nohighlight">\(\rho\)</span>, such as the 2-parameter
+Fermi distribution (2pF):</p>
+<div class="math notranslate nohighlight">
+\[\rho(r)=\rho_{0} \left[ 1 + \exp\left({4\ln(3)\frac{(r-c)}{t}} \right)  \right]^{-1}\]</div>
+<p>The equation above describes a spherically symmetric nuclear charge distribution that
+comprises a uniformly charged spherical nucleus with a ‘skin’ of thickness <em>t</em>, which is
+defined as the distance at which the charge density reduces from 90% to 10% of the
+density at the centre of the uniformly charged nucleus. The other parameter of the
+2pF model is <em>c</em>, which describes the half-density radius: the distance from the centre
+of the spherical nucleus where the charge density is half of that of the uniform charge
+at the centre. Figure (2) below compares the nuclear charge distributions in the uniform
+and 2pF models for an example atom 197Au. Using the 2pF model allows for a soft
+edge to the nuclear charge density.</p>
+<figure class="align-default">
+<img alt="Figure 2: Charge density in the spherically symmetric Uniform model and 2pF model for 197Au." src="_images/Mudirac_nuclear_models_radial_Au_197.png" />
+</figure>
+<p>Figure 2: Charge density in the spherically symmetric Uniform model and 2pF model for 197Au.
+The uniformly charged nucleus as has a radius described by Ru = 1.2xA:math:<cite>^{frac{1}{3}}</cite>,
+where A is the nucleon number for 197Au. The 2pF model here uses t=2.3 fm and
+<em>c</em> is annotated to show that it represents the half density radius in the 2pF model.
+This happens to coincide with Ru in the Uniform model but this is generally not the
+case. The 2pF model does not have a hard edge like the uniform model. Instead, the
+edge is diffuse and <span class="math notranslate nohighlight">\(\rho\)</span> falls from <span class="math notranslate nohighlight">\(\frac{9}{10}\)</span> <span class="math notranslate nohighlight">\(\rho_{0}\)</span> to
+<span class="math notranslate nohighlight">\(\frac{1}{10}\)</span> <span class="math notranslate nohighlight">\(\rho_{0}\)</span> across distance <em>t</em> around <em>r</em> = c as shown
+by the annotations in Figure (2).</p>
+<p>MuDirac can automatically define the parameters of the 2pF model. If no values are
+explicitly defined, MuDirac uses t=2.3 fm, while
+<em>c</em> is obtained from nuclear data tables. Hence, the <em>c</em> and <em>t</em> parameters of the 2pF
+model can be defined <em>a priori</em>. This is because the initial focus of MuDirac was the
+calculation of muonic x-ray transition energies for elemental analysis. However,
+there has been a growing need in the negative muon community, working on nuclear
+physics, for software tools that can be used to estimate the 2pF model’s <em>c</em> and <em>t</em>
+parameters from experimental muonic x-ray measurements. Hence, MuDirac has been adapted
+so that it can reverse-engineer the Dirac equation to efficiently obtain the 2pF model
+parameters <em>c</em> and <em>t</em> using, at least, two experimentally measured muonic x-ray transition energies.</p>
 </section>
 </section>
 
@@ -112,7 +182,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Simone Sturniolo.</p>
+    <p>&#169; Copyright 2024, Simone Sturniolo, Leandro Liborio.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
