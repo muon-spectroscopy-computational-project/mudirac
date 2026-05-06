@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'MuDirac documentation'
-copyright = '2024, Simone Sturniolo'
-author = 'Simone Sturniolo'
+copyright = '2024, Simone Sturniolo, Leandro Liborio'
+authors = 'Simone Sturniolo, Leandro Liborio'
 release = 'November 16, 2020'
 
 # -- General configuration ---------------------------------------------------
@@ -18,6 +18,7 @@ extensions = [
     #'sphinx.ext.autodoc',
     #'breathe',
     'sphinx_rtd_theme',
+    'sphinx.ext.mathjax'
     # Other extensions...
 ]
 

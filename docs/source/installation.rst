@@ -20,20 +20,24 @@ In order to run the test suite, within the same directory run:
 
 and wait for a few seconds for the tests to complete. If you want :literal:`mudirac` to be accessible from any folder in your computer, add the resulting :literal:`bin` directory to your system :literal:`PATH` environment variable.
 
-Install MuDriac using conda
+Install MuDirac using conda
 ---------------------------
 MuDirac is available as `conda <https://docs.conda.io/projects/conda/en/stable/>`_ package.
 To install mudirac using conda run the following
+
 .. code-block:: bash
 
    conda install conda-forge::mudirac
 
 Usage
 --------
-MuDirac works simply by running it with an input file:
+To simulate the x-ray transition energies of a muonic atom, MuDirac works simply by running it with an input file:
 
 .. code-block:: bash
 
    mudirac input.in
 
-where :literal:`.in` file can have any name one prefers. The input file is a text file containing rows of the form :literal:`keyword: value`. A full list of keywords employable in the :literal:`.in` file and their meaning can be found in :ref:`section_mudirac_input_keywords`.
+where :literal:`.in` file can have any name one prefers. The input file is a text file with rows of the form
+:literal:`keyword: value`, which contains all the necessary information about the parameters of the Dirac equation, 
+and the muonic atom and transitions being simulated. A full list of keywords employable in the :literal:`.in` file and
+their meaning can be found in :ref:`section_mudirac_input_keywords`.
