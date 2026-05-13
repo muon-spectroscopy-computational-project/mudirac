@@ -86,11 +86,6 @@ struct CostFunctor {
       if (transitions_iteration[k].name == ma.xr_lines_measured[k]) {
         // convert to eV
         double transition_energy = dE / Physical::eV;
-
-        // calculate the square error of each transition
-        //double square_deviation = (transition_energy-xr_energies[k])*(transition_energy-xr_energies[k]);
-        //double valid_uncertainty = (xr_errors[k])*(xr_errors[k]);
-        //square_error = square_deviation/valid_uncertainty;
         residual[k] = (transition_energy - ma.xr_energies[k])/ma.xr_errors[k];
       }
     }
