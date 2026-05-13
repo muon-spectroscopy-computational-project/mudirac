@@ -126,7 +126,7 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   // DENSE_QR is optimal for small problems; 2pF has only 2 parameters (c, t).
   options.linear_solver_type = ceres::DENSE_QR;
 
-  options.minimizer_progress_to_stdout = true;
+  options.minimizer_progress_to_stdout = false;
 
   options.line_search_interpolation_type = ceres::QUADRATIC;
   options.max_num_line_search_step_size_iterations = 10;
@@ -139,7 +139,7 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   ceres::Solve(options, &problem, &summary);
 
   opt_t1 = chrono::high_resolution_clock::now();
-  std::cout << summary.FullReport() << "\n";
+  LOG(INFO) << summary.FullReport() << "\n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   finaliseFermi2(da, da.coord_system, c1, c2, opt_time, summary.final_cost*2.0/double(num_residuals));
 
