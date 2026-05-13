@@ -68,7 +68,7 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   optFermi2(da, min_2pF_algo, opt_time);
 
   // output file containing best fermi parameters and the associated MSE
-  writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+  writeFermiParameters(da, opt_time, seed + ".fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
 void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo) {
