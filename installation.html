@@ -45,6 +45,11 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation of MuDirac</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-ceres-solver">Installing Ceres Solver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#building-mudirac">Building MuDirac</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#install-mudirac-using-conda">Install MuDirac using conda</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
 </ul>
@@ -80,7 +85,56 @@
              
   <section id="installation-of-mudirac">
 <h1>Installation of MuDirac<a class="headerlink" href="#installation-of-mudirac" title="Link to this heading"></a></h1>
-<p>MuDirac uses CMake as a build system, and requires a C++ compiler. In order to compile it and prepare it to be executed on a Linux, Unix, or MacOS system with a working C++ compiler installed, follow these steps:</p>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<p>MuDirac requires:</p>
+<ul class="simple">
+<li><p>A C++ compiler</p></li>
+<li><p>CMake 3.25 or later</p></li>
+<li><p><a class="reference external" href="http://ceres-solver.org/">Ceres Solver</a> (required for 2pF nuclear model optimisation)</p></li>
+</ul>
+<section id="installing-ceres-solver">
+<h3>Installing Ceres Solver<a class="headerlink" href="#installing-ceres-solver" title="Link to this heading"></a></h3>
+<p>Ceres can be installed via a package manager on most platforms:</p>
+<p><strong>Ubuntu/Debian:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libceres-dev
+</pre></div>
+</div>
+<p><strong>macOS (Homebrew):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>ceres-solver
+</pre></div>
+</div>
+<p><strong>Conda:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>ceres-solver
+</pre></div>
+</div>
+<p>If you prefer to build Ceres from source, first install its dependencies (including glog), then clone and build:</p>
+<p><strong>Ubuntu/Debian:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libgoogle-glog-dev<span class="w"> </span>libgflags-dev<span class="w"> </span>libeigen3-dev
+</pre></div>
+</div>
+<p><strong>macOS (Homebrew):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>glog<span class="w"> </span>gflags<span class="w"> </span>eigen
+</pre></div>
+</div>
+<p>Then build and install Ceres. MuDirac only uses Ceres’s dense solver (<code class="docutils literal notranslate"><span class="pre">DENSE_QR</span></code>), so SuiteSparse and LAPACK are not needed and can be disabled for a faster, leaner build:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ceres-solver/ceres-solver.git
+<span class="nb">cd</span><span class="w"> </span>ceres-solver<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>tags/2.2.0
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-DBUILD_TESTING<span class="o">=</span>OFF<span class="w"> </span>-DBUILD_EXAMPLES<span class="o">=</span>OFF<span class="w"> </span>-DSUITESPARSE<span class="o">=</span>OFF<span class="w"> </span>-DLAPACK<span class="o">=</span>OFF<span class="w"> </span>..
+make<span class="w"> </span>-j4
+sudo<span class="w"> </span>make<span class="w"> </span>install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do <strong>not</strong> use <code class="docutils literal notranslate"><span class="pre">-DMINIGLOG=ON</span></code> when building Ceres for use with MuDirac. MuDirac uses the <a class="reference external" href="https://github.com/badaix/aixlog">aixlog</a> logging library, which defines the same severity symbols (<code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, <code class="docutils literal notranslate"><span class="pre">FATAL</span></code>) as Ceres’s miniglog substitute. Using miniglog will cause a compilation error due to this conflict. Always build Ceres with the full glog library.</p>
+</div>
+</section>
+</section>
+<section id="building-mudirac">
+<h2>Building MuDirac<a class="headerlink" href="#building-mudirac" title="Link to this heading"></a></h2>
+<p>MuDirac uses CMake as a build system. In order to compile it and prepare it to be executed on a Linux, Unix, or MacOS system with a working C++ compiler installed, follow these steps:</p>
 <ol class="arabic simple">
 <li><p>Download and unpack (or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>) the repository on your local system.</p></li>
 <li><p>Within the main folder of the repository (the one containing the <code class="docutils literal notranslate"><span class="pre">READ.md</span></code> file), create a subfolder called <code class="docutils literal notranslate"><span class="pre">build</span></code>.</p></li>
@@ -96,6 +150,7 @@ make<span class="w"> </span><span class="nb">test</span>
 </pre></div>
 </div>
 <p>and wait for a few seconds for the tests to complete. If you want <code class="docutils literal notranslate"><span class="pre">mudirac</span></code> to be accessible from any folder in your computer, add the resulting <code class="docutils literal notranslate"><span class="pre">bin</span></code> directory to your system <code class="docutils literal notranslate"><span class="pre">PATH</span></code> environment variable.</p>
+</section>
 <section id="install-mudirac-using-conda">
 <h2>Install MuDirac using conda<a class="headerlink" href="#install-mudirac-using-conda" title="Link to this heading"></a></h2>
 <p>MuDirac is available as <a class="reference external" href="https://docs.conda.io/projects/conda/en/stable/">conda</a> package.
