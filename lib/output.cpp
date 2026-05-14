@@ -13,6 +13,50 @@
 #include "output.hpp"
 
 /**
+  * @brief  Write valid 2 parameter Fermi Distribution parameters to a file
+  * @note   Write a tsv of valid fermi parameters which fit the input experimental results in an ASCII file.
+  * The file has columns of fermi_c, fermi_t, rms_radius, theta, mean_sq_error, where fermi_c and fermi_t are
+  * the parameters for the Fermi distribution, rms_radius is the root mean square radius of that distribution,
+  * theta is a polar coordinate which maps the rms_radius to the fermi parameters, and mean_sq_error is the
+  * mean square error between the experimental xray transition energies and the transition energies simulated
+  * by mudirac using the fermi parameters in the row.
+  *
+  * @param  da:         Dirac Atom containing required configuration data (Z, A, m)
+  * @param  fermi_parameters:         vector containing valid fermi parameter data to be output
+  * @param  fname:      Filename
+  * @param  output_precision: output decimal places
+  *
+  * @retval None
+ */
+void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, int output_precision) {
+
+  // output file containing all valid fermi parameters and the associated MSE
+  ofstream out(fname);
+  out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+  out << fixed;
+  out << setprecision(output_precision);
+
+  int w = max(output_precision + 8, 16);
+  out << left
+      << setw(w) << "fermi_c"
+      << setw(w) << "fermi_t"
+      << setw(w) << "rms_radius"
+      << setw(w) << "theta"
+      << setw(w) << "mean_chi_sq"
+      << "time\n";
+  out << left
+      << setw(w) << da.fermi2.c
+      << setw(w) << da.fermi2.t
+      << setw(w) << da.fermi2.rms_radius
+      << setw(w) << da.fermi2.theta
+      << setw(w) << da.fermi2.mse
+      << opt_time << '\n';
+
+
+  out.close();
+}
+
+/**
   * @brief  Write a DiracState object to a text file
   * @note   Write down a full DiracState object in an ASCII file,
   * saving potential and P and Q component values
@@ -91,6 +135,7 @@ void writeTransitionMatrix(TransitionMatrix tmat, string fname) {
  * @retval None
  */
 void writeEConfPotential(EConfPotential epot, string fname) {
+  LOG(INFO) << "Writing electronic configuration potential\n";
   ofstream out(fname);
 
   int i0 = epot.getGridLimits().first;
@@ -169,4 +214,88 @@ void writeEdEscan(vector<double> Es, vector<double> dEs, vector<int> nodes, stri
   }
 
   out.close();
+}
+
+// main output functions
+
+void printInitLogMessage() {
+  LOG(INFO) << "MuDirac, a muonic atomic solver\n";
+  LOG(INFO) << "by Simone Sturniolo\n";
+  LOG(INFO) << "Released under the MIT License (2019)\n";
+  LOG(INFO) << " \n";
+  LOG(INFO) << "Please cite the following paper:\n";
+  LOG(INFO) << "Sturniolo, S, Hillier, A., \"Mudirac: A Dirac equation solver for elemental analysis with muonic X‐rays.\"\n";
+  LOG(INFO) << "X‐Ray Spectrom. 2020; 1– 17. https://doi.org/10.1002/xrs.3212\n";
+  LOG(INFO) << " \n";
+}
+
+void writeOutputFiles(string seed, MuDiracInputFile & config, DiracAtom & da, vector<TransitionData> & transitions) {
+
+  // Sort transitions by energy if requested
+  if (config.getBoolValue("sort_by_energy")) {
+    LOG(DEBUG) << "sorting transitions by energy \n";
+    sort(transitions.begin(), transitions.end(),
+    [](TransitionData t1, TransitionData t2) {
+      return (t1.ds2.E - t1.ds1.E) > (t2.ds2.E - t2.ds1.E);
+    });
+  }
+
+  // Now create output files
+  int output_verbosity = config.getIntValue("output");
+  if (output_verbosity >= 1) {
+    // Save a file for all lines
+    LOG(DEBUG) << "writing xray transitions output file \n";
+    ofstream out(seed + ".xr.out");
+    out << "# Z = " << da.getZ() << ", A = " << da.getA() << " amu, m = " << da.getm() << " au\n";
+    out << "Line\tDeltaE (eV)\tW_12 (s^-1)\n";
+    out << fixed;
+
+    if (config.getIntValue("xr_print_precision") > -1) {
+      out << setprecision(config.getIntValue("xr_print_precision"));
+    } else {
+      out << setprecision(15); //Setting the maximum precision
+    }
+
+    for (int i = 0; i < transitions.size(); ++i) {
+      double dE = (transitions[i].ds2.E - transitions[i].ds1.E);
+      double tRate = transitions[i].tmat.totalRate();
+      if (dE <= 0 || tRate <= 0)
+        continue; // Transition is invisible
+      out << transitions[i].name << '\t' << dE / Physical::eV;
+      out << "\t\t" << tRate * Physical::s << '\n';
+    }
+
+    // could be a config method in output.hpp?
+    if (config.getBoolValue("write_spec")) {
+      // Write a spectrum
+      writeSimSpec(transitions, config.getDoubleValue("spec_step"), config.getDoubleValue("spec_linewidth"), config.getDoubleValue("spec_expdec"),
+                   seed + ".spec.dat");
+    }
+
+    out.close();
+  }
+
+  if (output_verbosity >= 2) {
+    vector<string> saved_states;
+    // Save each individual state
+    for (int i = 0; i < transitions.size(); ++i) {
+      for (int j = 0; j < 2; ++j) {
+        DiracState ds = (j == 0 ? transitions[i].ds1 : transitions[i].ds2);
+        string sname = ds.name();
+        string fname = seed + "." + sname + ".out";
+
+        if (vectorContains(saved_states, sname)) {
+          continue;
+        }
+
+        LOG(DEBUG) << "Printing out state file for state " << sname << "\n";
+
+        writeDiracState(ds, fname, config.getIntValue("state_print_precision"));
+
+        saved_states.push_back(sname);
+      }
+      string fname = seed + "." + transitions[i].name + ".tmat.out";
+      writeTransitionMatrix(transitions[i].tmat, fname);
+    }
+  }
 }

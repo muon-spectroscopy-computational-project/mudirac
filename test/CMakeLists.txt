@@ -51,6 +51,10 @@ add_executable(test_lines test_lines.cpp)
 target_link_libraries(test_lines test_main mudiraclib)
 add_test(lines test_lines)
 
+add_executable(test_experiment test_experiment.cpp)
+target_link_libraries(test_experiment test_main mudiraclib)
+add_test(experiment test_experiment)
+
 # Removed for now as too long and unreliable. Test_lines serves a similar purpose but more efficiently.
 # add_executable(test_kappaa test_kappaa.cpp)
 # target_link_libraries(test_kappaa mudiraclib)
@@ -59,4 +63,4 @@ add_test(lines test_lines)
 add_custom_target(tests)
 add_dependencies(tests test_utils test_elements test_econfigs test_integrate
 test_hydrogenic test_input test_potential test_transforms test_atom test_wavefunction
-test_lines)
+test_lines test_experiment)

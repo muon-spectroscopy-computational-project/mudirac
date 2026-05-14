@@ -26,6 +26,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <array>
 
 using namespace std;
 
@@ -47,6 +48,11 @@ enum NuclearRadiusModel {
   FERMI2
 };
 
+enum Fermi2CoordinateSystem {
+  CT,
+  POLAR
+};
+
 // Main classes
 class TransitionMatrix {
  public:
@@ -63,6 +69,12 @@ class TransitionMatrix {
   double totalRate();
 };
 
+struct TransLineSpec {
+  int n1, n2;
+  int l1, l2;
+  bool s1, s2;
+};
+
 struct TransitionData {
   string name;
   string sname1;
@@ -71,6 +83,20 @@ struct TransitionData {
   DiracState ds2;
   TransitionMatrix tmat;
 };
+
+
+/**
+ * @brief Data structure to store a set of conventional and polar fermi parameters and related mean square error
+ *
+ */
+struct Fermi2ParametersData {
+  double rms_radius;
+  double theta;
+  double mse;
+  double c;
+  double t;
+};
+
 
 class Atom {
  public:
@@ -111,6 +137,10 @@ class Atom {
   EConfPotential V_econf;
 
  public:
+  // fermi 2pF parameters
+  Fermi2ParametersData fermi2;
+  Fermi2CoordinateSystem coord_system;
+
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
        double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
 
@@ -162,6 +192,25 @@ class Atom {
 
   // Additional potential terms get/setters
   void setFermi2(double thickness = Physical::fermi2_t, double fermi_c = -1);
+
+  /**
+   * @brief sets the 2 parameter fermi nuclear model parameters of the atom in units of fm.
+   * @note sets the 2pF parameters in ct or polar coordinates,
+   * depending on the choice of coordinate system. Units are in fm.
+   * @param coord_1: half density radius c or rms radius
+   * @param coord_2: skin thickness t or theta
+   * @param coord_sys: coordinate system "ct" or "polar"
+   * @retval None
+   */
+  void setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys);
+
+  /**
+   * @brief gets the 2 parameter fermi model parameters in femtometres of the atoms nuclear model.
+   * @param coord_sys: coordinate system for the returned parameter (CT or POLAR).
+   * @retval array<double,2>: fermi parameters in CT or POLAR coordinates.
+   */
+  array<double, 2> getFermi2Femto(Fermi2CoordinateSystem coord_sys);
+
   bool getUehling() {
     return use_uehling;
   };
@@ -187,6 +236,14 @@ class DiracAtom : public Atom {
   double out_eps = 1e-5;
   double in_eps = 1e-5;
   int min_n = 1000;
+
+  // 2pF optimisation attributes
+  int  iteration_counter_2pF =0;
+  vector<TransLineSpec> transqnums;
+  vector<string> xr_lines_measured;
+  vector<double> xr_energies;
+  vector<double> xr_errors;
+  double  opt_time;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
             double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
@@ -214,6 +271,31 @@ class DiracAtom : public Atom {
   DiracState getState(int n, int l, bool s);
   TransitionMatrix getTransitionProbabilities(int n1, int l1, bool s1, int n2,
       int l2, bool s2, bool approx_j0 = false);
+
+  // Full energy calculation
+
+  vector<TransitionData> getAllTransitions();
+
+  // optimisation
+
+  /**
+   * @brief sets values for experimental data input and the coordinate system for the optimisation
+   * @param coord_sys: coordinate system to be used in optimising the Fermi nuclear model parameters(CT or POLAR).
+   * @param xr_lines: measured transition lines in xray notation.
+   * @param xr_e: energies of the the measured transition lines.
+   * @param xr_err: energy uncertainties of the measured transition lines.
+   * @retval None.
+   */
+  void setExpOptData(Fermi2CoordinateSystem coord_sys, const vector<string> xr_lines, const vector<double> xr_e, const vector<double> xr_err) {
+    iteration_counter_2pF =0;
+    coord_system = coord_sys;
+    xr_lines_measured = xr_lines;
+    xr_energies = xr_e;
+    xr_errors = xr_err;
+    opt_time = 0.0;
+  }
+
+  double calculateMSE(double coord_1, double coord_2);
 };
 
 // A class used mainly for debugging purposes, works as DiracAtom but uses only
@@ -223,5 +305,6 @@ class DiracIdealAtom : public DiracAtom {
   DiracIdealAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
                  double radius = -1, double fc = 1.0, double dx = 0.005);
 };
+
 
 #endif

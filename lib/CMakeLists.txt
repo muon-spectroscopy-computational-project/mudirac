@@ -12,11 +12,17 @@ add_library(input STATIC input.cpp)
 add_library(output STATIC output.cpp)
 add_library(wavefunction STATIC wavefunction.cpp)
 add_library(config STATIC config.cpp)
+add_library(experiment STATIC experiment.cpp)
 add_library(debugtasks STATIC debugtasks.cpp)
+add_library(optimisation STATIC optimisation.cpp)
+find_package(Ceres)
+target_link_libraries(optimisation Ceres::ceres experiment)
+
+
 
 # Define interface library
 add_library(mudiraclib INTERFACE)
-target_link_libraries(mudiraclib INTERFACE debugtasks config output
+target_link_libraries(mudiraclib INTERFACE debugtasks config experiment output
                       atom boundary state potential
-                      econfigs hydrogenic transforms 
-                      wavefunction integrate elements input utils)
+                      econfigs hydrogenic transforms
+                      wavefunction integrate elements input utils optimisation)
