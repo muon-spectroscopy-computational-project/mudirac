@@ -36,12 +36,20 @@ void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, in
   out << fixed;
   out << setprecision(output_precision);
 
-  out << "fermi_c\tfermi_t\trms_radius\ttheta\tmean_chi_sq\ttime\n";
-  out << da.fermi2.c << '\t'
-      << da.fermi2.t << '\t'
-      << da.fermi2.rms_radius << '\t'
-      << da.fermi2.theta << '\t'
-      << da.fermi2.mse << '\t'
+  int w = max(output_precision + 8, 16);
+  out << left
+      << setw(w) << "fermi_c"
+      << setw(w) << "fermi_t"
+      << setw(w) << "rms_radius"
+      << setw(w) << "theta"
+      << setw(w) << "mean_chi_sq"
+      << "time\n";
+  out << left
+      << setw(w) << da.fermi2.c
+      << setw(w) << da.fermi2.t
+      << setw(w) << da.fermi2.rms_radius
+      << setw(w) << da.fermi2.theta
+      << setw(w) << da.fermi2.mse
       << opt_time << '\n';
 
 
