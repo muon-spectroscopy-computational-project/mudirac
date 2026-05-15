@@ -80,9 +80,9 @@ target_link_libraries(optimisation Ceres::ceres experiment)
 # Define interface library
 add_library(mudiraclib INTERFACE)
 target_link_libraries(mudiraclib INTERFACE
-  -Wl,--start-group
-  debugtasks config experiment output
-  atom boundary state potential
-  econfigs hydrogenic transforms
-  wavefunction integrate elements input utils optimisation
-  -Wl,--end-group)
+  $<LINK_GROUP:RESCAN,
+    debugtasks,config,experiment,output,
+    atom,boundary,state,potential,
+    econfigs,hydrogenic,transforms,
+    wavefunction,integrate,elements,input,utils,optimisation
+  >)
