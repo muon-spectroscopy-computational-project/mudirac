@@ -8,59 +8,9 @@ MuDirac requires:
 
 * A C++ compiler
 * CMake 3.25 or later
-* `Ceres Solver <http://ceres-solver.org/>`_ (required for 2pF nuclear model optimisation)
+* An internet connection on the first build (to fetch Ceres and its dependencies automatically)
 
-Installing Ceres Solver
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Ceres can be installed via a package manager on most platforms:
-
-**Ubuntu/Debian:**
-
-.. code-block:: bash
-
-   sudo apt-get install libceres-dev
-
-**macOS (Homebrew):**
-
-.. code-block:: bash
-
-   brew install ceres-solver
-
-**Conda:**
-
-.. code-block:: bash
-
-   conda install -c conda-forge ceres-solver
-
-If you prefer to build Ceres from source, first install its dependencies (including glog), then clone and build:
-
-**Ubuntu/Debian:**
-
-.. code-block:: bash
-
-   sudo apt-get install libgoogle-glog-dev libgflags-dev libeigen3-dev
-
-**macOS (Homebrew):**
-
-.. code-block:: bash
-
-   brew install glog gflags eigen
-
-Then build and install Ceres. MuDirac only uses Ceres's dense solver (``DENSE_QR``), so SuiteSparse and LAPACK are not needed and can be disabled for a faster, leaner build:
-
-.. code-block:: bash
-
-   git clone https://github.com/ceres-solver/ceres-solver.git
-   cd ceres-solver && git checkout tags/2.2.0
-   mkdir build && cd build
-   cmake -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DSUITESPARSE=OFF -DLAPACK=OFF ..
-   make -j4
-   sudo make install
-
-.. note::
-
-   Do **not** use :literal:`-DMINIGLOG=ON` when building Ceres for use with MuDirac. MuDirac uses the `aixlog <https://github.com/badaix/aixlog>`_ logging library, which defines the same severity symbols (``INFO``, ``WARNING``, ``ERROR``, ``FATAL``) as Ceres's miniglog substitute. Using miniglog will cause a compilation error due to this conflict. Always build Ceres with the full glog library.
+`Ceres Solver <http://ceres-solver.org/>`_ and its dependencies (Eigen, glog) are fetched and built automatically by CMake the first time you build MuDirac — no separate installation is needed. If Ceres is already installed on your system, CMake will use it directly and skip the download.
 
 Building MuDirac
 -----------------
