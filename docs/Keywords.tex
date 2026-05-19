@@ -127,6 +127,7 @@ When \texttt{optimise\_fermi\_parameters = TRUE}, a second input file must be pr
 	\item \texttt{xr\_error}: 1$\sigma$ uncertainties on the experimental energies in eV, comma-separated, in the same order as \texttt{xr\_lines}. Used as weights in the $\chi^2$ minimisation.
 \end{itemize}
 
+\begin{minipage}{\linewidth}
 An example experimental results file for $^{206}$Pb:
 
 \begin{verbatim}
@@ -134,5 +135,6 @@ xr_lines:  K1-L2, K1-L3, L2-M4, L3-M5
 xr_energy: 5788330, 5973980, 2643750, 2501450
 xr_error:  480, 440, 360, 430
 \end{verbatim}
+\end{minipage}
 
 \end{document}
