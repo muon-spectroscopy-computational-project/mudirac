@@ -9,7 +9,7 @@
 
 % Title Page
 \title{\texttt{mudirac} - List of input keywords}
-\author{Simone Sturniolo}
+\author{Simone Sturniolo, Milan Kumar, Subindev Devadasan}
 
 
 \begin{document}
@@ -17,7 +17,13 @@
 
 \section{Input keywords}\label{APP:keyw}
 
-\texttt{mudirac} takes a single input file, containing multiple lines with the format
+\texttt{mudirac} takes a main input file, and optionally a second experimental results file when running Fermi parameter optimisation:
+
+\begin{verbatim}
+mudirac main.in [experimental.in]
+\end{verbatim}
+
+The main input file contains multiple lines with the format
 
 \begin{verbatim}
 <keyword>: <value>
@@ -31,6 +37,8 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 \begin{itemize}
 	\item \texttt{element}: symbol of the element for the calculation. Determines the nuclear charge. Can be any symbol in the periodic table up to Z=111, Roentgenium (Rg). Default is H.
 	\item \texttt{nuclear\_model}: model used to describe the nucleus. Can be POINT (point charge), SPHERE (finite size, uniformly charged spherical nucleus) or FERMI2 (Fermi 2-term charge distribution). Default is POINT.
+	\item \texttt{2pF\_coords}: coordinate system to use for the 2-parameter Fermi (2pF) optimisation. Can be CT (half-density radius $c$ and skin thickness $t$) or POLAR (rms radius and polar angle $\theta$, where $\tan\theta = t/c$). The POLAR parametrisation gives better-conditioned optimisation and is recommended for most nuclei; CT should be used when $A < 5$. Only relevant when \texttt{optimise\_fermi\_parameters = TRUE}. Default is POLAR.
+	\item \texttt{min\_2pF\_algorithm}: minimisation algorithm for Fermi parameter optimisation. Can be \texttt{lm} (Levenberg--Marquardt, recommended) or \texttt{ls} (L-BFGS line search). Only relevant when \texttt{optimise\_fermi\_parameters = TRUE}. Default is \texttt{lm}.
 	\item \texttt{electronic\_config}: electronic configuration to use in order to describe the negative charge background. Can be a full string describing the configuration (e.g. \texttt{1s2 2s2 2p2}), an element symbol to represent the default configuration of that atom when neutral (e.g. \texttt{C}) or a mix of the two (e.g. \texttt{[He] 2s2 2p2}). Default is the empty string (no electrons).
 	\item \texttt{ideal\_atom\_minshell}: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (K $\implies$ n = 1, L $\implies$ n = 2, etc.). Default is the empty string (no ideal solutions used).
 	\item \texttt{xr\_lines}: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example
@@ -48,9 +56,11 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word `TRUE' or the letter `T' (regardless of case) work.
 
 \begin{itemize}
-	\item \texttt{uehling\_correction}: whether to turn on or not the Uehling correction. Default is FALSE.
-	\item \texttt{write\_spec}: if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other parameters can be specified with different keywords. Default is FALSE.
-	\item \texttt{sort\_byE}: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+	\item \texttt{uehling\_correction}: whether to turn on or not the Uehling correction (vacuum polarisation). Recommended when running Fermi parameter optimisation against experimental data. Default is FALSE.
+	\item \texttt{optimise\_fermi\_parameters}: if true, optimises $c$ and $t$ from the 2pF model. If false, no optimisation is performed and $c$ and $t$ can be set manually. Requires a second experimental results file: \texttt{mudirac main.in experimental.in}. Default is FALSE.
+	\item \texttt{reduced\_mass}: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the \texttt{mass} keyword if provided). Default is TRUE.
+	\item \texttt{write\_spec}: if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other keywords starting with \texttt{spec\_} can then be specified. Default is FALSE.
+	\item \texttt{sort\_by\_energy}: if true, print out the transitions sorted by energy instead of by shell. Default is FALSE.
 \end{itemize}
 
 \subsection{Floating point keywords}
@@ -59,12 +69,15 @@ These keywords accept a non-integer number. It can be written normally (e.g. 105
 
 \begin{itemize}
 	\item \texttt{mass}: mass of the particle in atomic units (1 = mass of the electron). By default it's the mass of the muon, 206.7683.
+	\item \texttt{radius}: solid sphere equivalent radius ($r_\text{rms} \times \sqrt{5/3}$). By default it is set to values from Angeli and Marinova (2013).
+	\item \texttt{fermi\_t}: skin thickness for a Fermi model nucleus. By default it is 2.3 fm.
+	\item \texttt{fermi\_c}: Fermi parameter $c$. By default $c = \sqrt{R^2 - \frac{7}{3}\left(\frac{\pi T}{4\ln 3}\right)^2}$ for $A \geq 5$, or $c = 2.2291 \times 10^{-5} \cdot A^{1/3} - 0.90676 \times 10^{-5}$ for $A < 5$.
 	\item \texttt{energy\_tol}: absolute tolerance for energy convergence when searching for eigenvalues. Iterations will stop once the energy change is smaller than this number, in atomic units. Default is 1E-7.
 	\item \texttt{energy\_damp}: a damping parameter used in steepest descent energy search to ease convergence. Used to multiply the suggested step $\delta E$ and make it smaller. Helps avoiding overshooting; fine-tuning it might help to converge difficult calculations, while making it bigger might make convergence faster in simple ones. Default is 0.5.
 	\item \texttt{max\_dE\_ratio}: maximum ratio between energy step, $\delta E$, and current energy $E$ in convergence search. If the suggested step exceeds this ratio times the guessed energy, it will be rescaled. This also serves as a measure to avoid overshooting and can be tweaked to get around cases of bad convergence. Default is 0.1.
 	\item \texttt{node\_tol}: tolerance parameter used to identify and count nodes in wavefunctions. Very unlikely to need any tweaking. Default is 1E-6.
 	\item \texttt{loggrid\_step}: step of the logarithmic grid. Default is 0.005.
-	\item \texttt{logggrid\_center}: center of the logarithmic grid in units of $a_0 = 1/(Zm)$. Default is 1.
+	\item \texttt{loggrid\_center}: center of the logarithmic grid in units of $a_0 = 1/(Zm)$. Default is 1.
 	\item \texttt{uehling\_lowcut}: low cutoff for Uehling potential, under which the radius will be considered 0. Default is 0.
 	\item \texttt{uehling\_highcut}: high cutoff for Uehling potential, over which the radius will be considered $r >> c$. Default is INFINITY.
 	\item \texttt{econf\_rhoeps}: charge density threshold under which the electronic charge background will be truncated and treated as zero. Default is 1E-4.
@@ -85,7 +98,9 @@ Keywords that take an integer number as value.
 	\item \texttt{max\_nodes\_iter}: maximum number of iterations to perform when searching for a starting energy value that gives a state the expected number of nodes. If exceeded, convergence will fail. Should generally not need to be adjusted. Default is 100.
 	\item \texttt{max\_state\_iter}: maximum number of iterations to perform when searching for a state. This loop encloses both node-based and energy-based search. Once a state is converged, the program checks again that it has the correct number of nodes. If it does not, the state is stored for future use and to provide an upper or lower limit to the energy of the searches and then the process is repeated. This number represents how much can the process be repeated before failing. Should not generally need to be adjusted. Default is 100.
 	\item \texttt{uehling\_steps}: integration steps for the Uehling potential. Higher numbers will make the Uehling energy more precise but increase computation times. Default is 100.
-	\item \texttt{xr\_print\_precision}: number of digits after the point to use when printing out energies and transition rates in the \texttt{.xr.out} file. Default is -1 (print as many as possible).
+	\item \texttt{xr\_print\_precision}: number of digits after the decimal point for energies and rates in the \texttt{.xr.out} file. Default is -1 (maximum precision).
+	\item \texttt{state\_print\_precision}: number of digits after the decimal point in Dirac state output files. Default is -1 (maximum precision). Only has effect if \texttt{output} $\geq$ 2.
+	\item \texttt{rms\_radius\_decimals}: number of decimal places to use for the rms radius in the \texttt{.fermi\_parameters.out} output file. Only relevant when \texttt{optimise\_fermi\_parameters = TRUE}. Default is 2.
 	\item \texttt{verbosity}: verbosity level. Going from 1 to 3 will increase the amount of information printed to the log file. Default is 1.
 	\item \texttt{output}: output level. Going from 1 to 3 will increase the amount of files produced. Specifically:
 	\begin{enumerate}
@@ -94,5 +109,30 @@ Keywords that take an integer number as value.
 		\item is reserved for future uses and currently has the same effect as 2.
 	\end{enumerate}
 \end{itemize}
+
+\section{Experimental results file keywords}\label{APP:expkeyw}
+
+When \texttt{optimise\_fermi\_parameters = TRUE}, a second input file must be provided containing the experimental X-ray transition data. This file uses the same \texttt{keyword: value} format and accepts the following keywords.
+
+\subsection{String keywords}
+
+\begin{itemize}
+	\item \texttt{xr\_lines}: the transitions for which experimental energies are provided, using the same IUPAC notation as in the main input file. The list must match the \texttt{xr\_lines} in the main input. Multiple lines separated by commas.
+\end{itemize}
+
+\subsection{Floating point keywords}
+
+\begin{itemize}
+	\item \texttt{xr\_energy}: experimental transition energies in eV, comma-separated, in the same order as \texttt{xr\_lines}.
+	\item \texttt{xr\_error}: 1$\sigma$ uncertainties on the experimental energies in eV, comma-separated, in the same order as \texttt{xr\_lines}. Used as weights in the $\chi^2$ minimisation.
+\end{itemize}
+
+An example experimental results file for $^{206}$Pb:
+
+\begin{verbatim}
+xr_lines:  K1-L2, K1-L3, L2-M4, L3-M5
+xr_energy: 5788330, 5973980, 2643750, 2501450
+xr_error:  480, 440, 360, 430
+\end{verbatim}
 
 \end{document}
