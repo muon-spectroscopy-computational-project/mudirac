@@ -1,0 +1,10 @@
+element: Pb
+isotope: 206
+nuclear_model: FERMI2
+xr_lines: K1-L2, K1-L3, L2-M4, L3-M5
+optimise_fermi_parameters: T
+min_2pF_algorithm: lm
+2pF_coords: CT
+uehling_correction: T
+rms_radius_decimals: 4
+verbosity: 2

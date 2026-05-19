@@ -39,6 +39,7 @@ test/*
 !test/catch
 !test/data
 !test/CMakeLists.txt
+!test/test_optimisation.cmake
 
 # Doc files
 docs/*.aux

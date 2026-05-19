@@ -5,6 +5,8 @@ set(CURRENT_DATAPATH ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(datapath.in.h ${CMAKE_CURRENT_SOURCE_DIR}/datapath.h)
 file(COPY data/inputtest.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 file(COPY data/kappa_alpha_exp.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
+file(COPY data/pb206_lm.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
+file(COPY data/pb206_exp.in DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 
 # Tests
 add_executable(test_utils test_utils.cpp)
@@ -60,7 +62,15 @@ add_test(experiment test_experiment)
 # target_link_libraries(test_kappaa mudiraclib)
 # add_test(kappaa test_kappaa)
 
+add_test(
+  NAME optimisation
+  COMMAND ${CMAKE_COMMAND}
+    -DMUDIRAC_BIN=$<TARGET_FILE:mudirac>
+    -DDATA_DIR=${CMAKE_CURRENT_BINARY_DIR}/data
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test_optimisation.cmake
+)
+
 add_custom_target(tests)
 add_dependencies(tests test_utils test_elements test_econfigs test_integrate
 test_hydrogenic test_input test_potential test_transforms test_atom test_wavefunction
-test_lines test_experiment)
+test_lines test_experiment mudirac)
