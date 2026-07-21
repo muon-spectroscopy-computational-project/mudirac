@@ -79,10 +79,17 @@ target_link_libraries(optimisation Ceres::ceres experiment)
 
 # Define interface library
 add_library(mudiraclib INTERFACE)
-target_link_libraries(mudiraclib INTERFACE
-  $<LINK_GROUP:RESCAN,
-    debugtasks,config,experiment,output,
-    atom,boundary,state,potential,
-    econfigs,hydrogenic,transforms,
-    wavefunction,integrate,elements,input,utils,optimisation
-  >)
+set(MUDIRAC_LIBS
+  debugtasks config experiment output
+  atom boundary state potential
+  econfigs hydrogenic transforms
+  wavefunction integrate elements input utils optimisation)
+# GNU ld resolves static library symbols in a single pass, so the libraries
+# must be wrapped in a RESCAN group; other linkers (e.g. Apple ld64) don't
+# support the feature and don't need it.
+if(CMAKE_CXX_LINK_GROUP_USING_RESCAN_SUPPORTED OR CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED)
+  string(JOIN "," MUDIRAC_LIBS_GROUP ${MUDIRAC_LIBS})
+  target_link_libraries(mudiraclib INTERFACE "$<LINK_GROUP:RESCAN,${MUDIRAC_LIBS_GROUP}>")
+else()
+  target_link_libraries(mudiraclib INTERFACE ${MUDIRAC_LIBS})
+endif()
