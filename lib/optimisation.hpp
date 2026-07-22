@@ -73,7 +73,7 @@ struct CostFunctor {
     ma.setFermi2Femto(c1[0], c2[0], ma.coord_system);
     vector<TransitionData> transitions_iteration = ma.getAllTransitions();
 
-    if ((int)transitions_iteration.size() < (int)ma.xr_lines_measured.size())
+    if ((int)transitions_iteration.size() != (int)ma.xr_lines_measured.size())
       return false; // Not enough transitions to compare with experimental data
 
     for (int k = 0; k < transitions_iteration.size(); ++k) {
