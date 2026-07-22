@@ -68,7 +68,7 @@ void runFermiModelOptimisation(MuDiracInputFile & config, const int & argc, char
   optFermi2(da, min_2pF_algo, opt_time);
 
   // output file containing best fermi parameters and the associated MSE
-  writeFermiParameters(da, opt_time,  seed + "fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
+  writeFermiParameters(da, opt_time, seed + ".fermi_parameters.out", config.getIntValue("rms_radius_decimals"));
 }
 
 void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const string & algo) {
@@ -112,26 +112,34 @@ void ceresOptimizeFermiParameters(DiracAtom & da, double & opt_time, const strin
   opt_t0 = chrono::high_resolution_clock::now();
 
 
-  // set options and solve minimisation
+  // Set solver options. Full documentation at:
+  // http://ceres-solver.org/nnls_solving.html#solver-options
+
   ceres::Solver::Options options;
   options.minimizer_type = minimizer;
-  options.gradient_tolerance =1e-5;
+  // Tolerances are intentionally looser than Ceres defaults (gradient: 1e-10,
+  // parameter: 1e-8, relative decrease: 1e-3), matching the physical precision
+  // required for nuclear radii in femtometres.
+  options.gradient_tolerance = 1e-5;
   options.parameter_tolerance = 1e-5;
   options.min_relative_decrease = 1e-2;
+  // DENSE_QR is optimal for small problems; 2pF has only 2 parameters (c, t).
   options.linear_solver_type = ceres::DENSE_QR;
 
-  options.minimizer_progress_to_stdout = true;
+  options.minimizer_progress_to_stdout = false;
 
   options.line_search_interpolation_type = ceres::QUADRATIC;
   options.max_num_line_search_step_size_iterations = 10;
   options.line_search_sufficient_curvature_decrease = 0.90;
+  // Contraction bounds [0.1, 0.5] are wider than the defaults [1e-3, 0.6]
+  // to allow larger step sizes on the smooth 2pF cost surface.
   options.max_line_search_step_contraction = 0.1;
   options.min_line_search_step_contraction = 0.5;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
   opt_t1 = chrono::high_resolution_clock::now();
-  std::cout << summary.FullReport() << "\n";
+  LOG(INFO) << summary.FullReport() << "\n";
   opt_time = chrono::duration_cast<chrono::milliseconds>(opt_t1 - opt_t0).count() / 1.0e3;
   finaliseFermi2(da, da.coord_system, c1, c2, opt_time, summary.final_cost*2.0/double(num_residuals));
 

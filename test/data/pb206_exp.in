@@ -1,0 +1,5 @@
+# Pb-206 experimental muonic X-ray energies (in eV) with 1-sigma uncertainties
+# Source: Anderson et al., Phys. Rev. 187, 1565 (1969)
+xr_lines:  K1-L2, K1-L3, L2-M4, L3-M5
+xr_energy: 5788330, 5973980, 2643750, 2501450
+xr_error:  480, 440, 360, 430

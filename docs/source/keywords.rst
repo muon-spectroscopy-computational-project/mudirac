@@ -18,6 +18,8 @@ These keywords take a string as value; invalid strings (e.g. a chemical symbol t
 * :literal:`nuclear_model`: model used to describe the nucleus. Can be POINT (point charge), SPHERE (finite size, uniformly charged spherical nucleus) or FERMI2 (Fermi 2-term charge distribution). Default is POINT.
 * :literal:`electronic_config`: electronic configuration to use in order to describe the negative charge background. Can be a full string describing the configuration (e.g. ``1s2 2s2 2p2``), an element symbol to represent the default configuration of that atom when neutral (e.g. ``C``) or a mix of the two (e.g. ``[He] 2s2 2p2``). Default is the empty string (no electrons).
 * :literal:`ideal_atom_minshell`: for this shell, and all above it, treat the atom as a simple hydrogen-like point charge Dirac atom, using the known analytical solution and discarding all corrections. Mostly useful for debugging, or when very high shell states have difficulty to converge. The shell must use IUPAC notation (:math:`K \Rightarrow n=1`, :math:`L \Rightarrow n=2`, etc.). Default is the empty string (no ideal solutions used).
+* :literal:`2pF_coords`: coordinate system for the 2pF Fermi parameter optimisation. Can be ``CT`` (half-density radius *c* and skin thickness *t*) or ``POLAR`` (rms radius and polar angle :math:`\theta`, where :math:`\tan\theta = t/c`). The POLAR parametrisation is recommended; use CT when :math:`A < 5`. Only relevant when :literal:`optimise_fermi_parameters = TRUE`. Default is POLAR.
+* :literal:`min_2pF_algorithm`: minimisation algorithm for Fermi parameter optimisation. Can be ``lm`` (Levenberg--Marquardt, recommended) or ``ls`` (L-BFGS line search). Only relevant when :literal:`optimise_fermi_parameters = TRUE`. Default is ``lm``.
 * :literal:`xr_lines`: the transition or transitions for which energy and rates are desired. Each line must be expressed using the conventional IUPAC notation [Jenkins et al., 1991]. Multiple lines can be separated by commas. For example:
 	
   ::
@@ -33,7 +35,8 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
 * :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
-* :literal:`sort_byE`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+* :literal:`sort_by_energy`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
+* :literal:`optimise_fermi_parameters`: if true, it optimises the *c* and *t* from the 2pF model. If false, no optimisation is performed and the *c* and *t* from the 2pF model can be manually modified. 
 
 .. _floating_point_keywords:
 
@@ -59,7 +62,7 @@ These keywords accept a non-integer number. It can be written normally (e.g. 105
 * :literal:`spec_step`: energy step for the simulated spectrum, in eV. Only has effect if :literal:`write\_spec = TRUE`. Default is 1E2 eV.
 * :literal:`spec_linewidth`: Gaussian broadening width for the simulated spectrum, in eV. Only has effect if :literal:`write\_spec = TRUE`. Default is 1E3 eV.
 * :literal:`spec_expdec`: exponential decay parameter :math:`E_{\text{dec}}` for a sensitivity function for the simulated spectrum, in eV. Multiplies the entire spectrum by a function :math:`\exp(-E/E_{\text{dec}})`. Only has effect if :literal:`write\_spec = TRUE`. Default is -1 (no decay).
-
+        
 Integer keywords
 ~~~~~~~~~~~~~~~~~
 Keywords that take an integer number as value.
@@ -71,6 +74,7 @@ Keywords that take an integer number as value.
 * :literal:`uehling_steps`: integration steps for the Uehling potential. Higher numbers will make the Uehling energy more precise but increase computation times. Default is 100.
 * :literal:`xr_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.xr.out` file. Default is -1 (print as many as possible).
 * :literal:`state_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.{state name}.out` files. Default is -1 (print as many as possible). Only has effect if :literal:`output >= 2`.
+* :literal:`rms_radius_decimals`: number of decimal places for the rms radius, *c*, and *t* values in the :literal:`.fermi_parameters.out` output file. Only relevant when :literal:`optimise_fermi_parameters = TRUE`. Default is 2.
 * :literal:`verbosity`: verbosity level. Going from 1 to 3 will increase the amount of information printed to the log file. Default is 1.
 * :literal:`output`: output level. Going from 1 to 3 will increase the amount of files produced. Specifically:
    1. will print out only the transition energies and rates in the :literal:`.xr.out` file;

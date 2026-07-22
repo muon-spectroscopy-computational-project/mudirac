@@ -684,9 +684,9 @@ pair<int, int> DiracAtom::gridLimits(double E, int k) {
 
   if (r_in > r_tp) {
     LOG(ERROR) << SPECIAL << "Inner grid radius " << r_in
-               << " is smaller than turning point radius " << r_tp
+               << " is greater than turning point radius " << r_tp
                << "; please decrease in_eps\n";
-    throw runtime_error("Inner grid radius is too small for given atom and "
+    throw runtime_error("Inner grid radius is too large for given atom and "
                         "state; please decrease in_eps");
   }
 
