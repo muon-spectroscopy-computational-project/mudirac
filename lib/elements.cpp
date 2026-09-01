@@ -74,16 +74,14 @@ double getIsotopeRadius(int Z, int isotope) {
 }
 
 vector<int> getAllIsotopes(string symbol) {
-  map<int, isotope> isos;
+  vector<int> isoA;
   try {
-    isos = atomic_data.at(symbol).isotopes;
+    const map<int, isotope> &isos = atomic_data.at(symbol).isotopes;
+    for (map<int, isotope>::const_iterator it = isos.begin(); it != isos.end(); ++it) {
+      isoA.push_back(it->first);
+    }
   } catch (out_of_range e) {
     throw invalid_argument("Element does not exist");
-  }
-
-  vector<int> isoA;
-  for (map<int, isotope>::iterator it = isos.begin(); it != isos.end(); ++it) {
-    isoA.push_back(it->first);
   }
   sort(isoA.begin(), isoA.end());
 
