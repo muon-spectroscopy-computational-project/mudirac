@@ -37,6 +37,7 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_by_energy`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 * :literal:`optimise_fermi_parameters`: if true, it optimises the *c* and *t* from the 2pF model. If false, no optimisation is performed and the *c* and *t* from the 2pF model can be manually modified. 
+* :literal:`fermi2_hermite`: for :literal:`nuclear_model: FERMI2`, compute the charge moments of the Coulomb potential by Gauss-Legendre quadrature on each interval of its grid and read the potential back by cubic Hermite interpolation, instead of the trapezoidal recursion and linear interpolation. This removes most of the grid error at the default :literal:`fermi2_csteps`. Default is FALSE.
 
 .. _floating_point_keywords:
 
@@ -74,6 +75,7 @@ Keywords that take an integer number as value.
 * :literal:`uehling_steps`: integration steps for the Uehling potential. Higher numbers will make the Uehling energy more precise but increase computation times. Default is 100.
 * :literal:`xr_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.xr.out` file. Default is -1 (print as many as possible).
 * :literal:`state_print_precision`: number of digits after the point to use when printing out energies and transition rates in the :literal:`.{state name}.out` files. Default is -1 (print as many as possible). Only has effect if :literal:`output >= 2`.
+* :literal:`fermi2_csteps`: number of points of the logarithmic grid (from :math:`10^{-8}` to :math:`10^{-2}` Bohr) on which the Coulomb potential of a :literal:`nuclear_model: FERMI2` nucleus is built. The grid error of the default shifts heavy-element transition energies by up to tens of eV; see also :literal:`fermi2_hermite`. Default is 5000.
 * :literal:`rms_radius_decimals`: number of decimal places for the rms radius, *c*, and *t* values in the :literal:`.fermi_parameters.out` output file. Only relevant when :literal:`optimise_fermi_parameters = TRUE`. Default is 2.
 * :literal:`verbosity`: verbosity level. Going from 1 to 3 will increase the amount of information printed to the log file. Default is 1.
 * :literal:`output`: output level. Going from 1 to 3 will increase the amount of files produced. Specifically:

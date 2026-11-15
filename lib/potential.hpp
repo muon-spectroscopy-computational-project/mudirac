@@ -73,7 +73,8 @@ class CoulombSpherePotential : Potential {
 class CoulombFermi2Potential : public CoulombSpherePotential {
  public:
   CoulombFermi2Potential(double Z = 1.0, double R = -1, double A = 1.0,
-                         double thickness = Physical::fermi2_t, double fermi_c = -1, int csteps = 5000);
+                         double thickness = Physical::fermi2_t, double fermi_c = -1, int csteps = 5000,
+                         bool hermite = false);
   virtual double V(double r) override;
 
   double getc() {
@@ -84,6 +85,10 @@ class CoulombFermi2Potential : public CoulombSpherePotential {
   double c, innerV, dx, T;
   vector<vector<double>> grid;
   vector<double> Vgrid;
+  // Charge moments by Gauss-Legendre quadrature, cubic Hermite read-back
+  bool hermite = false;
+  double innerVh = 0;
+  vector<double> Vh, dVdx;
 };
 
 /**

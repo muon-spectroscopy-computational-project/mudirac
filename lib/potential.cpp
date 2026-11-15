@@ -54,10 +54,14 @@ double CoulombSpherePotential::V(double r) {
  * @param  csteps:    Steps used to integrate numerically the potential
  * @param  thickness: Thickness parameter of the 'skin' of the nucleus
  * @param  fermi_c:   Fermi parameter c for the model.
+ * @param  hermite:   If true, compute the charge moments by 4-point Gauss-Legendre
+ * quadrature on each grid interval and read the potential back by cubic Hermite
+ * interpolation (with the exact derivative dV/dx = Z q(r)/(Q r)), instead of the
+ * trapezoidal recursion and linear interpolation
  * @retval
  */
 CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
-    double thickness, double fermi_c, int csteps): CoulombSpherePotential(Z, R) {
+    double thickness, double fermi_c, int csteps, bool hermite): CoulombSpherePotential(Z, R) {
 
   vector<double> rho;
 
@@ -79,6 +83,11 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
   }
 
   LOG(INFO) << "Initialising Coulomb Fermi-2 potential, c = " << c << "\n";
+
+  if (csteps < 2) {
+    throw invalid_argument("CoulombFermi2Potential needs at least 2 grid steps");
+  }
+  this->hermite = hermite;
 
   // Then find the grid
   grid = logGrid(1e-8, 1e-2, csteps);
@@ -108,6 +117,45 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
 
   // Adjust potential so that it connects well at grid edge
   VR = -Z / grid[1].back() - Vgrid.back();
+
+  if (hermite) {
+    // Enclosed charge q2(r) = int_0^r 4 pi s^2 f ds and outer moment
+    // q1(r) = int_r^R1 4 pi s f ds, with 4-point Gauss-Legendre in x = log(r/r0)
+    // on each grid interval; V = -(Z/Q)(q2/r + q1) and dV/dx = (Z/Q) q2/r
+    int N = csteps;
+    vector<double> gx, gw;
+    gaussLegendre(4, gx, gw);
+    double a4 = 4 * log(3.0);
+    vector<double> q2(N), q1(N);
+    double r0 = grid[1][0];
+    double f0 = 1.0 / (1.0 + exp(a4 * (r0 - c) / T));
+    q2[0] = 4 * M_PI * f0 * pow(r0, 3) / 3.0;
+    vector<double> seg1(N - 1);
+    for (int i = 0; i < N - 1; ++i) {
+      double s2 = 0, s1 = 0;
+      for (int j = 0; j < 4; ++j) {
+        double xm = 0.5 * (grid[0][i + 1] + grid[0][i]) + 0.5 * dx * gx[j];
+        double rm = 1e-8 * exp(xm);
+        double fm = 1.0 / (1.0 + exp(a4 * (rm - c) / T));
+        s2 += gw[j] * (4 * M_PI * pow(rm, 3) * fm);
+        s1 += gw[j] * (4 * M_PI * pow(rm, 2) * fm);
+      }
+      q2[i + 1] = q2[i] + s2 * (0.5 * dx);
+      seg1[i] = s1 * (0.5 * dx);
+    }
+    q1[N - 1] = 0;
+    for (int i = N - 2; i >= 0; --i) {
+      q1[i] = q1[i + 1] + seg1[i];
+    }
+    double Qh = q2[N - 1];
+    Vh = vector<double>(N);
+    dVdx = vector<double>(N);
+    for (int i = 0; i < N; ++i) {
+      Vh[i] = -(Z / Qh) * (q2[i] / grid[1][i] + q1[i]);
+      dVdx[i] = (Z / Qh) * q2[i] / grid[1][i];
+    }
+    innerVh = (Z / Qh) * 4 * M_PI * f0 / 6.0;
+  }
 }
 
 double CoulombFermi2Potential::V(double r) {
@@ -116,6 +164,21 @@ double CoulombFermi2Potential::V(double r) {
     throw invalid_argument("Negative radius not allowed for CoulombPotential");
   } else if (r > grid[1].back()) {
     return -Z / r;
+  } else if (hermite) {
+    if (r < grid[1][0]) {
+      return Vh[0] + innerVh * (pow(r, 2) - pow(grid[1][0], 2));
+    }
+    double xi = log(r / grid[1][0]) / dx;
+    int i0 = floor(xi);
+    if (i0 > (int)Vh.size() - 2)
+      i0 = Vh.size() - 2;
+    if (i0 < 0)
+      i0 = 0;
+    double t = xi - i0;
+    double y0 = Vh[i0], y1 = Vh[i0 + 1];
+    double d0 = dVdx[i0] * dx, d1 = dVdx[i0 + 1] * dx;
+    double t2 = t * t, t3 = t * t * t;
+    return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * d0 + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * d1;
   } else if (r < grid[1][0]) {
     return innerV * pow(r, 2) + VR;
   } else {
