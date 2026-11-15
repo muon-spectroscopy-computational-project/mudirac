@@ -86,6 +86,110 @@ TEST_CASE("Uehling correction to Coulomb potential",
           Approx(Vhigh).margin(1e-3)); // This being a 0, we use absolute values
 }
 
+TEST_CASE("Uehling potential, cancellation-free finite-size kernel",
+          "[UehlingSpherePotential]") {
+  // Reference values from data/uehling_sphere_ref.py (mpmath, 40 digits)
+  struct UehlingRef {
+    int Z;
+    double R_fm, x, V; // x = r/R
+  };
+  vector<UehlingRef> refs = {
+    {82, 7.1, 0.01, -4420.8619722329687}, {82, 7.1, 0.5, -3992.0617712912353},
+    {82, 7.1, 0.99, -2659.6613644582458}, {82, 7.1, 1.0, -2620.1596811696094},
+    {82, 7.1, 1.5, -1447.0531678537094}, {82, 7.1, 4.0, -324.41078457627675},
+    {14, 4.0, 0.01, -1581.234188791387}, {14, 4.0, 0.5, -1430.7353466425679},
+    {14, 4.0, 0.99, -966.90696977011124}, {14, 4.0, 1.0, -953.29931105167961},
+    {14, 4.0, 1.5, -542.97490468111887}, {14, 4.0, 4.0, -134.40890407494777}
+  };
+
+  for (const UehlingRef &ref : refs) {
+    double R = ref.R_fm * Physical::fm;
+    double r = ref.x * R;
+
+    // Gauss-Legendre in theta reaches the reference with few nodes
+    // (r close to R needs more nodes, so it gets a looser bound)
+    UehlingSpherePotential ugauss(ref.Z, R, 400, false, true);
+    double tol_gauss = (ref.x == 0.99) ? 5e-8 : 1e-10;
+    REQUIRE(fabs(ugauss.V(r) / ref.V - 1) < tol_gauss);
+
+    // Trapezoidal rule at many steps: limited only by the step size
+    // (the original form of the kernel loses all precision inside the
+    // nucleus here)
+    UehlingSpherePotential ustable(ref.Z, R, 16000, true);
+    REQUIRE(fabs(ustable.V(r) / ref.V - 1) < 1.5e-6);
+  }
+
+  // The trapezoidal error shrinks monotonically as the steps grow, also inside
+  // the nucleus, where the original form of the kernel breaks down
+  vector<int> steps = {1000, 1200, 1400, 2000, 4000, 8000, 16000};
+  for (const UehlingRef &ref : refs) {
+    if (ref.Z != 82 || ref.x < 0.5 || ref.x > 1.0)
+      continue;
+    double R = ref.R_fm * Physical::fm;
+    double r = ref.x * R;
+    double err_prev = INFINITY;
+    for (int U : steps) {
+      UehlingSpherePotential ustable(ref.Z, R, U, true);
+      double err = ustable.V(r) / ref.V - 1;
+      REQUIRE(err < 0);
+      REQUIRE(fabs(err) < err_prev);
+      err_prev = fabs(err);
+    }
+  }
+
+  // The central value (r = 0, and below a low cutoff) uses the selected rule.
+  // With 2 nodes the trapezoidal grid holds only u = 0 and u = 1, where the
+  // weighted central kernel vanishes, while the Gauss rule does not: the value
+  // must be the Gauss sum of the r -> 0 limit of the kernel divided by r.
+  {
+    double Rc = 7.1 * Physical::fm;
+    double K = -2 * pow(Physical::alpha, 2) / 3 * (82 * 0.75 / (M_PI * pow(Rc, 3)));
+    double V2 = 0;
+    for (double xg : {-1 / sqrt(3.0), 1 / sqrt(3.0)}) {
+      double th = (xg + 1) * M_PI / 4, u = sin(th);
+      double g0 = u * Physical::alpha - 4 * Physical::c / u * exp(-2 * Physical::c * Rc / u) *
+                  (Rc * u * Physical::alpha / 2 + pow(u * Physical::alpha, 2) / 4);
+      V2 += M_PI / 4 * pow(cos(th), 2) * (1 + u * u / 2) * g0;
+    }
+    V2 *= K;
+    UehlingSpherePotential ug2(82, Rc, 2, false, true);
+    REQUIRE(V2 < 0);
+    REQUIRE(ug2.V(0) == Approx(V2).epsilon(1e-12));
+    REQUIRE(UehlingSpherePotential(82, Rc, 2, true).V(0) == 0);
+
+    // At ordinary node counts: the centre agrees with the reference
+    // (data/uehling_sphere_ref.py, r = 0) and joins the values just off centre
+    vector<pair<int, double>> centre = {{82, -4421.0316696091921}, {14, -1581.2938391256568}};
+    for (const pair<int, double> &cv : centre) {
+      double Rn = (cv.first == 82 ? 7.1 : 4.0) * Physical::fm;
+      UehlingSpherePotential ug(cv.first, Rn, 400, false, true);
+      REQUIRE(fabs(ug.V(0) / cv.second - 1) < 1e-10);
+      REQUIRE(fabs(ug.V(1e-4 * Rn) / ug.V(0) - 1) < 1e-7);
+      // Below a non-zero low cutoff the same central value is returned
+      double v0 = ug.V(0);
+      ug.set_exp_cutoffs(1e-3, INFINITY);
+      REQUIRE(ug.V(1e-12) == v0);
+    }
+  }
+
+  // Kernel selection: gauss takes precedence; a point nucleus keeps its own kernel
+  double R = 7.1 * Physical::fm;
+  REQUIRE(UehlingSpherePotential(82, R, 100).getKernelMode() == 0);
+  REQUIRE(UehlingSpherePotential(82, R, 100, true).getKernelMode() == 1);
+  REQUIRE(UehlingSpherePotential(82, R, 100, false, true).getKernelMode() == 2);
+  REQUIRE(UehlingSpherePotential(82, R, 100, true, true).getKernelMode() == 2);
+  REQUIRE(UehlingSpherePotential(82, -1, 100, true, true).getKernelMode() == 0);
+
+  // The options reach the potential through Atom::setUehling
+  DiracAtom da = DiracAtom(82, Physical::m_mu, 208, SPHERE);
+  da.setUehling(true, 100, 0, INFINITY, false, true);
+  REQUIRE(da.getPotentialUehling().getKernelMode() == 2);
+  da.setUehling(true, 100, 0, INFINITY, true, false);
+  REQUIRE(da.getPotentialUehling().getKernelMode() == 1);
+  da.setUehling(true, 100);
+  REQUIRE(da.getPotentialUehling().getKernelMode() == 0);
+}
+
 TEST_CASE("Background charge on grid potential", "[BkgGridPotential]") {
   double rc = 1, dx = 0.000001;
   int i0 = -100000, i1 = 10000;

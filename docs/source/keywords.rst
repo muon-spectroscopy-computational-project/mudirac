@@ -33,6 +33,8 @@ Boolean keywords
 These keywords can only have a value of TRUE or FALSE. In order to set them true, either the word 'TRUE' or the letter 'T' (regardless of case) work.
 
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
+* :literal:`uehling_stable`: for a finite-size nucleus, evaluate the Uehling integration kernel in a form without the cancellation between growing and decaying exponentials that loses precision inside the nucleus at large :literal:`uehling_steps`. Uses the same trapezoidal rule in *u* as the default. Has no effect for a point nucleus. Default is FALSE.
+* :literal:`uehling_gauss`: as :literal:`uehling_stable`, but integrating by Gauss-Legendre quadrature in :math:`\theta`, with :math:`u = \sin\theta` and :literal:`uehling_steps` nodes. This also removes the :math:`\sqrt{1-u^2}` endpoint behaviour that slows the trapezoidal rule, so far fewer steps are needed. Takes precedence over :literal:`uehling_stable`. Has no effect for a point nucleus. Default is FALSE.
 * :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_by_energy`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.

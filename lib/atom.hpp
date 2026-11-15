@@ -215,7 +215,8 @@ class Atom {
     return use_uehling;
   };
   void setUehling(bool s, int usteps = 1000, double cut_low = 0,
-                  double cut_high = INFINITY);
+                  double cut_high = INFINITY, bool stable = false,
+                  bool gauss = false);
   // Electronic background
   void setElectBkgConfig(bool s, ElectronicConfiguration econf,
                          double rho_eps = 1e-5, double max_r0 = -1,

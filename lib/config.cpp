@@ -30,6 +30,8 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
 
   // Boolean keywords
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false));        // Whether to use the Uehling potential correction
+  this->defineBoolNode("uehling_stable", InputNode<bool>(false, false));            // Uehling: cancellation-free finite-size kernel (trapezoidal rule)
+  this->defineBoolNode("uehling_gauss", InputNode<bool>(false, false));             // Uehling: cancellation-free finite-size kernel (Gauss-Legendre)
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));                // If true, write a simulated spectrum with the lines found
   this->defineBoolNode("sort_by_energy", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
   this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, perform least squares optimisation using user-provided experimental energies for the fermi model
@@ -196,7 +198,9 @@ DiracAtom MuDiracInputFile::makeAtom() {
   if (this->getBoolValue("uehling_correction")) {
     da.setUehling(true, this->getIntValue("uehling_steps"),
                   this->getDoubleValue("uehling_lowcut"),
-                  this->getDoubleValue("uehling_highcut"));
+                  this->getDoubleValue("uehling_highcut"),
+                  this->getBoolValue("uehling_stable"),
+                  this->getBoolValue("uehling_gauss"));
   }
 
   if (this->getStringValue("electronic_config") != "") {

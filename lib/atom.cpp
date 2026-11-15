@@ -251,14 +251,20 @@ array<double, 2> Atom::getFermi2Femto(Fermi2CoordinateSystem coord_sys) {
  *
  * @param  s:          Whether the Uehling potential should be on/off
  * @param  usteps:     Number of integration steps used for it (default = 1000)
+ * @param  cut_low:    Low cutoff (see UehlingSpherePotential::set_exp_cutoffs)
+ * @param  cut_high:   High cutoff (see UehlingSpherePotential::set_exp_cutoffs)
+ * @param  stable:     Use the cancellation-free finite-size kernel (default = false)
+ * @param  gauss:      Use the cancellation-free finite-size kernel with
+ * Gauss-Legendre quadrature (default = false)
  * @retval None
  */
-void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high) {
+void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high,
+                      bool stable, bool gauss) {
   use_uehling = s;
   if (s) {
     LOG(INFO) << "Initialising Uehling potential with " << usteps
               << " integration steps\n";
-    V_uehling = UehlingSpherePotential(Z, R, usteps);
+    V_uehling = UehlingSpherePotential(Z, R, usteps, stable, gauss);
     V_uehling.set_exp_cutoffs(cut_low, cut_high);
   }
   reset();
