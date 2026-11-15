@@ -113,6 +113,8 @@ class Atom {
 
   // Radius models
   double static sphereNuclearModel(int Z, int A);
+  // Total binding energy of the Z electrons of the neutral atom (Hartree)
+  double static electronBindingEnergy(int Z);
 
  protected:
 
@@ -122,6 +124,7 @@ class Atom {
   double R;                  // Nuclear radius
   NuclearRadiusModel rmodel; // Nuclear model
   bool reduced_mass;        // turn on reduced mass
+  bool nuclear_mass;        // reduced mass with the nuclear (not atomic) mass
 
   //Grid
   double rc = 1.0;   // Central radius
@@ -142,7 +145,8 @@ class Atom {
   Fermi2CoordinateSystem coord_system;
 
   Atom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-       double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true);
+       double radius = -1, double fc = 1.0,double dx = 0.005, bool reduced_mass = true,
+       bool nuclear_mass = false);
 
   // Basic getters
   double getZ() {
@@ -246,7 +250,8 @@ class DiracAtom : public Atom {
   double  opt_time;
 
   DiracAtom(int Z = 1, double m = 1, int A = -1, NuclearRadiusModel radius_model = POINT,
-            double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true);
+            double radius = -1, double fc = 1.0, double dx = 0.005, int ideal_minshell = -1, bool reduced_mass = true,
+            bool nuclear_mass = false);
 
   double getRestE() {
     return restE;
