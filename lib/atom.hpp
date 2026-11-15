@@ -133,6 +133,14 @@ class Atom {
   // Additional potential terms
   bool use_uehling = false;
   UehlingSpherePotential V_uehling;
+  // Uehling potential of the Fermi 2-term charge density (see setUehlingDensity)
+  bool uehling_fermi2 = false;
+  int uehling_shell_nodes = 12;
+  int uehling_steps = 100;
+  double uehling_cut_low = 0, uehling_cut_high = INFINITY;
+  UehlingFermi2Potential V_uehling_fermi2;
+  UehlingFermi2Potential makeUehlingFermi2(CoulombSpherePotential *coulomb, int usteps, int snodes,
+      double cut_low, double cut_high) const;
   bool use_econf = false;
   EConfPotential V_econf;
 
@@ -187,6 +195,13 @@ class Atom {
   EConfPotential getPotentialElectronic() {
     return V_econf;
   };
+  bool getUehlingDensityFermi2() {
+    return uehling_fermi2;
+  };
+  UehlingFermi2Potential getPotentialUehlingFermi2() {
+    return V_uehling_fermi2;
+  };
+  void setUehlingDensity(bool fermi2, int shell_nodes = 12);
 
   void setgrid(double rc, double dx);
 

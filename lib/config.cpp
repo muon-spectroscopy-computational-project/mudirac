@@ -27,6 +27,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
   this->defineStringNode("nuclear_model", InputNode<string>("POINT", false)); // Model used for nucleus
   this->defineStringNode("electronic_config", InputNode<string>(""));         // Electronic configuration for background charge
   this->defineStringNode("ideal_atom_minshell", InputNode<string>(""));       // Shell above which to treat the atom as ideal, and simply use standard hydrogen-like orbitals
+  this->defineStringNode("uehling_density", InputNode<string>("SPHERE", false)); // Charge density of the Uehling potential (SPHERE or FERMI2)
 
   // Boolean keywords
   this->defineBoolNode("uehling_correction", InputNode<bool>(false, false));        // Whether to use the Uehling potential correction
@@ -60,6 +61,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
   this->defineIntNode("max_nodes_iter", InputNode<int>(100));    // Max iterations in nodes search
   this->defineIntNode("max_state_iter", InputNode<int>(100));    // Max iterations in state search
   this->defineIntNode("uehling_steps", InputNode<int>(100));     // Uehling correction integration steps
+  this->defineIntNode("uehling_shell_nodes", InputNode<int>(12)); // Gauss-Legendre nodes per panel for uehling_density FERMI2
   this->defineIntNode("xr_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in .xr.out file
   this->defineIntNode("state_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in Dirac state output .{state_name}.out files
   this->defineIntNode("verbosity", InputNode<int>(1));           // Verbosity level (1 to 3)
@@ -192,6 +194,23 @@ DiracAtom MuDiracInputFile::makeAtom() {
   da.maxit_E = this->getIntValue("max_E_iter");
   da.maxit_nodes = this->getIntValue("max_nodes_iter");
   da.maxit_state = this->getIntValue("max_state_iter");
+
+  string uehling_density = upperString(this->getStringValue("uehling_density"));
+  if (uehling_density != "SPHERE" && uehling_density != "FERMI2") {
+    LOG(ERROR) << SPECIAL << "Invalid uehling_density " << uehling_density << " (must be SPHERE or FERMI2)\n";
+    throw invalid_argument("Invalid uehling_density parameter in input file");
+  }
+  if (uehling_density == "FERMI2") {
+    if (nucmodel != FERMI2) {
+      LOG(ERROR) << SPECIAL << "uehling_density FERMI2 needs nuclear_model FERMI2\n";
+      throw invalid_argument("uehling_density FERMI2 needs nuclear_model FERMI2");
+    }
+    if (this->getDoubleValue("uehling_lowcut") != 0) {
+      LOG(ERROR) << SPECIAL << "uehling_density FERMI2 does not support uehling_lowcut\n";
+      throw invalid_argument("uehling_density FERMI2 does not support uehling_lowcut");
+    }
+    da.setUehlingDensity(true, this->getIntValue("uehling_shell_nodes"));
+  }
 
   if (this->getBoolValue("uehling_correction")) {
     da.setUehling(true, this->getIntValue("uehling_steps"),
