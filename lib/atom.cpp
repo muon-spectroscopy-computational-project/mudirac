@@ -187,15 +187,32 @@ void Atom::setFermi2(double thickness, double fermi_c) {
     }
   }
 
+  // restored if the Uehling potential of the new density is refused
+  CoulombSpherePotential *coulomb_prev = V_coulomb;
+  Fermi2ParametersData fermi2_prev = fermi2;
+
   // set object attributes for fermi 2pf in fm
   fermi2.c = fermi_c/Physical::fm;
   fermi2.t = thickness/Physical::fm;
 
   V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
   reset();
+  if (use_uehling && uehling_fermi2) {
+    try {
+      V_uehling_fermi2 = makeUehlingFermi2(V_coulomb, uehling_steps, uehling_shell_nodes,
+                                           uehling_cut_low, uehling_cut_high);
+    } catch (...) {
+      V_coulomb = coulomb_prev;
+      fermi2 = fermi2_prev;
+      throw;
+    }
+  }
 }
 
 void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2CoordinateSystem coord_sys) {
+  // restored if the Uehling potential of the new density is refused
+  CoulombSpherePotential *coulomb_prev = V_coulomb;
+  Fermi2ParametersData fermi2_prev = fermi2;
   string coordinate_system_state;
   if (coord_sys == POLAR) {
     coordinate_system_state = "(rms radius, theta)";
@@ -216,6 +233,16 @@ void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2Coor
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
   V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
   reset();
+  if (use_uehling && uehling_fermi2) {
+    try {
+      V_uehling_fermi2 = makeUehlingFermi2(V_coulomb, uehling_steps, uehling_shell_nodes,
+                                           uehling_cut_low, uehling_cut_high);
+    } catch (...) {
+      V_coulomb = coulomb_prev;
+      fermi2 = fermi2_prev;
+      throw;
+    }
+  }
 }
 
 /**
@@ -254,14 +281,89 @@ array<double, 2> Atom::getFermi2Femto(Fermi2CoordinateSystem coord_sys) {
  * @retval None
  */
 void Atom::setUehling(bool s, int usteps, double cut_low, double cut_high) {
+  // With the Fermi 2-term density, build its potential first: a refusal leaves
+  // the atom as it was
+  UehlingFermi2Potential vf;
+  if (s && uehling_fermi2) {
+    vf = makeUehlingFermi2(V_coulomb, usteps, uehling_shell_nodes, cut_low, cut_high);
+  }
   use_uehling = s;
   if (s) {
     LOG(INFO) << "Initialising Uehling potential with " << usteps
               << " integration steps\n";
     V_uehling = UehlingSpherePotential(Z, R, usteps);
     V_uehling.set_exp_cutoffs(cut_low, cut_high);
+    uehling_steps = usteps;
+    uehling_cut_low = cut_low;
+    uehling_cut_high = cut_high;
+    if (uehling_fermi2) {
+      V_uehling_fermi2 = vf;
+    }
   }
   reset();
+}
+
+/**
+ * @brief  Choose the charge density of the Uehling potential term
+ * @note   Choose between the Uehling potential of a uniform sphere of radius R
+ * (the default) and that of the Fermi 2-term charge density of the Coulomb
+ * potential, with the same c and t (only for a FERMI2 nuclear model). The
+ * Fermi 2-term version is rebuilt whenever the Fermi parameters change.
+ * Calling this function resets all computed states.
+ *
+ * @param  fermi2:       If true, use the Fermi 2-term charge density
+ * @param  shell_nodes:  Gauss-Legendre nodes per panel of the superposition of
+ * uniform spheres (default = 12)
+ * @retval None
+ */
+void Atom::setUehlingDensity(bool fermi2, int shell_nodes) {
+  if (fermi2 && rmodel != FERMI2) {
+    throw invalid_argument("The Uehling potential of the Fermi 2-term density needs a FERMI2 nuclear model");
+  }
+  if (shell_nodes < 1) {
+    throw invalid_argument("The Uehling potential of the Fermi 2-term density needs at least 1 shell node");
+  }
+  // Build first: a refusal leaves the atom as it was
+  UehlingFermi2Potential vf;
+  if (use_uehling && fermi2) {
+    vf = makeUehlingFermi2(V_coulomb, uehling_steps, shell_nodes, uehling_cut_low, uehling_cut_high);
+  }
+  uehling_fermi2 = fermi2;
+  uehling_shell_nodes = shell_nodes;
+  if (use_uehling && uehling_fermi2) {
+    V_uehling_fermi2 = vf;
+  }
+  reset();
+}
+
+/**
+ * @brief  Build the Uehling potential of a Fermi 2-term density
+ * @note   Build, without changing the atom, the Uehling potential of the charge
+ * density of the given Coulomb potential (its c and t), with the given steps,
+ * shell nodes and cutoffs. Throws invalid_argument if they are refused.
+ *
+ * @param  coulomb:   Coulomb potential (must be a finite Fermi 2-term one)
+ * @param  usteps:    Steps of the integration in w
+ * @param  snodes:    Gauss-Legendre nodes per shell panel
+ * @param  cut_low:   Low cutoff (must be zero)
+ * @param  cut_high:  High cutoff
+ * @retval The potential
+ */
+UehlingFermi2Potential Atom::makeUehlingFermi2(CoulombSpherePotential *coulomb, int usteps, int snodes,
+    double cut_low, double cut_high) const {
+  CoulombFermi2Potential *vc = dynamic_cast<CoulombFermi2Potential *>(coulomb);
+  if (vc == nullptr || R <= 0) {
+    throw invalid_argument("The Uehling potential of the Fermi 2-term density needs a finite FERMI2 nucleus");
+  }
+  if (cut_low != 0) {
+    throw invalid_argument("The Uehling potential of the Fermi 2-term density does not support a low cutoff");
+  }
+  LOG(INFO) << "Initialising Uehling potential of the Fermi 2-term density, c = " << vc->getc()
+            << ", t = " << vc->getT() << ", " << usteps << " steps, "
+            << snodes << " shell nodes\n";
+  UehlingFermi2Potential vf(Z, vc->getc(), vc->getT(), usteps, snodes);
+  vf.set_exp_cutoffs(cut_low, cut_high);
+  return vf;
 }
 
 /**
@@ -338,7 +440,7 @@ double Atom::getV(double r) {
 
   Vout = V_coulomb->V(r);
   if (use_uehling) {
-    Vout += V_uehling.V(r);
+    Vout += uehling_fermi2 ? V_uehling_fermi2.V(r) : V_uehling.V(r);
   }
   if (use_econf) {
     Vout += V_econf.V(r);

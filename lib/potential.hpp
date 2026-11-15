@@ -11,7 +11,9 @@
  */
 
 #include <cmath>
+#include <cstdint>
 #include <stdexcept>
+#include <unordered_map>
 #include <vector>
 
 #include "constants.hpp"
@@ -78,6 +80,9 @@ class CoulombFermi2Potential : public CoulombSpherePotential {
 
   double getc() {
     return c;
+  }
+  double getT() {
+    return T;
   }
 
  protected:
@@ -179,6 +184,78 @@ class EConfPotential : public BkgGridPotential {
 
  protected:
   ElectronicConfiguration ec;
+};
+
+/**
+ * @brief  Uehling correction term for a Fermi 2-term charge distribution
+ * @note   Uehling potential of the charge density f(s) = 1/(1 + exp((s - c)/a)),
+ * a = T/(4 ln 3), normalised to Z: the same density as CoulombFermi2Potential
+ * with the same c and T. The density is written as a superposition of uniform
+ * spheres of radius s weighted by -f'(s), so that
+ *
+ * V(r) = -(2 alpha/(3 c r)) (Z/Q) sum_j w_j (-f'(s_j)) J(r; s_j),
+ * Q = sum_j w_j (4 pi s_j^3/3) (-f'(s_j)),
+ *
+ * where J is the uniform-sphere Uehling integral over u in the cancellation-free
+ * form (only decaying exponentials), done by the trapezoidal rule in w with
+ * u = sech(w) and usteps steps. s runs over Gauss-Legendre nodes (snodes per
+ * panel) on panels of width at most 2a over [max(0, c - 40a), c + 40a]; the panel that
+ * holds r is split at s = r. The sums over the panels above and below r are
+ * precomputed, and values are cached per radius, never interpolated.
+ * T = 0 is the uniform sphere of radius c (a single shell at s = c); T < 0 is
+ * refused.
+ *
+ * @retval None
+ */
+class UehlingFermi2Potential : Potential {
+ public:
+  UehlingFermi2Potential() {}; // empty until built
+  UehlingFermi2Potential(double Z, double c, double T, int usteps = 100, int snodes = 12,
+                         bool direct = false);
+  double V(double r) override;
+
+  void set_exp_cutoffs(double low, double high) {
+    exp_cutoff_low = low;
+    exp_cutoff_high = high;
+  };
+
+  double getc() {
+    return c;
+  };
+  double getT() {
+    return T;
+  };
+  int getUsteps() {
+    return nu;
+  };
+  int getSnodes() {
+    return ns;
+  };
+  long cacheSize() {
+    return (long)memo.size();
+  };
+  double shapeCharge();           // Q of the fixed panels (Bohr^3)
+  double computeDirect(double r); // plain double sum, the reference for the precomputed evaluation
+
+  static double hOut(double x); // (x - 1) + (x + 1) exp(-2x), with a series for x < 1
+
+ protected:
+  bool direct = false;
+  double Z = 1, c = 0, T = 1, a = 1, smin = 0, smax = 0, h0 = 0.18;
+  int nu = 100, ns = 12, npan = 0;
+  double exp_cutoff_high = INFINITY, exp_cutoff_low = 0.0;
+  vector<double> gx, gw;           // Gauss-Legendre nodes and weights on [-1, 1], ns points
+  vector<double> edges;            // npan + 1 panel edges in s
+  vector<double> fs, fq, fqn;      // fixed nodes, panel by panel: s, w (-f'), w (4 pi s^3/3)(-f')
+  vector<double> bu, bW, bku, biu; // w-rule: u, weight, 2c/u, u/(2c)
+  vector<double> Tab, Tbe;         // npan x (nu + 1): sums over the panels above (about B_p) and below (about A_p)
+  vector<double> QAab, QNab, QNbe; // per panel: sum of q above, sum of qn above, sum of qn below
+  unordered_map<uint64_t, double> memo;
+  double compute(double r);
+  void splitNodes(int p, double r, vector<double> &s, vector<double> &q, vector<double> &qn) const;
+  void panelNodes(double A, double B, vector<double> &s, vector<double> &q, vector<double> &qn) const;
+  double mfp(double s) const;
+  double farSum(double r, const vector<double> &s, const vector<double> &q) const;
 };
 
 #endif
