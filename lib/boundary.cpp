@@ -58,7 +58,7 @@ void boundaryDiracCoulomb(DiracState &state, double m, double Z, double R) {
     // Point like
     // We set P, the major component, as having a prefactor of 1, and scale Q accordingly
     state.P[0] = pow(state.grid[0], gamma);
-    state.Q[0] = Z * Physical::alpha / (gamma - k) * state.P[0];
+    state.Q[0] = -Z * Physical::alpha / (gamma - k) * state.P[0];
   } else {
     // Finite size
     if (k < 0) {
