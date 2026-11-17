@@ -63,7 +63,8 @@ ElectronicConfiguration::ElectronicConfiguration(string config, int Z, double mu
         LOG(TRACE) << "Channel l = " << l << ", population = " << epop[n-1][l] << "\n";
       }
     }
-  } else {
+  }
+  else {
     Zshell = vector<int>(epop.size(), Z);
   }
 }
