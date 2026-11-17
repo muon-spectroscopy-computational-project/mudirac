@@ -381,7 +381,7 @@ double Atom::sphereNuclearModel(int Z, int A) {
     return Physical::fm * getIsotopeRadius(Z, A);
   } catch (invalid_argument e) {
     LOG(TRACE) << "Isotope not found; falling back on default model for "
-               "nuclear radius";
+                  "nuclear radius";
     return 1.2 * Physical::fm * pow(A, 1.0 / 3.0);
   }
 }
@@ -841,7 +841,7 @@ DiracState DiracAtom::convergeState(int n, int k) {
     state = initState(state.E, k);
 
     vector<vector<double>> PQ =
-                          hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
+      hydrogenicDiracWavefunction(state.grid, Z, mu, n, k);
     state.P = PQ[0];
     state.Q = PQ[1];
 

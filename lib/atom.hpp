@@ -109,7 +109,7 @@ class Atom {
   int maxit_state = 100;
 
   bool write_debug =
-    false; // If true, files will be printed to store details of the process
+  false; // If true, files will be printed to store details of the process
 
   // Radius models
   double static sphereNuclearModel(int Z, int A);
