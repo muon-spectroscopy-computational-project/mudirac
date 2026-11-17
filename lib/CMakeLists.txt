@@ -52,7 +52,7 @@ if(NOT Ceres_FOUND)
   if(NOT glog_FOUND)
     FetchContent_Declare(glog
       GIT_REPOSITORY https://github.com/google/glog.git
-      GIT_TAG        v0.6.0
+      GIT_TAG        v0.7.1
       GIT_SHALLOW    TRUE
       SYSTEM)
     set(WITH_GFLAGS   OFF CACHE BOOL "" FORCE)
