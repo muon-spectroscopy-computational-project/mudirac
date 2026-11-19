@@ -143,9 +143,17 @@ double CoulombFermi2Potential::V(double r) {
  * @param  Z:          Nuclear charge
  * @param  R:          Nuclear radius (if omitted or negative, point-like)
  * @param  usteps:     Steps used to integrate numerically over 'u' parameter
+ * (with gauss = true, the number of Gauss-Legendre nodes)
+ * @param  stable:     If true and R > 0, evaluate the kernel in a form free of
+ * cancellation (the common factor exp(-2Rc/u) taken out, so that only decaying
+ * exponentials remain), integrated with the trapezoidal rule in u
+ * @param  gauss:      If true and R > 0, the same cancellation-free kernel,
+ * integrated by Gauss-Legendre quadrature in theta with u = sin(theta).
+ * Takes precedence over stable
  * @retval
  */
-UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps) {
+UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps,
+    bool stable, bool gauss) {
   this->Z = Z;
   this->R = R;
   this->usteps = usteps;
@@ -184,6 +192,35 @@ UehlingSpherePotential::UehlingSpherePotential(double Z, double R, int usteps) {
   }
 
   K = -2 * pow(Physical::alpha, 2) / 3 * rho;
+
+  // Cancellation-free finite-size kernel (the point-like kernel has no cancellation)
+  kernel_mode = (R > 0) ? (gauss ? 2 : (stable ? 1 : 0)) : 0;
+  if (kernel_mode == 2) {
+    vector<double> gx, gw;
+    gaussLegendre(usteps, gx, gw);
+    gu = vector<double>(usteps);
+    gW = vector<double>(usteps);
+    gu24 = vector<double>(usteps);
+    for (int j = 0; j < usteps; ++j) {
+      // theta in (0, pi/2); du = cos(theta) dtheta, and sqrt(1 - u^2) = cos(theta)
+      double th = (gx[j] + 1.0) * (M_PI / 4.0);
+      double u = sin(th), cu = cos(th);
+      gu[j] = u;
+      gW[j] = gw[j] * (M_PI / 4.0) * cu * (cu * (1 + 0.5 * u * u));
+      gu24[j] = pow(u * Physical::alpha, 2.0) / 4.0;
+    }
+    // Central value (r -> 0, and below the low cutoff) by the same rule: the
+    // r -> 0 limit of the kernel divided by r, with a = R*u*alpha/2,
+    //   u*alpha - (4c/u)*exp(-2cR/u)*(a + (u*alpha)^2/4)
+    double uint0_gauss = 0;
+    for (int j = 0; j < usteps; ++j) {
+      double u = gu[j];
+      double a = R * u * Physical::alpha / 2;
+      uint0_gauss += gW[j] * (u * Physical::alpha -
+                              4 * Physical::c / u * exp(-2 * Physical::c * R / u) * (a + gu24[j]));
+    }
+    uint0 = uint0_gauss;
+  }
 }
 
 /**
@@ -292,12 +329,35 @@ double UehlingSpherePotential::V(double r) {
   } else if (r <= exp_cutoff_low * 0.5 * du * Physical::alpha) {
     return K * uint0;
   }
+  // Cancellation-free kernel, Gauss-Legendre in theta
+  if (kernel_mode == 2) {
+    double gans = 0;
+    for (int j = 0; j < (int)gu.size(); ++j) {
+      double u = gu[j];
+      double a = R * u * Physical::alpha / 2;
+      double em = exp(-2 * Physical::c * fabs(R - r) / u);
+      double ep = exp(-2 * Physical::c * (R + r) / u);
+      double y = (r <= R) ? (r * u * Physical::alpha - (em - ep) * (a + gu24[j]))
+                 : (em * (a - gu24[j]) + ep * (a + gu24[j]));
+      gans += y * gW[j];
+    }
+    return K / r * gans;
+  }
   // Fill in the u integration kernel
   uarg[0] = 0;
   for (int i = 1; i < usteps; ++i) {
     double u = i * du;
     if (R <= 0) {
       uarg[i] = ukernel_point(u, r);
+    } else if (kernel_mode == 1) {
+      // Cancellation-free kernel, with a = R*u*alpha/2:
+      //   r <= R: r*u*alpha - (exp(-2c(R-r)/u) - exp(-2c(R+r)/u))*(a + (u*alpha)^2/4)
+      //   r >  R: exp(-2c(r-R)/u)*(a - (u*alpha)^2/4) + exp(-2c(r+R)/u)*(a + (u*alpha)^2/4)
+      double a = R * u * Physical::alpha / 2;
+      double em = exp(-2 * Physical::c * fabs(R - r) / u);
+      double ep = exp(-2 * Physical::c * (R + r) / u);
+      uarg[i] = (r <= R) ? (r * u * Physical::alpha - (em - ep) * (a + u24c2[i]))
+                : (em * (a - u24c2[i]) + ep * (a + u24c2[i]));
     } else if (r > R) {
       uarg[i] = ukernel_r_greater(i, r);
     } else {

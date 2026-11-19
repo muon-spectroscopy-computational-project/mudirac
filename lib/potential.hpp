@@ -96,12 +96,17 @@ class CoulombFermi2Potential : public CoulombSpherePotential {
  */
 class UehlingSpherePotential : Potential {
  public:
-  UehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100);
+  UehlingSpherePotential(double Z = 1.0, double R = -1, int usteps = 100,
+                         bool stable = false, bool gauss = false);
   double V(double r) override;
 
   void set_exp_cutoffs(double low, double high) {
     exp_cutoff_low = low;
     exp_cutoff_high = high;
+  };
+
+  int getKernelMode() {
+    return kernel_mode;
   };
 
   static double ukernel_r_greater(double u, double r, double R);
@@ -121,6 +126,11 @@ class UehlingSpherePotential : Potential {
   double Z, R, rho, K, V0, du, uint0;
   int usteps;
   vector<double> uarg, uker, u24c2, uker_great, uker_small;
+  // Finite-size kernel: 0 = original form, 1 = cancellation-free form with the
+  // trapezoidal rule in u, 2 = cancellation-free form with Gauss-Legendre in
+  // theta (u = sin(theta)); gu, gW, gu24 hold u, weights and (u*alpha)^2/4
+  int kernel_mode = 0;
+  vector<double> gu, gW, gu24;
 };
 
 /**

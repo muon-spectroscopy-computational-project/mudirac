@@ -221,6 +221,47 @@ TEST_CASE("Trapezoidal integration", "[trapzInt]")
     REQUIRE(trapzIntTest(exp, 1e-2, 1, 1000, true, true) == Approx(exp(1) - exp(1e-2)));
 }
 
+TEST_CASE("Gauss-Legendre quadrature", "[gaussLegendre]")
+{
+    vector<double> x, w;
+
+    // Three points: nodes 0, +-sqrt(3/5), weights 8/9 and 5/9
+    gaussLegendre(3, x, w);
+    REQUIRE(x.size() == 3);
+    REQUIRE(x[0] == Approx(-sqrt(0.6)).epsilon(1e-14));
+    REQUIRE(x[1] == Approx(0.0).margin(1e-15));
+    REQUIRE(x[2] == Approx(sqrt(0.6)).epsilon(1e-14));
+    REQUIRE(w[0] == Approx(5.0 / 9.0).epsilon(1e-14));
+    REQUIRE(w[1] == Approx(8.0 / 9.0).epsilon(1e-14));
+    REQUIRE(w[2] == Approx(5.0 / 9.0).epsilon(1e-14));
+
+    // n nodes integrate x^k exactly on [-1, 1] for k <= 2n-1
+    for (int n = 1; n <= 40; n += 13) {
+        gaussLegendre(n, x, w);
+        for (int i = 1; i < n; ++i) {
+            REQUIRE(x[i] > x[i - 1]);
+        }
+        for (int k = 0; k <= 2 * n - 1; ++k) {
+            double s = 0;
+            for (int i = 0; i < n; ++i) {
+                s += w[i] * pow(x[i], k);
+            }
+            double exact = (k % 2 == 0) ? 2.0 / (k + 1) : 0.0;
+            REQUIRE(s == Approx(exact).margin(1e-13));
+        }
+    }
+
+    // A smooth integrand converges fast
+    gaussLegendre(20, x, w);
+    double s = 0;
+    for (int i = 0; i < 20; ++i) {
+        s += w[i] * exp(x[i]);
+    }
+    REQUIRE(s == Approx(exp(1.0) - exp(-1.0)).epsilon(1e-14));
+
+    REQUIRE_THROWS_AS(gaussLegendre(0, x, w), invalid_argument);
+}
+
 TEST_CASE("Shooting integration", "[shootRungeKutta]")
 {
     /* 
