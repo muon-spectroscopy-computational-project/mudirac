@@ -83,10 +83,13 @@ double TransitionMatrix::totalRate() {
  * radius, depending on which one is bigger (default = 1)
  * @param  dx:   Logarithmic step of the grid (default = 0.005)
  * @param  reduced_mass: Whether to use reduced mass (default = true)
+ * @param  nuclear_mass: If true (and reduced_mass is), compute the reduced mass
+ * with the mass of the nucleus, M_atom - Z m_e + B_e(Z)/c^2, instead of the
+ * atomic mass (default = false)
  * @retval
  */
 Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
-           double radius, double fc, double dx, bool reduced_mass) {
+           double radius, double fc, double dx, bool reduced_mass, bool nuclear_mass) {
   // Set the properties
   this->Z = Z;
   this->A = A;
@@ -94,6 +97,7 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
   rmodel = radius_model;
 
   this->reduced_mass = reduced_mass;
+  this->nuclear_mass = nuclear_mass;
   // Sanity checks
   if (Z <= 0) {
     throw invalid_argument("Z must be positive");
@@ -107,7 +111,14 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
 
   if ((A > 0) && (reduced_mass) ) {
     M = getIsotopeMass(Z, A);
-    mu = effectiveMass(m, M * Physical::amu);
+    if (nuclear_mass) {
+      // Nuclear mass: subtract electron rest masses and add back their binding energy
+      double M_nuc = M * Physical::amu - Z * Physical::m_e +
+                     electronBindingEnergy(Z) / (Physical::c * Physical::c);
+      mu = effectiveMass(m, M_nuc);
+    } else {
+      mu = effectiveMass(m, M * Physical::amu);
+    }
   } else {
     mu = m;
   }
@@ -387,6 +398,21 @@ double Atom::sphereNuclearModel(int Z, int A) {
 }
 
 /**
+ * @brief  Total electron binding energy of the neutral atom
+ * @note   B_e(Z) = 14.4381 Z^2.39 + 1.55468e-6 Z^5.35 eV, the approximate formula
+ * of Lunney, Pearson and Thibault, as given in the Atomic Mass Evaluation
+ * (AME2020 part II, M. Wang et al., Chin. Phys. C 45, 030003 (2021), eqs. 1
+ * and 2), converted to Hartree with the CODATA 2022 Hartree energy
+ * 27.211386245981 eV
+ *
+ * @param  Z:   Atomic number
+ * @retval      Binding energy (Hartree)
+ */
+double Atom::electronBindingEnergy(int Z) {
+  return (14.4381 * pow(Z, 2.39) + 1.55468e-6 * pow(Z, 5.35)) / 27.211386245981;
+}
+
+/**
  * @brief  Initialise a DiracAtom class instance
  * @note   Creates a DiracAtom object defined by the given properties
  *
@@ -403,11 +429,13 @@ double Atom::sphereNuclearModel(int Z, int A) {
  * Dirac hydrogen-like solution as an approximation. Never used if negative
  * (default = -1)
  * @param reduced_mass: Whether to use reduced mass (default = true)
+ * @param nuclear_mass: Whether the reduced mass uses the nuclear mass (default = false)
  * @retval
  */
 DiracAtom::DiracAtom(int Z, double m, int A, NuclearRadiusModel radius_model,
-                     double radius, double fc, double dx, int ideal_minshell, bool reduced_mass)
-  : Atom(Z, m, A, radius_model, radius, fc, dx, reduced_mass) {
+                     double radius, double fc, double dx, int ideal_minshell, bool reduced_mass,
+                     bool nuclear_mass)
+  : Atom(Z, m, A, radius_model, radius, fc, dx, reduced_mass, nuclear_mass) {
   restE = mu * pow(Physical::c, 2);
   LOG(DEBUG) << "Rest energy = " << restE / Physical::eV << " eV\n";
   idshell = ideal_minshell;
