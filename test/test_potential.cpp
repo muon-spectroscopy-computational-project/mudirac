@@ -44,6 +44,57 @@ TEST_CASE("Coulomb Fermi-2 potential", "[CoulombFermi2Potential]") {
   REQUIRE(point->V(3.981e-5) == Approx(-23338.5869).epsilon(1e-3));
 }
 
+TEST_CASE("Coulomb Fermi-2 potential, grid settings", "[CoulombFermi2Potential]") {
+  AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::warning,
+                                      AixLog::Type::all);
+  // Pb-208 with R = 7.102018661385413 fm, t = 2.3 fm
+  double R = 7.102018661385413 * Physical::fm;
+  double t = 2.3 * Physical::fm;
+
+  // Reference values from data/fermi2_coulomb_ref.py (mpmath, 40 digits),
+  // at r = x*c
+  vector<pair<double, double>> refs = {
+    {0.1, -939016.31956046096}, {0.5, -865170.92018901327},
+    {1.0, -642145.94556580227}, {1.5, -435445.28385701454},
+    {3.0, -217733.74136103255}
+  };
+  CoulombFermi2Potential vlin(82, R, 208, t, -1);
+  CoulombFermi2Potential vherm(82, R, 208, t, -1, 5000, true);
+  REQUIRE(vherm.getc() == vlin.getc());
+  double maxerr_lin = 0;
+  for (const pair<double, double> &ref : refs) {
+    double r = ref.first * vlin.getc();
+    // Gauss-Legendre moments with cubic Hermite read-back: near machine precision
+    REQUIRE(fabs(vherm.V(r) / ref.second - 1) < 1e-11);
+    maxerr_lin = max(maxerr_lin, fabs(vlin.V(r) / ref.second - 1));
+  }
+  // The default construction carries a grid error of order 1e-6
+  REQUIRE(maxerr_lin > 1e-7);
+
+  REQUIRE_THROWS_AS(CoulombFermi2Potential(82, R, 208, t, -1, 1), invalid_argument);
+
+  // K1-L3 (2p3/2 - 1s1/2) of muonic Pb-208 through Atom::setFermi2Grid
+  auto k1l3 = [&](int csteps, bool hermite) {
+    DiracAtom da = DiracAtom(82, Physical::m_mu, 208, FERMI2, 7.102018661385413);
+    da.setFermi2Grid(csteps, hermite);
+    da.setFermi2(t);
+    return (da.getState(2, 1, true).E - da.getState(1, 0, true).E) / Physical::eV;
+  };
+  double E_default = k1l3(5000, false);
+  double E_lin_fine = k1l3(80000, false);
+  double E_herm = k1l3(5000, true);
+  double E_herm_fine = k1l3(80000, true);
+  // The Hermite construction is converged at the default grid size...
+  REQUIRE(fabs(E_herm - E_herm_fine) < 1e-3);
+  // ...and agrees with the linear construction on a 16 times finer grid
+  REQUIRE(fabs(E_herm - E_lin_fine) < 0.1);
+  // while the default construction sits about 24 eV below (issue #86)
+  REQUIRE(E_herm - E_default > 20.0);
+
+  DiracAtom da = DiracAtom(82, Physical::m_mu, 208, FERMI2);
+  REQUIRE_THROWS_AS(da.setFermi2Grid(1, false), invalid_argument);
+}
+
 TEST_CASE("Uehling correction to Coulomb potential",
           "[CoulombSpherePotential]") {
   UehlingSpherePotential cpot = UehlingSpherePotential(1, 1e-4, 100);

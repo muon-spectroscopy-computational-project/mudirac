@@ -33,6 +33,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
   this->defineBoolNode("write_spec", InputNode<bool>(false, false));                // If true, write a simulated spectrum with the lines found
   this->defineBoolNode("sort_by_energy", InputNode<bool>(false, false));                  // If true, sort output transitions by energy in report
   this->defineBoolNode("optimise_fermi_parameters", InputNode<bool>(false, false)); // If true, perform least squares optimisation using user-provided experimental energies for the fermi model
+  this->defineBoolNode("fermi2_hermite", InputNode<bool>(false, false));            // Fermi 2-term potential: Gauss-Legendre moments and cubic Hermite read-back
 
   // Double keywords
   this->defineDoubleNode("mass", InputNode<double>(Physical::m_mu));      // Mass of orbiting particle (default: muon mass)
@@ -62,6 +63,7 @@ MuDiracInputFile::MuDiracInputFile() : BaseInputFile() {
   this->defineIntNode("uehling_steps", InputNode<int>(100));     // Uehling correction integration steps
   this->defineIntNode("xr_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in .xr.out file
   this->defineIntNode("state_print_precision", InputNode<int>(-1)); // Number of digits to print out in values in Dirac state output .{state_name}.out files
+  this->defineIntNode("fermi2_csteps", InputNode<int>(5000));    // Grid size of the Fermi 2-term Coulomb potential
   this->defineIntNode("verbosity", InputNode<int>(1));           // Verbosity level (1 to 3)
   this->defineIntNode("output", InputNode<int>(1));              // Output level (1 to 3)
   // Vector string keywords
@@ -207,6 +209,8 @@ DiracAtom MuDiracInputFile::makeAtom() {
                          this->getDoubleValue("econf_rin_max"),
                          this->getDoubleValue("econf_rout_min"));
   }
+
+  da.setFermi2Grid(this->getIntValue("fermi2_csteps"), this->getBoolValue("fermi2_hermite"));
 
   if (fermi_t ==-1) {
     fermi_t = Physical::fermi2_thickness;
