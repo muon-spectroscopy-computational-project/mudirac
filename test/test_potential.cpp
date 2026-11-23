@@ -93,6 +93,13 @@ TEST_CASE("Coulomb Fermi-2 potential, grid settings", "[CoulombFermi2Potential]"
 
   DiracAtom da = DiracAtom(82, Physical::m_mu, 208, FERMI2);
   REQUIRE_THROWS_AS(da.setFermi2Grid(1, false), invalid_argument);
+  // shootPotentialLog initialises three entries, so three points is the minimum in both modes
+  for (bool hermite : {false, true}) {
+    REQUIRE_THROWS_AS(da.setFermi2Grid(2, hermite), invalid_argument);
+    REQUIRE_THROWS_AS(CoulombFermi2Potential(82, R, 208, t, -1, 2, hermite), invalid_argument);
+    CoulombFermi2Potential vmin(82, R, 208, t, -1, 3, hermite);
+    REQUIRE(std::isfinite(vmin.V(R)));
+  }
 }
 
 TEST_CASE("Uehling correction to Coulomb potential",

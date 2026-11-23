@@ -84,8 +84,8 @@ CoulombFermi2Potential::CoulombFermi2Potential(double Z, double R, double A,
 
   LOG(INFO) << "Initialising Coulomb Fermi-2 potential, c = " << c << "\n";
 
-  if (csteps < 2) {
-    throw invalid_argument("CoulombFermi2Potential needs at least 2 grid steps");
+  if (csteps < 3) {
+    throw invalid_argument("CoulombFermi2Potential needs at least 3 grid points");
   }
   this->hermite = hermite;
 

@@ -229,13 +229,13 @@ void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2Coor
  * potential built by every later call of setFermi2 or setFermi2Femto, so they
  * must be set before those.
  *
- * @param  csteps:   Number of grid points (default = 5000, at least 2)
+ * @param  csteps:   Number of grid points (default = 5000, at least 3)
  * @param  hermite:  Gauss-Legendre moments and cubic Hermite read-back (default = false)
  * @retval None
  */
 void Atom::setFermi2Grid(int csteps, bool hermite) {
-  if (csteps < 2) {
-    throw invalid_argument("The Fermi 2-term potential grid needs at least 2 steps");
+  if (csteps < 3) {
+    throw invalid_argument("The Fermi 2-term potential grid needs at least 3 points");
   }
   fermi2_csteps = csteps;
   fermi2_hermite = hermite;
