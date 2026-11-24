@@ -77,6 +77,78 @@ double trapzInt(double dx, vector<double> y) {
 }
 
 /**
+ * @brief  Legendre polynomial and its derivative
+ * @note   Evaluate P_n(t) by the Bonnet recurrence
+ *
+ * k P_k(t) = (2k - 1) t P_{k-1}(t) - (k - 1) P_{k-2}(t),   P_0 = 1,
+ *
+ * and P_n'(t) from the identity P_n'(t) = n (t P_n(t) - P_{n-1}(t))/(t^2 - 1),
+ * valid for |t| < 1.
+ *
+ * @param  n:       Degree
+ * @param  t:       Argument, |t| < 1
+ * @param  value:   P_n(t)
+ * @param  slope:   P_n'(t)
+ * @retval None
+ */
+static void legendreAndSlope(int n, double t, double &value, double &slope) {
+  double p_cur = 1.0;  // P_k, starting from P_0
+  double p_prev = 0.0; // P_{k-1}
+  for (int k = 1; k <= n; ++k) {
+    double p_prev2 = p_prev;
+    p_prev = p_cur;
+    p_cur = ((2.0 * k - 1.0) * t * p_prev - (k - 1.0) * p_prev2) / k;
+  }
+  value = p_cur;
+  slope = n * (t * p_cur - p_prev) / (t * t - 1.0);
+}
+
+/**
+ * @brief  Gauss-Legendre quadrature nodes and weights
+ * @note   Compute the n nodes and weights of the Gauss-Legendre rule on [-1, 1],
+ * so that
+ *
+ * int_{-1}^{1} f(x) dx ~ sum_i w[i]*f(x[i])
+ *
+ * is exact for polynomials of degree up to 2n-1. The nodes are the roots of
+ * P_n, found by Newton iteration from the asymptotic estimate
+ * cos(pi (k - 1/4)/(n + 1/2)) of the k-th largest root; the weights are
+ * 2/((1 - x^2) P_n'(x)^2). The rule is symmetric, so only the positive roots are
+ * computed. The nodes are in ascending order.
+ *
+ * @param  n:   Number of nodes (must be positive)
+ * @param  x:   Nodes (resized to n)
+ * @param  w:   Weights (resized to n)
+ * @retval None
+ */
+void gaussLegendre(int n, vector<double> &x, vector<double> &w) {
+  if (n < 1) {
+    throw invalid_argument("Number of Gauss-Legendre nodes must be positive");
+  }
+  x = vector<double>(n);
+  w = vector<double>(n);
+
+  const double newton_tol = 1e-15; // stop when a Newton step is this small
+  const int newton_maxit = 100;    // or after this many steps
+  int n_positive = (n + 1) / 2;    // roots in [0, 1), the middle one included for odd n
+  for (int k = 1; k <= n_positive; ++k) {
+    double root = cos(M_PI * (k - 0.25) / (n + 0.5));
+    double value, slope, previous;
+    int steps = 0;
+    do {
+      legendreAndSlope(n, root, value, slope);
+      previous = root;
+      root = previous - value / slope;
+      ++steps;
+    } while (!(fabs(root - previous) <= newton_tol) && steps < newton_maxit);
+    // The weight uses P_n' at the last point where it was evaluated
+    x[k - 1] = -root;
+    x[n - k] = root;
+    w[k - 1] = w[n - k] = 2.0 / ((1.0 - root * root) * slope * slope);
+  }
+}
+
+/**
  * @brief A single Runge-Kutta step
  * @note  Perform a single Runge-Kutta integration step for methods like shootRungeKutta, for
  * a differential equation of the form:
