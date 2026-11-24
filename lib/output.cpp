@@ -68,17 +68,17 @@ void writeFermiParameters(DiracAtom &da, const double opt_time, string fname, in
 void writeDiracState(DiracState ds, string fname, int output_precision) {
   ofstream out(fname);
 
+  if (output_precision > -1) {
+    out << fixed;
+    out << setprecision(output_precision);
+  }
+
   // Start with writing a header
   out << "#####################################################\n";
   out << "# DiracState with n = " << ds.getn() << ", l = " << ds.getl() << ", s = " << ds.gets() << "\n";
   out << "# E = " << ds.bindingE() / Physical::eV << " + mc^2 = " << ds.E / Physical::eV << " eV\n";
   out << "# nodes = " << ds.nodes << ", " << ds.nodesQ << "\n";
   out << "#####################################################\n";
-
-  if (output_precision > -1) {
-    out << fixed;
-    out << setprecision(output_precision);
-  }
 
   // Now write down the content
   for (int i = 0; i < ds.grid.size(); ++i) {
