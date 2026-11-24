@@ -34,6 +34,7 @@ These keywords can only have a value of TRUE or FALSE. In order to set them true
 
 * :literal:`uehling_correction`: whether to turn on the Uehling correction or not. Default is FALSE.
 * :literal:`reduced_mass`: whether to turn on the non-relativistic recoil correction or not. If true, the reduced mass of the muon is calculated and applied using the nuclear mass and the muon mass (defined by the mass keyword if provided). Default is TRUE.
+* :literal:`nuclear_mass`: if true, the reduced mass is computed with the mass of the nucleus, :math:`M_{\text{atom}} - Z m_e + B_e(Z)/c^2`, instead of the atomic mass, since the muon orbits the bare nucleus. :math:`B_e(Z) = 14.4381 Z^{2.39} + 1.55468 \times 10^{-6} Z^{5.35}` eV is the total electron binding energy, by the approximate formula of Lunney, Pearson and Thibault, as given in the Atomic Mass Evaluation (AME2020 part II, M. Wang et al., Chin. Phys. C 45, 030003 (2021), eqs. 1 and 2). Only has effect if :literal:`reduced_mass` is true. Default is FALSE.
 * :literal:`write_spec`:  if true, write a spectrum file using the transition lines found broadened with Gaussian functions. Other :ref:`floating_point_keywords` starting with :literal:`spec_` can then be specified. Default is FALSE.
 * :literal:`sort_by_energy`: if true, print out the transitions sorted by energy instead than by shell. Default is FALSE.
 * :literal:`optimise_fermi_parameters`: if true, it optimises the *c* and *t* from the 2pF model. If false, no optimisation is performed and the *c* and *t* from the 2pF model can be manually modified. 

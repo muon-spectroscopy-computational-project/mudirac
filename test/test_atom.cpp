@@ -49,6 +49,37 @@ TEST_CASE("Dirac Atom - full mass", "[DiracAtom]") {
   REQUIRE (da.getmu() == m);
 }
 
+TEST_CASE("Dirac Atom - nuclear mass", "[DiracAtom]") {
+  AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::warning,
+                                      AixLog::Type::all);
+  // B_e(Z) = 14.4381 Z^2.39 + 1.55468e-6 Z^5.35 eV, evaluated independently
+  double E_H = 27.211386245981;
+  REQUIRE(Atom::electronBindingEnergy(14) * E_H == Approx(7922.668807420379).epsilon(1e-13));
+  REQUIRE(Atom::electronBindingEnergy(82) * E_H == Approx(568357.7563871737).epsilon(1e-13));
+  REQUIRE(Atom::electronBindingEnergy(92) * E_H == Approx(762669.862342978).epsilon(1e-13));
+
+  // Reduced mass with M_atom - Z m_e + B_e/c^2
+  int Z = 14, A = 28;
+  double M_atom = getIsotopeMass(Z, A) * Physical::amu;
+  double M_nuc = M_atom - Z * Physical::m_e + Atom::electronBindingEnergy(Z) / pow(Physical::c, 2);
+  DiracAtom da_atom = DiracAtom(Z, Physical::m_mu, A, FERMI2);
+  DiracAtom da_nuc = DiracAtom(Z, Physical::m_mu, A, FERMI2, -1, 1.0, 0.005, -1, true, true);
+  REQUIRE(da_atom.getmu() == Approx(effectiveMass(Physical::m_mu, M_atom)).epsilon(1e-15));
+  REQUIRE(da_nuc.getmu() == Approx(effectiveMass(Physical::m_mu, M_nuc)).epsilon(1e-15));
+  REQUIRE(da_nuc.getmu() < da_atom.getmu());
+  // The atomic mass is still reported by getM
+  REQUIRE(da_nuc.getM() == da_atom.getM());
+
+  // The K binding energy of muonic Si-28 drops by about 0.56 eV (1.1 ppm)
+  double dE = (da_atom.getState(1, 0, true).bindingE() - da_nuc.getState(1, 0, true).bindingE()) / Physical::eV;
+  REQUIRE(dE > -0.65);
+  REQUIRE(dE < -0.50);
+
+  // Without the reduced mass, the option has no effect
+  DiracAtom da_full = DiracAtom(Z, Physical::m_mu, A, FERMI2, -1, 1.0, 0.005, -1, false, true);
+  REQUIRE(da_full.getmu() == Physical::m_mu);
+}
+
 TEST_CASE("Dirac Atom - grid", "[DiracAtom]") {
   AixLog::Log::init<AixLog::SinkCout>(AixLog::Severity::info,
                                       AixLog::Type::normal);
