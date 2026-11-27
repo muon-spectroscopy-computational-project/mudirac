@@ -73,21 +73,14 @@ struct CostFunctor {
     ma.setFermi2Femto(c1[0], c2[0], ma.coord_system);
     vector<TransitionData> transitions_iteration = ma.getAllTransitions();
 
+    if ((int)transitions_iteration.size() != (int)ma.xr_lines_measured.size())
+      return false; // Not enough transitions to compare with experimental data
+
     for (int k = 0; k < transitions_iteration.size(); ++k) {
       // calculate transition energy and rate
       double dE = (transitions_iteration[k].ds2.E - transitions_iteration[k].ds1.E);
-      double tRate = transitions_iteration[k].tmat.totalRate();
-
-
-      if (dE <= 0 || tRate <= 0)
-        continue; // Transition is invisible
-
-      // check transition allign with experimental transitions
-      if (transitions_iteration[k].name == ma.xr_lines_measured[k]) {
-        // convert to eV
-        double transition_energy = dE / Physical::eV;
-        residual[k] = (transition_energy - ma.xr_energies[k])/ma.xr_errors[k];
-      }
+      double transition_energy = dE / Physical::eV;
+      residual[k] = (transition_energy - ma.xr_energies[k])/ma.xr_errors[k];
     }
     return true;
   }
