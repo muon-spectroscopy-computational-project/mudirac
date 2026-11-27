@@ -143,7 +143,8 @@ Atom::Atom(int Z, double m, int A, NuclearRadiusModel radius_model,
   }
 
   if (radius_model == FERMI2) {
-    V_coulomb = new CoulombFermi2Potential(Z, R, A);
+    V_coulomb = new CoulombFermi2Potential(Z, R, A, Physical::fermi2_t, -1,
+                                           fermi2_csteps, fermi2_hermite);
   } else {
     V_coulomb = new CoulombSpherePotential(Z, R);
   }
@@ -191,7 +192,8 @@ void Atom::setFermi2(double thickness, double fermi_c) {
   fermi2.c = fermi_c/Physical::fm;
   fermi2.t = thickness/Physical::fm;
 
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, thickness, fermi_c,
+                                         fermi2_csteps, fermi2_hermite);
   reset();
 }
 
@@ -214,8 +216,29 @@ void Atom::setFermi2Femto(const double coord_1, const double coord_2, Fermi2Coor
   }
   LOG(DEBUG) << "creating potential with " << coordinate_system_state << " fermi parameters: " << coord_1 << ", " << coord_2 << "\n";
   LOG(DEBUG) << "fermi parameters: " << fermi2.c << " fm, " << fermi2.t << " fm \n";
-  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm);
+  V_coulomb = new CoulombFermi2Potential(Z, R, A, fermi2.t*Physical::fm, fermi2.c *Physical::fm,
+                                         fermi2_csteps, fermi2_hermite);
   reset();
+}
+
+/**
+ * @brief  Set the grid settings of the Fermi 2-term Coulomb potential
+ * @note   Set the size of the logarithmic grid on which the Fermi 2-term
+ * Coulomb potential is built, and whether it is built with Gauss-Legendre
+ * charge moments and cubic Hermite read-back. The settings apply to the
+ * potential built by every later call of setFermi2 or setFermi2Femto, so they
+ * must be set before those.
+ *
+ * @param  csteps:   Number of grid points (default = 5000, at least 3)
+ * @param  hermite:  Gauss-Legendre moments and cubic Hermite read-back (default = false)
+ * @retval None
+ */
+void Atom::setFermi2Grid(int csteps, bool hermite) {
+  if (csteps < 3) {
+    throw invalid_argument("The Fermi 2-term potential grid needs at least 3 points");
+  }
+  fermi2_csteps = csteps;
+  fermi2_hermite = hermite;
 }
 
 /**

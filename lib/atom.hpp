@@ -127,6 +127,10 @@ class Atom {
   double rc = 1.0;   // Central radius
   double dx = 0.005; // Step
 
+  // Grid settings of the Fermi 2-term Coulomb potential
+  int fermi2_csteps = 5000;
+  bool fermi2_hermite = false;
+
   //Potential
   CoulombSpherePotential *V_coulomb;
 
@@ -192,6 +196,7 @@ class Atom {
 
   // Additional potential terms get/setters
   void setFermi2(double thickness = Physical::fermi2_t, double fermi_c = -1);
+  void setFermi2Grid(int csteps = 5000, bool hermite = false);
 
   /**
    * @brief sets the 2 parameter fermi nuclear model parameters of the atom in units of fm.
